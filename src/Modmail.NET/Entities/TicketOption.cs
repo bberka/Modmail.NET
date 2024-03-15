@@ -12,5 +12,11 @@ public class TicketOption
   public ulong LogChannelId { get; set; }
 
   public ulong CategoryId { get; set; }
-  public bool IsListenPrivateMessages { get; set; } = true;
+  public bool IsEnabled { get; set; } = true;
+
+  public DateTime RegisterDate { get; set; } = DateTime.Now;
+  public DateTime? UpdateDate { get; set; } = DateTime.Now;
+
+  public bool IsSensitiveLogging { get; set; } = true;
+
 }

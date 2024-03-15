@@ -138,7 +138,7 @@ public class ModmailBot
       CategoryId = category.Id,
       GuildId = mainGuild.Id,
       LogChannelId = logChannel.Id,
-      IsListenPrivateMessages = true
+      IsEnabled = true
     };
     dbContext.TicketOptions.Add(mmOption);
     await dbContext.SaveChangesAsync();
