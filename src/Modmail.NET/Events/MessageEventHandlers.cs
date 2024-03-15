@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -31,14 +30,14 @@ public static class MessageEventHandlers
     await using var db = new ModmailDbContext();
     var option = await db.GetOptionAsync(MMConfig.This.MainServerId);
     var activeMail = await db.GetActiveModmailAsync(authorId);
-    var guild = await sender.GetGuildAsync((ulong)option.GuildId);
-    var logChannel = guild.GetChannel((ulong)option.LogChannelId);
+    var guild = await sender.GetGuildAsync(option.GuildId);
+    var logChannel = guild.GetChannel(option.LogChannelId);
 
 
     if (activeMail is null) {
       //make new channel
       var channelName = $"modmail-{author.Username.Trim()}";
-      var category = guild.GetChannel((ulong)option.CategoryId);
+      var category = guild.GetChannel(option.CategoryId);
 
 
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category);
@@ -46,8 +45,7 @@ public static class MessageEventHandlers
       await mailChannel.SendMessageAsync(embedUserMessage);
 
 
-
-      var ticket = new Ticket() {
+      var ticket = new Ticket {
         DiscordUserId = authorId,
         ModMessageChannelId = mailChannel.Id,
         GuildId = guild.Id,
@@ -65,7 +63,7 @@ public static class MessageEventHandlers
 
       var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
       await channel.SendMessageAsync(embedUserMessageDelivered);
-      
+
       var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
     }
@@ -103,6 +101,7 @@ public static class MessageEventHandlers
       Log.Error("Failed to parse mail id from channel topic");
       return;
     }
+
     await using var db = new ModmailDbContext();
     var ticket = await db.GetActiveModmailAsync(id);
     if (ticket is null) {
@@ -130,12 +129,11 @@ public static class MessageEventHandlers
 
     ticket.LastMessageDate = DateTime.Now;
     db.Update(ticket);
-    
-    var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id,guildId);
+
+    var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
     db.Add(dbMessageLog);
-    
+
     await db.SaveChangesAsync();
-    
   }
 
   public static async Task OnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args) { }

@@ -24,6 +24,4 @@ public partial class ModmailDbContext
   public async Task<Ticket?> GetActiveModmailAsync(Guid modmailId) {
     return await Tickets.FindAsync(modmailId);
   }
-
-
 }

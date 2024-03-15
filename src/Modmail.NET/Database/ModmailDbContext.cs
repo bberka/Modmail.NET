@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
@@ -8,6 +7,11 @@ namespace Modmail.NET.Database;
 
 public partial class ModmailDbContext : DbContext
 {
+  public DbSet<Ticket> Tickets { get; set; }
+  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
+  public DbSet<TicketMessage> TicketMessages { get; set; }
+  public DbSet<TicketOption> TicketOptions { get; set; }
+
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     switch (MMConfig.This.DbType) {
       case DbType.Sqlite:
@@ -26,10 +30,4 @@ public partial class ModmailDbContext : DbContext
         throw new ArgumentOutOfRangeException();
     }
   }
-
-
-  public DbSet<Ticket> Tickets { get; set; }
-  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
-  public DbSet<TicketMessage> TicketMessages { get; set; }
-  public DbSet<TicketOption> TicketOptions { get; set; }
 }

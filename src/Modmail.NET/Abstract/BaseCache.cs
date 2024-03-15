@@ -4,7 +4,7 @@ namespace Modmail.NET.Abstract;
 
 public abstract class BaseCache
 {
-  protected record CacheData(object Value, DateTime ExpireDate);
+  protected readonly ConcurrentDictionary<string, CacheData> CacheDictionary;
 
   protected BaseCache() {
     CacheDictionary = new ConcurrentDictionary<string, CacheData>();
@@ -12,16 +12,12 @@ public abstract class BaseCache
     Task.Run(() => {
       while (true) {
         var expiredKeys = CacheDictionary.Where(x => x.Value.ExpireDate < DateTime.Now).Select(x => x.Key).ToList();
-        foreach (var key in expiredKeys) {
-          CacheDictionary.TryRemove(key, out _);
-        }
+        foreach (var key in expiredKeys) CacheDictionary.TryRemove(key, out _);
 
         Thread.Sleep(1000);
       }
     });
   }
-
-  protected readonly ConcurrentDictionary<string, CacheData> CacheDictionary;
 
   public object? Get(string key) {
     return CacheDictionary.TryGetValue(key, out var cacheData)
@@ -37,4 +33,6 @@ public abstract class BaseCache
   public void Set(string key, object value, TimeSpan expireTimeSpan) {
     CacheDictionary[key] = new CacheData(value, DateTime.Now.Add(expireTimeSpan));
   }
+
+  protected record CacheData(object Value, DateTime ExpireDate);
 }

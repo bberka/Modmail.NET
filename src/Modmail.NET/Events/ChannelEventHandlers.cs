@@ -17,15 +17,14 @@ public static class ChannelEventHandlers
       await using var db = new ModmailDbContext();
       var ticket = await db.GetActiveModmailAsync(ticketId);
       if (ticket is not null) {
-        
         var logChannel = await ModmailBot.This.GetLogChannelAsync();
         var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserId);
-        var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser,ticketOpenUser, ticketId,ticket.RegisterDate,"Channel was deleted");
-        await logChannel.SendMessageAsync(embed: logEmbed);
+        var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser, ticketOpenUser, ticketId, ticket.RegisterDate, "Channel was deleted");
+        await logChannel.SendMessageAsync(logEmbed);
 
-        var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild,ticketOpenUser);
+        var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild, ticketOpenUser);
         await ticketOpenUser.SendMessageAsync(embed);
-    
+
         ticket.ClosedDate = DateTime.Now;
         ticket.IsForcedClosed = true;
         await db.SaveChangesAsync();

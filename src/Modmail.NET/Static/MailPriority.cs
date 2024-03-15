@@ -4,5 +4,5 @@ public enum MailPriority
 {
   Low,
   Normal,
-  High,
+  High
 }

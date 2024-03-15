@@ -5,5 +5,5 @@ public enum LogReason
   MailCreated,
   MailClosed,
   MailClosedWithReason,
-  MailPriorityChanged,
+  MailPriorityChanged
 }

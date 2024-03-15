@@ -13,7 +13,7 @@ public static class UtilLogConfig
                  .Enrich.WithThreadId()
                  .MinimumLevel.Is(MMConfig.This.LogLevel)
                  .WriteTo.Console(outputTemplate: template)
-                 .WriteTo.File(new CompactJsonFormatter(),logPath, rollingInterval: RollingInterval.Day)
+                 .WriteTo.File(new CompactJsonFormatter(), logPath, rollingInterval: RollingInterval.Day)
                  .CreateLogger();
   }
 }

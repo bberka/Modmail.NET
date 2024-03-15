@@ -6,11 +6,12 @@ namespace Modmail.NET.Common;
 
 public class MMConfig
 {
+  private static MMConfig? _instance;
   private readonly IConfigurationRoot _configManager;
 
   private MMConfig() {
     _configManager = new ConfigurationBuilder()
-                     .AddJsonFile("appsettings.json", false, reloadOnChange: true)
+                     .AddJsonFile("appsettings.json", false, true)
                      .Build();
     Environment = Enum.Parse<EnvironmentType>(_configManager["ENVIRONMENT"] ?? "Development", true);
     BotToken = _configManager["BOT_TOKEN"] ?? throw new Exception("BOT_TOKEN is not set.");
@@ -24,17 +25,14 @@ public class MMConfig
     LogLevel = Enum.Parse<LogEventLevel>(_configManager["LOG_LEVEL"] ?? "Information", true);
     LogSinkToFile = bool.Parse(_configManager["LOG_SINK_TO_FILE"] ?? "true");
     LogSinkToConsole = bool.Parse(_configManager["LOG_SINK_TO_CONSOLE"] ?? "true");
- 
   }
 
   public static MMConfig This {
     get {
-      _instance ??= new();
+      _instance ??= new MMConfig();
       return _instance;
     }
   }
-
-  private static MMConfig? _instance;
 
   //Name: ENVIRONMENT
   public EnvironmentType Environment { get; set; }

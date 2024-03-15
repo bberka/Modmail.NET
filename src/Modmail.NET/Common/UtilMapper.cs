@@ -5,9 +5,9 @@ namespace Modmail.NET.Common;
 
 public static class UtilMapper
 {
-  public static TicketMessage DiscordMessageToEntity(DiscordMessage message,Guid ticketId,ulong guildId) {
+  public static TicketMessage DiscordMessageToEntity(DiscordMessage message, Guid ticketId, ulong guildId) {
     var id = Guid.NewGuid();
-    return new TicketMessage() {
+    return new TicketMessage {
       Id = id,
       AuthorId = message.Author.Id,
       Discriminator = message.Author.Discriminator,
@@ -17,12 +17,12 @@ public static class UtilMapper
       ChannelId = message.ChannelId,
       MessageId = message.Id,
       TicketId = ticketId,
-      TicketAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x,id)).ToList()
+      TicketAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()
     };
   }
 
-  public static TicketMessageAttachment DiscordAttachmentToEntity(DiscordAttachment attachment,Guid ticketMessageId) {
-    return new TicketMessageAttachment() {
+  public static TicketMessageAttachment DiscordAttachmentToEntity(DiscordAttachment attachment, Guid ticketMessageId) {
+    return new TicketMessageAttachment {
       RegisterDate = DateTime.Now,
       Url = attachment.Url,
       ProxyUrl = attachment.ProxyUrl,
@@ -31,7 +31,7 @@ public static class UtilMapper
       Width = attachment.Width,
       FileName = attachment.FileName,
       FileSize = attachment.FileSize,
-      MediaType = attachment.MediaType,
+      MediaType = attachment.MediaType
     };
   }
 }

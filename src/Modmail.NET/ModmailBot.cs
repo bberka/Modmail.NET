@@ -1,11 +1,8 @@
-﻿using System.Diagnostics;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Abstract;
 using Modmail.NET.Cache;
 using Modmail.NET.Commands;
 using Modmail.NET.Common;
@@ -20,6 +17,9 @@ namespace Modmail.NET;
 
 public class ModmailBot
 {
+  private static ModmailBot? _instance;
+
+
   private ModmailBot() {
     _ = MMConfig.This; // Initialize the environment container
     UtilLogConfig.Configure();
@@ -29,38 +29,33 @@ public class ModmailBot
 
   public static ModmailBot This {
     get {
-      _instance ??= new();
+      _instance ??= new ModmailBot();
       return _instance;
     }
   }
 
-  private static ModmailBot? _instance;
-
-
-  private DiscordClient _discordClient;
-
-  public DiscordClient Client => _discordClient;
+  public DiscordClient Client { get; private set; }
 
   public async Task StartAsync() {
     // Start the bot
-    _discordClient = new DiscordClient(new DiscordConfiguration() {
+    Client = new DiscordClient(new DiscordConfiguration {
       Token = MMConfig.This.BotToken,
       AutoReconnect = true,
       TokenType = TokenType.Bot,
       Intents = DiscordIntents.All,
       HttpTimeout = TimeSpan.FromSeconds(10),
       LogUnknownEvents = false,
-      LoggerFactory = new SerilogLoggerFactory(Log.Logger),
+      LoggerFactory = new SerilogLoggerFactory(Log.Logger)
     });
-    _discordClient.Heartbeated += BaseEvents.OnHeartbeat;
-    _discordClient.Ready += BaseEvents.OnReady;
-    _discordClient.ClientErrored += BaseEvents.OnClientError;
-    _discordClient.SocketErrored += BaseEvents.OnSocketError;
+    Client.Heartbeated += BaseEvents.OnHeartbeat;
+    Client.Ready += BaseEvents.OnReady;
+    Client.ClientErrored += BaseEvents.OnClientError;
+    Client.SocketErrored += BaseEvents.OnSocketError;
 
-    _discordClient.MessageCreated += MessageEventHandlers.OnMessageCreated;
-    _discordClient.MessageDeleted += MessageEventHandlers.OnMessageDeleted;
-    _discordClient.MessageUpdated += MessageEventHandlers.OnMessageUpdated;
-    _discordClient.ChannelDeleted += ChannelEventHandlers.OnChannelDeleted;
+    Client.MessageCreated += MessageEventHandlers.OnMessageCreated;
+    Client.MessageDeleted += MessageEventHandlers.OnMessageDeleted;
+    Client.MessageUpdated += MessageEventHandlers.OnMessageUpdated;
+    Client.ChannelDeleted += ChannelEventHandlers.OnChannelDeleted;
 
     var commandsConfig = new CommandsNextConfiguration {
       StringPrefixes = new[] { MMConfig.This.BotPrefix },
@@ -68,14 +63,14 @@ public class ModmailBot
       EnableMentionPrefix = true,
       DmHelp = false,
       CaseSensitive = false,
-      IgnoreExtraArguments = true,
+      IgnoreExtraArguments = true
     };
-    var slash = _discordClient.UseSlashCommands();
-    var commands = _discordClient.UseCommandsNext(commandsConfig);
+    var slash = Client.UseSlashCommands();
+    var commands = Client.UseCommandsNext(commandsConfig);
     commands.RegisterCommands<AdminCommands>();
 
 
-    await _discordClient.ConnectAsync();
+    await Client.ConnectAsync();
 
     await TrySetupServer();
 
@@ -83,7 +78,7 @@ public class ModmailBot
   }
 
   private async Task StopAsync() {
-    await _discordClient.DisconnectAsync();
+    await Client.DisconnectAsync();
   }
 
 
@@ -92,7 +87,7 @@ public class ModmailBot
     const string cacheKey = "MainGuild";
     var guild = (DiscordGuild?)DiscordDataCache.This.Get(cacheKey);
     if (guild is not null) return guild;
-    guild = await _discordClient.GetGuildAsync((ulong)MMConfig.This.MainServerId);
+    guild = await Client.GetGuildAsync(MMConfig.This.MainServerId);
     if (guild is null) throw new Exception("Failed to get main guild");
     DiscordDataCache.This.Set(cacheKey, guild, TimeSpan.FromSeconds(cacheTimeSeconds));
     return guild;
@@ -141,11 +136,11 @@ public class ModmailBot
     //create a log channel
     var logChannel = await mainGuild.CreateTextChannelAsync("modmail-logs", category);
 
-    var mmOption = new TicketOption() {
+    var mmOption = new TicketOption {
       CategoryId = category.Id,
       GuildId = mainGuild.Id,
       LogChannelId = logChannel.Id,
-      IsListenPrivateMessages = true,
+      IsListenPrivateMessages = true
     };
     dbContext.TicketOptions.Add(mmOption);
     await dbContext.SaveChangesAsync();
