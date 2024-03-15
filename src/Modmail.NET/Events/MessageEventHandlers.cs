@@ -136,7 +136,4 @@ public static class MessageEventHandlers
     await db.SaveChangesAsync();
   }
 
-  public static async Task OnMessageDeleted(DiscordClient sender, MessageDeleteEventArgs args) { }
-
-  public static async Task OnMessageUpdated(DiscordClient sender, MessageUpdateEventArgs args) { }
 }

@@ -53,8 +53,6 @@ public class ModmailBot
     Client.SocketErrored += BaseEvents.OnSocketError;
 
     Client.MessageCreated += MessageEventHandlers.OnMessageCreated;
-    Client.MessageDeleted += MessageEventHandlers.OnMessageDeleted;
-    Client.MessageUpdated += MessageEventHandlers.OnMessageUpdated;
     Client.ChannelDeleted += ChannelEventHandlers.OnChannelDeleted;
 
     var commandsConfig = new CommandsNextConfiguration {
