@@ -5,3 +5,8 @@ riderModule.iml
 /_ReSharper.Caches/
 .env
 /.env
+# Ignore appsettings.json
+appsettings.json
+
+# Exclude appsettings.example.json from being ignored
+!appsettings.example.json

@@ -1,31 +1,35 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Database;
 
-public class ModmailDbContext : DbContext
+public partial class ModmailDbContext : DbContext
 {
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    switch (EnvContainer.This.DbType) {
+    switch (MMConfig.This.DbType) {
       case DbType.Sqlite:
-        optionsBuilder.UseSqlite(EnvContainer.This.DbConnectionString);
+        optionsBuilder.UseSqlite(MMConfig.This.DbConnectionString);
         break;
       case DbType.Postgres:
-        optionsBuilder.UseNpgsql(EnvContainer.This.DbConnectionString);
+        optionsBuilder.UseNpgsql(MMConfig.This.DbConnectionString);
         break;
       case DbType.MsSql:
-        optionsBuilder.UseSqlServer(EnvContainer.This.DbConnectionString);
+        optionsBuilder.UseSqlServer(MMConfig.This.DbConnectionString);
         break;
       case DbType.MySql:
-        optionsBuilder.UseMySql(EnvContainer.This.DbConnectionString, ServerVersion.AutoDetect(EnvContainer.This.DbConnectionString));
+        optionsBuilder.UseMySql(MMConfig.This.DbConnectionString, ServerVersion.AutoDetect(MMConfig.This.DbConnectionString));
         break;
       default:
         throw new ArgumentOutOfRangeException();
     }
   }
 
-  public DbSet<ModmailLog> ModmailLogs { get; set; }
-  public DbSet<ModmailOption> ModmailOptions { get; set; }
+
+  public DbSet<Ticket> Tickets { get; set; }
+  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
+  public DbSet<TicketMessage> TicketMessages { get; set; }
+  public DbSet<TicketOption> TicketOptions { get; set; }
 }
