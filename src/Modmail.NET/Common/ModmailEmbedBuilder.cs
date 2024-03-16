@@ -37,7 +37,7 @@ public static class ModmailEmbedBuilder
                   .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
-                  .WithColor(DiscordColor.Green);
+                  .WithColor(DiscordColor.Blue);
       if (!anonymous) embed.WithAuthor(author.Username, iconUrl: author.AvatarUrl);
 
       return embed;
@@ -82,7 +82,7 @@ public static class ModmailEmbedBuilder
                   .WithFooter($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
-                  .WithColor(DiscordColor.Green);
+                  .WithColor(DiscordColor.Blue);
       return embed;
     }
 
@@ -169,8 +169,9 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
-                  .AddField("Channel", channel.Mention, true)
-                  .AddField("Ticket Id", ticketId.ToString().ToUpper(), true);
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper())
+                  .AddField("Channel Id", channel.Id.ToString())
+                  .AddField("Channel", channel.Mention);
       foreach (var attachment in message.Attachments) {
         embed.AddField("Attachment", attachment.Url);
       }
@@ -189,7 +190,10 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
-                  .AddField("Ticket Id", ticketId.ToString().ToUpper(), true);
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper())
+                  .AddField("Channel Id", channel.Id.ToString())
+                  .AddField("Channel", channel.Mention);
+
       foreach (var attachment in message.Attachments) {
         embed.AddField("Attachment", attachment.Url);
       }

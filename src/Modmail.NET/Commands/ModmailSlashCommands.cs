@@ -49,44 +49,41 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
 
-
     var oldPriority = ticket.Priority;
     ticket.Priority = priority;
     await dbService.UpdateTicketAsync(ticket);
 
     var guildId = ticket.GuildId;
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
-    
-    
+
+
     var newChName = "";
     switch (priority) {
       case TicketPriority.Normal:
         newChName = Const.NORMAL_PRIORITY_EMOJI + ctx.Channel.Name;
         break;
       case TicketPriority.High:
-        newChName = Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticketOpenUser.Username.Trim()); ;
+        newChName = Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticketOpenUser.Username.Trim());
+        ;
         break;
-      case TicketPriority.Low :
-        newChName = Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticketOpenUser.Username.Trim()); ;
+      case TicketPriority.Low:
+        newChName = Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticketOpenUser.Username.Trim());
+        ;
         break;
     }
-    await ctx.Channel.ModifyAsync(x => {
-      x.Name =  newChName;
-    });
-    
-    
-    
-    
-    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User,oldPriority, priority);
+
+    await ctx.Channel.ModifyAsync(x => { x.Name = newChName; });
+
+
+    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority);
     await ticketOpenUser.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild,ctx.User,oldPriority,priority);
+    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority);
     var logChannelId = await dbService.GetLogChannelIdAsync(guildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
 
 
-    
     var builder2 = new DiscordWebhookBuilder().WithContent("Priority set!");
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
@@ -226,5 +223,28 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await currentChannel.DeleteAsync("ticket_closed");
 
     Log.Information("Ticket closed: {TicketId} in guild {GuildId}", ticketId, guildId);
+  }
+
+
+  [SlashCommand("tag", "Bot sends defined message content by tag.")]
+  [RequireUserPermissions(Permissions.Administrator)]
+  public async Task Tag(InteractionContext ctx,
+                        [ChoiceProvider(typeof(TagChoiceProvider))] [Option("key", "Tag key")]
+                        string key) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var tag = await dbService.GetTagAsync(currentGuildId, key);
+    if (tag is null) {
+      var builder = new DiscordWebhookBuilder().WithContent("Tag not found!");
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+
+    var builder2 = new DiscordWebhookBuilder().WithContent(tag.MessageContent);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
 }
