@@ -29,7 +29,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var builder = new DiscordWebhookBuilder().WithContent("This command can only be used in a ticket channel.");
+      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.","",DiscordColor.Green);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -39,7 +40,11 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var ticket = await dbService.GetActiveTicketAsync(ticketId);
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildId}", ticketId, currentGuild.Id);
-      var builder = new DiscordWebhookBuilder().WithContent("This command can only be used in a ticket channel.");
+      
+      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.","",DiscordColor.Green);
+
+      
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -81,7 +86,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(embed2);
 
 
-    var builder2 = new DiscordWebhookBuilder().WithContent("Priority set!");
+    var embed3 = ModmailEmbedBuilder.Base("Priority set!","",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed3);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
     Log.Information("Priority set: {TicketId} in guild {GuildId}", ticketId, ticket.GuildOption.GuildId);
@@ -97,7 +103,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var currentGuildId = ctx.Guild.Id;
     var ticketOption = await dbService.GetOptionAsync(currentGuildId);
     if (ticketOption is null) {
-      var builder = new DiscordWebhookBuilder().WithContent("Server not setup!");
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -115,7 +122,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
       Log.Information("Sensitive logging disabled for guild: {GuildId}", currentGuildId);
     }
 
-    var builder2 = new DiscordWebhookBuilder().WithContent(text.ToString());
+    var embed4 = ModmailEmbedBuilder.Base(text.ToString(),"",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
 
@@ -128,7 +136,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var currentGuildId = ctx.Guild.Id;
     if (currentGuildId != MMConfig.This.MainServerId) {
-      var builder = new DiscordWebhookBuilder().WithContent("This command can only be used in the main server.");
+      var embed3 = ModmailEmbedBuilder.Base("This command can only be used in the main server.","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -139,7 +148,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     // await using var db = new ModmailDbContext();
     var existingMmOption = await dbService.GetOptionAsync(currentGuildId);
     if (existingMmOption is not null) {
-      var builder = new DiscordWebhookBuilder().WithContent("Server already setup!");
+      var embed3 = ModmailEmbedBuilder.Base("Server already setup!","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -160,8 +170,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     };
     await dbService.AddTicketOptionAsync(guildOption);
 
-
-    var builder2 = new DiscordWebhookBuilder().WithContent("Server setup complete!");
+    var embed2 = ModmailEmbedBuilder.Base("Server setup complete!","",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
     Log.Information("Server setup complete for guild: {GuildId}", currentGuildId);
   }
@@ -185,7 +195,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var builder = new DiscordWebhookBuilder().WithContent("This command can only be used in a ticket channel.");
+      var embed3 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -194,7 +205,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var ticket = await dbService.GetActiveTicketAsync(ticketId);
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildId}", ticketId, currentGuild.Id);
-      var builder = new DiscordWebhookBuilder().WithContent("This command can only be used in a ticket channel.");
+      var embed3 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -214,7 +226,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(logEmbed);
 
 
-    var builder2 = new DiscordWebhookBuilder().WithContent("Ticket closed!");
+    var embed2 = ModmailEmbedBuilder.Base("Ticket closed!","",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
 
@@ -236,7 +249,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var currentGuildId = ctx.Guild.Id;
     var tag = await dbService.GetTagAsync(currentGuildId, key);
     if (tag is null) {
-      var builder = new DiscordWebhookBuilder().WithContent("Tag not found!");
+      var embed2 = ModmailEmbedBuilder.Base("Tag not found!","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -245,4 +259,87 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().WithContent(tag.MessageContent);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
+
+  [SlashCommand("add-tag", "Add a tag.")]
+  [RequireUserPermissions(Permissions.Administrator)]
+  public async Task AddTag(InteractionContext ctx,
+                           [Option("key", "Tag key")] string key,
+                           [Option("message", "Tag message")] string message) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var existingTag = await dbService.GetTagAsync(currentGuildId, key);
+    if (existingTag is not null) {
+      var embed2 = ModmailEmbedBuilder.Base("Tag already exists!","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var tag = new Tag {
+      GuildId = currentGuildId,
+      Key = key,
+      MessageContent = message,
+      RegisterDate = DateTime.Now,
+      UseEmbed = false,
+    };
+    await dbService.AddTagAsync(tag);
+
+    var embed = ModmailEmbedBuilder.Base("Tag added!","",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
+     
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+
+  [SlashCommand("remove-tag", "Remove a tag.")]
+  [RequireUserPermissions(Permissions.Administrator)]
+  public async Task RemoveTag(InteractionContext ctx,
+                              [ChoiceProvider(typeof(TagChoiceProvider))] [Option("key", "Tag key")]
+                              string key) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var tag = await dbService.GetTagAsync(currentGuildId, key);
+    if (tag is null) {
+      var embed2 = ModmailEmbedBuilder.Base("Tag not found!","",DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    await dbService.RemoveTagAsync(tag);
+
+    var embed = ModmailEmbedBuilder.Base("Tag removed!","",DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  [SlashCommand("list-tag", "List all tags.")]
+  [RequireUserPermissions(Permissions.Administrator)]
+  public async Task ListTag(InteractionContext ctx) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var tags = await dbService.GetTagsAsync(currentGuildId);
+    if (tags is null || tags.Count == 0) {
+      var embed2 = ModmailEmbedBuilder.Base("No tags found!","",DiscordColor.Red);
+
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var embed = ModmailEmbedBuilder.ListTags(ctx.Guild, tags);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  
+
 }

@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
+using System.Text;
 using DSharpPlus.Entities;
+using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Common;
@@ -197,4 +199,26 @@ public static class ModmailEmbedBuilder
       return embed;
     }
   }
+
+  public static DiscordEmbed ListTags(DiscordGuild ctxGuild, List<Tag> tags) {
+    var sb = new StringBuilder();
+    foreach (var tag in tags) sb.AppendLine(tag.Key);
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle("Tag List")
+                .WithDescription(sb.ToString())
+                .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                .WithColor(DiscordColor.Gold);
+    return embed;
+  }
+
+  public static DiscordEmbed Base(string title, string text = "", DiscordColor? color = null) {
+    color ??= DiscordColor.White;
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(title)
+                .WithColor(color.Value);
+    if (!string.IsNullOrEmpty(text))
+      embed.WithDescription(text);
+    return embed;
+  }
+
 }

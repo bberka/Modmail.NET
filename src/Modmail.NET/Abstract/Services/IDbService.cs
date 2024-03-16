@@ -15,4 +15,6 @@ public interface IDbService
   Task AddMessageLog(TicketMessage dbMessageLog);
   Task<List<Tag>> GetTagsAsync(ulong guildId);
   Task<Tag?> GetTagAsync(ulong guildId, string key);
+  Task AddTagAsync(Tag tag);
+  Task RemoveTagAsync(Tag tag);
 }

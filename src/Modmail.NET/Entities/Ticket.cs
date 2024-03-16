@@ -20,8 +20,6 @@ public class Ticket
   public ulong ModMessageChannelId { get; set; }
 
 
-  // public ulong GuildId { get; set; }
-
   public ulong InitialMessageId { get; set; }
 
   public TicketPriority Priority { get; set; }

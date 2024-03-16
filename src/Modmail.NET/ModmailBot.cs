@@ -55,6 +55,10 @@ public class ModmailBot
 
     Client.MessageCreated += MessageEventHandlers.OnMessageCreated;
     Client.ChannelDeleted += ChannelEventHandlers.OnChannelDeleted;
+    
+    Client.InteractionCreated += InteractionEventHandlers.InteractionCreated;
+    Client.ComponentInteractionCreated += InteractionEventHandlers.ComponentInteractionCreated;
+     
 
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();

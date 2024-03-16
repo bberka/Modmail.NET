@@ -64,4 +64,15 @@ public class DbService : IDbService
   public async Task<Tag?> GetTagAsync(ulong guildId, string key) {
     return await _dbContext.Tags.FirstOrDefaultAsync(x => x.GuildId == guildId && x.Key == key);
   }
+
+  public async Task AddTagAsync(Tag tag) {
+  await _dbContext.Tags.AddAsync(tag);
+    await _dbContext.SaveChangesAsync();
+     
+}
+
+  public async Task RemoveTagAsync(Tag tag) {
+    _dbContext.Tags.Remove(tag);
+    await _dbContext.SaveChangesAsync();
+  }
 }
