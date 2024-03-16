@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -25,18 +26,20 @@ public static class MessageEventHandlers
     if (!channel.IsPrivate) return;
     var channelId = channel.Id;
     var authorId = author.Id;
+    var guildId = MMConfig.This.MainServerId;
 
+    var dbService = ServiceLocator.Get<IDbService>();
     //Check if user has active modmail
-    await using var db = new ModmailDbContext();
-    var option = await db.GetOptionAsync(MMConfig.This.MainServerId);
-    var activeMail = await db.GetActiveModmailAsync(authorId);
+    // await using var db = new ModmailDbContext();
+    var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
+    var activeTicket = await dbService.GetActiveTicketAsync(authorId);
     var guild = await sender.GetGuildAsync(option.GuildId);
     var logChannel = guild.GetChannel(option.LogChannelId);
 
 
-    if (activeMail is null) {
+    if (activeTicket is null) {
       //make new channel
-      var channelName = $"modmail-{author.Username.Trim()}";
+      var channelName = string.Format(Const.TICKET_NAME_TEMPLATE, author.Username.Trim());
       var category = guild.GetChannel(option.CategoryId);
 
 
@@ -52,12 +55,11 @@ public static class MessageEventHandlers
         RegisterDate = DateTime.Now,
         PrivateMessageChannelId = channelId,
         InitialMessageId = message.Id,
-        Priority = MailPriority.Normal,
+        Priority = TicketPriority.Normal,
         LastMessageDate = DateTime.Now
       };
 
-      db.Add(ticket);
-      await db.SaveChangesAsync();
+      await dbService.AddTicketAsync(ticket);
 
       await mailChannel.ModifyAsync(x => { x.Topic = UtilChannelTopic.BuildChannelTopic(ticket.Id); });
 
@@ -66,19 +68,42 @@ public static class MessageEventHandlers
 
       var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
+
+      if (option.IsSensitiveLogging) {
+        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
+        await dbService.AddMessageLog(dbMessageLog);
+        
+        var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
+                                                                 message,
+                                                                 channel,
+                                                                 ticket.Id,
+                                                                 guildId);
+        await logChannel.SendMessageAsync(embed3);
+      }
     }
     else {
       //continue on existing channel
-      var mailChannel = guild.GetChannel(activeMail.ModMessageChannelId);
+      var mailChannel = guild.GetChannel(activeTicket.ModMessageChannelId);
       var embed = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embed);
 
-      activeMail.LastMessageDate = DateTime.Now;
-      db.Update(activeMail);
-      await db.SaveChangesAsync();
+      activeTicket.LastMessageDate = DateTime.Now;
+      await dbService.UpdateTicketAsync(activeTicket);
 
       var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
       await channel.SendMessageAsync(embedUserMessageDelivered);
+
+      if (option.IsSensitiveLogging) {
+        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id, guildId);
+        await dbService.AddMessageLog(dbMessageLog);
+        
+        var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
+                                                                message,
+                                                                channel,
+                                                                activeTicket.Id,
+                                                                guildId);
+        await logChannel.SendMessageAsync(embed3);
+      }
     }
   }
 
@@ -102,8 +127,16 @@ public static class MessageEventHandlers
       return;
     }
 
-    await using var db = new ModmailDbContext();
-    var ticket = await db.GetActiveModmailAsync(id);
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
+    if (option is null) {
+      Log.Error("Option not found for guild: {GuildId}", guildId);
+      return;
+    }
+
+    // await using var db = new ModmailDbContext();
+    var ticket = await dbService.GetActiveTicketAsync(id);
     if (ticket is null) {
       Log.Error("Modmail not found for channel: {ChannelId}", channelId);
       return;
@@ -111,8 +144,8 @@ public static class MessageEventHandlers
 
     // var option = await db.GetOptionAsync(MMConfig.This.MainServerId);
 
-    var modmailChannel = guild.GetChannel(ticket.ModMessageChannelId);
-    if (modmailChannel is null) {
+    var ticketChannel = guild.GetChannel(ticket.ModMessageChannelId);
+    if (ticketChannel is null) {
       Log.Error("Modmail channel not found for channel: {ChannelId}", channelId);
       return;
     }
@@ -124,16 +157,26 @@ public static class MessageEventHandlers
     await user.SendMessageAsync(embed);
 
     var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(author, user, message, channel);
-    await modmailChannel.SendMessageAsync(embed2);
+    await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
     ticket.LastMessageDate = DateTime.Now;
-    db.Update(ticket);
+    await dbService.UpdateTicketAsync(ticket);
 
-    var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
-    db.Add(dbMessageLog);
 
-    await db.SaveChangesAsync();
+    if (option.IsSensitiveLogging) {
+      var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
+      await dbService.AddMessageLog(dbMessageLog);
+
+
+      var logChannelId = option.LogChannelId;
+      var logChannel = guild.GetChannel(logChannelId);
+      var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByMod(author,
+                                                              message,
+                                                              channel,
+                                                              ticket.Id,
+                                                              guildId);
+      await logChannel.SendMessageAsync(embed3);
+    }
   }
-
 }

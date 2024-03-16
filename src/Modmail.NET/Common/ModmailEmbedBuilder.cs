@@ -52,6 +52,25 @@ public static class ModmailEmbedBuilder
                   .AddField("Note", "You can always open another ticket by just messaging me again.");
       return embed;
     }
+
+    public static DiscordEmbed TicketPriorityChanged(DiscordGuild ctxGuild, DiscordMember ticketOpenUser) {
+      throw new NotImplementedException();
+    }
+
+    public static DiscordEmbed TicketPriorityChanged(DiscordGuild guild,
+                                                     DiscordUser modUser,
+                                                     TicketPriority oldPriority,
+                                                     TicketPriority newPriority) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl)
+                  .WithDescription("Ticket priority has been changed.")
+                  .WithTimestamp(DateTime.Now)
+                  .WithColor(DiscordColor.Magenta)
+                  .AddField("Old Priority", oldPriority.ToString(), true)
+                  .AddField("New Priority", newPriority.ToString(), true);
+      return embed.Build();
+    }
   }
 
   public static class ToMail
@@ -124,20 +143,58 @@ public static class ModmailEmbedBuilder
     }
 
 
-    public static DiscordEmbed TicketPriorityChanged(DiscordUser user,
-                                                     DiscordUser mod,
-                                                     DiscordChannel mailChannel,
-                                                     MailPriority oldPriority,
-                                                     MailPriority newPriority) {
+    public static DiscordEmbed TicketPriorityChanged(DiscordGuild guild,
+                                                     DiscordUser modUser,
+                                                     TicketPriority oldPriority,
+                                                     TicketPriority newPriority) {
       var embed = new DiscordEmbedBuilder()
-                  .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
-                  .WithDescription("This modmail has been closed.")
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl)
+                  .WithDescription("Ticket priority has been changed.")
                   .WithTimestamp(DateTime.Now)
-                  .WithFooter("Mail Closed")
-                  .WithColor(DiscordColor.Red)
+                  .WithColor(DiscordColor.Magenta)
                   .AddField("Old Priority", oldPriority.ToString(), true)
                   .AddField("New Priority", newPriority.ToString(), true);
       return embed.Build();
+    }
+
+    public static DiscordEmbed MessageSentByMod(DiscordUser author,
+                                                DiscordMessage message,
+                                                DiscordChannel channel,
+                                                Guid ticketId,
+                                                ulong guildId) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Message Sent by Mod")
+                  .WithFooter($"{author.GetUsername()} | {author.Id}", author.AvatarUrl)
+                  .WithDescription(message.Content)
+                  .WithTimestamp(message.Timestamp)
+                  .WithColor(DiscordColor.CornflowerBlue)
+                  .AddField("Channel", channel.Mention, true)
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper(), true);
+      foreach (var attachment in message.Attachments) {
+        embed.AddField("Attachment", attachment.Url);
+      }
+
+      return embed;
+    }
+
+    public static DiscordEmbed MessageSentByUser(DiscordUser author,
+                                                 DiscordMessage message,
+                                                 DiscordChannel channel,
+                                                 Guid ticketId,
+                                                 ulong guildId) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Message Sent by User")
+                  .WithFooter($"{author.GetUsername()} | {author.Id}", author.AvatarUrl)
+                  .WithDescription(message.Content)
+                  .WithTimestamp(message.Timestamp)
+                  .WithColor(DiscordColor.CornflowerBlue)
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper(), true);
+      foreach (var attachment in message.Attachments) {
+        embed.AddField("Attachment", attachment.Url);
+      }
+
+      return embed;
     }
   }
 }

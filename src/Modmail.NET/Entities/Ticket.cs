@@ -24,7 +24,7 @@ public class Ticket
 
   public ulong InitialMessageId { get; set; }
 
-  public MailPriority Priority { get; set; }
+  public TicketPriority Priority { get; set; }
 
   public bool IsForcedClosed { get; set; } = false;
   //FK
