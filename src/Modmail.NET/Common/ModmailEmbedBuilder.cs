@@ -181,9 +181,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
-                  .AddField("Ticket Id", ticketId.ToString().ToUpper())
-                  .AddField("Channel Id", channel.Id.ToString())
-                  .AddField("Channel", channel.Mention + " | " + channel.Id); 
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper()); 
       for (int i = 0; i < message.Attachments.Count; i++) {
         embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
       }
@@ -202,8 +200,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
-                  .AddField("Ticket Id", ticketId.ToString().ToUpper())
-                  .AddField("Channel", channel.Mention + " | " + channel.Id);
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper());
 
       for (int i = 0; i < message.Attachments.Count; i++) {
         embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
