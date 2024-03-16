@@ -5,7 +5,10 @@ This bot can be easily setup and used on your server for managing community comm
 
 Bot creates tickets and users message with the bot directly instead of sending message to mods
 
+# Warning
+This project is not ready for production needs more features and polishing.
 
+If you wish to use it be aware of potential errors
 
 # Features
 - Open tickets by sending a private message to bot
