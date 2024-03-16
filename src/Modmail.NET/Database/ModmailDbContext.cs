@@ -14,6 +14,8 @@ public partial class ModmailDbContext : DbContext
   public DbSet<GuildOption> GuildOptions { get; set; }
   public DbSet<Tag> Tags { get; set; }
   public DbSet<TicketFeedback> TicketFeedbacks { get; set; }
+  public DbSet<GuildTeam> GuildTeams { get; set; }
+  public DbSet<GuildTeamMember> GuildTeamMembers { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     switch (MMConfig.This.DbType) {

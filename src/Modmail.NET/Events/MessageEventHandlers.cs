@@ -51,12 +51,12 @@ public static class MessageEventHandlers
       var ticket = new Ticket {
         DiscordUserId = authorId,
         ModMessageChannelId = mailChannel.Id,
-        GuildId = guild.Id,
         RegisterDate = DateTime.Now,
         PrivateMessageChannelId = channelId,
         InitialMessageId = message.Id,
         Priority = TicketPriority.Normal,
-        LastMessageDate = DateTime.Now
+        LastMessageDate = DateTime.Now,
+        GuildOptionId = option.Id
       };
 
       await dbService.AddTicketAsync(ticket);

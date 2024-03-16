@@ -53,7 +53,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     ticket.Priority = priority;
     await dbService.UpdateTicketAsync(ticket);
 
-    var guildId = ticket.GuildId;
+    
+    // var guildId = ticket.GuildId;
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
 
 
@@ -79,7 +80,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await ticketOpenUser.SendMessageAsync(embed);
 
     var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority);
-    var logChannelId = await dbService.GetLogChannelIdAsync(guildId);
+    var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
 
@@ -87,7 +88,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().WithContent("Priority set!");
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
-    Log.Information("Priority set: {TicketId} in guild {GuildId}", ticketId, guildId);
+    Log.Information("Priority set: {TicketId} in guild {GuildId}", ticketId, ticket.GuildOption.GuildId);
   }
 
   [SlashCommand("toggle-sensitive-logging", "Toggle sensitive logging for the modmail bot.")]
@@ -203,7 +204,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
 
-    var guildId = ticket.GuildId;
+
 
     ticket.ClosedDate = DateTime.Now;
     await dbService.UpdateTicketAsync(ticket);
@@ -213,7 +214,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await ticketOpenUser.SendMessageAsync(embed);
 
 
-    var logChannelId = await dbService.GetLogChannelIdAsync(guildId);
+    var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser, ticketOpenUser, ticketId, ticket.RegisterDate, reason);
     await logChannel.SendMessageAsync(logEmbed);
@@ -225,7 +226,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     await currentChannel.DeleteAsync("ticket_closed");
 
-    Log.Information("Ticket closed: {TicketId} in guild {GuildId}", ticketId, guildId);
+    Log.Information("Ticket closed: {TicketId} in guild {GuildId}", ticketId, ticket.GuildOption.GuildId);
   }
 
 

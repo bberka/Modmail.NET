@@ -17,11 +17,15 @@ public class DbService : IDbService
   }
 
   public async Task<Ticket?> GetActiveTicketAsync(ulong discordUserId) {
-    return await _dbContext.Tickets.FirstOrDefaultAsync(x => x.DiscordUserId == discordUserId && !x.ClosedDate.HasValue);
+    return await _dbContext.Tickets
+                           .Include(x => x.GuildOption)
+                           .FirstOrDefaultAsync(x => x.DiscordUserId == discordUserId && !x.ClosedDate.HasValue);
   }
 
   public async Task<Ticket?> GetActiveTicketAsync(Guid modmailId) {
-    return await _dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == modmailId && !x.ClosedDate.HasValue);
+    return await _dbContext.Tickets
+                           .Include(x => x.GuildOption)
+                           .FirstOrDefaultAsync(x => x.Id == modmailId && !x.ClosedDate.HasValue);
   }
 
   public async Task<ulong> GetLogChannelIdAsync(ulong guildId) {

@@ -20,14 +20,18 @@ public class Ticket
   public ulong ModMessageChannelId { get; set; }
 
 
-  public ulong GuildId { get; set; }
+  // public ulong GuildId { get; set; }
 
   public ulong InitialMessageId { get; set; }
 
   public TicketPriority Priority { get; set; }
 
   public bool IsForcedClosed { get; set; } = false;
+  
+  public Guid GuildOptionId { get; set; }
   //FK
 
+  public virtual TicketFeedback TicketFeedback { get; set; }
+  public virtual GuildOption GuildOption { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }
 }
