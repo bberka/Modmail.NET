@@ -17,7 +17,7 @@ namespace Modmail.NET.Commands;
 
 public class ModmailSlashCommands : ApplicationCommandModule
 {
-  [SlashCommand("set-priority", "Set the priority of a ticket. This command changes the channel name. It can only be used in a ticket channel.")]
+  [SlashCommand("set-priority", "Set the priority of a ticket.")]
   [RequireUserPermissions(Permissions.Administrator)]
   public async Task SetPriority(InteractionContext ctx,
                                 [Option("priority", "Priority of the ticket")]
