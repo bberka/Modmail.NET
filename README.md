@@ -5,7 +5,10 @@ This bot can be easily setup and used on your server for managing community comm
 
 Bot creates tickets and users message with the bot directly instead of sending message to mods
 
+# Warning
+This project is not ready for production needs more features and polishing.
 
+If you wish to use it be aware of potential errors
 
 # Features
 - Open tickets by sending a private message to bot
@@ -25,18 +28,18 @@ Create a pull request by using semantic commits and proper explanation
 
 # Possible Upcoming Features
 - Web UI and/or API to manage tickets and see transcript information
-- Support for multiple servers
+- Support for multiple servers (groundwork is done)
 - Getting feedback from user when ticket closed
 - Encrpyt message information
 - Role and team system for allowing channel access
-- Setting priority for tickets
+- :white_check_mark: Setting priority for tickets
 - Pinging roles/members on ticket open
 - Setting up greeting/closing messages
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
-- Advanced message logging to logging channel (optional)
-- Make db message logging optional
-- Responding tickets anonmylously
+- :white_check_mark: Advanced message logging to logging channel (optional)
+- :white_check_mark: Make db message logging optional
+- Responding tickets anonymously
 - Blacklist 
 - Setup some filter to open tickets
 - Snippets or tags system
