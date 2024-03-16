@@ -150,15 +150,18 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var mainGuild = ctx.Guild;
     var category = await mainGuild.CreateChannelCategoryAsync(Const.CATEGORY_NAME);
     var logChannel = await mainGuild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category);
-    var mmOption = new TicketOption {
+    var guildOption = new GuildOption {
       CategoryId = category.Id,
       GuildId = mainGuild.Id,
       LogChannelId = logChannel.Id,
       IsSensitiveLogging = sensitiveLogging,
       IsEnabled = true,
       RegisterDate = DateTime.Now,
+      TakeFeedbackAfterClosing = false,
+      ShowConfirmationWhenClosingTickets = false,
+      AllowAnonymousResponding = false,
     };
-    await dbService.AddTicketOptionAsync(mmOption);
+    await dbService.AddTicketOptionAsync(guildOption);
 
 
     var builder2 = new DiscordWebhookBuilder().WithContent("Server setup complete!");
@@ -247,4 +250,6 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().WithContent(tag.MessageContent);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
+  
+  
 }

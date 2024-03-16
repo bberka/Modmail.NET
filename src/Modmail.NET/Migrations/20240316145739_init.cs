@@ -10,18 +10,43 @@ namespace Modmail.NET.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "TicketOptions",
+                name: "GuildOptions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     LogChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     CategoryId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    IsListenPrivateMessages = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    IsSensitiveLogging = table.Column<bool>(type: "INTEGER", nullable: false),
+                    GreetingMessage = table.Column<string>(type: "TEXT", nullable: false),
+                    ClosingMessage = table.Column<string>(type: "TEXT", nullable: false),
+                    TakeFeedbackAfterClosing = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AllowAnonymousResponding = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ShowConfirmationWhenClosingTickets = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TicketOptions", x => x.Id);
+                    table.PrimaryKey("PK_GuildOptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: false),
+                    MessageContent = table.Column<string>(type: "TEXT", nullable: false),
+                    UseEmbed = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,10 +136,13 @@ namespace Modmail.NET.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "TicketMessageAttachments");
+                name: "GuildOptions");
 
             migrationBuilder.DropTable(
-                name: "TicketOptions");
+                name: "Tags");
+
+            migrationBuilder.DropTable(
+                name: "TicketMessageAttachments");
 
             migrationBuilder.DropTable(
                 name: "TicketMessages");

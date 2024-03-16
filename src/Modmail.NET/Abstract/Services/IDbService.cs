@@ -4,12 +4,12 @@ namespace Modmail.NET.Abstract.Services;
 
 public interface IDbService
 {
-  Task<TicketOption?> GetOptionAsync(ulong guildId);
+  Task<GuildOption?> GetOptionAsync(ulong guildId);
   Task<Ticket?> GetActiveTicketAsync(ulong discordUserId);
   Task<Ticket?> GetActiveTicketAsync(Guid ticketId);
   Task<ulong> GetLogChannelIdAsync(ulong guildId);
-  Task UpdateTicketOptionAsync(TicketOption option);
-  Task AddTicketOptionAsync(TicketOption option);
+  Task UpdateTicketOptionAsync(GuildOption option);
+  Task AddTicketOptionAsync(GuildOption option);
   Task UpdateTicketAsync(Ticket ticket);
   Task AddTicketAsync(Ticket ticket);
   Task AddMessageLog(TicketMessage dbMessageLog);

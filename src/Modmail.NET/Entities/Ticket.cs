@@ -29,5 +29,5 @@ public class Ticket
   public bool IsForcedClosed { get; set; } = false;
   //FK
 
-  public virtual List<TicketMessage> ModmailMessageLogs { get; set; }
+  public virtual List<TicketMessage> TicketMessages { get; set; }
 }

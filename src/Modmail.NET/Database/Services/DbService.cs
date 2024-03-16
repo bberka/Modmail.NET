@@ -12,8 +12,8 @@ public class DbService : IDbService
     _dbContext = dbContext;
   }
 
-  public async Task<TicketOption?> GetOptionAsync(ulong guildId) {
-    return await _dbContext.TicketOptions.FirstOrDefaultAsync(x => x.GuildId == guildId);
+  public async Task<GuildOption?> GetOptionAsync(ulong guildId) {
+    return await _dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == guildId);
   }
 
   public async Task<Ticket?> GetActiveTicketAsync(ulong discordUserId) {
@@ -25,16 +25,16 @@ public class DbService : IDbService
   }
 
   public async Task<ulong> GetLogChannelIdAsync(ulong guildId) {
-    return await _dbContext.TicketOptions.Where(x => x.GuildId == guildId).Select(x => x.LogChannelId).FirstOrDefaultAsync();
+    return await _dbContext.GuildOptions.Where(x => x.GuildId == guildId).Select(x => x.LogChannelId).FirstOrDefaultAsync();
   }
 
-  public async Task UpdateTicketOptionAsync(TicketOption option) {
-    _dbContext.TicketOptions.Update(option);
+  public async Task UpdateTicketOptionAsync(GuildOption option) {
+    _dbContext.GuildOptions.Update(option);
     await _dbContext.SaveChangesAsync();
   }
 
-  public async Task AddTicketOptionAsync(TicketOption option) {
-    await _dbContext.TicketOptions.AddAsync(option);
+  public async Task AddTicketOptionAsync(GuildOption option) {
+    await _dbContext.GuildOptions.AddAsync(option);
     await _dbContext.SaveChangesAsync();
   }
 

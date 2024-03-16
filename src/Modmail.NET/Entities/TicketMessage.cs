@@ -23,5 +23,5 @@ public class TicketMessage
 
   //FK
   public virtual Guid TicketId { get; set; }
-  public virtual List<TicketMessageAttachment> TicketAttachments { get; set; }
+  public virtual List<TicketMessageAttachment> TicketMessageAttachments { get; set; }
 }

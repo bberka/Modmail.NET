@@ -17,7 +17,7 @@ public static class UtilMapper
       ChannelId = message.ChannelId,
       MessageId = message.Id,
       TicketId = ticketId,
-      TicketAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()
+      TicketMessageAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()
     };
   }
 

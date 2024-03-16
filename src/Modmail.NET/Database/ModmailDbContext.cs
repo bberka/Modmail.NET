@@ -11,7 +11,7 @@ public partial class ModmailDbContext : DbContext
   public DbSet<Ticket> Tickets { get; set; }
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
   public DbSet<TicketMessage> TicketMessages { get; set; }
-  public DbSet<TicketOption> TicketOptions { get; set; }
+  public DbSet<GuildOption> GuildOptions { get; set; }
   public DbSet<Tag> Tags { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {

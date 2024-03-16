@@ -17,6 +17,84 @@ namespace Modmail.NET.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.28");
 
+            modelBuilder.Entity("Modmail.NET.Entities.GuildOption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AllowAnonymousResponding")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClosingMessage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GreetingMessage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSensitiveLogging")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("LogChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RegisterDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ShowConfirmationWhenClosingTickets")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TakeFeedbackAfterClosing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GuildOptions");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Entities.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MessageContent")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RegisterDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("UseEmbed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -145,33 +223,10 @@ namespace Modmail.NET.Migrations
                     b.ToTable("TicketMessageAttachments");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Entities.TicketOption", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<ulong>("CategoryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("GuildId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("LogChannelId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TicketOptions");
-                });
-
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessage", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.Ticket", null)
-                        .WithMany("ModmailMessageLogs")
+                        .WithMany("TicketMessages")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -180,7 +235,7 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessageAttachment", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.TicketMessage", "TicketMessage")
-                        .WithMany("TicketAttachments")
+                        .WithMany("TicketMessageAttachments")
                         .HasForeignKey("TicketMessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -190,12 +245,12 @@ namespace Modmail.NET.Migrations
 
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
-                    b.Navigation("ModmailMessageLogs");
+                    b.Navigation("TicketMessages");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessage", b =>
                 {
-                    b.Navigation("TicketAttachments");
+                    b.Navigation("TicketMessageAttachments");
                 });
 #pragma warning restore 612, 618
         }
