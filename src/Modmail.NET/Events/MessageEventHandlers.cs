@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
-using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
 using Serilog;
@@ -72,7 +71,7 @@ public static class MessageEventHandlers
       if (option.IsSensitiveLogging) {
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
         await dbService.AddMessageLog(dbMessageLog);
-        
+
         var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
                                                                  message,
                                                                  channel,
@@ -96,12 +95,12 @@ public static class MessageEventHandlers
       if (option.IsSensitiveLogging) {
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id);
         await dbService.AddMessageLog(dbMessageLog);
-        
+
         var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
-                                                                message,
-                                                                channel,
-                                                                activeTicket.Id,
-                                                                guildId);
+                                                                 message,
+                                                                 channel,
+                                                                 activeTicket.Id,
+                                                                 guildId);
         await logChannel.SendMessageAsync(embed3);
       }
     }

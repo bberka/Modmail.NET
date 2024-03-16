@@ -5,8 +5,7 @@ using Modmail.NET.Static;
 
 namespace Modmail.NET.Database;
 
-
-public partial class ModmailDbContext : DbContext
+public class ModmailDbContext : DbContext
 {
   public DbSet<Ticket> Tickets { get; set; }
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }

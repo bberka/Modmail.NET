@@ -56,7 +56,7 @@ public class DbService : IDbService
     await _dbContext.TicketMessages.AddAsync(dbMessageLog);
     await _dbContext.SaveChangesAsync();
   }
-  
+
   public async Task<List<Tag>> GetTagsAsync(ulong guildId) {
     return await _dbContext.Tags.Where(x => x.GuildId == guildId).ToListAsync();
   }

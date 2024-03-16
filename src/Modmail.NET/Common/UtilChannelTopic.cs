@@ -11,9 +11,9 @@ public static class UtilChannelTopic
 
   public static Guid GetTicketIdFromChannelTopic(string topic) {
     try {
-      if(string.IsNullOrEmpty(topic)) return Guid.Empty;
+      if (string.IsNullOrEmpty(topic)) return Guid.Empty;
       var split = topic.Split("||");
-      if(split.Length != 3) return Guid.Empty;
+      if (split.Length != 3) return Guid.Empty;
       return Guid.Parse(split[1].Trim());
     }
     catch (Exception ex) {

@@ -26,8 +26,8 @@ public class GuildOption
   public string? ClosingMessage { get; set; }
 
   //TODO: Implement ClosingMessage
-  public bool TakeFeedbackAfterClosing { get; set; }  
-  
+  public bool TakeFeedbackAfterClosing { get; set; }
+
   //TODO: Implement AllowAnonymousResponding
   public bool AllowAnonymousResponding { get; set; }
 
@@ -37,5 +37,4 @@ public class GuildOption
   public virtual List<GuildTeam> GuildTeams { get; set; }
   public virtual List<Tag> Tags { get; set; }
   public virtual List<Ticket> Tickets { get; set; }
-  
 }

@@ -17,9 +17,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Green);
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
       return embed;
     }
 
@@ -42,10 +40,8 @@ public static class ModmailEmbedBuilder
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Blue);
       if (!anonymous) embed.WithAuthor(author.Username, iconUrl: author.AvatarUrl);
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
-     
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
+
       return embed;
     }
 
@@ -89,9 +85,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Blue);
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
       return embed;
     }
 
@@ -103,9 +97,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Green);
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
       return embed;
     }
   }
@@ -181,10 +173,8 @@ public static class ModmailEmbedBuilder
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
-                  .AddField("Ticket Id", ticketId.ToString().ToUpper()); 
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
+                  .AddField("Ticket Id", ticketId.ToString().ToUpper());
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
 
       return embed;
     }
@@ -202,9 +192,7 @@ public static class ModmailEmbedBuilder
                   .WithColor(DiscordColor.CornflowerBlue)
                   .AddField("Ticket Id", ticketId.ToString().ToUpper());
 
-      for (int i = 0; i < message.Attachments.Count; i++) {
-        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
-      }
+      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
 
       return embed;
     }

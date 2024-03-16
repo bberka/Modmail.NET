@@ -1,14 +1,10 @@
 ﻿using System.Text;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
-using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
-using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
 using Serilog;
@@ -53,7 +49,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     ticket.Priority = priority;
     await dbService.UpdateTicketAsync(ticket);
 
-    
+
     // var guildId = ticket.GuildId;
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
 
@@ -160,7 +156,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = false,
       ShowConfirmationWhenClosingTickets = false,
-      AllowAnonymousResponding = false,
+      AllowAnonymousResponding = false
     };
     await dbService.AddTicketOptionAsync(guildOption);
 
@@ -202,8 +198,6 @@ public class ModmailSlashCommands : ApplicationCommandModule
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
-
-
 
 
     ticket.ClosedDate = DateTime.Now;
@@ -251,6 +245,4 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().WithContent(tag.MessageContent);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
-  
-  
 }

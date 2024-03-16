@@ -2,7 +2,6 @@
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
-using Modmail.NET.Database;
 using Serilog;
 
 namespace Modmail.NET.Events;
@@ -13,7 +12,7 @@ public static class ChannelEventHandlers
     var channel = args.Channel;
     var channelTopic = channel.Topic;
     var guild = channel.Guild;
-    
+
     var currentUser = await guild.GetMemberAsync(sender.CurrentUser.Id);
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId != Guid.Empty) {

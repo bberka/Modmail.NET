@@ -27,7 +27,7 @@ public class Ticket
   public TicketPriority Priority { get; set; }
 
   public bool IsForcedClosed { get; set; } = false;
-  
+
   public Guid GuildOptionId { get; set; }
   //FK
 

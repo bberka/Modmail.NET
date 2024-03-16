@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.SlashCommands;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Modmail.NET.Attributes;
 

@@ -22,7 +22,7 @@ public class ModmailBot
     UtilLogConfig.Configure();
     if (MMConfig.This.Environment == EnvironmentType.Development)
       Log.Information("Running in development mode");
-    
+
     var kernel = new StandardKernel(new MmKernel());
     ServiceLocator.Initialize(kernel);
   }
@@ -46,8 +46,7 @@ public class ModmailBot
       Intents = DiscordIntents.All,
       HttpTimeout = TimeSpan.FromSeconds(10),
       LogUnknownEvents = false,
-      LoggerFactory = new SerilogLoggerFactory(Log.Logger),
-      
+      LoggerFactory = new SerilogLoggerFactory(Log.Logger)
     });
     Client.Heartbeated += BaseEvents.OnHeartbeat;
     Client.Ready += BaseEvents.OnReady;
