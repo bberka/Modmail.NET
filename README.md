@@ -42,7 +42,7 @@ Create a pull request by using semantic commits and proper explanation
 - Responding tickets anonymously
 - Blacklist 
 - Setup some filter to open tickets
-- Snippets or tags system
+- :white_check_mark: Snippets or tags system
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
