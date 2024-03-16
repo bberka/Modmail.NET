@@ -5,7 +5,7 @@ namespace Modmail.NET.Common;
 
 public static class UtilMapper
 {
-  public static TicketMessage DiscordMessageToEntity(DiscordMessage message, Guid ticketId, ulong guildId) {
+  public static TicketMessage DiscordMessageToEntity(DiscordMessage message, Guid ticketId) {
     var id = Guid.NewGuid();
     return new TicketMessage {
       Id = id,
@@ -13,9 +13,6 @@ public static class UtilMapper
       Discriminator = message.Author.Discriminator,
       Username = message.Author.Username,
       MessageContent = message.Content,
-      GuildId = message.Channel.GuildId ?? guildId,
-      ChannelId = message.ChannelId,
-      MessageId = message.Id,
       TicketId = ticketId,
       TicketMessageAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()
     };

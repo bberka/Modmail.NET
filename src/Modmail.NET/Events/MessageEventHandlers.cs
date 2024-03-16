@@ -70,7 +70,7 @@ public static class MessageEventHandlers
       await logChannel.SendMessageAsync(embedLog);
 
       if (option.IsSensitiveLogging) {
-        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
+        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
         await dbService.AddMessageLog(dbMessageLog);
         
         var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
@@ -94,7 +94,7 @@ public static class MessageEventHandlers
       await channel.SendMessageAsync(embedUserMessageDelivered);
 
       if (option.IsSensitiveLogging) {
-        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id, guildId);
+        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id);
         await dbService.AddMessageLog(dbMessageLog);
         
         var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
@@ -165,7 +165,7 @@ public static class MessageEventHandlers
 
 
     if (option.IsSensitiveLogging) {
-      var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id, guildId);
+      var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
       await dbService.AddMessageLog(dbMessageLog);
 
 

@@ -17,5 +17,6 @@ public class TicketFeedback
   public Guid TicketId { get; set; }
   public virtual Ticket Ticket { get; set; }
    
+  
    
 }

@@ -15,11 +15,6 @@ public class TicketMessage
 
   public string MessageContent { get; set; }
 
-  public ulong GuildId { get; set; }
-
-  public ulong ChannelId { get; set; }
-
-  public ulong MessageId { get; set; }
 
   //FK
   public virtual Guid TicketId { get; set; }
