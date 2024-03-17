@@ -31,6 +31,10 @@ public static class OnMessageCreated
     //Check if user has active modmail
     // await using var db = new ModmailDbContext();
     var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
+    if (option is null) {
+      Log.Error("Option not found for guild: {GuildOptionId}", guildId);
+      return;
+    }
     var activeTicket = await dbService.GetActiveTicketAsync(authorId);
     var guild = await sender.GetGuildAsync(option.GuildId);
     var logChannel = guild.GetChannel(option.LogChannelId);
@@ -43,6 +47,11 @@ public static class OnMessageCreated
 
 
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category);
+      
+      var member = await guild.GetMemberAsync(author.Id);
+      var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
+      await mailChannel.SendMessageAsync(embedNewTicket);
+      
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
 
@@ -67,6 +76,8 @@ public static class OnMessageCreated
 
       var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
+      
+       
 
       if (option.IsSensitiveLogging) {
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);

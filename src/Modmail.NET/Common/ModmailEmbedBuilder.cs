@@ -79,6 +79,30 @@ public static class ModmailEmbedBuilder
 
   public static class ToMail
   {
+    public static DiscordEmbed NewTicket(DiscordMember user) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("New Ticket")
+                  .WithTimestamp(DateTime.Now)
+                  .WithDescription("New ticket has been created. Please respond to this message to continue the conversation."
+                                   + Environment.NewLine
+                                   + Environment.NewLine
+                                   + "If you want to close the ticket, you can use the `/ticket close` command."
+                                   + Environment.NewLine
+                                   + Environment.NewLine
+                                   + "If you want to change the priority of the ticket, you can use the `/ticket set-priority` command."
+                                    + Environment.NewLine
+                                    + Environment.NewLine
+                                    + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
+                                    + Environment.NewLine
+                                    + Environment.NewLine
+                                    + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ")
+                  .WithFooter($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
+                  .AddField("User", user.Mention + " | " + user.Id, true)
+                  .AddField("Roles", string.Join(", ", user.Roles.Select(x => x.Mention)), true)
+                  .WithColor(DiscordColor.Green);
+      return embed;
+    }
+
     public static DiscordEmbed MessageReceived(DiscordUser user,
                                                DiscordMessage message) {
       var embed = new DiscordEmbedBuilder()
@@ -260,7 +284,7 @@ public static class ModmailEmbedBuilder
                 .WithTitle("Modmail Settings")
                 .WithColor(DiscordColor.Gold)
                 .WithFooter(guild.Name + " | " + guild.Id, guild.IconUrl);
-    
+
     sb.AppendLine("`Modmail Enabled`: " + ticketOption.IsEnabled);
     sb.AppendLine("`Sensitive Logging`: " + ticketOption.IsSensitiveLogging);
     sb.AppendLine("`Take Feedback After Closing`: " + ticketOption.TakeFeedbackAfterClosing);
