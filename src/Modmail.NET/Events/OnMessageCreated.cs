@@ -17,9 +17,9 @@ public static class OnMessageCreated
   }
 
   private static async Task HandlePrivateMessage(DiscordClient sender,
-                                                DiscordMessage message,
-                                                DiscordChannel channel,
-                                                DiscordUser author) {
+                                                 DiscordMessage message,
+                                                 DiscordChannel channel,
+                                                 DiscordUser author) {
     if (message.Author.IsBot) return;
     if (message.IsTTS) return;
     if (!channel.IsPrivate) return;
@@ -35,6 +35,7 @@ public static class OnMessageCreated
       Log.Error("Option not found for guild: {GuildOptionId}", guildId);
       return;
     }
+
     var activeTicket = await dbService.GetActiveTicketAsync(authorId);
     var guild = await sender.GetGuildAsync(option.GuildId);
     var logChannel = guild.GetChannel(option.LogChannelId);
@@ -47,11 +48,11 @@ public static class OnMessageCreated
 
 
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category);
-      
+
       var member = await guild.GetMemberAsync(author.Id);
       var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
       await mailChannel.SendMessageAsync(embedNewTicket);
-      
+
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
 
@@ -74,10 +75,9 @@ public static class OnMessageCreated
       var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
       await channel.SendMessageAsync(embedUserMessageDelivered);
 
-      var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
+      var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
-      
-       
+
 
       if (option.IsSensitiveLogging) {
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);

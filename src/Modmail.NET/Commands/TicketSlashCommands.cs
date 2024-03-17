@@ -59,7 +59,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
-    var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser, ticketOpenUser, ticketId, ticket.RegisterDate, reason);
+    var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser, ticketOpenUser, ctx.Guild ,ticketId, ticket.RegisterDate, reason);
     await logChannel.SendMessageAsync(logEmbed);
 
 

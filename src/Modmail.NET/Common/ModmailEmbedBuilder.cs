@@ -57,9 +57,6 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed TicketPriorityChanged(DiscordGuild ctxGuild, DiscordMember ticketOpenUser) {
-      throw new NotImplementedException();
-    }
 
     public static DiscordEmbed TicketPriorityChanged(DiscordGuild guild,
                                                      DiscordUser modUser,
@@ -134,12 +131,14 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed TicketCreated(DiscordUser user,
                                              DiscordMessage initialMessage,
                                              DiscordChannel mailChannel,
+                                             DiscordGuild guild,
                                              Guid ticketId) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("New Ticket Created")
                   .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithTimestamp(initialMessage.Timestamp)
                   .WithColor(DiscordColor.Green)
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                   .AddField("User", user.Mention, true)
                   .AddField("User Id", user.Id.ToString(), true)
                   .AddField("Username", user.GetUsername(), true)
@@ -151,6 +150,7 @@ public static class ModmailEmbedBuilder
 
     public static DiscordEmbed TicketClosed(DiscordUser mailCloserUser,
                                             DiscordUser mailCreatorUser,
+                                            DiscordGuild  guild,
                                             Guid ticketId,
                                             DateTime createdAt,
                                             string reason = ""
@@ -161,6 +161,7 @@ public static class ModmailEmbedBuilder
                   .WithDescription("Ticket has been closed.")
                   .WithTimestamp(DateTime.Now)
                   .WithTitle("Ticket Closed")
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                   .WithColor(DiscordColor.Red)
                   .AddField("Opened By User", mailCreatorUser.Mention, true)
                   .AddField("Opened By User Id", mailCreatorUser.Id.ToString(), true)
