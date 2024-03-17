@@ -48,16 +48,16 @@ public class ModmailBot
       LogUnknownEvents = false,
       LoggerFactory = new SerilogLoggerFactory(Log.Logger)
     });
-    Client.Heartbeated += BaseEvents.OnHeartbeat;
-    Client.Ready += BaseEvents.OnReady;
-    Client.ClientErrored += BaseEvents.OnClientError;
-    Client.SocketErrored += BaseEvents.OnSocketError;
+    Client.Heartbeated += OnHeartbeat.Handle;
+    Client.Ready += OnReady.Handle;
+    Client.ClientErrored += OnClientError.Handle;
+    Client.SocketErrored += OnSocketError.Handle;
 
-    Client.MessageCreated += MessageEventHandlers.OnMessageCreated;
-    Client.ChannelDeleted += ChannelEventHandlers.OnChannelDeleted;
+    Client.MessageCreated += OnMessageCreated.Handle;
+    Client.ChannelDeleted += OnChannelDeleted.Handle;
     
-    Client.InteractionCreated += InteractionEventHandlers.InteractionCreated;
-    Client.ComponentInteractionCreated += InteractionEventHandlers.ComponentInteractionCreated;
+    Client.InteractionCreated += InteractionCreated.Handle;
+    Client.ComponentInteractionCreated += ComponentInteractionCreated.Handle;
      
 
     var slash = Client.UseSlashCommands();

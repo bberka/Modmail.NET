@@ -9,14 +9,14 @@ using Serilog;
 
 namespace Modmail.NET.Events;
 
-public static class MessageEventHandlers
+public static class OnMessageCreated
 {
-  public static async Task OnMessageCreated(DiscordClient sender, MessageCreateEventArgs args) {
+  public static async Task Handle(DiscordClient sender, MessageCreateEventArgs args) {
     await Task.WhenAll(HandlePrivateMessage(sender, args.Message, args.Channel, args.Author),
                        HandleGuildMessage(sender, args.Message, args.Channel, args.Author, args.Guild));
   }
 
-  public static async Task HandlePrivateMessage(DiscordClient sender,
+  private static async Task HandlePrivateMessage(DiscordClient sender,
                                                 DiscordMessage message,
                                                 DiscordChannel channel,
                                                 DiscordUser author) {
@@ -106,11 +106,11 @@ public static class MessageEventHandlers
     }
   }
 
-  public static async Task HandleGuildMessage(DiscordClient sender,
-                                              DiscordMessage message,
-                                              DiscordChannel channel,
-                                              DiscordUser author,
-                                              DiscordGuild guild) {
+  private static async Task HandleGuildMessage(DiscordClient sender,
+                                               DiscordMessage message,
+                                               DiscordChannel channel,
+                                               DiscordUser author,
+                                               DiscordGuild guild) {
     if (message.Author.IsBot) return;
     if (message.IsTTS) return;
     if (channel.IsPrivate) return;

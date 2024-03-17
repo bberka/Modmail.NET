@@ -6,9 +6,9 @@ using Serilog;
 
 namespace Modmail.NET.Events;
 
-public static class ChannelEventHandlers
+public static class OnChannelDeleted
 {
-  public static async Task OnChannelDeleted(DiscordClient sender, ChannelDeleteEventArgs args) {
+  public static async Task Handle(DiscordClient sender, ChannelDeleteEventArgs args) {
     var channel = args.Channel;
     var channelTopic = channel.Topic;
     var guild = channel.Guild;
