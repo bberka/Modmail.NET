@@ -55,7 +55,7 @@ public static class MessageEventHandlers
         InitialMessageId = message.Id,
         Priority = TicketPriority.Normal,
         LastMessageDate = DateTime.Now,
-        GuildOptionId = option.Id
+        GuildOptionId = guildId
       };
 
       await dbService.AddTicketAsync(ticket);
@@ -122,7 +122,7 @@ public static class MessageEventHandlers
     var guildId = guild.Id;
     var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
     if (id == Guid.Empty) {
-      Log.Error("Failed to parse mail id from channel topic");
+      Log.Verbose("Failed to parse mail id from channel topic");
       return;
     }
 
@@ -130,7 +130,7 @@ public static class MessageEventHandlers
 
     var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
     if (option is null) {
-      Log.Error("Option not found for guild: {GuildId}", guildId);
+      Log.Error("Option not found for guild: {GuildOptionId}", guildId);
       return;
     }
 

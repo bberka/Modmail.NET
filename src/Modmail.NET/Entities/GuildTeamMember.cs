@@ -16,5 +16,6 @@ public class GuildTeamMember
   public TeamMemberDataType Type { get; set; }
 
   public Guid GuildTeamId { get; set; }
+  
   public virtual GuildTeam GuildTeam { get; set; }
 }

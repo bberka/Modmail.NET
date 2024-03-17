@@ -5,8 +5,6 @@ namespace Modmail.NET.Entities;
 public class GuildOption
 {
   [Key]
-  public Guid Id { get; set; }
-
   public ulong GuildId { get; set; }
 
   public ulong LogChannelId { get; set; }

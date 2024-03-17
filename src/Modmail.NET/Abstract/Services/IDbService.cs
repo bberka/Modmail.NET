@@ -17,4 +17,12 @@ public interface IDbService
   Task<Tag?> GetTagAsync(ulong guildId, string key);
   Task AddTagAsync(Tag tag);
   Task RemoveTagAsync(Tag tag);
+  Task<List<GuildTeam>> GetTeamsAsync(ulong guildId);
+  Task AddTeamAsync(GuildTeam team);
+  Task RemoveTeamAsync(GuildTeam team);
+  Task UpdateTeamAsync(GuildTeam team);
+
+  Task<GuildTeam?> GetTeamByIdAsync(ulong guildId, Guid id);
+  Task<GuildTeam?> GetTeamByNameAsync(ulong guildId, string name);
+  Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId, int index);
 }

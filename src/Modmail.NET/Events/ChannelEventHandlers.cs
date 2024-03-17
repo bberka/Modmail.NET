@@ -21,13 +21,13 @@ public static class ChannelEventHandlers
       if (ticket is not null) {
         var logChannelId = await dbService.GetLogChannelIdAsync(guild.Id);
         if (logChannelId == 0) {
-          Log.Warning("LogChannelId not found in database for guild: {GuildId}", guild.Id);
+          Log.Warning("LogChannelId not found in database for guild: {GuildOptionId}", guild.Id);
           return;
         }
 
         var logChannel = guild.GetChannel(logChannelId);
         if (logChannel is null) {
-          Log.Warning("LogChannel not found in guild: {GuildId}", guild.Id);
+          Log.Warning("LogChannel not found in guild: {GuildOptionId}", guild.Id);
           return;
         }
 

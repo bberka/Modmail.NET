@@ -16,7 +16,7 @@ public class GuildTeam
   public bool IsEnabled { get; set; } = true;
 
 
-  public Guid GuildOptionId { get; set; }
+  public ulong GuildOptionId { get; set; }
 
   public virtual GuildOption GuildOption { get; set; }
 

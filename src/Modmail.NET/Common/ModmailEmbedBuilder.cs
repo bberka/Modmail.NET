@@ -221,4 +221,54 @@ public static class ModmailEmbedBuilder
     return embed;
   }
 
+  public static DiscordEmbed ListTeams(DiscordGuild ctxGuild, List<GuildTeam> teams) {
+    // var sb = new StringBuilder();
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle("Team List")
+                // .WithDescription(sb.ToString())
+                .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                .WithColor(DiscordColor.Gold);
+
+    foreach (var team in teams) {
+      var sb = new StringBuilder();
+      sb.AppendLine($"`Enabled`: {team.IsEnabled}");
+      sb.AppendLine($"`Members`: {team.GuildTeamMembers.Count}");
+      foreach (var member in team.GuildTeamMembers.OrderBy(x => x.Type)) {
+        switch (member.Type) {
+          case TeamMemberDataType.RoleId:
+            //Tag role 
+            sb.AppendLine($"`Role`: <@&{member.Key}>");
+            break;
+          case TeamMemberDataType.UserId:
+            //tag user
+            sb.AppendLine($"`User`: <@{member.Key}>");
+            break;
+          default:
+            throw new ArgumentOutOfRangeException();
+        }
+      }
+
+      embed.AddField(team.Name, sb.ToString());
+    }
+
+    return embed;
+  }
+
+  public static DiscordEmbed Settings(DiscordGuild guild, GuildOption ticketOption) {
+    var sb = new StringBuilder();
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle("Modmail Settings")
+                .WithColor(DiscordColor.Gold)
+                .WithFooter(guild.Name + " | " + guild.Id, guild.IconUrl);
+    
+    sb.AppendLine("`Modmail Enabled`: " + ticketOption.IsEnabled);
+    sb.AppendLine("`Sensitive Logging`: " + ticketOption.IsSensitiveLogging);
+    sb.AppendLine("`Take Feedback After Closing`: " + ticketOption.TakeFeedbackAfterClosing);
+    sb.AppendLine("`Show Confirmations`: " + ticketOption.ShowConfirmationWhenClosingTickets);
+    sb.AppendLine("`Allow Anonymous Response`: " + ticketOption.AllowAnonymousResponding);
+    sb.AppendLine("`Log Channel`: <#" + ticketOption.LogChannelId + "> | " + ticketOption.LogChannelId);
+    sb.AppendLine("`Tickets Category Id`: <#" + ticketOption.CategoryId + "> | " + ticketOption.CategoryId);
+    embed.WithDescription(sb.ToString());
+    return embed;
+  }
 }

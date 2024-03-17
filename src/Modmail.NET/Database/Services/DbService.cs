@@ -58,21 +58,67 @@ public class DbService : IDbService
   }
 
   public async Task<List<Tag>> GetTagsAsync(ulong guildId) {
-    return await _dbContext.Tags.Where(x => x.GuildId == guildId).ToListAsync();
+    return await _dbContext.Tags.Where(x => x.GuildOptionId == guildId).ToListAsync();
   }
 
   public async Task<Tag?> GetTagAsync(ulong guildId, string key) {
-    return await _dbContext.Tags.FirstOrDefaultAsync(x => x.GuildId == guildId && x.Key == key);
+    return await _dbContext.Tags.FirstOrDefaultAsync(x => x.GuildOptionId == guildId && x.Key == key);
   }
 
   public async Task AddTagAsync(Tag tag) {
-  await _dbContext.Tags.AddAsync(tag);
+    await _dbContext.Tags.AddAsync(tag);
     await _dbContext.SaveChangesAsync();
-     
-}
+  }
 
   public async Task RemoveTagAsync(Tag tag) {
     _dbContext.Tags.Remove(tag);
+    await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task<List<GuildTeam>> GetTeamsAsync(ulong guildId) {
+    return await _dbContext.GuildTeams
+                           .OrderBy(x => x.Id)
+                           .Include(x => x.GuildTeamMembers)
+                           .Where(x => x.GuildOptionId == guildId)
+                           .ToListAsync();
+  }
+
+  public async Task<GuildTeam?> GetTeamByIdAsync(ulong guildId,Guid id) {
+    return await _dbContext.GuildTeams
+                           .Include(x => x.GuildTeamMembers)
+                           .Where(x => x.Id == id)
+                           .FirstOrDefaultAsync();
+  }  
+  public async Task<GuildTeam?> GetTeamByNameAsync(ulong guildId,string name) {
+    return await _dbContext.GuildTeams
+                           .OrderBy(x => x.Id)
+                           .Include(x => x.GuildTeamMembers)
+                           .Where(x => x.Name == name)
+                           .FirstOrDefaultAsync();
+  }
+
+  public async Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId,int index) {
+    return await _dbContext.GuildTeams
+                           .OrderBy(x => x.Id)
+                           .Include(x => x.GuildTeamMembers)
+                           .Skip(index)
+                           .Take(1)
+                           .FirstOrDefaultAsync();
+  }
+
+  public async Task AddTeamAsync(GuildTeam team) {
+    await _dbContext.GuildTeams.AddAsync(team);
+    await _dbContext.SaveChangesAsync();
+  }
+
+
+  public async Task RemoveTeamAsync(GuildTeam team) {
+    _dbContext.GuildTeams.Remove(team);
+    await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task UpdateTeamAsync(GuildTeam team) {
+    _dbContext.GuildTeams.Update(team);
     await _dbContext.SaveChangesAsync();
   }
 }

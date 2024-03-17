@@ -62,6 +62,9 @@ public class ModmailBot
 
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();
+    slash.RegisterCommands<TicketSlashCommands>();
+    slash.RegisterCommands<TeamSlashCommands>();
+    slash.RegisterCommands<TagSlashCommands>();
 
     await Client.ConnectAsync();
 

@@ -10,11 +10,13 @@ public class Tag
   public DateTime RegisterDate { get; set; }
   public DateTime? UpdateDate { get; set; }
 
-  public ulong GuildId { get; set; }
+  public ulong GuildOptionId { get; set; }
 
   public string Key { get; set; }
 
   public string MessageContent { get; set; }
 
   public bool UseEmbed { get; set; } = false;
+
+  public virtual GuildOption GuildOption { get; set; }
 }
