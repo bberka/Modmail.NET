@@ -235,8 +235,8 @@ public static class ModmailEmbedBuilder
                                                 bool ticketAnonymous) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Message Sent by Mod")
-                  .WithAuthor($"{mod.GetUsername()} | {mod.Id}", mod.AvatarUrl)
-                  .WithFooter("To " + user.GetUsername() + " | " + user.Id, user.AvatarUrl)
+                  .WithAuthor($"{mod.GetUsername()} | {mod.Id}", null,mod.AvatarUrl)
+                  // .WithFooter("To " + user.GetUsername() + " | " + user.Id, user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
@@ -257,7 +257,7 @@ public static class ModmailEmbedBuilder
                                                  ulong guildId) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Message Sent by User")
-                  .WithAuthor($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
+                  .WithAuthor($"{user.GetUsername()} | {user.Id}", null,user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
