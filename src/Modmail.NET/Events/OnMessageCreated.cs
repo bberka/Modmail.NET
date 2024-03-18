@@ -136,6 +136,11 @@ public static class OnMessageCreated
     var messageContent = message.Content;
     var attachments = message.Attachments;
     var guildId = guild.Id;
+    if (message.Content.StartsWith(MMConfig.This.BotPrefix)) {
+      //ignored
+      return;
+    }
+    
     var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
     if (id == Guid.Empty) {
       Log.Verbose("Failed to parse mail id from channel topic");
@@ -167,7 +172,7 @@ public static class OnMessageCreated
     // var logChannel = ModmailBot.This.GetLogChannelAsync();
 
 
-    var user = await guild.GetMemberAsync(authorId);
+    var user = await guild.GetMemberAsync(ticket.DiscordUserId);
     var embed = ModmailEmbedBuilder.ToUser.MessageReceived(author, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 

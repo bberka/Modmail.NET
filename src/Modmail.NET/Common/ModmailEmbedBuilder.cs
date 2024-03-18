@@ -76,7 +76,7 @@ public static class ModmailEmbedBuilder
 
   public static class ToMail
   {
-    public static DiscordEmbed NewTicket(DiscordMember user) {
+    public static DiscordEmbed NewTicket(DiscordMember member) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("New Ticket")
                   .WithTimestamp(DateTime.Now)
@@ -93,10 +93,16 @@ public static class ModmailEmbedBuilder
                                    + Environment.NewLine
                                    + Environment.NewLine
                                    + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ")
-                  .WithFooter($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
-                  .AddField("User", user.Mention + " | " + user.Id, true)
-                  .AddField("Roles", string.Join(", ", user.Roles.Select(x => x.Mention)), true)
+                  .WithFooter($"{member.GetUsername()} | {member.Id}", member.AvatarUrl)
+                  .AddField("User", member.Mention + " | " + member.Id, true)
                   .WithColor(DiscordColor.Green);
+      if (member.Roles is not null) {
+        var str = string.Join(", ", member.Roles.Select(x => x.Mention));
+        if (!string.IsNullOrEmpty(str)) {
+          embed.AddField("Roles", str, true);
+        }
+      }
+
       return embed;
     }
 
@@ -150,8 +156,8 @@ public static class ModmailEmbedBuilder
                   .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
                   .AddField("Toggled By", user.Mention + " | " + user.GetUsername() + " | " + user.Id, false);
       embed.WithDescription(ticketAnonymous
-                            ? "This ticket is now anonymous. The user will not know who is responding to their messages."
-                            : "This ticket is no longer anonymous. The user can see who is responding to their messages.");
+                              ? "This ticket is now anonymous. The member will not know who is responding to their messages."
+                              : "This ticket is no longer anonymous. The member can see who is responding to their messages.");
       return embed;
     }
   }
@@ -285,11 +291,11 @@ public static class ModmailEmbedBuilder
                   .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
                   .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
                   .AddField("Toggled By", user.Mention + " | " + user.GetUsername() + " | " + user.Id, false);
-      
+
       embed.WithDescription(anonymous
-                              ? "This ticket is now anonymous. The user will not know who is responding to their messages."
-                              : "This ticket is no longer anonymous. The user can see who is responding to their messages.");
-      
+                              ? "This ticket is now anonymous. The member will not know who is responding to their messages."
+                              : "This ticket is no longer anonymous. The member can see who is responding to their messages.");
+
       return embed;
     }
   }
@@ -334,7 +340,7 @@ public static class ModmailEmbedBuilder
             sb.AppendLine($"`Role`: <@&{member.Key}>");
             break;
           case TeamMemberDataType.UserId:
-            //tag user
+            //tag member
             sb.AppendLine($"`User`: <@{member.Key}>");
             break;
           default:
