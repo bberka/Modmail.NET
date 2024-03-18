@@ -13,7 +13,7 @@ If you wish to use it be aware of potential errors
 # Features
 - Open tickets by sending a private message to bot
 - Close tickets by using command or deleting the channel
-- Logging to messages/transcript to database
+- Logging to messages/transcript to database and modmail log channel
 - Admins or mod team can respond tickets by sending message to created channel
 - Toggle sensitive logging (Logging messages to tickets)
 - Toggle anonymous messages by mods
