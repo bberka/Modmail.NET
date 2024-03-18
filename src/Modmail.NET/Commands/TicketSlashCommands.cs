@@ -143,10 +143,10 @@ public class TicketSlashCommands : ApplicationCommandModule
     await ctx.Channel.ModifyAsync(x => { x.Name = newChName; });
 
 
-    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority);
+    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority,ticket.Anonymous);
     await ticketOpenUser.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority);
+    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority,ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
