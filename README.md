@@ -19,7 +19,8 @@ If you wish to use it be aware of potential errors
 - Toggle anonymous messages by mods
 - Setting up teams adding roles and members to teams (partly done)
 - Setting priority for tickets (adds emoji to tikcet channel name)
-  
+- Adding private mod notes to tickets that can be viewed later only by mods
+
 # Contributing
 Create a pull request by using semantic commits and proper explanation
 
