@@ -367,7 +367,7 @@ public static class ModmailEmbedBuilder
     sb.AppendLine("`Show Confirmations`: " + ticketOption.ShowConfirmationWhenClosingTickets);
     // sb.AppendLine("`Allow Anonymous Response`: " + ticketOption.AllowAnonymousResponding);
     sb.AppendLine("`Log Channel`: <#" + ticketOption.LogChannelId + "> | " + ticketOption.LogChannelId);
-    sb.AppendLine("`Tickets Category Id`: <#" + ticketOption.CategoryId + "> | " + ticketOption.CategoryId);
+    sb.AppendLine("`Tickets Category`: <#" + ticketOption.CategoryId + "> | " + ticketOption.CategoryId);
     embed.WithDescription(sb.ToString());
     return embed;
   }

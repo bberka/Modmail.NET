@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Entities;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Database.Services;
 
@@ -83,13 +84,14 @@ public class DbService : IDbService
                            .ToListAsync();
   }
 
-  public async Task<GuildTeam?> GetTeamByIdAsync(ulong guildId,Guid id) {
+  public async Task<GuildTeam?> GetTeamByIdAsync(ulong guildId, Guid id) {
     return await _dbContext.GuildTeams
                            .Include(x => x.GuildTeamMembers)
                            .Where(x => x.Id == id)
                            .FirstOrDefaultAsync();
-  }  
-  public async Task<GuildTeam?> GetTeamByNameAsync(ulong guildId,string name) {
+  }
+
+  public async Task<GuildTeam?> GetTeamByNameAsync(ulong guildId, string name) {
     return await _dbContext.GuildTeams
                            .OrderBy(x => x.Id)
                            .Include(x => x.GuildTeamMembers)
@@ -97,7 +99,7 @@ public class DbService : IDbService
                            .FirstOrDefaultAsync();
   }
 
-  public async Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId,int index) {
+  public async Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId, int index) {
     return await _dbContext.GuildTeams
                            .OrderBy(x => x.Id)
                            .Include(x => x.GuildTeamMembers)
@@ -109,6 +111,16 @@ public class DbService : IDbService
   public async Task AddNoteAsync(TicketNote noteEntity) {
     await _dbContext.TicketNotes.AddAsync(noteEntity);
     await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task<TeamPermissionLevel> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList) {
+    var teamMember = await _dbContext.GuildTeamMembers
+                                     .Include(x => x.GuildTeam)
+                                     .Where(x => x.GuildTeam.GuildOptionId == guildId &&
+                                                 ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
+                                     .OrderByDescending(x => x.GuildTeam.PermissionLevel)
+                                     .FirstOrDefaultAsync();
+    return teamMember?.GuildTeam.PermissionLevel ?? TeamPermissionLevel.None;
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

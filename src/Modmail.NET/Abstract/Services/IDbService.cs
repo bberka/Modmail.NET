@@ -1,4 +1,5 @@
 ﻿using Modmail.NET.Entities;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Abstract.Services;
 
@@ -26,4 +27,5 @@ public interface IDbService
   Task<GuildTeam?> GetTeamByNameAsync(ulong guildId, string name);
   Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId, int index);
   Task AddNoteAsync(TicketNote noteEntity);
+  Task<TeamPermissionLevel> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList);
 }

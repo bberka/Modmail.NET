@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 
@@ -7,7 +8,7 @@ public class GuildTeam
   [Key]
   public Guid Id { get; set; }
 
-
+  public TeamPermissionLevel PermissionLevel { get; set; }  
   public DateTime RegisterDate { get; set; }
   public DateTime? UpdateDate { get; set; }
 
