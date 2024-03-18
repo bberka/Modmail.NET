@@ -17,9 +17,9 @@ public static class OnMessageCreated
   }
 
   internal static async Task HandlePrivateMessage(DiscordClient sender,
-                                                 DiscordMessage message,
-                                                 DiscordChannel channel,
-                                                 DiscordUser author) {
+                                                  DiscordMessage message,
+                                                  DiscordChannel channel,
+                                                  DiscordUser author) {
     if (message.Author.IsBot) return;
     if (message.IsTTS) return;
     if (!channel.IsPrivate) return;
@@ -51,8 +51,28 @@ public static class OnMessageCreated
       var channelName = string.Format(Const.TICKET_NAME_TEMPLATE, author.Username.Trim());
       var category = guild.GetChannel(option.CategoryId);
 
+      var ticketId = Guid.NewGuid();
 
-      var mailChannel = await guild.CreateTextChannelAsync(channelName, category);
+      var permissions = await dbService.GetPermissionInfoAsync(guildId);
+      var members = await guild.GetAllMembersAsync();
+      var roles = guild.Roles;
+
+      var roleListForOverwrites = new List<DiscordRole>(); 
+      var memberListForOverwrites = new List<DiscordMember>();
+      foreach (var perm in permissions) {
+        var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
+        if (role.Key != 0) { 
+          roleListForOverwrites.Add(role.Value);
+        }
+        var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
+        if (member2 is not null && member2.Id != 0) {
+          memberListForOverwrites.Add(member2);
+        }
+      }
+      
+      
+      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild,memberListForOverwrites,roleListForOverwrites);
+      var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
       var member = await guild.GetMemberAsync(author.Id);
       var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
@@ -70,12 +90,13 @@ public static class OnMessageCreated
         InitialMessageId = message.Id,
         Priority = TicketPriority.Normal,
         LastMessageDate = DateTime.Now,
-        GuildOptionId = guildId
+        GuildOptionId = guildId,
+        Id = ticketId,
+        Anonymous = false,
+        IsForcedClosed = false,
       };
 
       await dbService.AddTicketAsync(ticket);
-
-      await mailChannel.ModifyAsync(x => { x.Topic = UtilChannelTopic.BuildChannelTopic(ticket.Id); });
 
       var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
       await channel.SendMessageAsync(embedUserMessageDelivered);
@@ -140,7 +161,7 @@ public static class OnMessageCreated
       //ignored
       return;
     }
-    
+
     var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
     if (id == Guid.Empty) {
       Log.Verbose("Failed to parse mail id from channel topic");

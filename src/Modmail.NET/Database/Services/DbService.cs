@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Entities;
+using Modmail.NET.Models;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Database.Services;
@@ -113,14 +114,22 @@ public class DbService : IDbService
     await _dbContext.SaveChangesAsync();
   }
 
-  public async Task<TeamPermissionLevel> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList) {
+  public async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList) {
     var teamMember = await _dbContext.GuildTeamMembers
                                      .Include(x => x.GuildTeam)
                                      .Where(x => x.GuildTeam.GuildOptionId == guildId &&
                                                  ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
                                      .OrderByDescending(x => x.GuildTeam.PermissionLevel)
                                      .FirstOrDefaultAsync();
-    return teamMember?.GuildTeam.PermissionLevel ?? TeamPermissionLevel.None;
+    return teamMember?.GuildTeam.PermissionLevel ;
+  }
+
+  public async Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId) {
+    return await _dbContext.GuildTeamMembers
+                           .Include(x => x.GuildTeam)
+                           .Where(x => x.GuildTeam.GuildOptionId == guildId)
+                           .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
+                           .ToListAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

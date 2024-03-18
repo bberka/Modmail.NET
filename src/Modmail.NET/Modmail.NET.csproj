@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="API\"/>
-    <Folder Include="Models\"/>
   </ItemGroup>
 
   <ItemGroup>

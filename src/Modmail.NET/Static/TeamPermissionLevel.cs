@@ -2,7 +2,7 @@
 
 public enum TeamPermissionLevel : byte
 {
-  None = 0,
+  Support,
   Moderator = 100,
   Admin = 200,
   Owner = 255

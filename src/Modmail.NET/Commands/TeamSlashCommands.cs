@@ -1,5 +1,4 @@
 ﻿using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
@@ -38,7 +37,9 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("create", "Create a new team.")]
   public async Task CreateTeam(InteractionContext ctx,
-                               [Option("teamName", "Team name")]string name) {
+                               [Option("teamName", "Team name")]string teamName,
+                               [Option("permissionLevel", "Permission level")]TeamPermissionLevel permissionLevel
+                               ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
@@ -53,7 +54,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
 
-    var existingTeam = (await dbService.GetTeamsAsync(currentGuildId)).FirstOrDefault(x => x.Name == name);
+    var existingTeam = (await dbService.GetTeamsAsync(currentGuildId)).FirstOrDefault(x => x.Name == teamName);
     if (existingTeam is not null) {
       var embed2 = ModmailEmbedBuilder.Base("Team already exists!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -63,12 +64,13 @@ public class TeamSlashCommands : ApplicationCommandModule
 
     var team = new GuildTeam {
       GuildOptionId = currentGuildId,
-      Name = name,
+      Name = teamName,
       RegisterDate = DateTime.Now,
       IsEnabled = true,
       GuildTeamMembers = new List<GuildTeamMember>(),
       UpdateDate = null,
-      Id = Guid.NewGuid()
+      Id = Guid.NewGuid(),
+      PermissionLevel = permissionLevel
     };
     await dbService.AddTeamAsync(team);
 
@@ -79,7 +81,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("remove", "Remove a team.")]
   public async Task RemoveTeam(InteractionContext ctx,
-                               [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                               [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
                                string teamName) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -103,7 +105,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("add-user", "Add a user to a team.")]
   public async Task AddTeamMember(InteractionContext ctx,
-                                  [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                                  [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
                                   string teamName,
                                   [Option("member", "Member to add to the team")]
                                   DiscordUser member) {
@@ -137,7 +139,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("remove-user", "Remove a user from a team.")]
   public async Task RemoveTeamMember(InteractionContext ctx,
-                                     [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                                     [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
                                      string teamName,
                                      [Option("member", "Member to remove from the team")]
                                      DiscordUser member) {
@@ -174,7 +176,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("add-role", "Adds a role to a team.")]
   public async Task AddRoleToTeam(InteractionContext ctx,
-                                  [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                                  [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
                                   string teamName,
                                   [Option("role", "Role to add to the team")]
                                   DiscordRole role) {
@@ -208,7 +210,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("remove-role", "Removes a role from a team.")]
   public async Task RemoveRoleFromTeam(InteractionContext ctx,
-                                       [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                                       [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
                                        string teamName,
                                        [Option("role", "Role to remove from the team")]
                                        DiscordRole role) {

@@ -332,6 +332,7 @@ public static class ModmailEmbedBuilder
     foreach (var team in teams) {
       var sb = new StringBuilder();
       sb.AppendLine($"`Enabled`: {team.IsEnabled}");
+      sb.AppendLine($"`Permission Level`: {team.PermissionLevel}");
       sb.AppendLine($"`Members`: {team.GuildTeamMembers.Count}");
       foreach (var member in team.GuildTeamMembers.OrderBy(x => x.Type)) {
         switch (member.Type) {
