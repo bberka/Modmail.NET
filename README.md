@@ -15,7 +15,11 @@ If you wish to use it be aware of potential errors
 - Close tickets by using command or deleting the channel
 - Logging to messages/transcript to database
 - Admins or mod team can respond tickets by sending message to created channel
-
+- Toggle sensitive logging (Logging messages to tickets)
+- Toggle anonymous messages by mods
+- Setting up teams adding roles and members to teams (partly done)
+- Setting priority for tickets (adds emoji to tikcet channel name)
+  
 # Contributing
 Create a pull request by using semantic commits and proper explanation
 
@@ -27,22 +31,24 @@ Create a pull request by using semantic commits and proper explanation
 5. Run the app
 
 # Possible Upcoming Features
+- :white_check_mark: Snippets or tags system
+- :white_check_mark: Advanced message logging to logging channel (optional)
+- :white_check_mark: Make db message logging optional
+- :white_check_mark: Responding tickets anonymously
+- :white_check_mark: Setting priority for tickets
 - Web UI and/or API to manage tickets and see transcript information
 - Support for multiple servers (groundwork is done)
 - Getting feedback from user when ticket closed
 - Encrpyt message information
 - Role and team system for allowing channel access
-- :white_check_mark: Setting priority for tickets
 - Pinging roles/members on ticket open
+- Teams and permission management
 - Setting up greeting/closing messages
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
-- :white_check_mark: Advanced message logging to logging channel (optional)
-- :white_check_mark: Make db message logging optional
-- Responding tickets anonymously
-- Blacklist 
+- Blacklist
 - Setup some filter to open tickets
-- :white_check_mark: Snippets or tags system
+
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
