@@ -27,6 +27,10 @@ public static class OnMessageCreated
     var authorId = author.Id;
     var guildId = MMConfig.This.MainServerId;
 
+    if (message.Content.StartsWith(MMConfig.This.BotPrefix)) {
+      //ignored
+       return;
+    }
     var dbService = ServiceLocator.Get<IDbService>();
     //Check if user has active modmail
     // await using var db = new ModmailDbContext();
