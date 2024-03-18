@@ -27,6 +27,8 @@ public class Ticket
   public bool IsForcedClosed { get; set; } = false;
 
   public ulong GuildOptionId { get; set; }
+
+  public bool Anonymous { get; set; }
   //FK
 
   public virtual TicketFeedback TicketFeedback { get; set; }

@@ -16,7 +16,7 @@ public static class OnMessageCreated
                        HandleGuildMessage(sender, args.Message, args.Channel, args.Author, args.Guild));
   }
 
-  private static async Task HandlePrivateMessage(DiscordClient sender,
+  internal static async Task HandlePrivateMessage(DiscordClient sender,
                                                  DiscordMessage message,
                                                  DiscordChannel channel,
                                                  DiscordUser author) {
@@ -29,8 +29,9 @@ public static class OnMessageCreated
 
     if (message.Content.StartsWith(MMConfig.This.BotPrefix)) {
       //ignored
-       return;
+      return;
     }
+
     var dbService = ServiceLocator.Get<IDbService>();
     //Check if user has active modmail
     // await using var db = new ModmailDbContext();
@@ -121,11 +122,11 @@ public static class OnMessageCreated
     }
   }
 
-  private static async Task HandleGuildMessage(DiscordClient sender,
-                                               DiscordMessage message,
-                                               DiscordChannel channel,
-                                               DiscordUser author,
-                                               DiscordGuild guild) {
+  internal static async Task HandleGuildMessage(DiscordClient sender,
+                                                DiscordMessage message,
+                                                DiscordChannel channel,
+                                                DiscordUser author,
+                                                DiscordGuild guild) {
     if (message.Author.IsBot) return;
     if (message.IsTTS) return;
     if (channel.IsPrivate) return;
@@ -167,10 +168,10 @@ public static class OnMessageCreated
 
 
     var user = await guild.GetMemberAsync(authorId);
-    var embed = ModmailEmbedBuilder.ToUser.MessageReceived(author, message, guild);
+    var embed = ModmailEmbedBuilder.ToUser.MessageReceived(author, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(author, user, message, channel);
+    var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(author, user, message, channel, ticket.Anonymous);
     await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
@@ -186,10 +187,12 @@ public static class OnMessageCreated
       var logChannelId = option.LogChannelId;
       var logChannel = guild.GetChannel(logChannelId);
       var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByMod(author,
+                                                              user,
                                                               message,
                                                               channel,
                                                               ticket.Id,
-                                                              guildId);
+                                                              guildId,
+                                                              ticket.Anonymous);
       await logChannel.SendMessageAsync(embed3);
     }
   }

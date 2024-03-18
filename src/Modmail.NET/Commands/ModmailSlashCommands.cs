@@ -21,11 +21,10 @@ public class ModmailSlashCommands : ApplicationCommandModule
                           [Option("sensitive-logging", "Whether to log modmail messages")]
                           bool sensitiveLogging = true,
                           [Option("take-feedback", "Whether to take feedback after closing tickets")]
-                          bool takeFeedbackAfterClosing = false,
-                          [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
-                          bool showConfirmationWhenClosing = false,
-                          [Option("allow-anonymous", "Whether to allow anonymous responding")]
-                          bool allowAnonymousResponding = false
+                          bool takeFeedbackAfterClosing = false
+                          // ,
+                          // [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
+                          // bool showConfirmationWhenClosing = false
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -62,8 +61,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
       IsEnabled = true,
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
-      ShowConfirmationWhenClosingTickets = showConfirmationWhenClosing,
-      AllowAnonymousResponding = allowAnonymousResponding,
+      ShowConfirmationWhenClosingTickets = false,
+      // AllowAnonymousResponding = allowAnonymousResponding,
       
     };
     await dbService.AddGuildOptionAsync(guildOption);

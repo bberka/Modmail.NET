@@ -112,15 +112,20 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed MessageSent(DiscordUser author, DiscordUser user, DiscordMessage message, DiscordChannel channel) {
+    public static DiscordEmbed MessageSent(DiscordUser author, DiscordUser user, DiscordMessage message, DiscordChannel channel, bool ticketAnonymous) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Message Sent")
-                  .WithFooter($"To {author.GetUsername()} | {user.Id}", author.AvatarUrl)
-                  // .WithAuthor($"{author.GetUsername()} | {author.Id}", iconUrl: author.AvatarUrl)
+                  .WithFooter($"To {user.GetUsername()} | {user.Id}", user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Green);
-      for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
+      for (var i = 0; i < message.Attachments.Count; i++)
+        embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
+
+      if (!ticketAnonymous) {
+        embed.WithAuthor($"{author.GetUsername()} | {author.Id}", iconUrl: author.AvatarUrl);
+      }
+
       return embed;
     }
 
@@ -132,6 +137,21 @@ public static class ModmailEmbedBuilder
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
                   .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl);
+      return embed;
+    }
+
+    public static DiscordEmbed AnonymousToggled(DiscordGuild guild, DiscordUser user, Ticket ticket, bool ticketAnonymous) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Anonymous Toggled")
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithColor(DiscordColor.Gold)
+                  .WithTimestamp(DateTime.Now)
+                  .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
+                  .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
+                  .AddField("Toggled By", user.Mention + " | " + user.GetUsername() + " | " + user.Id, false);
+      embed.WithDescription(ticketAnonymous
+                            ? "This ticket is now anonymous. The user will not know who is responding to their messages."
+                            : "This ticket is no longer anonymous. The user can see who is responding to their messages.");
       return embed;
     }
   }
@@ -200,31 +220,38 @@ public static class ModmailEmbedBuilder
       return embed.Build();
     }
 
-    public static DiscordEmbed MessageSentByMod(DiscordUser author,
+    public static DiscordEmbed MessageSentByMod(DiscordUser mod,
+                                                DiscordUser user,
                                                 DiscordMessage message,
                                                 DiscordChannel channel,
                                                 Guid ticketId,
-                                                ulong guildId) {
+                                                ulong guildId,
+                                                bool ticketAnonymous) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Message Sent by Mod")
-                  .WithFooter($"{author.GetUsername()} | {author.Id}", author.AvatarUrl)
+                  .WithAuthor($"{mod.GetUsername()} | {mod.Id}", mod.AvatarUrl)
+                  .WithFooter("To " + user.GetUsername() + " | " + user.Id, user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
                   .AddField("Ticket Id", ticketId.ToString().ToUpper());
       for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
 
+      if (ticketAnonymous) {
+        embed.AddField("Anonymous", "This message was sent anonymously.");
+      }
+
       return embed;
     }
 
-    public static DiscordEmbed MessageSentByUser(DiscordUser author,
+    public static DiscordEmbed MessageSentByUser(DiscordUser user,
                                                  DiscordMessage message,
                                                  DiscordChannel channel,
                                                  Guid ticketId,
                                                  ulong guildId) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Message Sent by User")
-                  .WithFooter($"{author.GetUsername()} | {author.Id}", author.AvatarUrl)
+                  .WithAuthor($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.CornflowerBlue)
@@ -243,9 +270,26 @@ public static class ModmailEmbedBuilder
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
                   .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl)
-                  .AddField("Ticket Id", ticket.Id.ToString().ToUpper(),false)
-                  .AddField("Note Added By", ctxUser.Mention + " | " + ctxUser.GetUsername() + " | " + ctxUser.Id , false)
-      ;
+                  .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
+                  .AddField("Note Added By", ctxUser.Mention + " | " + ctxUser.GetUsername() + " | " + ctxUser.Id, false)
+        ;
+      return embed;
+    }
+
+    public static DiscordEmbed AnonymousToggled(DiscordGuild guild, DiscordUser user, Ticket ticket, bool anonymous) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Anonymous Toggled")
+                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithColor(DiscordColor.Gold)
+                  .WithTimestamp(DateTime.Now)
+                  .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
+                  .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
+                  .AddField("Toggled By", user.Mention + " | " + user.GetUsername() + " | " + user.Id, false);
+      
+      embed.WithDescription(anonymous
+                              ? "This ticket is now anonymous. The user will not know who is responding to their messages."
+                              : "This ticket is no longer anonymous. The user can see who is responding to their messages.");
+      
       return embed;
     }
   }
@@ -315,7 +359,7 @@ public static class ModmailEmbedBuilder
     sb.AppendLine("`Sensitive Logging`: " + ticketOption.IsSensitiveLogging);
     sb.AppendLine("`Take Feedback After Closing`: " + ticketOption.TakeFeedbackAfterClosing);
     sb.AppendLine("`Show Confirmations`: " + ticketOption.ShowConfirmationWhenClosingTickets);
-    sb.AppendLine("`Allow Anonymous Response`: " + ticketOption.AllowAnonymousResponding);
+    // sb.AppendLine("`Allow Anonymous Response`: " + ticketOption.AllowAnonymousResponding);
     sb.AppendLine("`Log Channel`: <#" + ticketOption.LogChannelId + "> | " + ticketOption.LogChannelId);
     sb.AppendLine("`Tickets Category Id`: <#" + ticketOption.CategoryId + "> | " + ticketOption.CategoryId);
     embed.WithDescription(sb.ToString());

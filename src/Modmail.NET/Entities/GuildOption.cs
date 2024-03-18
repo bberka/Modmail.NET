@@ -26,9 +26,6 @@ public class GuildOption
   //TODO: Implement ClosingMessage
   public bool TakeFeedbackAfterClosing { get; set; }
 
-  //TODO: Implement AllowAnonymousResponding
-  public bool AllowAnonymousResponding { get; set; }
-
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
 
