@@ -9,7 +9,7 @@ public interface IDbService
   Task<Ticket?> GetActiveTicketAsync(Guid ticketId);
   Task<ulong> GetLogChannelIdAsync(ulong guildId);
   Task UpdateTicketOptionAsync(GuildOption option);
-  Task AddTicketOptionAsync(GuildOption option);
+  Task AddGuildOptionAsync(GuildOption option);
   Task UpdateTicketAsync(Ticket ticket);
   Task AddTicketAsync(Ticket ticket);
   Task AddMessageLog(TicketMessage dbMessageLog);
@@ -25,4 +25,5 @@ public interface IDbService
   Task<GuildTeam?> GetTeamByIdAsync(ulong guildId, Guid id);
   Task<GuildTeam?> GetTeamByNameAsync(ulong guildId, string name);
   Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId, int index);
+  Task AddNoteAsync(TicketNote noteEntity);
 }

@@ -19,14 +19,13 @@ public class ModmailSlashCommands : ApplicationCommandModule
   [RequireUserPermissions(Permissions.Administrator)]
   public async Task Setup(InteractionContext ctx,
                           [Option("sensitive-logging", "Whether to log modmail messages")]
-                          bool sensitiveLogging,
+                          bool sensitiveLogging = true,
                           [Option("take-feedback", "Whether to take feedback after closing tickets")]
-                          bool takeFeedbackAfterClosing,
+                          bool takeFeedbackAfterClosing = false,
                           [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
-                          bool showConfirmationWhenClosing,
+                          bool showConfirmationWhenClosing = false,
                           [Option("allow-anonymous", "Whether to allow anonymous responding")]
-                          bool allowAnonymousResponding,
-                          [Option("log-channel", "Log channel, if not given one will be created")] DiscordChannel? logChannel
+                          bool allowAnonymousResponding = false
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -51,19 +50,10 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
     var mainGuild = ctx.Guild;
-    ulong categoryId = 0;
-    ulong logChannelId = 0;
-    if (logChannel is null) {
-      var category = await mainGuild.CreateChannelCategoryAsync(Const.CATEGORY_NAME);
-      logChannel = await mainGuild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category);
-      categoryId = category.Id;
-      logChannelId = logChannel.Id;
-    }
-    else {
-      categoryId = logChannel.Parent.Id;
-      logChannelId = logChannel.Id;
-    }
-
+    var category = await mainGuild.CreateChannelCategoryAsync(Const.CATEGORY_NAME);
+    var logChannel = await mainGuild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category);
+    var categoryId = category.Id;
+   var  logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
       CategoryId = categoryId,
       GuildId = mainGuild.Id,
@@ -73,9 +63,10 @@ public class ModmailSlashCommands : ApplicationCommandModule
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
       ShowConfirmationWhenClosingTickets = showConfirmationWhenClosing,
-      AllowAnonymousResponding = allowAnonymousResponding
+      AllowAnonymousResponding = allowAnonymousResponding,
+      
     };
-    await dbService.AddTicketOptionAsync(guildOption);
+    await dbService.AddGuildOptionAsync(guildOption);
 
     var embed2 = ModmailEmbedBuilder.Base("Server setup complete!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);

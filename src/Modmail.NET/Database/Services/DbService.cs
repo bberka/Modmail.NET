@@ -37,7 +37,7 @@ public class DbService : IDbService
     await _dbContext.SaveChangesAsync();
   }
 
-  public async Task AddTicketOptionAsync(GuildOption option) {
+  public async Task AddGuildOptionAsync(GuildOption option) {
     await _dbContext.GuildOptions.AddAsync(option);
     await _dbContext.SaveChangesAsync();
   }
@@ -104,6 +104,11 @@ public class DbService : IDbService
                            .Skip(index)
                            .Take(1)
                            .FirstOrDefaultAsync();
+  }
+
+  public async Task AddNoteAsync(TicketNote noteEntity) {
+    await _dbContext.TicketNotes.AddAsync(noteEntity);
+    await _dbContext.SaveChangesAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

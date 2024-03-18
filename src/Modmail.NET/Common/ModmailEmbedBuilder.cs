@@ -87,12 +87,12 @@ public static class ModmailEmbedBuilder
                                    + Environment.NewLine
                                    + Environment.NewLine
                                    + "If you want to change the priority of the ticket, you can use the `/ticket set-priority` command."
-                                    + Environment.NewLine
-                                    + Environment.NewLine
-                                    + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
-                                    + Environment.NewLine
-                                    + Environment.NewLine
-                                    + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ")
+                                   + Environment.NewLine
+                                   + Environment.NewLine
+                                   + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
+                                   + Environment.NewLine
+                                   + Environment.NewLine
+                                   + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ")
                   .WithFooter($"{user.GetUsername()} | {user.Id}", user.AvatarUrl)
                   .AddField("User", user.Mention + " | " + user.Id, true)
                   .AddField("Roles", string.Join(", ", user.Roles.Select(x => x.Mention)), true)
@@ -123,6 +123,17 @@ public static class ModmailEmbedBuilder
       for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
       return embed;
     }
+
+    public static DiscordEmbed NoteAdded(DiscordGuild ctxGuild, DiscordUser ctxUser, string note) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Note Added")
+                  .WithDescription(note)
+                  .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                  .WithColor(DiscordColor.Gold)
+                  .WithTimestamp(DateTime.Now)
+                  .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl);
+      return embed;
+    }
   }
 
 
@@ -150,7 +161,7 @@ public static class ModmailEmbedBuilder
 
     public static DiscordEmbed TicketClosed(DiscordUser mailCloserUser,
                                             DiscordUser mailCreatorUser,
-                                            DiscordGuild  guild,
+                                            DiscordGuild guild,
                                             Guid ticketId,
                                             DateTime createdAt,
                                             string reason = ""
@@ -221,6 +232,20 @@ public static class ModmailEmbedBuilder
 
       for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"Attachment {i + 1}", message.Attachments[i].Url);
 
+      return embed;
+    }
+
+    public static DiscordEmbed NoteAdded(DiscordGuild ctxGuild, DiscordUser ctxUser, string note, Ticket ticket) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Note Added")
+                  .WithDescription(note)
+                  .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                  .WithColor(DiscordColor.Gold)
+                  .WithTimestamp(DateTime.Now)
+                  .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl)
+                  .AddField("Ticket Id", ticket.Id.ToString().ToUpper(),false)
+                  .AddField("Note Added By", ctxUser.Mention + " | " + ctxUser.GetUsername() + " | " + ctxUser.Id , false)
+      ;
       return embed;
     }
   }
