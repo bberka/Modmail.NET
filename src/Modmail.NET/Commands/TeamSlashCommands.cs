@@ -37,9 +37,10 @@ public class TeamSlashCommands : ApplicationCommandModule
 
   [SlashCommand("create", "Create a new team.")]
   public async Task CreateTeam(InteractionContext ctx,
-                               [Option("teamName", "Team name")]string teamName,
-                               [Option("permissionLevel", "Permission level")]TeamPermissionLevel permissionLevel
-                               ) {
+                               [Option("teamName", "Team name")] string teamName,
+                               [Option("permissionLevel", "Permission level")]
+                               TeamPermissionLevel permissionLevel
+  ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
@@ -127,7 +128,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.UserId,
       Key = member.Id,
-      RegisterDate = DateTime.Now,
+      RegisterDate = DateTime.Now
     };
     team.GuildTeamMembers.Add(memberEntity);
     await dbService.UpdateTeamAsync(team);
@@ -198,7 +199,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.RoleId,
       Key = role.Id,
-      RegisterDate = DateTime.Now,
+      RegisterDate = DateTime.Now
     };
     team.GuildTeamMembers.Add(roleEntity);
     await dbService.UpdateTeamAsync(team);
@@ -243,6 +244,4 @@ public class TeamSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
-  
-  
 }

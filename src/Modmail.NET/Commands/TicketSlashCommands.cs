@@ -1,13 +1,10 @@
-﻿using System.Text;
-using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
-using Modmail.NET.Events;
 using Modmail.NET.Static;
 using Serilog;
 
@@ -143,10 +140,10 @@ public class TicketSlashCommands : ApplicationCommandModule
     await ctx.Channel.ModifyAsync(x => { x.Name = newChName; });
 
 
-    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority,ticket.Anonymous);
+    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     await ticketOpenUser.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority,ticket.Anonymous);
+    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
@@ -191,7 +188,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var noteEntity = new TicketNote() {
+    var noteEntity = new TicketNote {
       TicketId = ticketId,
       Content = note,
       UserId = currentUser.Id,
@@ -249,7 +246,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     ticket.Anonymous = !ticket.Anonymous;
     await dbService.UpdateTicketAsync(ticket);
 
-    var embed = ModmailEmbedBuilder.ToLog.AnonymousToggled(ctx.Guild, ctx.User, ticket,ticket.Anonymous);
+    var embed = ModmailEmbedBuilder.ToLog.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed);
@@ -260,7 +257,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
 
-    var embed3 = ModmailEmbedBuilder.ToMail.AnonymousToggled(ctx.Guild, ctx.User, ticket,ticket.Anonymous);
+    var embed3 = ModmailEmbedBuilder.ToMail.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
     await mailChannel.SendMessageAsync(embed3);
 
     Log.Information("Anonymous mode toggled: {TicketId} in guild {GuildOptionId}", ticketId, ticket.GuildOption.GuildId);

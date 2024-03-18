@@ -6,6 +6,7 @@ public class TicketNote
 {
   [Key]
   public Guid Id { get; set; }
+
   public DateTime RegisterDate { get; set; } = DateTime.Now;
   public string Content { get; set; }
   public Guid TicketId { get; set; }

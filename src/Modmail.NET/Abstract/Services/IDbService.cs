@@ -29,7 +29,6 @@ public interface IDbService
   Task<GuildTeam?> GetTeamByIndexAsync(ulong guildId, int index);
   Task AddNoteAsync(TicketNote noteEntity);
   Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList);
-  
+
   Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId);
-  
 }

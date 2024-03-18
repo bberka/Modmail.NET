@@ -6,6 +6,7 @@ public enum TeamMemberDataType
 {
   [ChoiceName("Role")]
   RoleId,
+
   [ChoiceName("User")]
   UserId
 }

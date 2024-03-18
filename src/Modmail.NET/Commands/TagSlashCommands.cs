@@ -1,5 +1,4 @@
 ﻿using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
@@ -61,6 +60,7 @@ public class TagSlashCommands : ApplicationCommandModule
     else {
       builder2.WithContent(tag.MessageContent);
     }
+
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
 
@@ -69,7 +69,8 @@ public class TagSlashCommands : ApplicationCommandModule
   public async Task AddTag(InteractionContext ctx,
                            [Option("key", "Tag key")] string key,
                            [Option("message", "Tag message")] string message,
-                           [Option("use-embed", "Whether to use embed")] bool useEmbed = false) {
+                           [Option("use-embed", "Whether to use embed")]
+                           bool useEmbed = false) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
@@ -88,7 +89,7 @@ public class TagSlashCommands : ApplicationCommandModule
       Key = key,
       MessageContent = message,
       RegisterDate = DateTime.Now,
-      UseEmbed = useEmbed,
+      UseEmbed = useEmbed
     };
     await dbService.AddTagAsync(tag);
 

@@ -27,10 +27,9 @@ public static class OnMessageCreated
     var authorId = author.Id;
     var guildId = MMConfig.This.MainServerId;
 
-    if (message.Content.StartsWith(MMConfig.This.BotPrefix)) {
+    if (message.Content.StartsWith(MMConfig.This.BotPrefix))
       //ignored
       return;
-    }
 
     var dbService = ServiceLocator.Get<IDbService>();
     //Check if user has active modmail
@@ -57,21 +56,17 @@ public static class OnMessageCreated
       var members = await guild.GetAllMembersAsync();
       var roles = guild.Roles;
 
-      var roleListForOverwrites = new List<DiscordRole>(); 
+      var roleListForOverwrites = new List<DiscordRole>();
       var memberListForOverwrites = new List<DiscordMember>();
       foreach (var perm in permissions) {
         var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
-        if (role.Key != 0) { 
-          roleListForOverwrites.Add(role.Value);
-        }
+        if (role.Key != 0) roleListForOverwrites.Add(role.Value);
         var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
-        if (member2 is not null && member2.Id != 0) {
-          memberListForOverwrites.Add(member2);
-        }
+        if (member2 is not null && member2.Id != 0) memberListForOverwrites.Add(member2);
       }
-      
-      
-      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild,memberListForOverwrites,roleListForOverwrites);
+
+
+      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
       var member = await guild.GetMemberAsync(author.Id);
@@ -93,7 +88,7 @@ public static class OnMessageCreated
         GuildOptionId = guildId,
         Id = ticketId,
         Anonymous = false,
-        IsForcedClosed = false,
+        IsForcedClosed = false
       };
 
       await dbService.AddTicketAsync(ticket);
@@ -157,10 +152,9 @@ public static class OnMessageCreated
     var messageContent = message.Content;
     var attachments = message.Attachments;
     var guildId = guild.Id;
-    if (message.Content.StartsWith(MMConfig.This.BotPrefix)) {
+    if (message.Content.StartsWith(MMConfig.This.BotPrefix))
       //ignored
       return;
-    }
 
     var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
     if (id == Guid.Empty) {

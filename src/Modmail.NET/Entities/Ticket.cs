@@ -34,7 +34,6 @@ public class Ticket
   public virtual TicketFeedback TicketFeedback { get; set; }
   public virtual GuildOption GuildOption { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }
-  
-  public virtual List<TicketNote> TicketNotes { get; set; }
 
+  public virtual List<TicketNote> TicketNotes { get; set; }
 }

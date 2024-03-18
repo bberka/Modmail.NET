@@ -1,13 +1,11 @@
 ﻿using System.Text;
 using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
-using Modmail.NET.Providers;
 using Modmail.NET.Static;
 using Serilog;
 
@@ -15,7 +13,6 @@ namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("modmail", "Modmail management commands.")]
 [RequireAdmin]
-
 public class ModmailSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("setup", "Setup the modmail bot.")]
@@ -24,9 +21,9 @@ public class ModmailSlashCommands : ApplicationCommandModule
                           bool sensitiveLogging = true,
                           [Option("take-feedback", "Whether to take feedback after closing tickets")]
                           bool takeFeedbackAfterClosing = false
-                          // ,
-                          // [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
-                          // bool showConfirmationWhenClosing = false
+    // ,
+    // [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
+    // bool showConfirmationWhenClosing = false
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -54,7 +51,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var category = await mainGuild.CreateChannelCategoryAsync(Const.CATEGORY_NAME);
     var logChannel = await mainGuild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category);
     var categoryId = category.Id;
-   var  logChannelId = logChannel.Id;
+    var logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
       CategoryId = categoryId,
       GuildId = mainGuild.Id,
@@ -63,9 +60,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
       IsEnabled = true,
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
-      ShowConfirmationWhenClosingTickets = false,
+      ShowConfirmationWhenClosingTickets = false
       // AllowAnonymousResponding = allowAnonymousResponding,
-      
     };
     await dbService.AddGuildOptionAsync(guildOption);
 
@@ -77,8 +73,6 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("get-settings", "Get the modmail bot settings.")]
-
-
   public async Task GetSettings(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
@@ -100,7 +94,6 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("toggle-sensitive-logging", "Toggle sensitive logging for the modmail bot.")]
-
   public async Task ToggleSensitiveLogging(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -132,7 +125,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
-  
+
   [SlashCommand("toggle-take-feedback", "Toggle taking feedback after closing tickets.")]
   public async Task ToggleTakeFeedback(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -165,6 +158,4 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
-   
-  
 }

@@ -1,6 +1,6 @@
 ﻿namespace Modmail.NET.Static;
 
-public enum TeamPermissionLevel 
+public enum TeamPermissionLevel
 {
   Support,
   Moderator = 100,

@@ -23,7 +23,7 @@ public static class UtilPermission
       memberPerm.Allow(Permissions.AttachFiles);
       overwrites.Add(memberPerm);
     }
-    
+
     foreach (var role in roles) {
       var rolePerm = new DiscordOverwriteBuilder(role);
       rolePerm.Allow(Permissions.AccessChannels);

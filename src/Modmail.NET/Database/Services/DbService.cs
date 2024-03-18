@@ -121,7 +121,7 @@ public class DbService : IDbService
                                                  ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
                                      .OrderByDescending(x => x.GuildTeam.PermissionLevel)
                                      .FirstOrDefaultAsync();
-    return teamMember?.GuildTeam.PermissionLevel ;
+    return teamMember?.GuildTeam.PermissionLevel;
   }
 
   public async Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId) {
