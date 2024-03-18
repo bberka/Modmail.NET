@@ -51,10 +51,10 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed TicketClosed(DiscordGuild guild, DiscordUser user) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Ticket Closed")
+                  .WithDescription("You can always open another ticket by just messaging me again.")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithTimestamp(DateTime.Now)
-                  .WithColor(DiscordColor.Red)
-                  .AddField("Note", "You can always open another ticket by just messaging me again.");
+                  .WithColor(DiscordColor.Red);
       return embed;
     }
 
@@ -142,11 +142,11 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed NoteAdded(DiscordGuild ctxGuild, DiscordUser ctxUser, string note) {
+    public static DiscordEmbed NoteAdded(DiscordGuild guild, DiscordUser ctxUser, string note) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Note Added")
                   .WithDescription(note)
-                  .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
                   .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl);
@@ -156,7 +156,7 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed AnonymousToggled(DiscordGuild guild, DiscordUser user, Ticket ticket, bool ticketAnonymous) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Anonymous Toggled")
-                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
                   .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
@@ -182,7 +182,7 @@ public static class ModmailEmbedBuilder
                   .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithTimestamp(initialMessage.Timestamp)
                   .WithColor(DiscordColor.Green)
-                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .AddField("User", user.Mention, true)
                   .AddField("User Id", user.Id.ToString(), true)
                   .AddField("Username", user.GetUsername(), true)
@@ -202,10 +202,10 @@ public static class ModmailEmbedBuilder
       if (string.IsNullOrEmpty(reason)) reason = "No reason provided";
 
       var embed = new DiscordEmbedBuilder()
-                  .WithDescription("Ticket has been closed.")
+                  // .WithDescription("Ticket has been closed.")
                   .WithTimestamp(DateTime.Now)
                   .WithTitle("Ticket Closed")
-                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .WithColor(DiscordColor.Red)
                   .AddField("Opened By User", mailCreatorUser.Mention, true)
                   .AddField("Opened By User Id", mailCreatorUser.Id.ToString(), true)
@@ -283,16 +283,15 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed NoteAdded(DiscordGuild ctxGuild, DiscordUser ctxUser, string note, Ticket ticket) {
+    public static DiscordEmbed NoteAdded(DiscordGuild guild, DiscordUser user, string note, Ticket ticket) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Note Added")
                   .WithDescription(note)
-                  .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
-                  .WithAuthor(ctxUser.GetUsername(), iconUrl: ctxUser.AvatarUrl)
+                  .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
                   .AddField("Ticket Id", ticket.Id.ToString().ToUpper(), false)
-                  .AddField("Note Added By", ctxUser.Mention + " | " + ctxUser.GetUsername() + " | " + ctxUser.Id, false)
         ;
       return embed;
     }
@@ -300,7 +299,7 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed AnonymousToggled(DiscordGuild guild, DiscordUser user, Ticket ticket, bool anonymous) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Anonymous Toggled")
-                  .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
+                  .WithFooter(guild.Name, guild.IconUrl)
                   .WithColor(DiscordColor.Gold)
                   .WithTimestamp(DateTime.Now)
                   .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
@@ -315,13 +314,13 @@ public static class ModmailEmbedBuilder
     }
   }
 
-  public static DiscordEmbed ListTags(DiscordGuild ctxGuild, List<Tag> tags) {
+  public static DiscordEmbed ListTags(DiscordGuild guild, List<Tag> tags) {
     var sb = new StringBuilder();
     foreach (var tag in tags) sb.AppendLine(tag.Key);
     var embed = new DiscordEmbedBuilder()
                 .WithTitle("Tag List")
                 .WithDescription(sb.ToString())
-                .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                .WithFooter(guild.Name, guild.IconUrl)
                 .WithColor(DiscordColor.Gold);
     return embed;
   }
@@ -336,12 +335,12 @@ public static class ModmailEmbedBuilder
     return embed;
   }
 
-  public static DiscordEmbed ListTeams(DiscordGuild ctxGuild, List<GuildTeam> teams) {
+  public static DiscordEmbed ListTeams(DiscordGuild guild, List<GuildTeam> teams) {
     // var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithTitle("Team List")
                 // .WithDescription(sb.ToString())
-                .WithFooter($"{ctxGuild.Name} | {ctxGuild.Id}", ctxGuild.IconUrl)
+                .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                 .WithColor(DiscordColor.Gold);
 
     foreach (var team in teams) {
@@ -375,7 +374,7 @@ public static class ModmailEmbedBuilder
     var embed = new DiscordEmbedBuilder()
                 .WithTitle("Modmail Settings")
                 .WithColor(DiscordColor.Gold)
-                .WithFooter(guild.Name + " | " + guild.Id, guild.IconUrl);
+                .WithFooter(guild.Name, guild.IconUrl);
 
     sb.AppendLine("`Modmail Enabled`: " + ticketOption.IsEnabled);
     sb.AppendLine("`Sensitive Logging`: " + ticketOption.IsSensitiveLogging);
