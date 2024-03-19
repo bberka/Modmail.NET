@@ -31,6 +31,12 @@ public static class OnChannelDeleted
           return;
         }
 
+        ticket.ClosedDateUtc = DateTime.UtcNow;
+        ticket.IsForcedClosed = true;
+        ticket.CloseReason = "Channel was deleted";
+        await dbService.UpdateTicketAsync(ticket);
+
+
         var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
         var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser,
                                                               ticketOpenUser,
@@ -42,10 +48,6 @@ public static class OnChannelDeleted
 
         var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
         await ticketOpenUser.SendMessageAsync(embed);
-
-        ticket.ClosedDateUtc = DateTime.UtcNow;
-        ticket.IsForcedClosed = true;
-        await dbService.UpdateTicketAsync(ticket);
       }
     }
   }

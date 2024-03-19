@@ -188,7 +188,7 @@ public static class ModmailEmbedBuilder
                   .WithFooter(guild.Name, guild.IconUrl)
                   // .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithColor(DiscordColor.Red);
-      if (!string.IsNullOrEmpty(reason)) embed.AddField("Reason", reason);
+      if (!string.IsNullOrEmpty(reason)) embed.AddField("CloseReason", reason);
       return embed;
     }
   }
@@ -312,7 +312,7 @@ public static class ModmailEmbedBuilder
                                             DiscordGuild guild,
                                             Guid ticketId,
                                             DateTime createdAt,
-                                            string reason = ""
+                                            string? reason = null
     ) {
       if (string.IsNullOrEmpty(reason)) reason = "No reason provided";
 
@@ -328,7 +328,7 @@ public static class ModmailEmbedBuilder
                   .AddField("Ticket Id", ticketId.ToString().ToUpper(), true)
                   .AddField("Opened At", createdAt.ToString(CultureInfo.InvariantCulture), true)
                   .AddField("Closed By", mailCloserUser.Mention, true)
-                  .AddField("Reason", reason, true);
+                  .AddField("CloseReason", reason, true);
       return embed;
     }
 

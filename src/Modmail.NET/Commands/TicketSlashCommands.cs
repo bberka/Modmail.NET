@@ -17,7 +17,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   [SlashCommand("close", "Close a ticket.")]
   public async Task CloseTicket(InteractionContext ctx,
                                 [Option("reason", "Ticket closing reason")]
-                                string reason = "") {
+                                string? reason = null) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
@@ -50,6 +50,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var guildOption = ticket.GuildOption;
     ticket.ClosedDateUtc = DateTime.UtcNow;
+    ticket.CloseReason = reason;
     await dbService.UpdateTicketAsync(ticket);
 
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
