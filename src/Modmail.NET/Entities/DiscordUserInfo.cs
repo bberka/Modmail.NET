@@ -46,4 +46,6 @@ public class DiscordUserInfo
   public string? Email { get; set; }
 
   public string? Locale { get; set; }
+
+  public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
 }
