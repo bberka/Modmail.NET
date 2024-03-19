@@ -17,7 +17,7 @@ If you wish to use it be aware of potential errors
 - Admins or mod team can respond tickets by sending message to created channel
 - Toggle sensitive logging (Logging messages to tickets)
 - Toggle anonymous messages by mods
-- Setting up teams adding roles and members to teams (partly done)
+- Setting up teams adding roles and members to team
 - Setting priority for tickets (adds emoji to tikcet channel name)
 - Adding private mod notes to tickets that can be viewed later only by mods
 
@@ -37,19 +37,17 @@ Create a pull request by using semantic commits and proper explanation
 - :white_check_mark: Make db message logging optional
 - :white_check_mark: Responding tickets anonymously
 - :white_check_mark: Setting priority for tickets
+- :white_check_mark: Role and team system for allowing channel access
+- :white_check_mark: Pinging roles/members on ticket open
+- :white_check_mark: Teams and permission management
 - Web UI and/or API to manage tickets and see transcript information
 - Support for multiple servers (groundwork is done)
 - Getting feedback from user when ticket closed
 - Encrpyt message information
-- Role and team system for allowing channel access
-- Pinging roles/members on ticket open
-- Teams and permission management
 - Setting up greeting/closing messages
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
 - Blacklist
-- Setup some filter to open tickets
-
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
