@@ -21,7 +21,6 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                         bool notifyUser,
                         [Option("reason", "The reason for blacklisting.")]
                         string reason
-                      
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -54,7 +53,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var activeBlock = await dbService.GetUserBlacklistStatus(user.Id);
     if (activeBlock) {
       var embed4 = ModmailEmbedBuilder.Base("User is already blacklisted!", "", DiscordColor.Red);
@@ -62,7 +61,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
       await ctx.EditResponseAsync(builder);
       return;
     }
-    
+
     await dbService.UpdateUserInfoAsync(new DiscordUserInfo(ctx.User));
     await dbService.UpdateUserInfoAsync(new DiscordUserInfo(user));
 
@@ -79,9 +78,8 @@ public class BlacklistSlashCommands : ApplicationCommandModule
       var dmEmbed = ModmailEmbedBuilder.ToUser.Blacklisted(ctx.Guild, ctx.User, reason);
       await member.SendMessageAsync(dmEmbed);
     }
- 
   }
-  
+
   [SlashCommand("remove", "Remove a user from the blacklist.")]
   public async Task Remove(InteractionContext ctx,
                            [Option("user", "The user to remove from the blacklist.")]
@@ -123,24 +121,29 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);
   }
-  
+
   [SlashCommand("status", "Check if a user is blacklisted.")]
   public async Task Status(InteractionContext ctx,
-                           [Option("user", "The user to check.")]
-                           DiscordUser user
+                           [Option("user", "The user to check.")] DiscordUser user
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
-    var embed = ModmailEmbedBuilder.Base("User Blacklist Status", isBlocked ? "User is blacklisted." : "User is not blacklisted.", isBlocked ? DiscordColor.Red : DiscordColor.Green);
+    var embed = ModmailEmbedBuilder.Base("User Blacklist Status",
+                                         isBlocked
+                                           ? "User is blacklisted."
+                                           : "User is not blacklisted.",
+                                         isBlocked
+                                           ? DiscordColor.Red
+                                           : DiscordColor.Green);
     var builder = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.EditResponseAsync(builder);
   }
-  
-  [SlashCommand("list", "List all blacklisted users.")]
-  public async Task List(InteractionContext ctx) {
+
+  [SlashCommand("view", "View all blacklisted users.")]
+  public async Task View(InteractionContext ctx) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     var dbService = ServiceLocator.Get<IDbService>();
@@ -149,5 +152,4 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var builder = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.EditResponseAsync(builder);
   }
-  
 }

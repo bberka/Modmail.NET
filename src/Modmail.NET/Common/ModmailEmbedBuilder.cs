@@ -419,7 +419,7 @@ public static class ModmailEmbedBuilder
 
     public static DiscordEmbed BlacklistAdded(DiscordGuild guild,DiscordUser author, DiscordUser user, string? reason) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle("User blacklisted!")
+                  .WithTitle("User blacklisted")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                   .WithColor(DiscordColor.Yellow)
@@ -432,7 +432,7 @@ public static class ModmailEmbedBuilder
 
     public static DiscordEmbed BlacklistRemoved(DiscordGuild guild, DiscordUser author, DiscordUser user) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle("User removed from blacklist!")
+                  .WithTitle("User removed from blacklist")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                   .WithColor(DiscordColor.Orange)
