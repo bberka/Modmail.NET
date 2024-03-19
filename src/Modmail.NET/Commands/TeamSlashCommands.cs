@@ -123,6 +123,8 @@ public class TeamSlashCommands : ApplicationCommandModule
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
+    
+    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = team.Id,
@@ -158,6 +160,8 @@ public class TeamSlashCommands : ApplicationCommandModule
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
+
+    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
 
     var memberEntity = team.GuildTeamMembers.FirstOrDefault(x => x.Key == member.Id);
     if (memberEntity is null) {

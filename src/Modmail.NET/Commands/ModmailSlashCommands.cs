@@ -144,7 +144,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var currentGuildId = ctx.Guild.Id;
     var guildOption = await dbService.GetOptionAsync(currentGuildId);
     if (guildOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var embed3 = ModmailEmbedBuilder.ErrorServerNotSetup();
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;

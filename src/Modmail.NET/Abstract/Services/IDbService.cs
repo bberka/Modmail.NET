@@ -36,4 +36,7 @@ public interface IDbService
   Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher);
   Task UpdateUserInfoAsync(DiscordUserInfo dcUserInfo);
   Task<bool> GetUserBlacklistStatus(ulong authorId);
+  Task AddBlacklistAsync(ulong userId, ulong guildId, string? reason);
+  Task RemoveBlacklistAsync(ulong isBlocked);
+  Task<List<ulong>> GetBlacklistedUsersAsync(ulong guildId);
 }

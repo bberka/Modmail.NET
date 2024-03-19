@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -10,9 +11,10 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240319193633_blacklist-update")]
+    partial class blacklistupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.28");
@@ -210,6 +212,9 @@ namespace Modmail.NET.Migrations
                     b.Property<ulong>("DiscordUserInfoId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("EndDateUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<ulong>("GuildOptionId")
                         .HasColumnType("INTEGER");
 
@@ -221,10 +226,9 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildOptionId");
+                    b.HasIndex("DiscordUserInfoId");
 
-                    b.HasIndex("DiscordUserInfoId", "GuildOptionId")
-                        .IsUnique();
+                    b.HasIndex("GuildOptionId");
 
                     b.ToTable("TicketBlacklists");
                 });

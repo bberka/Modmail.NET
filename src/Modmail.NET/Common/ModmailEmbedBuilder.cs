@@ -66,6 +66,7 @@ public static class ModmailEmbedBuilder
   public static DiscordEmbed Settings(DiscordGuild guild, GuildOption ticketOption) {
     var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
+                .WithTimestamp(DateTime.Now)
                 .WithTitle("Modmail Settings")
                 .WithColor(DiscordColor.Gold)
                 .WithFooter(guild.Name, guild.IconUrl);
@@ -93,7 +94,10 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed UserBlocked(DiscordUser author, DiscordGuild guild) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("You have been blocked from using the modmail system.")
-                  .WithDescription("You have been blocked from using the modmail system. If you believe this is a mistake, please contact the server staff.")
+                  .WithDescription("You have been blocked from using the modmail system. Your messages will not be received by moderation team." +
+                                   Environment.NewLine +
+                                   Environment.NewLine +
+                                   " If you believe this is a mistake, please contact the server staff.")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithTimestamp(DateTime.Now)
                   .WithColor(DiscordColor.DarkRed);
@@ -104,7 +108,7 @@ public static class ModmailEmbedBuilder
                                            DiscordUser user,
                                            DiscordMessage message) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle("Message Sent")
+                  // .WithTitle("Message Sent")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
@@ -167,6 +171,17 @@ public static class ModmailEmbedBuilder
                   .AddField("New Priority", newPriority.ToString(), true);
       if (!anonymous) embed.WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
       return embed.Build();
+    }
+
+    public static DiscordEmbed Blacklisted(DiscordGuild guild, DiscordUser user, string? reason) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("You have been blacklisted!")
+                  .WithDescription($"You have been blacklisted from using the modmail system. Your messages will not be received.")
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  // .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
+                  .WithColor(DiscordColor.Red);
+      if (!string.IsNullOrEmpty(reason)) embed.AddField("Reason", reason);
+      return embed;
     }
   }
 
@@ -401,5 +416,39 @@ public static class ModmailEmbedBuilder
 
       return embed;
     }
+
+    public static DiscordEmbed BlacklistAdded(DiscordGuild guild,DiscordUser author, DiscordUser user, string? reason) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("User blacklisted!")
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
+                  .WithColor(DiscordColor.Yellow)
+                  .AddField("User", user.Mention, true)
+                  .AddField("User Id", user.Id.ToString(), true)
+                  .AddField("Username", user.GetUsername(), true);
+      
+      return embed;
+    }
+
+    public static DiscordEmbed BlacklistRemoved(DiscordGuild guild, DiscordUser author, DiscordUser user) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("User removed from blacklist!")
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
+                  .WithColor(DiscordColor.Orange)
+                  .AddField("User", user.Mention, true)
+                  .AddField("User Id", user.Id.ToString(), true)
+                  .AddField("Username", user.GetUsername(), true);
+      return embed;
+       
+    }
+  }
+
+  public static DiscordEmbed ErrorServerNotSetup() {
+     var embed = new DiscordEmbedBuilder()
+                  .WithTitle(Texts.SERVER_NOT_SETUP)
+                  .WithDescription(Texts.SETUP_SERVER_BEFORE_USING)
+                  .WithColor(DiscordColor.Red);
+      return embed;
   }
 }

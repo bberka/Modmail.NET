@@ -12,6 +12,7 @@ public class DbService : IDbService
 
   public DbService(ModmailDbContext dbContext) {
     _dbContext = dbContext;
+    _dbContext.Database.SetCommandTimeout(Const.DB_TIMEOUT);
   }
 
   public async Task<GuildOption?> GetOptionAsync(ulong guildId) {
@@ -168,7 +169,32 @@ public class DbService : IDbService
   }
 
   public async Task<bool> GetUserBlacklistStatus(ulong authorId) {
-    return await _dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserInfoId == authorId && x.EndDateUtc > DateTime.UtcNow);
+    return await _dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserInfoId == authorId);
+  }
+
+  public async Task AddBlacklistAsync(ulong userId, ulong guildId, string? reason) {
+    var blacklist = new TicketBlacklist {
+      // Id = Guid.NewGuid(),
+      DiscordUserInfoId = userId,
+      GuildOptionId = guildId,
+      Reason = reason,
+      RegisterDateUtc = DateTime.UtcNow,
+      
+    };
+    await _dbContext.TicketBlacklists.AddAsync(blacklist);
+    await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task RemoveBlacklistAsync(ulong userId) {
+    var blacklist = await _dbContext.TicketBlacklists.FirstOrDefaultAsync(x => x.DiscordUserInfoId == userId);
+    if (blacklist is not null) {
+      _dbContext.TicketBlacklists.Remove(blacklist);
+      await _dbContext.SaveChangesAsync();
+    }
+  }
+
+  public async Task<List<ulong>> GetBlacklistedUsersAsync(ulong guildId) {
+    return await _dbContext.TicketBlacklists.Where(x => x.GuildOptionId == guildId).Select(x => x.DiscordUserInfoId).ToListAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

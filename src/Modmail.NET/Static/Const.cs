@@ -13,4 +13,5 @@ public static class Const
   public const string HIGH_PRIORITY_EMOJI = "🔴";
   public const string NORMAL_PRIORITY_EMOJI = "⚪";
   public const string LOW_PRIORITY_EMOJI = "🟢";
+  public const int DB_TIMEOUT = 10;
 }
