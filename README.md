@@ -22,7 +22,8 @@ If you wish to use it be aware of potential errors
 - Adding private mod notes to tickets that can be viewed later only by mods
 - Pinging team roles/members on ticket open
 - Caching user information that are interacting with the ticket system  
-
+- Blacklist, Blocking users from opening tickets 
+  
 # Contributing
 Create a pull request by using semantic commits and proper explanation
 
@@ -41,7 +42,6 @@ Create a pull request by using semantic commits and proper explanation
 - Setting up greeting/closing messages
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
-- Blacklist
 
 # Commands
 Parameter types with '*' are required
