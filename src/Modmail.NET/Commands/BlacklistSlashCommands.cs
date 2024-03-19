@@ -29,7 +29,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var option = await dbService.GetOptionAsync(ctx.Guild.Id);
     if (option is null) {
-      var embed1 = ModmailEmbedBuilder.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
+      var embed1 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
       var builder1 = new DiscordWebhookBuilder().AddEmbed(embed1);
       await ctx.EditResponseAsync(builder1);
       return;
@@ -39,7 +39,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var logChannel = ctx.Guild.GetChannel(logChannelId);
 
     if (logChannel is null) {
-      var embed2 = ModmailEmbedBuilder.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
+      var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
       var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
       await ctx.EditResponseAsync(builder2);
       return;
@@ -47,7 +47,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var activeTicket = await dbService.GetActiveTicketAsync(user.Id);
     if (activeTicket is not null) {
-      var embed3 = ModmailEmbedBuilder.Base("User has an active ticket!", "Please close the ticket before blacklisting the user.", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base("User has an active ticket!", "Please close the ticket before blacklisting the user.", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.EditResponseAsync(builder);
       return;
@@ -56,7 +56,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var activeBlock = await dbService.GetUserBlacklistStatus(user.Id);
     if (activeBlock) {
-      var embed4 = ModmailEmbedBuilder.Base("User is already blacklisted!", "", DiscordColor.Red);
+      var embed4 = ModmailEmbeds.Base("User is already blacklisted!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.EditResponseAsync(builder);
       return;
@@ -67,7 +67,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     await dbService.AddBlacklistAsync(user.Id, ctx.Guild.Id, reason);
 
-    var embedLog = ModmailEmbedBuilder.ToLog.BlacklistAdded(ctx.Guild, ctx.User, user, reason);
+    var embedLog = ModmailEmbeds.ToLog.BlacklistAdded(ctx.Guild, ctx.User, user, reason);
     await logChannel.SendMessageAsync(embedLog);
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);
@@ -75,7 +75,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     if (notifyUser) {
       var member = await ctx.Guild.GetMemberAsync(user.Id);
-      var dmEmbed = ModmailEmbedBuilder.ToUser.Blacklisted(ctx.Guild, ctx.User, reason);
+      var dmEmbed = ModmailEmbeds.ToUser.Blacklisted(ctx.Guild, ctx.User, reason);
       await member.SendMessageAsync(dmEmbed);
     }
   }
@@ -91,7 +91,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var option = await dbService.GetOptionAsync(ctx.Guild.Id);
     if (option is null) {
-      var embed1 = ModmailEmbedBuilder.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
+      var embed1 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
       var builder1 = new DiscordWebhookBuilder().AddEmbed(embed1);
       await ctx.EditResponseAsync(builder1);
       return;
@@ -101,7 +101,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var logChannel = ctx.Guild.GetChannel(logChannelId);
 
     if (logChannel is null) {
-      var embed2 = ModmailEmbedBuilder.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
+      var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
       var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
       await ctx.EditResponseAsync(builder2);
       return;
@@ -109,14 +109,14 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
     if (!isBlocked) {
-      var embed4 = ModmailEmbedBuilder.Base("User is not blacklisted!", "", DiscordColor.Yellow);
+      var embed4 = ModmailEmbeds.Base("User is not blacklisted!", "", DiscordColor.Yellow);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.EditResponseAsync(builder);
       return;
     }
 
     await dbService.RemoveBlacklistAsync(user.Id);
-    var embedLog = ModmailEmbedBuilder.ToLog.BlacklistRemoved(ctx.Guild, ctx.User, user);
+    var embedLog = ModmailEmbeds.ToLog.BlacklistRemoved(ctx.Guild, ctx.User, user);
     await logChannel.SendMessageAsync(embedLog);
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);
@@ -131,7 +131,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var dbService = ServiceLocator.Get<IDbService>();
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
-    var embed = ModmailEmbedBuilder.Base("User Blacklist Status",
+    var embed = ModmailEmbeds.Base("User Blacklist Status",
                                          isBlocked
                                            ? "User is blacklisted."
                                            : "User is not blacklisted.",
@@ -148,7 +148,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var dbService = ServiceLocator.Get<IDbService>();
     var blacklistedUsers = (await dbService.GetBlacklistedUsersAsync(ctx.Guild.Id)).Select(x => $"<@{x}>");
-    var embed = ModmailEmbedBuilder.Base("Blacklisted Users", string.Join("\n", blacklistedUsers), DiscordColor.Green);
+    var embed = ModmailEmbeds.Base("Blacklisted Users", string.Join("\n", blacklistedUsers), DiscordColor.Green);
     var builder = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.EditResponseAsync(builder);
   }

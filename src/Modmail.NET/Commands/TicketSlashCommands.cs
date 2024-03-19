@@ -31,7 +31,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var embed3 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -41,7 +41,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     var ticket = await dbService.GetActiveTicketAsync(ticketId);
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildOptionId}", ticketId, currentGuild.Id);
-      var embed3 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -54,13 +54,13 @@ public class TicketSlashCommands : ApplicationCommandModule
     await dbService.UpdateTicketAsync(ticket);
 
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
-    var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
+    var embed = ModmailEmbeds.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
     await ticketOpenUser.SendMessageAsync(embed);
 
 
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
-    var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser,
+    var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
                                                           ticketOpenUser,
                                                           ctx.Guild,
                                                           ticketId,
@@ -69,7 +69,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(logEmbed);
 
 
-    var embed2 = ModmailEmbedBuilder.Base("Ticket closed!", "", DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base("Ticket closed!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
@@ -94,7 +94,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -106,7 +106,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildOptionId}", ticketId, currentGuild.Id);
 
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
 
 
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
@@ -142,16 +142,16 @@ public class TicketSlashCommands : ApplicationCommandModule
     await ctx.Channel.ModifyAsync(x => { x.Name = newChName; });
 
 
-    var embed = ModmailEmbedBuilder.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
+    var embed = ModmailEmbeds.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     await ticketOpenUser.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
+    var embed2 = ModmailEmbeds.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
 
 
-    var embed3 = ModmailEmbedBuilder.Base("Priority set!", "", DiscordColor.Green);
+    var embed3 = ModmailEmbeds.Base("Priority set!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed3);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
@@ -174,7 +174,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -184,7 +184,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildOptionId}", ticketId, currentGuild.Id);
 
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -198,18 +198,18 @@ public class TicketSlashCommands : ApplicationCommandModule
     };
     await dbService.AddNoteAsync(noteEntity);
 
-    var embed = ModmailEmbedBuilder.ToLog.NoteAdded(ctx.Guild, ctx.User, note, ticket);
+    var embed = ModmailEmbeds.ToLog.NoteAdded(ctx.Guild, ctx.User, note, ticket);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.Base("Note added!", "`Note Content:`" + note, DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base("Note added!", "`Note Content:`" + note, DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
     var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
 
-    var embed3 = ModmailEmbedBuilder.ToMail.NoteAdded(ctx.Guild, ctx.User, note);
+    var embed3 = ModmailEmbeds.ToMail.NoteAdded(ctx.Guild, ctx.User, note);
     await mailChannel.SendMessageAsync(embed3);
 
     Log.Information("Note added: {TicketId} in guild {GuildOptionId}", ticketId, ticket.GuildOption.GuildId);
@@ -229,7 +229,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -239,7 +239,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     if (ticket is null) {
       Log.Verbose("Active ticket not found: {TicketId} {GuildOptionId}", ticketId, currentGuild.Id);
 
-      var embed4 = ModmailEmbedBuilder.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
+      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -248,18 +248,18 @@ public class TicketSlashCommands : ApplicationCommandModule
     ticket.Anonymous = !ticket.Anonymous;
     await dbService.UpdateTicketAsync(ticket);
 
-    var embed = ModmailEmbedBuilder.ToLog.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
+    var embed = ModmailEmbeds.ToLog.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.Base("Anonymous mode toggled!", "", DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base("Anonymous mode toggled!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
     var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
 
-    var embed3 = ModmailEmbedBuilder.ToMail.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
+    var embed3 = ModmailEmbeds.ToMail.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
     await mailChannel.SendMessageAsync(embed3);
 
     Log.Information("Anonymous mode toggled: {TicketId} in guild {GuildOptionId}", ticketId, ticket.GuildOption.GuildId);

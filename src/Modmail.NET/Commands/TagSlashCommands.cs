@@ -21,14 +21,14 @@
 //     var currentGuildId = ctx.Guild.Id;
 //     var tags = await dbService.GetTagsAsync(currentGuildId);
 //     if (tags is null || tags.Count == 0) {
-//       var embed2 = ModmailEmbedBuilder.Base("No tags found!", "", DiscordColor.Red);
+//       var embed2 = ModmailEmbeds.Base("No tags found!", "", DiscordColor.Red);
 //
 //       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
 //       await ctx.Interaction.EditOriginalResponseAsync(builder);
 //       return;
 //     }
 //
-//     var embed = ModmailEmbedBuilder.ListTags(ctx.Guild, tags);
+//     var embed = ModmailEmbeds.ListTags(ctx.Guild, tags);
 //     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
 //     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 //   }
@@ -44,7 +44,7 @@
 //     var currentGuildId = ctx.Guild.Id;
 //     var tag = await dbService.GetTagAsync(currentGuildId, key);
 //     if (tag is null) {
-//       var embed2 = ModmailEmbedBuilder.Base("Tag not found!", "", DiscordColor.Red);
+//       var embed2 = ModmailEmbeds.Base("Tag not found!", "", DiscordColor.Red);
 //       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
 //       await ctx.Interaction.EditOriginalResponseAsync(builder);
 //       return;
@@ -54,7 +54,7 @@
 //     var builder2 = new DiscordWebhookBuilder();
 //
 //     if (tag.UseEmbed) {
-//       var embed = ModmailEmbedBuilder.Base(tag.Key, tag.MessageContent, DiscordColor.Green);
+//       var embed = ModmailEmbeds.Base(tag.Key, tag.MessageContent, DiscordColor.Green);
 //       builder2.AddEmbed(embed);
 //     }
 //     else {
@@ -78,7 +78,7 @@
 //     var currentGuildId = ctx.Guild.Id;
 //     var existingTag = await dbService.GetTagAsync(currentGuildId, key);
 //     if (existingTag is not null) {
-//       var embed2 = ModmailEmbedBuilder.Base("Tag already exists!", "", DiscordColor.Red);
+//       var embed2 = ModmailEmbeds.Base("Tag already exists!", "", DiscordColor.Red);
 //       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
 //       await ctx.Interaction.EditOriginalResponseAsync(builder);
 //       return;
@@ -93,7 +93,7 @@
 //     };
 //     await dbService.AddTagAsync(tag);
 //
-//     var embed = ModmailEmbedBuilder.Base("Tag added!", "", DiscordColor.Green);
+//     var embed = ModmailEmbeds.Base("Tag added!", "", DiscordColor.Green);
 //     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
 //
 //     await ctx.Interaction.EditOriginalResponseAsync(builder2);
@@ -111,7 +111,7 @@
 //     var currentGuildId = ctx.Guild.Id;
 //     var tag = await dbService.GetTagAsync(currentGuildId, key);
 //     if (tag is null) {
-//       var embed2 = ModmailEmbedBuilder.Base("Tag not found!", "", DiscordColor.Red);
+//       var embed2 = ModmailEmbeds.Base("Tag not found!", "", DiscordColor.Red);
 //       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
 //       await ctx.Interaction.EditOriginalResponseAsync(builder);
 //       return;
@@ -119,7 +119,7 @@
 //
 //     await dbService.RemoveTagAsync(tag);
 //
-//     var embed = ModmailEmbedBuilder.Base("Tag removed!", "", DiscordColor.Green);
+//     var embed = ModmailEmbeds.Base("Tag removed!", "", DiscordColor.Green);
 //     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
 //     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 //   }

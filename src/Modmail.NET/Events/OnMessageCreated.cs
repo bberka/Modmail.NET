@@ -48,7 +48,7 @@ public static class OnMessageCreated
 
     var activeBlock = await dbService.GetUserBlacklistStatus(authorId);
     if (activeBlock) {
-      var embed = ModmailEmbedBuilder.ToUser.UserBlocked(author, guild);
+      var embed = ModmailEmbeds.ToUser.UserBlocked(author, guild);
       await channel.SendMessageAsync(embed);
       return;
     }
@@ -82,7 +82,7 @@ public static class OnMessageCreated
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
       var member = await guild.GetMemberAsync(author.Id);
-      var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
+      var embedNewTicket = ModmailEmbeds.ToMail.NewTicket(member);
       var sb = new StringBuilder();
       if (roleListForOverwrites.Count > 0) {
         sb.AppendLine("Roles:");
@@ -97,7 +97,7 @@ public static class OnMessageCreated
 
       await mailChannel.SendMessageAsync(sb.ToString(), embedNewTicket);
 
-      var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
+      var embedUserMessage = ModmailEmbeds.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
 
 
@@ -118,8 +118,8 @@ public static class OnMessageCreated
       await dbService.AddTicketAsync(ticket);
 
 
-      var embedTicketCreated = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message, option);
-      var embedUserMessageSentToUser = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
+      var embedTicketCreated = ModmailEmbeds.ToUser.TicketCreated(guild, author, message, option);
+      var embedUserMessageSentToUser = ModmailEmbeds.ToUser.MessageSent(guild, author, message);
 
       await channel.SendMessageAsync(x => {
         x.AddEmbed(embedTicketCreated);
@@ -127,7 +127,7 @@ public static class OnMessageCreated
       });
 
 
-      var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
+      var embedLog = ModmailEmbeds.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
 
 
@@ -135,7 +135,7 @@ public static class OnMessageCreated
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
         await dbService.AddMessageLog(dbMessageLog);
 
-        var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
+        var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
                                                                  message,
                                                                  channel,
                                                                  ticket.Id,
@@ -146,20 +146,20 @@ public static class OnMessageCreated
     else {
       //continue on existing channel
       var mailChannel = guild.GetChannel(activeTicket.ModMessageChannelId);
-      var embed = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
+      var embed = ModmailEmbeds.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embed);
 
       activeTicket.LastMessageDateUtc = DateTime.UtcNow;
       await dbService.UpdateTicketAsync(activeTicket);
 
-      var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
+      var embedUserMessageDelivered = ModmailEmbeds.ToUser.MessageSent(guild, author, message);
       await channel.SendMessageAsync(embedUserMessageDelivered);
 
       if (option.IsSensitiveLogging) {
         var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id);
         await dbService.AddMessageLog(dbMessageLog);
 
-        var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByUser(author,
+        var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
                                                                  message,
                                                                  channel,
                                                                  activeTicket.Id,
@@ -223,10 +223,10 @@ public static class OnMessageCreated
     await dbService.UpdateUserInfoAsync(dcUserInfo);
 
     var user = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
-    var embed = ModmailEmbedBuilder.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
+    var embed = ModmailEmbeds.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(modUser, user, message, channel, ticket.Anonymous);
+    var embed2 = ModmailEmbeds.ToMail.MessageSent(modUser, user, message, channel, ticket.Anonymous);
     await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
@@ -241,7 +241,7 @@ public static class OnMessageCreated
 
       var logChannelId = option.LogChannelId;
       var logChannel = guild.GetChannel(logChannelId);
-      var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByMod(modUser,
+      var embed3 = ModmailEmbeds.ToLog.MessageSentByMod(modUser,
                                                               user,
                                                               message,
                                                               channel,

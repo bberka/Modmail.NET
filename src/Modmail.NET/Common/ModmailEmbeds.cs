@@ -6,7 +6,7 @@ using Modmail.NET.Static;
 
 namespace Modmail.NET.Common;
 
-public static class ModmailEmbedBuilder
+public static class ModmailEmbeds
 {
   // public static DiscordEmbed ListTags(DiscordGuild guild, List<Tag> tags) {
   //   var sb = new StringBuilder();
