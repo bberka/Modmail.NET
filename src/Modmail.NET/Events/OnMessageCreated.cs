@@ -1,4 +1,5 @@
-﻿using DSharpPlus;
+﻿using System.Text;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
@@ -71,7 +72,22 @@ public static class OnMessageCreated
 
       var member = await guild.GetMemberAsync(author.Id);
       var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
-      await mailChannel.SendMessageAsync(embedNewTicket);
+      var sb = new StringBuilder();
+      if(roleListForOverwrites.Count > 0) {
+        sb.AppendLine("Roles:");
+        foreach (var role in roleListForOverwrites) {
+          sb.AppendLine(role.Mention);
+        }
+      }
+      if(memberListForOverwrites.Count > 0) {
+        sb.AppendLine("Members:");
+        foreach (var member2 in memberListForOverwrites) {
+          sb.AppendLine(member2.Mention);
+        }
+      }
+
+       
+      await mailChannel.SendMessageAsync(sb.ToString(),embedNewTicket);
 
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
