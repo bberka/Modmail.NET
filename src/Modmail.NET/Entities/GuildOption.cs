@@ -30,6 +30,6 @@ public class GuildOption
   public bool ShowConfirmationWhenClosingTickets { get; set; }
 
   public virtual List<GuildTeam> GuildTeams { get; set; }
-  public virtual List<Tag> Tags { get; set; }
+  // public virtual List<Tag> Tags { get; set; }
   public virtual List<Ticket> Tickets { get; set; }
 }

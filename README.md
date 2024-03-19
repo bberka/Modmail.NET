@@ -57,14 +57,6 @@ Parameter types with '*' are required
 (NOT IMPLEMENTED) `/modmail toggle-take-feedback`: Toggle taking feedback after closing tickets
 
 
-## Tag Group Slash Commands 
-`/tag list`: List all tags
-
-`/tag get (string* key)`: Bot sends defined message content by tag
-
-`/tag add (string* key)`: Add a tag
-
-`/tag remove (string* key)`: Remove a tag
 
 ## Ticket Group Slash Commands 
 `/ticket close (string reason)`: Close a ticket

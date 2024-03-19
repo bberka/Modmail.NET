@@ -8,16 +8,16 @@ namespace Modmail.NET.Common;
 
 public static class ModmailEmbedBuilder
 {
-  public static DiscordEmbed ListTags(DiscordGuild guild, List<Tag> tags) {
-    var sb = new StringBuilder();
-    foreach (var tag in tags) sb.AppendLine(tag.Key);
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle("Tag List")
-                .WithDescription(sb.ToString())
-                .WithFooter(guild.Name, guild.IconUrl)
-                .WithColor(DiscordColor.Gold);
-    return embed;
-  }
+  // public static DiscordEmbed ListTags(DiscordGuild guild, List<Tag> tags) {
+  //   var sb = new StringBuilder();
+  //   foreach (var tag in tags) sb.AppendLine(tag.Key);
+  //   var embed = new DiscordEmbedBuilder()
+  //               .WithTitle("Tag List")
+  //               .WithDescription(sb.ToString())
+  //               .WithFooter(guild.Name, guild.IconUrl)
+  //               .WithColor(DiscordColor.Gold);
+  //   return embed;
+  // }
 
   public static DiscordEmbed Base(string title, string text = "", DiscordColor? color = null) {
     color ??= DiscordColor.White;

@@ -11,7 +11,7 @@ public class ModmailDbContext : DbContext
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
   public DbSet<TicketMessage> TicketMessages { get; set; }
   public DbSet<GuildOption> GuildOptions { get; set; }
-  public DbSet<Tag> Tags { get; set; }
+  // public DbSet<Tag> Tags { get; set; }
   public DbSet<TicketFeedback> TicketFeedbacks { get; set; }
   public DbSet<GuildTeam> GuildTeams { get; set; }
   public DbSet<GuildTeamMember> GuildTeamMembers { get; set; }
