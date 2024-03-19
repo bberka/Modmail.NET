@@ -127,7 +127,7 @@ public class DbService : IDbService
   public async Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId) {
     return await _dbContext.GuildTeamMembers
                            .Include(x => x.GuildTeam)
-                           .Where(x => x.GuildTeam.GuildOptionId == guildId)
+                           .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled)
                            .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
                            .ToListAsync();
   }
