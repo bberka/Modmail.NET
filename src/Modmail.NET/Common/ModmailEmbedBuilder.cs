@@ -19,6 +19,7 @@ public static class ModmailEmbedBuilder
   //   return embed;
   // }
 
+
   public static DiscordEmbed Base(string title, string text = "", DiscordColor? color = null) {
     color ??= DiscordColor.White;
     var embed = new DiscordEmbedBuilder()
@@ -89,6 +90,16 @@ public static class ModmailEmbedBuilder
 
   public static class ToUser
   {
+    public static DiscordEmbed UserBlocked(DiscordUser author, DiscordGuild guild) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("You have been blocked from using the modmail system.")
+                  .WithDescription("You have been blocked from using the modmail system. If you believe this is a mistake, please contact the server staff.")
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithTimestamp(DateTime.Now)
+                  .WithColor(DiscordColor.DarkRed);
+      return embed;
+    }
+
     public static DiscordEmbed MessageSent(DiscordGuild guild,
                                            DiscordUser user,
                                            DiscordMessage message) {

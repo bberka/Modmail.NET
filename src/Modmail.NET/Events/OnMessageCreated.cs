@@ -40,9 +40,20 @@ public static class OnMessageCreated
       Log.Error("Option not found for guild: {GuildOptionId}", guildId);
       return;
     }
+    
+    var guild = await sender.GetGuildAsync(option.GuildId);
+
+    var dcUserInfo = new DiscordUserInfo(author);
+    await dbService.UpdateUserInfoAsync(dcUserInfo);
+    
+    var activeBlock = await dbService.GetUserBlacklistStatus(authorId);
+    if (activeBlock) {
+      var embed = ModmailEmbedBuilder.ToUser.UserBlocked(author, guild);
+      await channel.SendMessageAsync(embed);
+      return;
+    }
 
     var activeTicket = await dbService.GetActiveTicketAsync(authorId);
-    var guild = await sender.GetGuildAsync(option.GuildId);
     var logChannel = guild.GetChannel(option.LogChannelId);
 
 
@@ -89,8 +100,7 @@ public static class OnMessageCreated
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
 
-      var dcUserInfo = new DiscordUserInfo(author);
-      await dbService.UpdateUserInfoAsync(dcUserInfo);
+
 
       var ticket = new Ticket {
         DiscordUserInfoId = authorId,
@@ -191,7 +201,8 @@ public static class OnMessageCreated
       Log.Error("Option not found for guild: {GuildOptionId}", guildId);
       return;
     }
-
+    
+    
     // await using var db = new ModmailDbContext();
     var ticket = await dbService.GetActiveTicketAsync(id);
     if (ticket is null) {

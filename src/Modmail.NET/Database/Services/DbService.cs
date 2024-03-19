@@ -167,6 +167,10 @@ public class DbService : IDbService
     await _dbContext.SaveChangesAsync();
   }
 
+  public async Task<bool> GetUserBlacklistStatus(ulong authorId) {
+    return await _dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserInfoId == authorId && x.EndDateUtc > DateTime.UtcNow);
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();
