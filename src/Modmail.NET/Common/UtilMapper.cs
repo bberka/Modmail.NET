@@ -9,9 +9,7 @@ public static class UtilMapper
     var id = Guid.NewGuid();
     return new TicketMessage {
       Id = id,
-      AuthorId = message.Author.Id,
-      Discriminator = message.Author.Discriminator,
-      Username = message.Author.Username,
+      DiscordUserInfoId = message.Author.Id,
       MessageContent = message.Content,
       TicketId = ticketId,
       TicketMessageAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()

@@ -12,7 +12,7 @@ public class Ticket
   public DateTime LastMessageDate { get; set; }
   public DateTime? ClosedDate { get; set; }
 
-  public ulong DiscordUserId { get; set; }
+  public ulong DiscordUserInfoId { get; set; } //FK
 
   public ulong PrivateMessageChannelId { get; set; }
 
@@ -31,6 +31,8 @@ public class Ticket
   public bool Anonymous { get; set; }
   //FK
 
+  public virtual DiscordUserInfo DiscordUserInfo { get; set; }
+  
   public virtual TicketFeedback TicketFeedback { get; set; }
   public virtual GuildOption GuildOption { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }

@@ -34,4 +34,5 @@ public interface IDbService
 
   Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId);
   Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher);
+  Task UpdateUserInfoAsync(DiscordUserInfo dcUserInfo);
 }

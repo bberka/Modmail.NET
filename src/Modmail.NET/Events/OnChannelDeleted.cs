@@ -2,6 +2,7 @@
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Entities;
 using Serilog;
 
 namespace Modmail.NET.Events;
@@ -17,11 +18,6 @@ public static class OnChannelDeleted
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId != Guid.Empty) {
       var dbService = ServiceLocator.Get<IDbService>();
-      // var option = await dbService.GetOptionAsync(guild.Id);
-      // if (option is null) {
-      //   Log.Warning("Option not found for guild: {GuildOptionId}", guild.Id);
-      //   return;
-      // }
       var ticket = await dbService.GetActiveTicketAsync(ticketId);
       if (ticket is not null) {
         var logChannelId = await dbService.GetLogChannelIdAsync(guild.Id);
@@ -36,7 +32,7 @@ public static class OnChannelDeleted
           return;
         }
 
-        var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserId);
+        var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
         var logEmbed = ModmailEmbedBuilder.ToLog.TicketClosed(currentUser,
                                                               ticketOpenUser,
                                                               guild,

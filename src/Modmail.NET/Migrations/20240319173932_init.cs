@@ -10,6 +10,25 @@ namespace Modmail.NET.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "DiscordUserInfos",
+                columns: table => new
+                {
+                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Username = table.Column<string>(type: "TEXT", nullable: false),
+                    AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    BannerUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    Email = table.Column<string>(type: "TEXT", nullable: true),
+                    Locale = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DiscordUserInfos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GuildOptions",
                 columns: table => new
                 {
@@ -21,8 +40,8 @@ namespace Modmail.NET.Migrations
                     RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     IsSensitiveLogging = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GreetingMessage = table.Column<string>(type: "TEXT", nullable: true),
-                    ClosingMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    GreetingMessage = table.Column<string>(type: "TEXT", nullable: false),
+                    ClosingMessage = table.Column<string>(type: "TEXT", nullable: false),
                     TakeFeedbackAfterClosing = table.Column<bool>(type: "INTEGER", nullable: false),
                     ShowConfirmationWhenClosingTickets = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
@@ -62,7 +81,7 @@ namespace Modmail.NET.Migrations
                     RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastMessageDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ClosedDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DiscordUserId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    DiscordUserInfoId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     PrivateMessageChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     ModMessageChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     InitialMessageId = table.Column<ulong>(type: "INTEGER", nullable: false),
@@ -74,6 +93,12 @@ namespace Modmail.NET.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tickets_DiscordUserInfos_DiscordUserInfoId",
+                        column: x => x.DiscordUserInfoId,
+                        principalTable: "DiscordUserInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Tickets_GuildOptions_GuildOptionId",
                         column: x => x.GuildOptionId,
@@ -130,15 +155,19 @@ namespace Modmail.NET.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AuthorId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    Username = table.Column<string>(type: "TEXT", nullable: false),
+                    DiscordUserInfoId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     MessageContent = table.Column<string>(type: "TEXT", nullable: false),
                     TicketId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TicketMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TicketMessages_DiscordUserInfos_DiscordUserInfoId",
+                        column: x => x.DiscordUserInfoId,
+                        principalTable: "DiscordUserInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TicketMessages_Tickets_TicketId",
                         column: x => x.TicketId,
@@ -155,12 +184,18 @@ namespace Modmail.NET.Migrations
                     RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     TicketId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    DiscordUserInfoId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TicketNotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TicketNotes_DiscordUserInfos_DiscordUserInfoId",
+                        column: x => x.DiscordUserInfoId,
+                        principalTable: "DiscordUserInfos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TicketNotes_Tickets_TicketId",
                         column: x => x.TicketId,
@@ -218,14 +253,29 @@ namespace Modmail.NET.Migrations
                 column: "TicketMessageId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TicketMessages_DiscordUserInfoId",
+                table: "TicketMessages",
+                column: "DiscordUserInfoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TicketMessages_TicketId",
                 table: "TicketMessages",
                 column: "TicketId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TicketNotes_DiscordUserInfoId",
+                table: "TicketNotes",
+                column: "DiscordUserInfoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TicketNotes_TicketId",
                 table: "TicketNotes",
                 column: "TicketId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_DiscordUserInfoId",
+                table: "Tickets",
+                column: "DiscordUserInfoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_GuildOptionId",
@@ -255,6 +305,9 @@ namespace Modmail.NET.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tickets");
+
+            migrationBuilder.DropTable(
+                name: "DiscordUserInfos");
 
             migrationBuilder.DropTable(
                 name: "GuildOptions");

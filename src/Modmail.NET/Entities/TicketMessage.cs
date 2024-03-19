@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DSharpPlus.Entities;
 
 namespace Modmail.NET.Entities;
 
@@ -7,16 +8,12 @@ public class TicketMessage
   [Key]
   public Guid Id { get; set; }
 
-  public ulong AuthorId { get; set; }
-
-  public string Discriminator { get; set; }
-
-  public string Username { get; set; }
-
+  public ulong DiscordUserInfoId { get; set; }
   public string MessageContent { get; set; }
 
-
   //FK
+  
+  public virtual DiscordUserInfo DiscordUserInfo { get; set; }
   public virtual Guid TicketId { get; set; }
   public virtual List<TicketMessageAttachment> TicketMessageAttachments { get; set; }
 }

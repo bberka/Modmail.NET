@@ -89,9 +89,11 @@ public static class OnMessageCreated
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
 
+      var dcUserInfo = new DiscordUserInfo(author);
+      await dbService.UpdateUserInfoAsync(dcUserInfo);
 
       var ticket = new Ticket {
-        DiscordUserId = authorId,
+        DiscordUserInfoId = authorId,
         ModMessageChannelId = mailChannel.Id,
         RegisterDate = DateTime.Now,
         PrivateMessageChannelId = channelId,
@@ -161,14 +163,14 @@ public static class OnMessageCreated
   internal static async Task HandleGuildMessage(DiscordClient sender,
                                                 DiscordMessage message,
                                                 DiscordChannel channel,
-                                                DiscordUser author,
+                                                DiscordUser modUser,
                                                 DiscordGuild guild) {
     if (message.Author.IsBot) return;
     if (message.IsTTS) return;
     if (channel.IsPrivate) return;
     if (guild is null) return;
     var channelId = channel.Id;
-    var authorId = author.Id;
+    var authorId = modUser.Id;
     var messageContent = message.Content;
     var attachments = message.Attachments;
     var guildId = guild.Id;
@@ -207,11 +209,14 @@ public static class OnMessageCreated
     // var logChannel = ModmailBot.This.GetLogChannelAsync();
 
 
-    var user = await guild.GetMemberAsync(ticket.DiscordUserId);
-    var embed = ModmailEmbedBuilder.ToUser.MessageReceived(author, message, guild, ticket.Anonymous);
+    var dcUserInfo = new DiscordUserInfo(modUser);
+    await dbService.UpdateUserInfoAsync(dcUserInfo);
+    
+    var user = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
+    var embed = ModmailEmbedBuilder.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(author, user, message, channel, ticket.Anonymous);
+    var embed2 = ModmailEmbedBuilder.ToMail.MessageSent(modUser, user, message, channel, ticket.Anonymous);
     await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
@@ -226,7 +231,7 @@ public static class OnMessageCreated
 
       var logChannelId = option.LogChannelId;
       var logChannel = guild.GetChannel(logChannelId);
-      var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByMod(author,
+      var embed3 = ModmailEmbedBuilder.ToLog.MessageSentByMod(modUser,
                                                               user,
                                                               message,
                                                               channel,

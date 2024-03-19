@@ -52,7 +52,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     ticket.ClosedDate = DateTime.Now;
     await dbService.UpdateTicketAsync(ticket);
 
-    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
+    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
     var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
     await ticketOpenUser.SendMessageAsync(embed);
 
@@ -120,7 +120,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
     // var guildId = ticket.GuildOptionId;
-    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
+    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
 
 
     var newChName = "";
@@ -192,7 +192,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     var noteEntity = new TicketNote {
       TicketId = ticketId,
       Content = note,
-      UserId = currentUser.Id,
+      DiscordUserInfoId = currentUser.Id,
       Username = currentUser.GetUsername()
     };
     await dbService.AddNoteAsync(noteEntity);

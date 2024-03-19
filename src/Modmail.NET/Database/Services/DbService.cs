@@ -21,7 +21,7 @@ public class DbService : IDbService
   public async Task<Ticket?> GetActiveTicketAsync(ulong discordUserId) {
     return await _dbContext.Tickets
                            .Include(x => x.GuildOption)
-                           .FirstOrDefaultAsync(x => x.DiscordUserId == discordUserId && !x.ClosedDate.HasValue);
+                           .FirstOrDefaultAsync(x => x.DiscordUserInfoId == discordUserId && !x.ClosedDate.HasValue);
   }
 
   public async Task<Ticket?> GetActiveTicketAsync(Guid ticketId) {
@@ -138,6 +138,21 @@ public class DbService : IDbService
                      .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
                      .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
                      .ToListAsync();
+  }
+
+  public async Task UpdateUserInfoAsync(DiscordUserInfo dcUserInfo) {
+    var current = await _dbContext.DiscordUserInfos.FindAsync(dcUserInfo.Id);
+
+    if (current is not null) {
+      dcUserInfo.RegisterDate = current.RegisterDate;
+      dcUserInfo.UpdateDate = DateTime.Now;
+      _dbContext.DiscordUserInfos.Update(dcUserInfo);
+    }
+    else {
+      dcUserInfo.RegisterDate = DateTime.Now;
+      await _dbContext.DiscordUserInfos.AddAsync(dcUserInfo);
+    }
+    await _dbContext.SaveChangesAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

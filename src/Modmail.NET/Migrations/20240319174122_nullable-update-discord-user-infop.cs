@@ -4,13 +4,13 @@
 
 namespace Modmail.NET.Migrations
 {
-    public partial class greetingclosingmessage : Migration
+    public partial class nullableupdatediscorduserinfop : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "GreetingMessage",
-                table: "GuildOptions",
+                name: "Locale",
+                table: "DiscordUserInfos",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: "",
@@ -19,8 +19,8 @@ namespace Modmail.NET.Migrations
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
-                name: "ClosingMessage",
-                table: "GuildOptions",
+                name: "Email",
+                table: "DiscordUserInfos",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: "",
@@ -32,16 +32,16 @@ namespace Modmail.NET.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "GreetingMessage",
-                table: "GuildOptions",
+                name: "Locale",
+                table: "DiscordUserInfos",
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT");
 
             migrationBuilder.AlterColumn<string>(
-                name: "ClosingMessage",
-                table: "GuildOptions",
+                name: "Email",
+                table: "DiscordUserInfos",
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(string),

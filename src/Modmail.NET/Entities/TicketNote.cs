@@ -10,7 +10,10 @@ public class TicketNote
   public DateTime RegisterDate { get; set; } = DateTime.Now;
   public string Content { get; set; }
   public Guid TicketId { get; set; }
-  public ulong UserId { get; set; }
+  public ulong DiscordUserInfoId { get; set; }
   public string Username { get; set; }
   public virtual Ticket Ticket { get; set; }
+
+  
+  public virtual DiscordUserInfo DiscordUserInfo { get; set; }
 }
