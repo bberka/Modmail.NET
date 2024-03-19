@@ -101,6 +101,7 @@ public static class ModmailEmbedBuilder
                   .WithTitle("Ticket Created")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithDescription(message.Content)
+                  .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Green);
       return embed;
