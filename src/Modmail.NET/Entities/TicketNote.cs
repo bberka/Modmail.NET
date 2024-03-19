@@ -14,6 +14,6 @@ public class TicketNote
   public string Username { get; set; }
   public virtual Ticket Ticket { get; set; }
 
-  
+
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
 }

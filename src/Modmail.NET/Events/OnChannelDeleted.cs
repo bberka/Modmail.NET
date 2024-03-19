@@ -2,7 +2,6 @@
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
-using Modmail.NET.Entities;
 using Serilog;
 
 namespace Modmail.NET.Events;

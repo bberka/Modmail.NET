@@ -123,7 +123,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
-    
+
     await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
 
     var memberEntity = new GuildTeamMember {

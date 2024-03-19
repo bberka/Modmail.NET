@@ -143,14 +143,12 @@ public class DbService : IDbService
 
   public async Task UpdateUserInfoAsync(DiscordUserInfo dcUserInfo) {
     var current = await _dbContext.DiscordUserInfos.FindAsync(dcUserInfo.Id);
-    
-    
+
+
     if (current is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
       var lastUpdate = current.UpdateDateUtc ?? current.RegisterDateUtc;
-      if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) {
-        return;
-      }
+      if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) return;
       dcUserInfo.RegisterDateUtc = current.RegisterDateUtc;
       current.UpdateDateUtc = DateTime.UtcNow;
       current.Username = dcUserInfo.Username;
@@ -178,8 +176,7 @@ public class DbService : IDbService
       DiscordUserInfoId = userId,
       GuildOptionId = guildId,
       Reason = reason,
-      RegisterDateUtc = DateTime.UtcNow,
-      
+      RegisterDateUtc = DateTime.UtcNow
     };
     await _dbContext.TicketBlacklists.AddAsync(blacklist);
     await _dbContext.SaveChangesAsync();

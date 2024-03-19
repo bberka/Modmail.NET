@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DSharpPlus.Entities;
 
 namespace Modmail.NET.Entities;
 
@@ -13,7 +12,7 @@ public class TicketMessage
   public string MessageContent { get; set; }
 
   //FK
-  
+
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
   public virtual Guid TicketId { get; set; }
   public virtual List<TicketMessageAttachment> TicketMessageAttachments { get; set; }

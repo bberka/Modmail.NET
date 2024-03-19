@@ -6,9 +6,8 @@ namespace Modmail.NET.Entities;
 
 public class DiscordUserInfo
 {
-  public DiscordUserInfo() {
-    
-  }
+  public DiscordUserInfo() { }
+
   public DiscordUserInfo(DiscordUser user) {
     Id = user.Id;
     Username = user.GetUsername();
@@ -28,7 +27,7 @@ public class DiscordUserInfo
   }
 
   /// <summary>
-  /// Users Discord Id
+  ///   Users Discord Id
   /// </summary>
   [Key]
   public ulong Id { get; set; }

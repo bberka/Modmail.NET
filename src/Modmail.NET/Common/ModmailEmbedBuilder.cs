@@ -89,6 +89,14 @@ public static class ModmailEmbedBuilder
     return embed;
   }
 
+  public static DiscordEmbed ErrorServerNotSetup() {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.SERVER_NOT_SETUP)
+                .WithDescription(Texts.SETUP_SERVER_BEFORE_USING)
+                .WithColor(DiscordColor.Red);
+    return embed;
+  }
+
   public static class ToUser
   {
     public static DiscordEmbed UserBlocked(DiscordUser author, DiscordGuild guild) {
@@ -176,7 +184,7 @@ public static class ModmailEmbedBuilder
     public static DiscordEmbed Blacklisted(DiscordGuild guild, DiscordUser user, string? reason) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("You have been blacklisted!")
-                  .WithDescription($"You have been blacklisted from using the modmail system. Your messages will not be received.")
+                  .WithDescription("You have been blacklisted from using the modmail system. Your messages will not be received.")
                   .WithFooter(guild.Name, guild.IconUrl)
                   // .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithColor(DiscordColor.Red);
@@ -417,7 +425,7 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed BlacklistAdded(DiscordGuild guild,DiscordUser author, DiscordUser user, string? reason) {
+    public static DiscordEmbed BlacklistAdded(DiscordGuild guild, DiscordUser author, DiscordUser user, string? reason) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("User blacklisted")
                   .WithFooter(guild.Name, guild.IconUrl)
@@ -426,7 +434,7 @@ public static class ModmailEmbedBuilder
                   .AddField("User", user.Mention, true)
                   .AddField("User Id", user.Id.ToString(), true)
                   .AddField("Username", user.GetUsername(), true);
-      
+
       return embed;
     }
 
@@ -440,15 +448,6 @@ public static class ModmailEmbedBuilder
                   .AddField("User Id", user.Id.ToString(), true)
                   .AddField("Username", user.GetUsername(), true);
       return embed;
-       
     }
-  }
-
-  public static DiscordEmbed ErrorServerNotSetup() {
-     var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.SERVER_NOT_SETUP)
-                  .WithDescription(Texts.SETUP_SERVER_BEFORE_USING)
-                  .WithColor(DiscordColor.Red);
-      return embed;
   }
 }

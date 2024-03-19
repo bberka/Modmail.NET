@@ -9,7 +9,7 @@ public class Ticket
   public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
-  public DateTime LastMessageDateUtc { get; set; }= DateTime.UtcNow;
+  public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? ClosedDateUtc { get; set; }
 
   public ulong DiscordUserInfoId { get; set; } //FK
@@ -32,7 +32,7 @@ public class Ticket
   //FK
 
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
-  
+
   public virtual TicketFeedback TicketFeedback { get; set; }
   public virtual GuildOption GuildOption { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }
