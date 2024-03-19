@@ -47,18 +47,11 @@ Create a pull request by using semantic commits and proper explanation
 Parameter types with '*' are required
 
 ## Modmail Group Slash Commands 
-`/modmail setup (bool sensitiveLogging, bool takeFeedbackAfterClosing)`: Setup the modmail bot
+`/modmail setup (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Setup the modmail bot
 
-`/modmail get-settings`: Get the modmail bot settings
+`/modmail configure (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Setup the modmail bot
 
-`/modmail toggle-sensitive-logging`: Toggle sensitive logging for the modmail bot
-
-(NOT IMPLEMENTED) `/modmail toggle-take-feedback`: Toggle taking feedback after closing tickets
-
-
-`/modmail set-greeting-message (string* message)`: Set the greeting message for the modmail bot
-
-`/modmail set-closing-message (string* message)`: Set the closing message for the modmail bot
+`/modmail get-settings`: Get the modmail bot settings 
 
 
 ## Ticket Group Slash Commands 

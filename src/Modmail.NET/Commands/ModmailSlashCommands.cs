@@ -18,12 +18,13 @@ public class ModmailSlashCommands : ApplicationCommandModule
   [SlashCommand("setup", "Setup the modmail bot.")]
   public async Task Setup(InteractionContext ctx,
                           [Option("sensitive-logging", "Whether to log modmail messages")]
-                          bool sensitiveLogging = true,
+                          bool sensitiveLogging = false,
                           [Option("take-feedback", "Whether to take feedback after closing tickets")]
-                          bool takeFeedbackAfterClosing = false
-    // ,
-    // [Option("show-confirmation", "Whether to show confirmation when closing tickets")]
-    // bool showConfirmationWhenClosing = false
+                          bool takeFeedbackAfterClosing = false,
+                          [Option("greening-message", "The greeting message")]
+                          string? greetingMessage = null,
+                          [Option("closing-message", "The closing message")]
+                          string? closingMessage = null
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -79,9 +80,13 @@ public class ModmailSlashCommands : ApplicationCommandModule
       IsEnabled = true,
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
-      ShowConfirmationWhenClosingTickets = false
+      ShowConfirmationWhenClosingTickets = false,
       // AllowAnonymousResponding = allowAnonymousResponding,
     };
+    if (!string.IsNullOrEmpty(greetingMessage))
+      guildOption.GreetingMessage = greetingMessage;
+    if (!string.IsNullOrEmpty(closingMessage))
+      guildOption.ClosingMessage = closingMessage;
     await dbService.AddGuildOptionAsync(guildOption);
 
     var embed2 = ModmailEmbedBuilder.Base("Server setup complete!", "", DiscordColor.Green);
@@ -90,6 +95,45 @@ public class ModmailSlashCommands : ApplicationCommandModule
     Log.Information("Server setup complete for guild: {GuildOptionId}", currentGuildId);
   }
 
+  [SlashCommand("configure", "Configure the modmail bot.")]
+  public async Task Configure(InteractionContext ctx,
+                              [Option("sensitive-logging", "Whether to log modmail messages")]
+                              bool? sensitiveLogging = null,
+                              [Option("take-feedback", "Whether to take feedback after closing tickets")]
+                              bool? takeFeedbackAfterClosing = null,
+                              [Option("greening-message", "The greeting message")]
+                              string? greetingMessage = null,
+                              [Option("closing-message", "The closing message")]
+                              string? closingMessage = null
+  ) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    if (sensitiveLogging.HasValue)
+      guildOption.IsSensitiveLogging = sensitiveLogging.Value;
+    if (takeFeedbackAfterClosing.HasValue)
+      guildOption.TakeFeedbackAfterClosing = takeFeedbackAfterClosing.Value;
+    if (!string.IsNullOrEmpty(greetingMessage))
+      guildOption.GreetingMessage = greetingMessage;
+    if (!string.IsNullOrEmpty(closingMessage))
+      guildOption.ClosingMessage = closingMessage;
+    await dbService.UpdateGuildOptionAsync(guildOption);
+
+    var embed2 = ModmailEmbedBuilder.Base("Server configuration updated!", "", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+    Log.Information("Server configuration updated for guild: {GuildOptionId}", currentGuildId);
+  }
 
   [SlashCommand("get-settings", "Get the modmail bot settings.")]
   public async Task GetSettings(InteractionContext ctx) {
@@ -110,123 +154,4 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
-
-
-  [SlashCommand("toggle-sensitive-logging", "Toggle sensitive logging for the modmail bot.")]
-  public async Task ToggleSensitiveLogging(InteractionContext ctx) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var ticketOption = await dbService.GetOptionAsync(currentGuildId);
-    if (ticketOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    ticketOption.IsSensitiveLogging = !ticketOption.IsSensitiveLogging;
-    await dbService.UpdateGuildOptionAsync(ticketOption);
-
-    var text = new StringBuilder();
-    if (ticketOption.IsSensitiveLogging) {
-      text.Append("Sensitive logging enabled!");
-      Log.Information("Sensitive logging enabled for guild: {GuildOptionId}", currentGuildId);
-    }
-    else {
-      text.Append("Sensitive logging disabled!");
-      Log.Information("Sensitive logging disabled for guild: {GuildOptionId}", currentGuildId);
-    }
-
-    var embed4 = ModmailEmbedBuilder.Base(text.ToString(), "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
-
-  [SlashCommand("toggle-take-feedback", "Toggle taking feedback after closing tickets.")]
-  public async Task ToggleTakeFeedback(InteractionContext ctx) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var ticketOption = await dbService.GetOptionAsync(currentGuildId);
-    if (ticketOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    ticketOption.TakeFeedbackAfterClosing = !ticketOption.TakeFeedbackAfterClosing;
-    await dbService.UpdateGuildOptionAsync(ticketOption);
-
-    var text = new StringBuilder();
-    if (ticketOption.TakeFeedbackAfterClosing) {
-      text.Append("Taking feedback after closing tickets enabled!");
-      Log.Information("Taking feedback after closing tickets enabled for guild: {GuildOptionId}", currentGuildId);
-    }
-    else {
-      text.Append("Taking feedback after closing tickets disabled!");
-      Log.Information("Taking feedback after closing tickets disabled for guild: {GuildOptionId}", currentGuildId);
-    }
-
-    var embed4 = ModmailEmbedBuilder.Base(text.ToString(), "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
-  
-  [SlashCommand("set-greeting-message", "Set the greeting message for the modmail bot.")]
-  public async Task SetGreetingMessage(InteractionContext ctx,
-                                      [Option("message", "The greeting message")]
-                                      string message) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
-    if (guildOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    guildOption.GreetingMessage = message;
-    await dbService.UpdateGuildOptionAsync(guildOption);
-
-    var embed4 = ModmailEmbedBuilder.Base("Greeting message updated!", "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
-  
-  [SlashCommand("set-closing-message", "Set the closing message for the modmail bot.")]
-  public async Task SetClosingMessage(InteractionContext ctx,
-                                      [Option("message", "The closing message")]
-                                      string message) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
-    if (guildOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    guildOption.ClosingMessage = message;
-    await dbService.UpdateGuildOptionAsync(guildOption);
-
-    var embed4 = ModmailEmbedBuilder.Base("Closing message updated!", "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
-  
-
 }
