@@ -49,7 +49,7 @@ Parameter types with '*' are required
 ## Modmail Group Slash Commands 
 `/modmail setup (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Setup the modmail bot
 
-`/modmail configure (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Setup the modmail bot
+`/modmail configure (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Configure the modmail bot after being setup
 
 `/modmail get-settings`: Get the modmail bot settings 
 
