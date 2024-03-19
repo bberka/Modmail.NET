@@ -31,4 +31,5 @@ public interface IDbService
   Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList);
 
   Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId);
+  Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId,TeamPermissionLevel levelOrHigher);
 }

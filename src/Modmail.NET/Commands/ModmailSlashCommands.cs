@@ -47,14 +47,34 @@ public class ModmailSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var mainGuild = ctx.Guild;
-    var category = await mainGuild.CreateChannelCategoryAsync(Const.CATEGORY_NAME);
-    var logChannel = await mainGuild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category);
+    var guild = ctx.Guild;
+    var guildId = guild.Id;
+    
+    var permissions = await dbService.GetPermissionInfoOrHigherAsync(guildId,TeamPermissionLevel.Admin);
+    var members = await guild.GetAllMembersAsync();
+    var roles = guild.Roles;
+
+    var roleListForOverwrites = new List<DiscordRole>();
+    var memberListForOverwrites = new List<DiscordMember>();
+    foreach (var perm in permissions) {
+      var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
+      if (role.Key != 0) roleListForOverwrites.Add(role.Value);
+      var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
+      if (member2 is not null && member2.Id != 0) memberListForOverwrites.Add(member2);
+    }
+
+
+    var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
+    
+    
+    
+    var category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME,permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category,"Modmail log channel",permissionOverwrites);
     var categoryId = category.Id;
     var logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
       CategoryId = categoryId,
-      GuildId = mainGuild.Id,
+      GuildId = guild.Id,
       LogChannelId = logChannelId,
       IsSensitiveLogging = sensitiveLogging,
       IsEnabled = true,

@@ -132,6 +132,14 @@ public class DbService : IDbService
                            .ToListAsync();
   }
 
+  public Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher) {
+    return _dbContext.GuildTeamMembers
+                   .Include(x => x.GuildTeam)
+                   .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
+                   .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
+                   .ToListAsync();
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();
