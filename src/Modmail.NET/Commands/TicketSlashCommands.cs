@@ -11,7 +11,7 @@ using Serilog;
 namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("ticket", "Ticket management commands.")]
-[RequireAdmin]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
 public class TicketSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("close", "Close a ticket.")]

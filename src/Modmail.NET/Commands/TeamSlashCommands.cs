@@ -11,7 +11,7 @@ using Modmail.NET.Static;
 namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("team", "Team management commands.")]
-[RequireAdmin]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
 public class TeamSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]

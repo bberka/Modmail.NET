@@ -12,7 +12,7 @@ using Serilog;
 namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("modmail", "Modmail management commands.")]
-[RequireAdmin]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
 public class ModmailSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("setup", "Setup the modmail bot.")]

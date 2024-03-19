@@ -6,6 +6,7 @@ using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Providers;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Commands;
 
@@ -65,7 +66,7 @@ public class TagSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("add", "Add a tag.")]
-  [RequireAdmin]
+  [RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
   public async Task AddTag(InteractionContext ctx,
                            [Option("key", "Tag key")] string key,
                            [Option("message", "Tag message")] string message,
@@ -100,7 +101,7 @@ public class TagSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("remove", "Remove a tag.")]
-  [RequireAdmin]
+  [RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
   public async Task RemoveTag(InteractionContext ctx,
                               [Autocomplete(typeof(TagProvider))] [Option("key", "Tag key")]
                               string key) {
