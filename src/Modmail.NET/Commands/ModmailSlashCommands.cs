@@ -1,5 +1,4 @@
-﻿using System.Text;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
@@ -80,7 +79,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       IsEnabled = true,
       RegisterDate = DateTime.Now,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
-      ShowConfirmationWhenClosingTickets = false,
+      ShowConfirmationWhenClosingTickets = false
       // AllowAnonymousResponding = allowAnonymousResponding,
     };
     if (!string.IsNullOrEmpty(greetingMessage))

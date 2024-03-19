@@ -13,6 +13,7 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
   public RequirePermissionLevelOrHigherAttribute(TeamPermissionLevel teamPermissionLevel) {
     _teamPermissionLevel = teamPermissionLevel;
   }
+
   public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx) {
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);
     if (isAdmin) return true;
@@ -25,7 +26,7 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
     var roleIdList = ctx.Member.Roles.Select(x => x.Id).ToList();
     var permLevel = await dbService!.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
     if (permLevel is null) return false;
-    var permLevelInt = (int) permLevel;
+    var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)_teamPermissionLevel;
     if (permLevelInt >= expectedLevelInt) return true;
 

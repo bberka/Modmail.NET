@@ -53,7 +53,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     await dbService.UpdateTicketAsync(ticket);
 
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
-    var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser,guildOption);
+    var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
     await ticketOpenUser.SendMessageAsync(embed);
 
 
