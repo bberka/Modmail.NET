@@ -118,6 +118,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       return;
     }
 
+    guildOption.UpdateDateUtc = DateTime.UtcNow;
     if (sensitiveLogging.HasValue)
       guildOption.IsSensitiveLogging = sensitiveLogging.Value;
     if (takeFeedbackAfterClosing.HasValue)
