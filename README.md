@@ -56,6 +56,15 @@ Parameter types with '*' are required
 (NOT IMPLEMENTED) `/modmail toggle-take-feedback`: Toggle taking feedback after closing tickets
 
 
+`/modmail set-greeting-message (string* message)`: Set the greeting message for the modmail bot
+
+`/modmail set-closing-message (string* message)`: Set the closing message for the modmail bot
+
+`/modmail view-greeting-message`: View the greeting message for the modmail bot
+
+`/modmail view-closing-message`: View the closing message for the modmail bot
+
+
 
 ## Ticket Group Slash Commands 
 `/ticket close (string reason)`: Close a ticket
