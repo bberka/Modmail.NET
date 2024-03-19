@@ -166,8 +166,13 @@ public static class ModmailEmbedBuilder
                                    + Environment.NewLine
                                    + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
                                    + Environment.NewLine
+                                   + Environment.NewLine 
+                                   +"If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
                                    + Environment.NewLine
-                                   + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ")
+                                   + Environment.NewLine
+                                   + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. "
+                                    
+                                   )
                   .WithFooter($"{member.GetUsername()} | {member.Id}", member.AvatarUrl)
                   .AddField("User", member.Mention, true)
                   .WithColor(DiscordColor.Green);
