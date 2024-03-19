@@ -76,7 +76,14 @@ public static class ModmailEmbedBuilder
     // sb.AppendLine("`Allow Anonymous Response`: " + ticketOption.AllowAnonymousResponding);
     sb.AppendLine("`Log Channel`: <#" + ticketOption.LogChannelId + "> | " + ticketOption.LogChannelId);
     sb.AppendLine("`Tickets Category`: <#" + ticketOption.CategoryId + "> | " + ticketOption.CategoryId);
+
     embed.WithDescription(sb.ToString());
+
+    if (!string.IsNullOrEmpty(ticketOption.GreetingMessage))
+      embed.AddField("Greeting Message", ticketOption.GreetingMessage);
+
+    if (!string.IsNullOrEmpty(ticketOption.ClosingMessage))
+      embed.AddField("Closing Message", ticketOption.ClosingMessage);
     return embed;
   }
 

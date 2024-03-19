@@ -98,15 +98,15 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var dbService = ServiceLocator.Get<IDbService>();
 
     var currentGuildId = ctx.Guild.Id;
-    var ticketOption = await dbService.GetOptionAsync(currentGuildId);
-    if (ticketOption is null) {
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
       var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
 
-    var embed = ModmailEmbedBuilder.Settings(ctx.Guild, ticketOption);
+    var embed = ModmailEmbedBuilder.Settings(ctx.Guild, guildOption);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
@@ -228,43 +228,5 @@ public class ModmailSlashCommands : ApplicationCommandModule
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
   
-  [SlashCommand("view-greeting-message", "View the greeting message for the modmail bot.")]
-  public async Task ViewGreetingMessage(InteractionContext ctx) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
-    if (guildOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    var embed = ModmailEmbedBuilder.Base(guildOption.GreetingMessage, "Greeting message", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
-  
-  [SlashCommand("view-closing-message", "View the closing message for the modmail bot.")]
-  public async Task ViewClosingMessage(InteractionContext ctx) {
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
-    if (guildOption is null) {
-      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-    var embed = ModmailEmbedBuilder.Base(guildOption.ClosingMessage, "Closing message", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-  }
 }

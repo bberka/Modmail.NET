@@ -60,11 +60,6 @@ Parameter types with '*' are required
 
 `/modmail set-closing-message (string* message)`: Set the closing message for the modmail bot
 
-`/modmail view-greeting-message`: View the greeting message for the modmail bot
-
-`/modmail view-closing-message`: View the closing message for the modmail bot
-
-
 
 ## Ticket Group Slash Commands 
 `/ticket close (string reason)`: Close a ticket
