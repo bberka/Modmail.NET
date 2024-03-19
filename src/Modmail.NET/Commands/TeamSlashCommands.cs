@@ -66,10 +66,10 @@ public class TeamSlashCommands : ApplicationCommandModule
     var team = new GuildTeam {
       GuildOptionId = currentGuildId,
       Name = teamName,
-      RegisterDate = DateTime.Now,
+      RegisterDateUtc = DateTime.UtcNow,
       IsEnabled = true,
       GuildTeamMembers = new List<GuildTeamMember>(),
-      UpdateDate = null,
+      UpdateDateUtc = null,
       Id = Guid.NewGuid(),
       PermissionLevel = permissionLevel
     };
@@ -128,7 +128,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.UserId,
       Key = member.Id,
-      RegisterDate = DateTime.Now
+      RegisterDateUtc = DateTime.UtcNow
     };
     team.GuildTeamMembers.Add(memberEntity);
     await dbService.UpdateTeamAsync(team);
@@ -199,7 +199,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.RoleId,
       Key = role.Id,
-      RegisterDate = DateTime.Now
+      RegisterDateUtc = DateTime.UtcNow
     };
     team.GuildTeamMembers.Add(roleEntity);
     await dbService.UpdateTeamAsync(team);

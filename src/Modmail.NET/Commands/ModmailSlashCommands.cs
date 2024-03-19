@@ -77,7 +77,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       LogChannelId = logChannelId,
       IsSensitiveLogging = sensitiveLogging,
       IsEnabled = true,
-      RegisterDate = DateTime.Now,
+      RegisterDateUtc = DateTime.UtcNow,
       TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
       ShowConfirmationWhenClosingTickets = false
       // AllowAnonymousResponding = allowAnonymousResponding,

@@ -18,7 +18,6 @@ public static class UtilMapper
 
   public static TicketMessageAttachment DiscordAttachmentToEntity(DiscordAttachment attachment, Guid ticketMessageId) {
     return new TicketMessageAttachment {
-      RegisterDate = DateTime.Now,
       Url = attachment.Url,
       ProxyUrl = attachment.ProxyUrl,
       TicketMessageId = ticketMessageId,

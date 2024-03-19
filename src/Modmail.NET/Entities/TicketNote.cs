@@ -7,7 +7,7 @@ public class TicketNote
   [Key]
   public Guid Id { get; set; }
 
-  public DateTime RegisterDate { get; set; } = DateTime.Now;
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public string Content { get; set; }
   public Guid TicketId { get; set; }
   public ulong DiscordUserInfoId { get; set; }

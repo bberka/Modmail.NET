@@ -6,8 +6,8 @@ public class TicketFeedback
 {
   [Key]
   public Guid Id { get; set; }
-
-  public DateTime RegisterDate { get; set; }
+ 
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
 
   public byte Stars { get; set; }
 

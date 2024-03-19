@@ -95,11 +95,11 @@ public static class OnMessageCreated
       var ticket = new Ticket {
         DiscordUserInfoId = authorId,
         ModMessageChannelId = mailChannel.Id,
-        RegisterDate = DateTime.Now,
+        RegisterDateUtc = DateTime.UtcNow,
         PrivateMessageChannelId = channelId,
         InitialMessageId = message.Id,
         Priority = TicketPriority.Normal,
-        LastMessageDate = DateTime.Now,
+        LastMessageDateUtc = DateTime.UtcNow,
         GuildOptionId = guildId,
         Id = ticketId,
         Anonymous = false,
@@ -140,7 +140,7 @@ public static class OnMessageCreated
       var embed = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embed);
 
-      activeTicket.LastMessageDate = DateTime.Now;
+      activeTicket.LastMessageDateUtc = DateTime.UtcNow;
       await dbService.UpdateTicketAsync(activeTicket);
 
       var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
@@ -220,7 +220,7 @@ public static class OnMessageCreated
     await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
-    ticket.LastMessageDate = DateTime.Now;
+    ticket.LastMessageDateUtc = DateTime.UtcNow;
     await dbService.UpdateTicketAsync(ticket);
 
 

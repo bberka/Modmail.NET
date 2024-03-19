@@ -7,8 +7,6 @@ public class TicketMessageAttachment
   [Key]
   public Guid Id { get; set; }
 
-  public DateTime RegisterDate { get; set; }
-
   public string Url { get; set; }
   public string ProxyUrl { get; set; }
   public byte[]? Content { get; set; }

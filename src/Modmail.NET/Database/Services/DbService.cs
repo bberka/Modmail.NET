@@ -21,13 +21,13 @@ public class DbService : IDbService
   public async Task<Ticket?> GetActiveTicketAsync(ulong discordUserId) {
     return await _dbContext.Tickets
                            .Include(x => x.GuildOption)
-                           .FirstOrDefaultAsync(x => x.DiscordUserInfoId == discordUserId && !x.ClosedDate.HasValue);
+                           .FirstOrDefaultAsync(x => x.DiscordUserInfoId == discordUserId && !x.ClosedDateUtc.HasValue);
   }
 
   public async Task<Ticket?> GetActiveTicketAsync(Guid ticketId) {
     return await _dbContext.Tickets
                            .Include(x => x.GuildOption)
-                           .FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDate.HasValue);
+                           .FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
   }
 
   public async Task<ulong> GetLogChannelIdAsync(ulong guildId) {
@@ -146,12 +146,12 @@ public class DbService : IDbService
     
     if (current is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
-      var lastUpdate = current.UpdateDate ?? current.RegisterDate;
+      var lastUpdate = current.UpdateDateUtc ?? current.RegisterDateUtc;
       if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) {
         return;
       }
-      dcUserInfo.RegisterDate = current.RegisterDate;
-      current.UpdateDate = DateTime.Now;
+      dcUserInfo.RegisterDateUtc = current.RegisterDateUtc;
+      current.UpdateDateUtc = DateTime.UtcNow;
       current.Username = dcUserInfo.Username;
       current.AvatarUrl = dcUserInfo.AvatarUrl;
       current.BannerUrl = dcUserInfo.BannerUrl;
@@ -160,7 +160,7 @@ public class DbService : IDbService
       _dbContext.DiscordUserInfos.Update(current);
     }
     else {
-      dcUserInfo.RegisterDate = DateTime.Now;
+      dcUserInfo.RegisterDateUtc = DateTime.UtcNow;
       await _dbContext.DiscordUserInfos.AddAsync(dcUserInfo);
     }
 

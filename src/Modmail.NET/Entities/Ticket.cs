@@ -8,9 +8,9 @@ public class Ticket
   [Key]
   public Guid Id { get; set; }
 
-  public DateTime RegisterDate { get; set; }
-  public DateTime LastMessageDate { get; set; }
-  public DateTime? ClosedDate { get; set; }
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
+  public DateTime LastMessageDateUtc { get; set; }= DateTime.UtcNow;
+  public DateTime? ClosedDateUtc { get; set; }
 
   public ulong DiscordUserInfoId { get; set; } //FK
 

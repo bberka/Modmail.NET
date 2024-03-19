@@ -33,9 +33,9 @@ public class DiscordUserInfo
   [Key]
   public ulong Id { get; set; }
 
-  public DateTime RegisterDate { get; set; } = DateTime.Now;
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
 
-  public DateTime? UpdateDate { get; set; }
+  public DateTime? UpdateDateUtc { get; set; }
 
   public string Username { get; set; }
 

@@ -9,8 +9,8 @@ public class GuildTeam
   public Guid Id { get; set; }
 
   public TeamPermissionLevel PermissionLevel { get; set; }
-  public DateTime RegisterDate { get; set; }
-  public DateTime? UpdateDate { get; set; }
+  public DateTime RegisterDateUtc { get; set; }
+  public DateTime? UpdateDateUtc { get; set; }
 
   public string Name { get; set; }
 

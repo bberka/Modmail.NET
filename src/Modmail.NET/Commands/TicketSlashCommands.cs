@@ -49,7 +49,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
     var guildOption = ticket.GuildOption;
-    ticket.ClosedDate = DateTime.Now;
+    ticket.ClosedDateUtc = DateTime.UtcNow;
     await dbService.UpdateTicketAsync(ticket);
 
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
@@ -63,7 +63,7 @@ public class TicketSlashCommands : ApplicationCommandModule
                                                           ticketOpenUser,
                                                           ctx.Guild,
                                                           ticketId,
-                                                          ticket.RegisterDate,
+                                                          ticket.RegisterDateUtc,
                                                           reason);
     await logChannel.SendMessageAsync(logEmbed);
 

@@ -12,8 +12,8 @@ public class GuildOption
   public ulong CategoryId { get; set; }
   public bool IsEnabled { get; set; } = true;
 
-  public DateTime RegisterDate { get; set; } = DateTime.Now;
-  public DateTime? UpdateDate { get; set; } = DateTime.Now;
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
+  public DateTime? UpdateDateUtc { get; set; } = DateTime.UtcNow;
 
   public bool IsSensitiveLogging { get; set; } = true;
 

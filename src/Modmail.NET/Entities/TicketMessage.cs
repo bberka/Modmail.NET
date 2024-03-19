@@ -8,6 +8,7 @@ public class TicketMessage
   [Key]
   public Guid Id { get; set; }
 
+  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public ulong DiscordUserInfoId { get; set; }
   public string MessageContent { get; set; }
 

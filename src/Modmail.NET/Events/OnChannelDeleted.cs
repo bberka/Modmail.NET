@@ -37,14 +37,14 @@ public static class OnChannelDeleted
                                                               ticketOpenUser,
                                                               guild,
                                                               ticketId,
-                                                              ticket.RegisterDate,
+                                                              ticket.RegisterDateUtc,
                                                               "Channel was deleted");
         await logChannel.SendMessageAsync(logEmbed);
 
         var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
         await ticketOpenUser.SendMessageAsync(embed);
 
-        ticket.ClosedDate = DateTime.Now;
+        ticket.ClosedDateUtc = DateTime.UtcNow;
         ticket.IsForcedClosed = true;
         await dbService.UpdateTicketAsync(ticket);
       }
