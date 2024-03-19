@@ -57,9 +57,9 @@ Parameter types with '*' are required
 ## Ticket Group Slash Commands 
 `/ticket close (string reason)`: Close a ticket
 
-`/ticket set-priority (TicketPriority priority)`: Set the priority of a ticket
+`/ticket set-priority (TicketPriority* priority)`: Set the priority of a ticket
 
-`/ticket add-note (string note)`: Add a note to a ticket
+`/ticket add-note (string* note)`: Add a note to a ticket
 
 `/ticket toggle-anonymous`: Toggle anonymous mode for a ticke
 
