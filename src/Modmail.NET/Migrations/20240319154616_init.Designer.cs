@@ -11,8 +11,8 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    [Migration("20240318121710_note_table_update")]
-    partial class note_table_update
+    [Migration("20240319154616_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,9 +23,6 @@ namespace Modmail.NET.Migrations
                 {
                     b.Property<ulong>("GuildId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("AllowAnonymousResponding")
                         .HasColumnType("INTEGER");
 
                     b.Property<ulong>("CategoryId")
@@ -79,6 +76,9 @@ namespace Modmail.NET.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("PermissionLevel")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("RegisterDate")
                         .HasColumnType("TEXT");
 
@@ -120,44 +120,14 @@ namespace Modmail.NET.Migrations
                     b.ToTable("GuildTeamMembers");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Entities.Tag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<ulong>("GuildOptionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MessageContent")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("RegisterDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("UseEmbed")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildOptionId");
-
-                    b.ToTable("Tags");
-                });
-
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Anonymous")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("TEXT");
@@ -352,17 +322,6 @@ namespace Modmail.NET.Migrations
                     b.Navigation("GuildTeam");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Entities.Tag", b =>
-                {
-                    b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
-                        .WithMany("Tags")
-                        .HasForeignKey("GuildOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GuildOption");
-                });
-
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
@@ -408,7 +367,7 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Entities.TicketNote", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.Ticket", "Ticket")
-                        .WithMany()
+                        .WithMany("TicketNotes")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -419,8 +378,6 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Entities.GuildOption", b =>
                 {
                     b.Navigation("GuildTeams");
-
-                    b.Navigation("Tags");
 
                     b.Navigation("Tickets");
                 });
@@ -436,6 +393,8 @@ namespace Modmail.NET.Migrations
                         .IsRequired();
 
                     b.Navigation("TicketMessages");
+
+                    b.Navigation("TicketNotes");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessage", b =>

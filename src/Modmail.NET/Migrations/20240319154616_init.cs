@@ -24,7 +24,6 @@ namespace Modmail.NET.Migrations
                     GreetingMessage = table.Column<string>(type: "TEXT", nullable: true),
                     ClosingMessage = table.Column<string>(type: "TEXT", nullable: true),
                     TakeFeedbackAfterClosing = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AllowAnonymousResponding = table.Column<bool>(type: "INTEGER", nullable: false),
                     ShowConfirmationWhenClosingTickets = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -37,6 +36,7 @@ namespace Modmail.NET.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PermissionLevel = table.Column<int>(type: "INTEGER", nullable: false),
                     RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
@@ -48,29 +48,6 @@ namespace Modmail.NET.Migrations
                     table.PrimaryKey("PK_GuildTeams", x => x.Id);
                     table.ForeignKey(
                         name: "FK_GuildTeams_GuildOptions_GuildOptionId",
-                        column: x => x.GuildOptionId,
-                        principalTable: "GuildOptions",
-                        principalColumn: "GuildId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tags",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    GuildOptionId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    MessageContent = table.Column<string>(type: "TEXT", nullable: false),
-                    UseEmbed = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tags_GuildOptions_GuildOptionId",
                         column: x => x.GuildOptionId,
                         principalTable: "GuildOptions",
                         principalColumn: "GuildId",
@@ -91,7 +68,8 @@ namespace Modmail.NET.Migrations
                     InitialMessageId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Priority = table.Column<int>(type: "INTEGER", nullable: false),
                     IsForcedClosed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GuildOptionId = table.Column<ulong>(type: "INTEGER", nullable: false)
+                    GuildOptionId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Anonymous = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,7 +155,8 @@ namespace Modmail.NET.Migrations
                     RegisterDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     TicketId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    UserId = table.Column<ulong>(type: "INTEGER", nullable: false)
+                    UserId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -228,11 +207,6 @@ namespace Modmail.NET.Migrations
                 column: "GuildOptionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tags_GuildOptionId",
-                table: "Tags",
-                column: "GuildOptionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TicketFeedbacks_TicketId",
                 table: "TicketFeedbacks",
                 column: "TicketId",
@@ -263,9 +237,6 @@ namespace Modmail.NET.Migrations
         {
             migrationBuilder.DropTable(
                 name: "GuildTeamMembers");
-
-            migrationBuilder.DropTable(
-                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "TicketFeedbacks");

@@ -118,39 +118,6 @@ namespace Modmail.NET.Migrations
                     b.ToTable("GuildTeamMembers");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Entities.Tag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<ulong>("GuildOptionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MessageContent")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("RegisterDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("UseEmbed")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildOptionId");
-
-                    b.ToTable("Tags");
-                });
-
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -353,17 +320,6 @@ namespace Modmail.NET.Migrations
                     b.Navigation("GuildTeam");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Entities.Tag", b =>
-                {
-                    b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
-                        .WithMany("Tags")
-                        .HasForeignKey("GuildOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GuildOption");
-                });
-
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
@@ -409,7 +365,7 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Entities.TicketNote", b =>
                 {
                     b.HasOne("Modmail.NET.Entities.Ticket", "Ticket")
-                        .WithMany()
+                        .WithMany("TicketNotes")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -420,8 +376,6 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Entities.GuildOption", b =>
                 {
                     b.Navigation("GuildTeams");
-
-                    b.Navigation("Tags");
 
                     b.Navigation("Tickets");
                 });
@@ -437,6 +391,8 @@ namespace Modmail.NET.Migrations
                         .IsRequired();
 
                     b.Navigation("TicketMessages");
+
+                    b.Navigation("TicketNotes");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessage", b =>
