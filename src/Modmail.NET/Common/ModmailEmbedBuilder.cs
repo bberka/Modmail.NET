@@ -96,14 +96,18 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed TicketCreated(DiscordGuild guild, DiscordUser author, DiscordMessage message) {
+  public static DiscordEmbed TicketCreated(DiscordGuild guild, DiscordUser author, DiscordMessage message) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle("Ticket Created")
+                  .WithTitle("You have created a new ticket")
                   .WithFooter(guild.Name, guild.IconUrl)
-                  .WithDescription(message.Content)
-                  .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
+                  .WithDescription("Thank you for reaching out to our team, we'll reply to you as soon as possible. " +
+                                   "Please help us speed up this process by describing your request in detail." +
+                                   Environment.NewLine + Environment.NewLine +
+                                   "Ticket will be closed automatically if there is no response on your end for a while."
+                                   )
+                  // .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                   .WithTimestamp(message.Timestamp)
-                  .WithColor(DiscordColor.Green);
+                  .WithColor(DiscordColor.Blue);
       return embed;
     }
 
@@ -123,8 +127,8 @@ public static class ModmailEmbedBuilder
 
     public static DiscordEmbed TicketClosed(DiscordGuild guild, DiscordUser user) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle("Ticket Closed")
-                  .WithDescription("You can always open another ticket by just messaging me again.")
+                  .WithTitle("Your ticket has been closed")
+                  .WithDescription("Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again.")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithTimestamp(DateTime.Now)
                   .WithColor(DiscordColor.Red);

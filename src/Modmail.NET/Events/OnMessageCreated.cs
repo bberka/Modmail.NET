@@ -109,8 +109,15 @@ public static class OnMessageCreated
 
       await dbService.AddTicketAsync(ticket);
 
-      var embedUserMessageDelivered = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
-      await channel.SendMessageAsync(embedUserMessageDelivered);
+      
+      var embedTicketCreated = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
+      var embedUserMessageSentToUser = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
+
+      await channel.SendMessageAsync(x => {
+        x.AddEmbed(embedTicketCreated);
+        x.AddEmbed(embedUserMessageSentToUser);
+      });
+      
 
       var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
