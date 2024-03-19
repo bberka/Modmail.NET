@@ -78,5 +78,15 @@ Parameter types with '*' are required
 
 `/team remove-role (string* teamName, DiscordRole* role)`: Removes a role from a team
 
+## Blacklist Group Slash Commands 
+`/blacklist add (DiscordUser* user, bool* notifyUser, string* reason)`: Add a user to the blacklist
+
+`/blacklist remove (DiscordUser* user)`: The user to remove from the blacklist
+
+`/blacklist status (DiscordUser* user)`: Check if a user is blacklisted
+
+`/blacklist view`  View all blacklisted users
+
+
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
