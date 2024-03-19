@@ -24,17 +24,17 @@ public class DbService : IDbService
                            .FirstOrDefaultAsync(x => x.DiscordUserId == discordUserId && !x.ClosedDate.HasValue);
   }
 
-  public async Task<Ticket?> GetActiveTicketAsync(Guid modmailId) {
+  public async Task<Ticket?> GetActiveTicketAsync(Guid ticketId) {
     return await _dbContext.Tickets
                            .Include(x => x.GuildOption)
-                           .FirstOrDefaultAsync(x => x.Id == modmailId && !x.ClosedDate.HasValue);
+                           .FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDate.HasValue);
   }
 
   public async Task<ulong> GetLogChannelIdAsync(ulong guildId) {
     return await _dbContext.GuildOptions.Where(x => x.GuildId == guildId).Select(x => x.LogChannelId).FirstOrDefaultAsync();
   }
 
-  public async Task UpdateTicketOptionAsync(GuildOption option) {
+  public async Task UpdateGuildOptionAsync(GuildOption option) {
     _dbContext.GuildOptions.Update(option);
     await _dbContext.SaveChangesAsync();
   }
@@ -134,10 +134,10 @@ public class DbService : IDbService
 
   public Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher) {
     return _dbContext.GuildTeamMembers
-                   .Include(x => x.GuildTeam)
-                   .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
-                   .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
-                   .ToListAsync();
+                     .Include(x => x.GuildTeam)
+                     .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
+                     .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
+                     .ToListAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {

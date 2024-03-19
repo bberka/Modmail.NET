@@ -73,21 +73,18 @@ public static class OnMessageCreated
       var member = await guild.GetMemberAsync(author.Id);
       var embedNewTicket = ModmailEmbedBuilder.ToMail.NewTicket(member);
       var sb = new StringBuilder();
-      if(roleListForOverwrites.Count > 0) {
+      if (roleListForOverwrites.Count > 0) {
         sb.AppendLine("Roles:");
-        foreach (var role in roleListForOverwrites) {
-          sb.AppendLine(role.Mention);
-        }
-      }
-      if(memberListForOverwrites.Count > 0) {
-        sb.AppendLine("Members:");
-        foreach (var member2 in memberListForOverwrites) {
-          sb.AppendLine(member2.Mention);
-        }
+        foreach (var role in roleListForOverwrites) sb.AppendLine(role.Mention);
       }
 
-       
-      await mailChannel.SendMessageAsync(sb.ToString(),embedNewTicket);
+      if (memberListForOverwrites.Count > 0) {
+        sb.AppendLine("Members:");
+        foreach (var member2 in memberListForOverwrites) sb.AppendLine(member2.Mention);
+      }
+
+
+      await mailChannel.SendMessageAsync(sb.ToString(), embedNewTicket);
 
       var embedUserMessage = ModmailEmbedBuilder.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
@@ -109,15 +106,15 @@ public static class OnMessageCreated
 
       await dbService.AddTicketAsync(ticket);
 
-      
-      var embedTicketCreated = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message);
+
+      var embedTicketCreated = ModmailEmbedBuilder.ToUser.TicketCreated(guild, author, message,option);
       var embedUserMessageSentToUser = ModmailEmbedBuilder.ToUser.MessageSent(guild, author, message);
 
       await channel.SendMessageAsync(x => {
         x.AddEmbed(embedTicketCreated);
         x.AddEmbed(embedUserMessageSentToUser);
       });
-      
+
 
       var embedLog = ModmailEmbedBuilder.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);

@@ -96,18 +96,15 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-  public static DiscordEmbed TicketCreated(DiscordGuild guild, DiscordUser author, DiscordMessage message) {
+    public static DiscordEmbed TicketCreated(DiscordGuild guild, DiscordUser author, DiscordMessage message, GuildOption option) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("You have created a new ticket")
                   .WithFooter(guild.Name, guild.IconUrl)
-                  .WithDescription("Thank you for reaching out to our team, we'll reply to you as soon as possible. " +
-                                   "Please help us speed up this process by describing your request in detail." +
-                                   Environment.NewLine + Environment.NewLine +
-                                   "Ticket will be closed automatically if there is no response on your end for a while."
-                                   )
-                  // .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                   .WithTimestamp(message.Timestamp)
                   .WithColor(DiscordColor.Blue);
+      if (!string.IsNullOrEmpty(option.GreetingMessage))
+        embed.WithDescription(option.GreetingMessage);
+
       return embed;
     }
 
@@ -125,13 +122,15 @@ public static class ModmailEmbedBuilder
       return embed;
     }
 
-    public static DiscordEmbed TicketClosed(DiscordGuild guild, DiscordUser user) {
+    public static DiscordEmbed TicketClosed(DiscordGuild guild, DiscordUser user, GuildOption option) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle("Your ticket has been closed")
                   .WithDescription("Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again.")
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithTimestamp(DateTime.Now)
                   .WithColor(DiscordColor.Red);
+      if (!string.IsNullOrEmpty(option.ClosingMessage))
+        embed.WithDescription(option.ClosingMessage);
       return embed;
     }
 
@@ -170,13 +169,12 @@ public static class ModmailEmbedBuilder
                                    + Environment.NewLine
                                    + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
                                    + Environment.NewLine
-                                   + Environment.NewLine 
-                                   +"If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
+                                   + Environment.NewLine
+                                   + "If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
                                    + Environment.NewLine
                                    + Environment.NewLine
                                    + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. "
-                                    
-                                   )
+                                  )
                   .WithFooter($"{member.GetUsername()} | {member.Id}", member.AvatarUrl)
                   .AddField("User", member.Mention, true)
                   .WithColor(DiscordColor.Green);

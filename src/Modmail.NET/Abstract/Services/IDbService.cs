@@ -10,11 +10,13 @@ public interface IDbService
   Task<Ticket?> GetActiveTicketAsync(ulong discordUserId);
   Task<Ticket?> GetActiveTicketAsync(Guid ticketId);
   Task<ulong> GetLogChannelIdAsync(ulong guildId);
-  Task UpdateTicketOptionAsync(GuildOption option);
+  Task UpdateGuildOptionAsync(GuildOption option);
   Task AddGuildOptionAsync(GuildOption option);
   Task UpdateTicketAsync(Ticket ticket);
   Task AddTicketAsync(Ticket ticket);
+
   Task AddMessageLog(TicketMessage dbMessageLog);
+
   // Task<List<Tag>> GetTagsAsync(ulong guildId);
   // Task<Tag?> GetTagAsync(ulong guildId, string key);
   // Task AddTagAsync(Tag tag);
@@ -31,5 +33,5 @@ public interface IDbService
   Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList);
 
   Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId);
-  Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId,TeamPermissionLevel levelOrHigher);
+  Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher);
 }

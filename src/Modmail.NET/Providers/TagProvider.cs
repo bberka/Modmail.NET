@@ -1,9 +1,4 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Modmail.NET.Abstract.Services;
-using Modmail.NET.Common;
-
-namespace Modmail.NET.Providers;
+﻿namespace Modmail.NET.Providers;
 
 // public class TagProvider : IAutocompleteProvider
 // {

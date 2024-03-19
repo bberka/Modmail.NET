@@ -48,11 +48,12 @@ public class TicketSlashCommands : ApplicationCommandModule
     }
 
 
+    var guildOption = ticket.GuildOption;
     ticket.ClosedDate = DateTime.Now;
     await dbService.UpdateTicketAsync(ticket);
 
     var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserId);
-    var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser);
+    var embed = ModmailEmbedBuilder.ToUser.TicketClosed(ctx.Guild, ticketOpenUser,guildOption);
     await ticketOpenUser.SendMessageAsync(embed);
 
 

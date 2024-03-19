@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Modmail.NET.Entities;
+﻿namespace Modmail.NET.Entities;
 
 // public class Tag
 // {

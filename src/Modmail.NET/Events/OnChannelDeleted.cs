@@ -17,6 +17,11 @@ public static class OnChannelDeleted
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId != Guid.Empty) {
       var dbService = ServiceLocator.Get<IDbService>();
+      // var option = await dbService.GetOptionAsync(guild.Id);
+      // if (option is null) {
+      //   Log.Warning("Option not found for guild: {GuildOptionId}", guild.Id);
+      //   return;
+      // }
       var ticket = await dbService.GetActiveTicketAsync(ticketId);
       if (ticket is not null) {
         var logChannelId = await dbService.GetLogChannelIdAsync(guild.Id);
@@ -40,7 +45,7 @@ public static class OnChannelDeleted
                                                               "Channel was deleted");
         await logChannel.SendMessageAsync(logEmbed);
 
-        var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild, ticketOpenUser);
+        var embed = ModmailEmbedBuilder.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
         await ticketOpenUser.SendMessageAsync(embed);
 
         ticket.ClosedDate = DateTime.Now;

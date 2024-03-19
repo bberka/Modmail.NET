@@ -49,8 +49,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var guild = ctx.Guild;
     var guildId = guild.Id;
-    
-    var permissions = await dbService.GetPermissionInfoOrHigherAsync(guildId,TeamPermissionLevel.Admin);
+
+    var permissions = await dbService.GetPermissionInfoOrHigherAsync(guildId, TeamPermissionLevel.Admin);
     var members = await guild.GetAllMembersAsync();
     var roles = guild.Roles;
 
@@ -65,11 +65,10 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
 
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
-    
-    
-    
-    var category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME,permissionOverwrites);
-    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category,"Modmail log channel",permissionOverwrites);
+
+
+    var category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, "Modmail log channel", permissionOverwrites);
     var categoryId = category.Id;
     var logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
@@ -129,7 +128,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
     ticketOption.IsSensitiveLogging = !ticketOption.IsSensitiveLogging;
-    await dbService.UpdateTicketOptionAsync(ticketOption);
+    await dbService.UpdateGuildOptionAsync(ticketOption);
 
     var text = new StringBuilder();
     if (ticketOption.IsSensitiveLogging) {
@@ -162,7 +161,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
     ticketOption.TakeFeedbackAfterClosing = !ticketOption.TakeFeedbackAfterClosing;
-    await dbService.UpdateTicketOptionAsync(ticketOption);
+    await dbService.UpdateGuildOptionAsync(ticketOption);
 
     var text = new StringBuilder();
     if (ticketOption.TakeFeedbackAfterClosing) {
@@ -176,6 +175,96 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var embed4 = ModmailEmbedBuilder.Base(text.ToString(), "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  [SlashCommand("set-greeting-message", "Set the greeting message for the modmail bot.")]
+  public async Task SetGreetingMessage(InteractionContext ctx,
+                                      [Option("message", "The greeting message")]
+                                      string message) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    guildOption.GreetingMessage = message;
+    await dbService.UpdateGuildOptionAsync(guildOption);
+
+    var embed4 = ModmailEmbedBuilder.Base("Greeting message updated!", "", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  [SlashCommand("set-closing-message", "Set the closing message for the modmail bot.")]
+  public async Task SetClosingMessage(InteractionContext ctx,
+                                      [Option("message", "The closing message")]
+                                      string message) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    guildOption.ClosingMessage = message;
+    await dbService.UpdateGuildOptionAsync(guildOption);
+
+    var embed4 = ModmailEmbedBuilder.Base("Closing message updated!", "", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed4);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  [SlashCommand("view-greeting-message", "View the greeting message for the modmail bot.")]
+  public async Task ViewGreetingMessage(InteractionContext ctx) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var embed = ModmailEmbedBuilder.Base(guildOption.GreetingMessage, "Greeting message", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
+  
+  [SlashCommand("view-closing-message", "View the closing message for the modmail bot.")]
+  public async Task ViewClosingMessage(InteractionContext ctx) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var currentGuildId = ctx.Guild.Id;
+    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    if (guildOption is null) {
+      var embed3 = ModmailEmbedBuilder.Base("Server not setup!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var embed = ModmailEmbedBuilder.Base(guildOption.ClosingMessage, "Closing message", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
 }
