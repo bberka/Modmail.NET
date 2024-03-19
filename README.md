@@ -21,7 +21,7 @@ If you wish to use it be aware of potential errors
 - Setting priority for tickets (adds emoji to tikcet channel name)
 - Adding private mod notes to tickets that can be viewed later only by mods
 - Pinging team roles/members on ticket open
-
+- Caching user information that are interacting with the ticket system  
 
 # Contributing
 Create a pull request by using semantic commits and proper explanation
@@ -42,7 +42,6 @@ Create a pull request by using semantic commits and proper explanation
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
 - Blacklist
-- Saving user information to another table
 
 # Commands
 Parameter types with '*' are required

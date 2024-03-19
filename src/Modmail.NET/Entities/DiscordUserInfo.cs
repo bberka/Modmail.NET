@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
+using Modmail.NET.Common;
 
 namespace Modmail.NET.Entities;
 
@@ -10,7 +11,7 @@ public class DiscordUserInfo
   }
   public DiscordUserInfo(DiscordUser user) {
     Id = user.Id;
-    Username = user.Username;
+    Username = user.GetUsername();
     AvatarUrl = user.AvatarUrl;
     BannerUrl = user.BannerUrl;
     Email = user.Email;
@@ -19,7 +20,7 @@ public class DiscordUserInfo
 
   public DiscordUserInfo(DiscordMember member) {
     Id = member.Id;
-    Username = member.Username;
+    Username = member.GetUsername();
     AvatarUrl = member.AvatarUrl;
     BannerUrl = member.BannerUrl;
     Email = member.Email;
@@ -42,7 +43,7 @@ public class DiscordUserInfo
 
   public string? BannerUrl { get; set; }
 
-  public string Email { get; set; }
+  public string? Email { get; set; }
 
-  public string Locale { get; set; }
+  public string? Locale { get; set; }
 }

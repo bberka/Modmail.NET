@@ -142,16 +142,28 @@ public class DbService : IDbService
 
   public async Task UpdateUserInfoAsync(DiscordUserInfo dcUserInfo) {
     var current = await _dbContext.DiscordUserInfos.FindAsync(dcUserInfo.Id);
-
+    
+    
     if (current is not null) {
+      const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
+      var lastUpdate = current.UpdateDate ?? current.RegisterDate;
+      if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) {
+        return;
+      }
       dcUserInfo.RegisterDate = current.RegisterDate;
-      dcUserInfo.UpdateDate = DateTime.Now;
-      _dbContext.DiscordUserInfos.Update(dcUserInfo);
+      current.UpdateDate = DateTime.Now;
+      current.Username = dcUserInfo.Username;
+      current.AvatarUrl = dcUserInfo.AvatarUrl;
+      current.BannerUrl = dcUserInfo.BannerUrl;
+      current.Email = dcUserInfo.Email;
+      current.Locale = dcUserInfo.Locale;
+      _dbContext.DiscordUserInfos.Update(current);
     }
     else {
       dcUserInfo.RegisterDate = DateTime.Now;
       await _dbContext.DiscordUserInfos.AddAsync(dcUserInfo);
     }
+
     await _dbContext.SaveChangesAsync();
   }
 
