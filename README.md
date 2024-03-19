@@ -42,6 +42,7 @@ Create a pull request by using semantic commits and proper explanation
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
 - Blacklist
+- Saving user information to another table
 
 # Commands
 Parameter types with '*' are required
