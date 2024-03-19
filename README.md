@@ -21,7 +21,6 @@ If you wish to use it be aware of potential errors
 - Setting priority for tickets (adds emoji to tikcet channel name)
 - Adding private mod notes to tickets that can be viewed later only by mods
 - Pinging team roles/members on ticket open
-- Tags system, can define snippet tags to use it easily
 
 
 # Contributing
