@@ -51,6 +51,8 @@ Create a pull request by using semantic commits and proper explanation
 - Web UI and/or API to manage tickets and see transcript information
 - Encrpyt message information
 - Confirmation for close and opening tickets
+- Language file support
+- Editing embeds and colors and maybe more (need web ui for this) 
 
 # Commands
 Parameter types with '*' are required
