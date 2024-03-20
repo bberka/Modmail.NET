@@ -23,7 +23,8 @@ If you wish to use it be aware of potential errors
 - Pinging team roles/members on ticket open
 - Caching user information that are interacting with the ticket system  
 - Blacklist, blocking users from opening tickets 
-  
+- Getting feedback from user when ticket closed
+
 # Contributing
 Create a pull request by using semantic commits and proper explanation
 
@@ -37,7 +38,6 @@ Create a pull request by using semantic commits and proper explanation
 # Possible Upcoming Features
 - Web UI and/or API to manage tickets and see transcript information
 - Support for multiple servers (groundwork is done)
-- Getting feedback from user when ticket closed
 - Encrpyt message information
 - Confirmation for close and opening tickets
 - Confirmation for sending attachments
