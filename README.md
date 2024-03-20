@@ -10,6 +10,18 @@ This project is may not be ready for production needs more features and polishin
 
 If you wish to use it be aware of potential errors
 
+This bot is currently designed to be used in single server and you must host it by yourself
+
+Reasons being, we must give user selectbox etc to select always and cache latest and keep confirming if user wants to send it to designed bot
+
+Since creating new bot and even hosting is not big deal, i won't be adding full support for multiple servers.
+
+Your main server id in config is taken into consideration almost always
+
+Only support for multiple servers is you have a discord server for just managing tickets then you can add bot on multiple servers.
+
+However user will see main discord name/icon and all logs will be sent there
+
 # Features
 - Open tickets by sending a private message to bot
 - Close tickets by using command or deleting the channel
@@ -37,10 +49,8 @@ Create a pull request by using semantic commits and proper explanation
 
 # Possible Upcoming Features
 - Web UI and/or API to manage tickets and see transcript information
-- Support for multiple servers (groundwork is done)
 - Encrpyt message information
 - Confirmation for close and opening tickets
-- Confirmation for sending attachments
 
 # Commands
 Parameter types with '*' are required
