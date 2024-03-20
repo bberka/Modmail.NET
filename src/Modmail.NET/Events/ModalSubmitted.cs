@@ -1,8 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
 
@@ -33,31 +31,26 @@ public static class ModalSubmitted
         var dbService = ServiceLocator.Get<IDbService>();
 
         var guildOption = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
-        if (guildOption is null) {
-          throw new InvalidOperationException("Guild option not found: " + MMConfig.This.MainServerId);
-        }
+        if (guildOption is null) throw new InvalidOperationException("Guild option not found: " + MMConfig.This.MainServerId);
 
-        if (!guildOption.TakeFeedbackAfterClosing) {
-          throw new InvalidOperationException("Feedback is not enabled for this guild: " + MMConfig.This.MainServerId);
-        }
-                  
-        
+        if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + MMConfig.This.MainServerId);
+
+
         var mainGuild = await ModmailBot.This.Client.GetGuildAsync(MMConfig.This.MainServerId);
 
-        
-        
+
         await dbService.AddFeedbackAsync(ticketId, starCount, textInput);
 
         var message = await args.Interaction.Channel.GetMessageAsync(messageId);
-        var feedbackDoneEmbed = ModmailEmbeds.Interaction.EmbedFeedbackDone(starCount, textInput,mainGuild);
+        var feedbackDoneEmbed = ModmailEmbeds.Interaction.EmbedFeedbackDone(starCount, textInput, mainGuild);
         await message.ModifyAsync(x => { x.AddEmbed(feedbackDoneEmbed); });
 
-        var logChannel  = mainGuild.GetChannel(guildOption.LogChannelId);
+        var logChannel = mainGuild.GetChannel(guildOption.LogChannelId);
         if (logChannel is not null) {
           var logEmbed = ModmailEmbeds.ToLog.EmbedFeedback(starCount, textInput, mainGuild, args.Interaction.User);
-          await logChannel.SendMessageAsync(embed: logEmbed);
+          await logChannel.SendMessageAsync(logEmbed);
         }
-        
+
         break;
     }
 

@@ -30,6 +30,7 @@ public class Ticket
   public ulong GuildOptionId { get; set; }
   public int? FeedbackStar { get; set; }
   public string? FeedbackMessage { get; set; }
+
   public bool Anonymous { get; set; }
   //FK
 

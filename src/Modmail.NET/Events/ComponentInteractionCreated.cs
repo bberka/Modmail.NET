@@ -1,7 +1,5 @@
 ﻿using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 using Modmail.NET.Common;
 
 namespace Modmail.NET.Events;
@@ -9,7 +7,6 @@ namespace Modmail.NET.Events;
 public static class ComponentInteractionCreated
 {
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
-    
     var interaction = args.Interaction;
     var id = interaction.Data.CustomId;
     var (interactionName, parameters) = UtilInteraction.ParseKey(id);
@@ -22,7 +19,7 @@ public static class ComponentInteractionCreated
         var starCount = int.Parse(starParam);
         var ticketId = Guid.Parse(ticketIdParam);
         var messageId = args.Message.Id;
-        
+
         var feedbackModal = ModmailInteractions.CreateFeedbackModal(starCount, ticketId, messageId);
 
         await args.Interaction.CreateResponseAsync(InteractionResponseType.Modal, feedbackModal);

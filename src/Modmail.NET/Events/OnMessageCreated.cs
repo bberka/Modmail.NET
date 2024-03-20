@@ -136,10 +136,10 @@ public static class OnMessageCreated
         await dbService.AddMessageLog(dbMessageLog);
 
         var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
-                                                                 message,
-                                                                 channel,
-                                                                 ticket.Id,
-                                                                 guildId);
+                                                           message,
+                                                           channel,
+                                                           ticket.Id,
+                                                           guildId);
         await logChannel.SendMessageAsync(embed3);
       }
     }
@@ -160,10 +160,10 @@ public static class OnMessageCreated
         await dbService.AddMessageLog(dbMessageLog);
 
         var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
-                                                                 message,
-                                                                 channel,
-                                                                 activeTicket.Id,
-                                                                 guildId);
+                                                           message,
+                                                           channel,
+                                                           activeTicket.Id,
+                                                           guildId);
         await logChannel.SendMessageAsync(embed3);
       }
     }
@@ -242,12 +242,12 @@ public static class OnMessageCreated
       var logChannelId = option.LogChannelId;
       var logChannel = guild.GetChannel(logChannelId);
       var embed3 = ModmailEmbeds.ToLog.MessageSentByMod(modUser,
-                                                              user,
-                                                              message,
-                                                              channel,
-                                                              ticket.Id,
-                                                              guildId,
-                                                              ticket.Anonymous);
+                                                        user,
+                                                        message,
+                                                        channel,
+                                                        ticket.Id,
+                                                        guildId,
+                                                        ticket.Anonymous);
       await logChannel.SendMessageAsync(embed3);
     }
   }

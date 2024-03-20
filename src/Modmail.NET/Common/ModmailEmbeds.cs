@@ -321,7 +321,7 @@ public static class ModmailEmbeds
                   .WithTimestamp(DateTime.Now)
                   .WithTitle("Ticket Closed")
                   .WithFooter(guild.Name, guild.IconUrl)
-                  .WithAuthor( mailCloserUser.GetUsername(), iconUrl: mailCloserUser.AvatarUrl)
+                  .WithAuthor(mailCloserUser.GetUsername(), iconUrl: mailCloserUser.AvatarUrl)
                   .WithColor(DiscordColor.Red)
                   .AddField("Opened By User", mailCreatorUser.Mention, true)
                   .AddField("Opened By User Id", mailCreatorUser.Id.ToString(), true)

@@ -1,8 +1,4 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
-using Modmail.NET.Attributes;
-
-namespace Modmail.NET.Common;
+﻿namespace Modmail.NET.Common;
 
 public static class UtilInteraction
 {

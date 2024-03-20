@@ -65,11 +65,11 @@ public class TicketSlashCommands : ApplicationCommandModule
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
-                                                          ticketOpenUser,
-                                                          ctx.Guild,
-                                                          ticketId,
-                                                          ticket.RegisterDateUtc,
-                                                          reason);
+                                                    ticketOpenUser,
+                                                    ctx.Guild,
+                                                    ticketId,
+                                                    ticket.RegisterDateUtc,
+                                                    reason);
     await logChannel.SendMessageAsync(logEmbed);
 
 
@@ -77,7 +77,6 @@ public class TicketSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
-    
 
     await currentChannel.DeleteAsync("ticket_closed");
 

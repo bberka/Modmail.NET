@@ -132,12 +132,12 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
     var embed = ModmailEmbeds.Base("User Blacklist Status",
-                                         isBlocked
-                                           ? "User is blacklisted."
-                                           : "User is not blacklisted.",
-                                         isBlocked
-                                           ? DiscordColor.Red
-                                           : DiscordColor.Green);
+                                   isBlocked
+                                     ? "User is blacklisted."
+                                     : "User is not blacklisted.",
+                                   isBlocked
+                                     ? DiscordColor.Red
+                                     : DiscordColor.Green);
     var builder = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.EditResponseAsync(builder);
   }

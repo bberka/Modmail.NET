@@ -39,18 +39,18 @@ public static class OnChannelDeleted
 
         var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
         var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
-                                                              ticketOpenUser,
-                                                              guild,
-                                                              ticketId,
-                                                              ticket.RegisterDateUtc,
-                                                              "Channel was deleted");
+                                                        ticketOpenUser,
+                                                        guild,
+                                                        ticketId,
+                                                        ticket.RegisterDateUtc,
+                                                        "Channel was deleted");
         await logChannel.SendMessageAsync(logEmbed);
 
         var embed = ModmailEmbeds.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
         await ticketOpenUser.SendMessageAsync(embed);
-        
+
         if (ticket.GuildOption.TakeFeedbackAfterClosing) {
-          var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId,guild);
+          var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId, guild);
           await ticketOpenUser.SendMessageAsync(interactionFeedback);
         }
       }

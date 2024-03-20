@@ -6,7 +6,7 @@ namespace Modmail.NET.Common;
 public static class ModmailInteractions
 {
   /// <summary>
-  /// Creates interaction response builder for taking feedback about your server's team moderation.
+  ///   Creates interaction response builder for taking feedback about your server's team moderation.
   /// </summary>
   /// <returns></returns>
   public static DiscordMessageBuilder CreateFeedbackInteraction(Guid ticketId, DiscordGuild guild) {
@@ -27,13 +27,12 @@ public static class ModmailInteractions
   }
 
   public static DiscordInteractionResponseBuilder CreateFeedbackModal(int starCount, Guid ticketId, ulong messageId) {
-
     var modal = new DiscordInteractionResponseBuilder()
                 .WithTitle("Feedback")
                 .WithCustomId(UtilInteraction.BuildKey("feedback", starCount, ticketId, messageId))
-                .AddComponents(new TextInputComponent(label: "Feedback",
-                                                      customId: "feedback",
-                                                      placeholder: "Please tell us reasons for your rating",
+                .AddComponents(new TextInputComponent("Feedback",
+                                                      "feedback",
+                                                      "Please tell us reasons for your rating",
                                                       style: TextInputStyle.Paragraph,
                                                       min_length: 10,
                                                       max_length: 500));
