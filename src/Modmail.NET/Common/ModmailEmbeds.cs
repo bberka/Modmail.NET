@@ -321,6 +321,7 @@ public static class ModmailEmbeds
                   .WithTimestamp(DateTime.Now)
                   .WithTitle("Ticket Closed")
                   .WithFooter(guild.Name, guild.IconUrl)
+                  .WithAuthor( mailCloserUser.GetUsername(), iconUrl: mailCloserUser.AvatarUrl)
                   .WithColor(DiscordColor.Red)
                   .AddField("Opened By User", mailCreatorUser.Mention, true)
                   .AddField("Opened By User Id", mailCreatorUser.Id.ToString(), true)
@@ -447,6 +448,44 @@ public static class ModmailEmbeds
                   .AddField("User", user.Mention, true)
                   .AddField("User Id", user.Id.ToString(), true)
                   .AddField("Username", user.GetUsername(), true);
+      return embed;
+    }
+
+    public static DiscordEmbed EmbedFeedback(int starCount, string textInput, DiscordGuild mainGuild, DiscordUser interactionUser) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Feedback received")
+                  .WithDescription(textInput)
+                  .WithTimestamp(DateTime.Now)
+                  .WithFooter(mainGuild.Name, mainGuild.IconUrl)
+                  .AddField("Star", starCount.ToString(), true)
+                  .AddField("User", interactionUser.Mention, true)
+                  .AddField("User Id", interactionUser.Id.ToString(), true)
+                  .WithColor(DiscordColor.Teal)
+                  .WithAuthor(interactionUser.GetUsername(), iconUrl: interactionUser.AvatarUrl);
+      return embed;
+    }
+  }
+
+  public static class Interaction
+  {
+    public static DiscordEmbed EmbedFeedback(DiscordGuild guild) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Feedback")
+                  .WithDescription("Please rate the answers you receive. This helps us improve our moderation team.")
+                  .WithTimestamp(DateTime.Now)
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithColor(DiscordColor.Teal);
+      return embed;
+    }
+
+    public static DiscordEmbed EmbedFeedbackDone(int starCount, string textInput, DiscordGuild guild) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle("Feedback received")
+                  .WithTimestamp(DateTime.Now)
+                  .WithFooter(guild.Name, guild.IconUrl)
+                  .AddField("Star", ":star:" + starCount)
+                  .AddField("Feedback", textInput)
+                  .WithColor(DiscordColor.Teal);
       return embed;
     }
   }

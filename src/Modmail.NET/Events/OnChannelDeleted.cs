@@ -48,6 +48,11 @@ public static class OnChannelDeleted
 
         var embed = ModmailEmbeds.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
         await ticketOpenUser.SendMessageAsync(embed);
+        
+        if (ticket.GuildOption.TakeFeedbackAfterClosing) {
+          var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId,guild);
+          await ticketOpenUser.SendMessageAsync(interactionFeedback);
+        }
       }
     }
   }

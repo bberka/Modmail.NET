@@ -58,7 +58,7 @@ public class ModmailBot
 
     Client.InteractionCreated += InteractionCreated.Handle;
     Client.ComponentInteractionCreated += ComponentInteractionCreated.Handle;
-
+    Client.ModalSubmitted += ModalSubmitted.Handle;
 
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();

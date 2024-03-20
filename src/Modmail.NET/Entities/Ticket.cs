@@ -24,17 +24,17 @@ public class Ticket
 
   public TicketPriority Priority { get; set; }
 
-  public string? CloseReason { get; set; } 
+  public string? CloseReason { get; set; }
   public bool IsForcedClosed { get; set; } = false;
 
   public ulong GuildOptionId { get; set; }
-
+  public int? FeedbackStar { get; set; }
+  public string? FeedbackMessage { get; set; }
   public bool Anonymous { get; set; }
   //FK
 
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
 
-  public virtual TicketFeedback TicketFeedback { get; set; }
   public virtual GuildOption GuildOption { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }
 

@@ -194,6 +194,26 @@ public class DbService : IDbService
     return await _dbContext.TicketBlacklists.Where(x => x.GuildOptionId == guildId).Select(x => x.DiscordUserInfoId).ToListAsync();
   }
 
+  public async Task<Ticket> GetClosedTicketAsync(Guid ticketId) {
+    return await _dbContext.Tickets
+                           .Include(x => x.GuildOption)
+                           .SingleAsync(x => x.Id == ticketId && x.ClosedDateUtc.HasValue);
+  }
+
+  public async Task AddFeedbackAsync(Guid ticketId, int starCount, string textInput) {
+    var ticket = await _dbContext.Tickets.FindAsync(ticketId);
+
+    if (ticket is null) return;
+
+    var isClosed = ticket.ClosedDateUtc.HasValue;
+    if (!isClosed) return;
+
+    ticket.FeedbackStar = starCount;
+    ticket.FeedbackMessage = textInput;
+    _dbContext.Tickets.Update(ticket);
+    await _dbContext.SaveChangesAsync();
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();

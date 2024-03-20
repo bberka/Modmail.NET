@@ -57,6 +57,10 @@ public class TicketSlashCommands : ApplicationCommandModule
     var embed = ModmailEmbeds.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
     await ticketOpenUser.SendMessageAsync(embed);
 
+    if (guildOption.TakeFeedbackAfterClosing) {
+      var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId, currentGuild);
+      await ticketOpenUser.SendMessageAsync(interactionFeedback);
+    }
 
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
@@ -73,6 +77,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
+    
 
     await currentChannel.DeleteAsync("ticket_closed");
 

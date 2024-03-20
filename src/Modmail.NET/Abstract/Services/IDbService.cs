@@ -39,4 +39,6 @@ public interface IDbService
   Task AddBlacklistAsync(ulong userId, ulong guildId, string? reason);
   Task RemoveBlacklistAsync(ulong isBlocked);
   Task<List<ulong>> GetBlacklistedUsersAsync(ulong guildId);
+  Task<Ticket> GetClosedTicketAsync(Guid ticketId);
+  Task AddFeedbackAsync(Guid ticketId, int starCount, string textInput);
 }
