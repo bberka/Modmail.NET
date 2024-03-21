@@ -16,7 +16,6 @@ public class TeamSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]
   public async Task ListTeams(InteractionContext ctx) {
-
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
     var currentGuildId = ctx.Guild.Id;
@@ -27,7 +26,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var dbService = ServiceLocator.Get<IDbService>();
 
 
@@ -61,7 +60,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var guildOption = await dbService.GetOptionAsync(currentGuildId);
@@ -145,9 +144,9 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var dbService = ServiceLocator.Get<IDbService>();
-    
+
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
@@ -235,7 +234,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
@@ -277,7 +276,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);

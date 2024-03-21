@@ -36,5 +36,5 @@ public interface IDbService
   Task<List<ulong>> GetBlacklistedUsersAsync(ulong guildId);
   Task<Ticket> GetClosedTicketAsync(Guid ticketId);
   Task AddFeedbackAsync(Guid ticketId, int starCount, string textInput);
-  Task<bool> AnyServerSetupAsync(); 
+  Task<bool> AnyServerSetupAsync();
 }

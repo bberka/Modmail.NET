@@ -1,5 +1,4 @@
-﻿using DSharpPlus.Entities;
-using Modmail.NET.Common;
+﻿using Modmail.NET.Common;
 
 namespace Modmail.NET.Static;
 
@@ -35,7 +34,7 @@ public static class Texts
   public const string FEEDBACK_DESCRIPTION = "Please rate the answers you receive. This helps us improve our moderation team.";
   public const string FEEDBACK_RECEIVED = "Feedback received";
   public const string STAR = "Star";
-  public const string ANONYMOUS_TOGGLED =  "Anonymous Toggled";
+  public const string ANONYMOUS_TOGGLED = "Anonymous Toggled";
   public const string TOGGLED_BY = "Toggled By";
   public const string TICKET_SET_ANONYMOUS_DESCRIPTION = "This ticket is now anonymous. The member will not know who is responding to their messages.";
   public const string TICKET_SET_NOT_ANONYMOUS_DESCRIPTION = "This ticket is no longer anonymous. The member can see who is responding to their messages.";
@@ -44,23 +43,6 @@ public static class Texts
   public const string STAR_EMOJI = ":star:";
   public const string ANONYMOUS_MESSAGE = "Anonymous Message";
   public const string NEW_TICKET = "New Ticket";
-  public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
-                                                       + Environment.NewLine
-                                                       + Environment.NewLine
-                                                       + "If you want to close the ticket, you can use the `/ticket close` command."
-                                                       + Environment.NewLine
-                                                       + Environment.NewLine
-                                                       + "If you want to change the priority of the ticket, you can use the `/ticket set-priority` command."
-                                                       + Environment.NewLine
-                                                       + Environment.NewLine
-                                                       + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
-                                                       + Environment.NewLine
-                                                       + Environment.NewLine
-                                                       + "If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
-                                                       + Environment.NewLine
-                                                       + Environment.NewLine
-                                                       + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. "
-    ;
 
   public const string ROLES = "Roles";
   public const string YOU_HAVE_BEEN_BLACKLISTED = "You have been blacklisted";
@@ -76,7 +58,7 @@ public static class Texts
   public const string LOG_CHANNEL = "Log Channel";
   public const string TICKET_CATEGORY = "Tickets Category";
   public const string GREETING_MESSAGE = "Greeting Message";
-  public const string CLOSING_MESSAGE = "Closing Message";  
+  public const string CLOSING_MESSAGE = "Closing Message";
   public const string TEAM_LIST = "Team List";
   public const string PERMISSION_LEVEL = "Permission Level";
   public const string MEMBERS = "Members";
@@ -96,4 +78,21 @@ public static class Texts
   public const string MODMAIL_LOG_CHANNEL_TOPIC = "Modmail log channel";
   public const string SERVER_SETUP_COMPLETE = "Server setup complete!";
   public const string SERVER_CONFIG_UPDATED = "Server configuration updated!";
+
+  public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
+                                                        + Environment.NewLine
+                                                        + Environment.NewLine
+                                                        + "If you want to close the ticket, you can use the `/ticket close` command."
+                                                        + Environment.NewLine
+                                                        + Environment.NewLine
+                                                        + "If you want to change the priority of the ticket, you can use the `/ticket set-priority` command."
+                                                        + Environment.NewLine
+                                                        + Environment.NewLine
+                                                        + "If you want to add a note to the ticket, you can use the `/ticket add-note` command."
+                                                        + Environment.NewLine
+                                                        + Environment.NewLine
+                                                        + "If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
+                                                        + Environment.NewLine
+                                                        + Environment.NewLine
+                                                        + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ";
 }

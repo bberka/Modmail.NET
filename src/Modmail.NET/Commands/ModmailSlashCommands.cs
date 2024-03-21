@@ -46,7 +46,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
-    
+
     // var anyServerSetup = await dbService.AnyServerSetupAsync();
     // if (anyServerSetup) {
     //   var embed3 = ModmailEmbeds.Base(Texts.ANOTHER_SERVER_ALREADY_SETUP, "", DiscordColor.Red);

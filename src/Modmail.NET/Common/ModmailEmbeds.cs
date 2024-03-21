@@ -8,7 +8,6 @@ namespace Modmail.NET.Common;
 
 public static class ModmailEmbeds
 {
-
   public static DiscordEmbed Base(string title, string text = "", DiscordColor? color = null) {
     color ??= DiscordColor.White;
     var embed = new DiscordEmbedBuilder()
@@ -169,8 +168,8 @@ public static class ModmailEmbeds
 
     public static DiscordEmbed Blacklisted(DiscordGuild guild, DiscordUser user, string? reason) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.YOU_HAVE_BEEN_BLACKLISTED )
-                  .WithDescription(Texts.YOU_HAVE_BEEN_BLACKLISTED_DESCRIPTION )
+                  .WithTitle(Texts.YOU_HAVE_BEEN_BLACKLISTED)
+                  .WithDescription(Texts.YOU_HAVE_BEEN_BLACKLISTED_DESCRIPTION)
                   .WithFooter(guild.Name, guild.IconUrl)
                   // .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithColor(DiscordColor.Red);
