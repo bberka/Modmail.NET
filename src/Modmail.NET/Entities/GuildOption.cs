@@ -30,7 +30,6 @@ public class GuildOption
 
   public virtual List<GuildTeam> GuildTeams { get; set; }
 
-  // public virtual List<Tag> Tags { get; set; }
   public virtual List<Ticket> Tickets { get; set; }
   public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
 }

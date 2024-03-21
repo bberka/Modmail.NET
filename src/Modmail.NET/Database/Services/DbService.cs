@@ -60,23 +60,6 @@ public class DbService : IDbService
     await _dbContext.SaveChangesAsync();
   }
 
-  // public async Task<List<Tag>> GetTagsAsync(ulong guildId) {
-  //   return await _dbContext.Tags.Where(x => x.GuildOptionId == guildId).ToListAsync();
-  // }
-  //
-  // public async Task<Tag?> GetTagAsync(ulong guildId, string key) {
-  //   return await _dbContext.Tags.FirstOrDefaultAsync(x => x.GuildOptionId == guildId && x.Key == key);
-  // }
-  //
-  // public async Task AddTagAsync(Tag tag) {
-  //   await _dbContext.Tags.AddAsync(tag);
-  //   await _dbContext.SaveChangesAsync();
-  // }
-  //
-  // public async Task RemoveTagAsync(Tag tag) {
-  //   _dbContext.Tags.Remove(tag);
-  //   await _dbContext.SaveChangesAsync();
-  // }
 
   public async Task<List<GuildTeam>> GetTeamsAsync(ulong guildId) {
     return await _dbContext.GuildTeams
