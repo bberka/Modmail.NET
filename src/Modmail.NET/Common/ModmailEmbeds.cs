@@ -333,7 +333,7 @@ public static class ModmailEmbeds
                   // .WithFooter("To " + user.GetUsername() + " | " + user.Id, user.AvatarUrl)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
-                  .WithColor(DiscordColor.CornflowerBlue)
+                  .WithColor(DiscordColor.Cyan)
                   .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper())
                   .AddField(Texts.USER_ID, user.Id.ToString(), true)
                   .AddField(Texts.CHANNEL_ID, channel.Id.ToString(), true)
@@ -421,7 +421,7 @@ public static class ModmailEmbeds
       return embed;
     }
 
-    public static DiscordEmbed EmbedFeedback(int starCount, string textInput, DiscordGuild mainGuild, DiscordUser interactionUser) {
+    public static DiscordEmbed FeedbackReceived(int starCount, string textInput, DiscordGuild mainGuild, DiscordUser interactionUser) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.FEEDBACK_RECEIVED)
                   .WithDescription(textInput)
@@ -430,7 +430,7 @@ public static class ModmailEmbeds
                   .AddField(Texts.STAR, starCount.ToString(), true)
                   .AddField(Texts.USER, interactionUser.Mention, true)
                   .AddField(Texts.USER_ID, interactionUser.Id.ToString(), true)
-                  .WithColor(DiscordColor.Teal)
+                  .WithColor(DiscordColor.Orange)
                   .WithAuthor(interactionUser.GetUsername(), iconUrl: interactionUser.AvatarUrl);
       return embed;
     }

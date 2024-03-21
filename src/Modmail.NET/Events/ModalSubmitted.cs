@@ -48,7 +48,7 @@ public static class ModalSubmitted
 
         var logChannel = mainGuild.GetChannel(guildOption.LogChannelId);
         if (logChannel is not null) {
-          var logEmbed = ModmailEmbeds.ToLog.EmbedFeedback(starCount, textInput, mainGuild, args.Interaction.User);
+          var logEmbed = ModmailEmbeds.ToLog.FeedbackReceived(starCount, textInput, mainGuild, args.Interaction.User);
           await logChannel.SendMessageAsync(logEmbed);
         }
 
