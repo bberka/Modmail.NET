@@ -80,4 +80,6 @@ public static class Texts
   public const string PERMISSION_LEVEL = "Permission Level";
   public const string MEMBERS = "Members";
   public const string ROLE = "Role";
+  public const string THANK_YOU_FOR_FEEDBACK = "Thank you for your feedback!";
+  public const string? CHANNEL_WAS_DELETED = "Channel was deleted";
 }

@@ -3,13 +3,14 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Events;
 
 public static class ModalSubmitted
 {
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
-    await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent("Thank you for your feedback!"));
+    await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(Texts.THANK_YOU_FOR_FEEDBACK));
 
     var interaction = args.Interaction;
     var id = interaction.Data.CustomId;

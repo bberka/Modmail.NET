@@ -2,6 +2,7 @@
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Static;
 using Serilog;
 
 namespace Modmail.NET.Events;
@@ -33,7 +34,7 @@ public static class OnChannelDeleted
 
         ticket.ClosedDateUtc = DateTime.UtcNow;
         ticket.IsForcedClosed = true;
-        ticket.CloseReason = "Channel was deleted";
+        ticket.CloseReason = Texts.CHANNEL_WAS_DELETED;
         await dbService.UpdateTicketAsync(ticket);
 
 
@@ -43,7 +44,7 @@ public static class OnChannelDeleted
                                                         guild,
                                                         ticketId,
                                                         ticket.RegisterDateUtc,
-                                                        "Channel was deleted");
+                                                        Texts.CHANNEL_WAS_DELETED);
         await logChannel.SendMessageAsync(logEmbed);
 
         var embed = ModmailEmbeds.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
