@@ -214,6 +214,10 @@ public class DbService : IDbService
     await _dbContext.SaveChangesAsync();
   }
 
+  public async Task<bool> AnyServerSetupAsync() {
+    return await _dbContext.GuildOptions.AnyAsync();
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();

@@ -20,6 +20,14 @@ public class TicketSlashCommands : ApplicationCommandModule
                                 string? reason = null) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var currentChannel = ctx.Channel;
@@ -88,6 +96,14 @@ public class TicketSlashCommands : ApplicationCommandModule
                                 [Option("priority", "Priority of the ticket")]
                                 TicketPriority priority) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
 
 
     var currentChannel = ctx.Channel;
@@ -168,6 +184,14 @@ public class TicketSlashCommands : ApplicationCommandModule
                             [Option("note", "Note to add")] string note) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var currentChannel = ctx.Channel;
@@ -222,6 +246,14 @@ public class TicketSlashCommands : ApplicationCommandModule
   [SlashCommand("toggle-anonymous", "Toggle anonymous mode for a ticket.")]
   public async Task ToggleAnonymous(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
 
     var dbService = ServiceLocator.Get<IDbService>();
 

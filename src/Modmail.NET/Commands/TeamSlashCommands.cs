@@ -16,11 +16,21 @@ public class TeamSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]
   public async Task ListTeams(InteractionContext ctx) {
+
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    
     var dbService = ServiceLocator.Get<IDbService>();
 
-    var currentGuildId = ctx.Guild.Id;
+
     var teams = await dbService.GetTeamsAsync(currentGuildId);
     if (teams is null || teams.Count == 0) {
       var embed2 = ModmailEmbeds.Base("No teams found!", "", DiscordColor.Red);
@@ -43,9 +53,17 @@ public class TeamSlashCommands : ApplicationCommandModule
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    
     var dbService = ServiceLocator.Get<IDbService>();
 
-    var currentGuildId = ctx.Guild.Id;
     var guildOption = await dbService.GetOptionAsync(currentGuildId);
     if (guildOption is null) {
       var embed2 = ModmailEmbeds.Base("Server not setup!", "", DiscordColor.Red);
@@ -86,9 +104,16 @@ public class TeamSlashCommands : ApplicationCommandModule
                                string teamName) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
-    var currentGuildId = ctx.Guild.Id;
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -112,9 +137,17 @@ public class TeamSlashCommands : ApplicationCommandModule
                                   DiscordUser member) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
     var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    
+    var dbService = ServiceLocator.Get<IDbService>();
+    
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
@@ -148,10 +181,17 @@ public class TeamSlashCommands : ApplicationCommandModule
                                      DiscordUser member) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
 
-    var currentGuildId = ctx.Guild.Id;
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
@@ -187,9 +227,17 @@ public class TeamSlashCommands : ApplicationCommandModule
                                   DiscordRole role) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    
     var dbService = ServiceLocator.Get<IDbService>();
 
-    var currentGuildId = ctx.Guild.Id;
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
@@ -221,9 +269,17 @@ public class TeamSlashCommands : ApplicationCommandModule
                                        DiscordRole role) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    
     var dbService = ServiceLocator.Get<IDbService>();
 
-    var currentGuildId = ctx.Guild.Id;
     var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
 
     if (team is null) {

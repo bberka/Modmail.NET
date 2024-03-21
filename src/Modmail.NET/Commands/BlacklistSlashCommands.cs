@@ -23,8 +23,6 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                         string reason
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-
     var dbService = ServiceLocator.Get<IDbService>();
 
     var option = await dbService.GetOptionAsync(ctx.Guild.Id);

@@ -29,7 +29,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     var currentGuildId = ctx.Guild.Id;
     if (currentGuildId != MMConfig.This.MainServerId) {
-      var embed3 = ModmailEmbeds.Base("This command can only be used in the main server.", "", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
@@ -41,11 +41,19 @@ public class ModmailSlashCommands : ApplicationCommandModule
     // await using var db = new ModmailDbContext();
     var existingMmOption = await dbService.GetOptionAsync(currentGuildId);
     if (existingMmOption is not null) {
-      var embed3 = ModmailEmbeds.Base("Server already setup!", "", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_SERVER_ALREADY_SETUP, "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
+    
+    // var anyServerSetup = await dbService.AnyServerSetupAsync();
+    // if (anyServerSetup) {
+    //   var embed3 = ModmailEmbeds.Base(Texts.ANOTHER_SERVER_ALREADY_SETUP, "", DiscordColor.Red);
+    //   var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+    //   await ctx.Interaction.EditOriginalResponseAsync(builder);
+    //   return;
+    // }
 
     var guild = ctx.Guild;
     var guildId = guild.Id;
@@ -68,7 +76,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
 
     var category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
-    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, "Modmail log channel", permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, Texts.MODMAIL_LOG_CHANNEL_TOPIC, permissionOverwrites);
     var categoryId = category.Id;
     var logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
@@ -88,7 +96,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       guildOption.ClosingMessage = closingMessage;
     await dbService.AddGuildOptionAsync(guildOption);
 
-    var embed2 = ModmailEmbeds.Base("Server setup complete!", "", DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base(Texts.SERVER_SETUP_COMPLETE, "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
     Log.Information("Server setup complete for guild: {GuildOptionId}", currentGuildId);
@@ -112,8 +120,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var currentGuildId = ctx.Guild.Id;
     var guildOption = await dbService.GetOptionAsync(currentGuildId);
     if (guildOption is null) {
-      var embed3 = ModmailEmbeds.Base("Server not setup!", "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      var builder = new DiscordWebhookBuilder().AddEmbed(ModmailEmbeds.ErrorServerNotSetup());
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }
@@ -129,7 +136,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
       guildOption.ClosingMessage = closingMessage;
     await dbService.UpdateGuildOptionAsync(guildOption);
 
-    var embed2 = ModmailEmbeds.Base("Server configuration updated!", "", DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base(Texts.SERVER_CONFIG_UPDATED, "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
     Log.Information("Server configuration updated for guild: {GuildOptionId}", currentGuildId);
@@ -144,8 +151,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     var currentGuildId = ctx.Guild.Id;
     var guildOption = await dbService.GetOptionAsync(currentGuildId);
     if (guildOption is null) {
-      var embed3 = ModmailEmbeds.ErrorServerNotSetup();
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      var builder = new DiscordWebhookBuilder().AddEmbed(ModmailEmbeds.ErrorServerNotSetup());
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
     }

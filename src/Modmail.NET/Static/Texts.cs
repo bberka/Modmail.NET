@@ -1,4 +1,5 @@
-﻿using Modmail.NET.Common;
+﻿using DSharpPlus.Entities;
+using Modmail.NET.Common;
 
 namespace Modmail.NET.Static;
 
@@ -89,4 +90,10 @@ public static class Texts
   public const string USER_BLACKLIST_STATUS = "User Blacklist Status";
   public const string USER_IS_BLACKLISTED = "User is blacklisted";
   public const string BLACKLISTED_USERS = "Blacklisted Users";
+  public const string ANOTHER_SERVER_ALREADY_SETUP = "Another server is already setup, this bot only supports single server setup.";
+  public const string THIS_SERVER_ALREADY_SETUP = "This server already setup!";
+  public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER = "This command can only be used in the main server.";
+  public const string MODMAIL_LOG_CHANNEL_TOPIC = "Modmail log channel";
+  public const string SERVER_SETUP_COMPLETE = "Server setup complete!";
+  public const string SERVER_CONFIG_UPDATED = "Server configuration updated!";
 }
