@@ -82,4 +82,11 @@ public static class Texts
   public const string ROLE = "Role";
   public const string THANK_YOU_FOR_FEEDBACK = "Thank you for your feedback!";
   public const string? CHANNEL_WAS_DELETED = "Channel was deleted";
+  public const string USER_HAS_ACTIVE_TICKET = "User has an active ticket!";
+  public const string PLEASE_CLOSE_THE_TICKET_BEFORE_BLACKLISTING = "Please close the ticket before blacklisting the user.";
+  public const string USER_ALREADY_BLACKLISTED = "User is already blacklisted";
+  public const string USER_IS_NOT_BLACKLISTED = "User is not blacklisted";
+  public const string USER_BLACKLIST_STATUS = "User Blacklist Status";
+  public const string USER_IS_BLACKLISTED = "User is blacklisted";
+  public const string BLACKLISTED_USERS = "Blacklisted Users";
 }

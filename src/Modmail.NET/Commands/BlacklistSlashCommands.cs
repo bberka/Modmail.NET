@@ -47,7 +47,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var activeTicket = await dbService.GetActiveTicketAsync(user.Id);
     if (activeTicket is not null) {
-      var embed3 = ModmailEmbeds.Base("User has an active ticket!", "Please close the ticket before blacklisting the user.", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base(Texts.USER_HAS_ACTIVE_TICKET, Texts.PLEASE_CLOSE_THE_TICKET_BEFORE_BLACKLISTING, DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.EditResponseAsync(builder);
       return;
@@ -56,7 +56,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var activeBlock = await dbService.GetUserBlacklistStatus(user.Id);
     if (activeBlock) {
-      var embed4 = ModmailEmbeds.Base("User is already blacklisted!", "", DiscordColor.Red);
+      var embed4 = ModmailEmbeds.Base(Texts.USER_ALREADY_BLACKLISTED, "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.EditResponseAsync(builder);
       return;
@@ -109,7 +109,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
     if (!isBlocked) {
-      var embed4 = ModmailEmbeds.Base("User is not blacklisted!", "", DiscordColor.Yellow);
+      var embed4 = ModmailEmbeds.Base(Texts.USER_IS_NOT_BLACKLISTED, "", DiscordColor.Yellow);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
       await ctx.EditResponseAsync(builder);
       return;
@@ -131,10 +131,10 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     var dbService = ServiceLocator.Get<IDbService>();
 
     var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
-    var embed = ModmailEmbeds.Base("User Blacklist Status",
+    var embed = ModmailEmbeds.Base(Texts.USER_BLACKLIST_STATUS,
                                    isBlocked
-                                     ? "User is blacklisted."
-                                     : "User is not blacklisted.",
+                                     ? Texts.USER_IS_BLACKLISTED
+                                     : Texts.USER_IS_NOT_BLACKLISTED,
                                    isBlocked
                                      ? DiscordColor.Red
                                      : DiscordColor.Green);
@@ -148,7 +148,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     var dbService = ServiceLocator.Get<IDbService>();
     var blacklistedUsers = (await dbService.GetBlacklistedUsersAsync(ctx.Guild.Id)).Select(x => $"<@{x}>");
-    var embed = ModmailEmbeds.Base("Blacklisted Users", string.Join("\n", blacklistedUsers), DiscordColor.Green);
+    var embed = ModmailEmbeds.Base(Texts.BLACKLISTED_USERS, string.Join("\n", blacklistedUsers), DiscordColor.Green);
     var builder = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.EditResponseAsync(builder);
   }
