@@ -5,22 +5,13 @@ This bot can be easily setup and used on your server for managing community comm
 
 Bot creates tickets and users message with the bot directly instead of sending message to mods
 
+# Contributing
+Create a pull request by using semantic commits and proper explanation
+
 # Warning
-This project is may not be ready for production needs more features and polishing.
+This project is may not be ready for production needs more polishing.
 
 If you wish to use it be aware of potential errors
-
-This bot is currently designed to be used in single server and you must host it by yourself
-
-Reasons being, we must give user selectbox etc to select always and cache latest and keep confirming if user wants to send it to designed bot
-
-Since creating new bot and even hosting is not big deal, i won't be adding full support for multiple servers.
-
-Your main server id in config is taken into consideration almost always
-
-Only support for multiple servers is you have a discord server for just managing tickets then you can add bot on multiple servers.
-
-However user will see main discord name/icon and all logs will be sent there
 
 # Features
 - Open tickets by sending a private message to bot
@@ -37,14 +28,23 @@ However user will see main discord name/icon and all logs will be sent there
 - Blacklist, blocking users from opening tickets 
 - Getting feedback from user when ticket closed
 
-# Contributing
-Create a pull request by using semantic commits and proper explanation
+# Multiple Servers Usage
+Before trying to use the bot on multiple servers you must now about the limitations;
+
+1. This bot can only be setup once and only for main server
+2. Ticket management/commands only allowed on the main server, which id provided in configuration
+3. Team management/commands is locked to main server only, meaning teams and members can only be managed in main server
+4. Modmail setting management/commands is locked to main server only
+
+You can simply invite bot to multiple servers and you can start using the bot
+
+Ticket channels will created in main server
 
 # Installation
 1. Install .NET 6
 2. Download project build and publish for your desired platform
 3. Visit Discord Developer Portal and create a new application
-4. Setup your bot configuration
+4. Configure app.settings
 5. Run the app
 
 # Possible Upcoming Features
@@ -53,6 +53,8 @@ Create a pull request by using semantic commits and proper explanation
 - Confirmation for close and opening tickets
 - Language file support
 - Editing embeds and colors and maybe more (need web ui for this) 
+- Ticket types and set member permissions based on ticket types
+- Once ticket type selected add form modal to receive information before actually creating the ticket
 
 # Commands
 Parameter types with '*' are required
