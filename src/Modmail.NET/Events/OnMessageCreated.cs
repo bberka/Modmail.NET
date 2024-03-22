@@ -83,9 +83,18 @@ public static class OnMessageCreated
       var memberListForOverwrites = new List<DiscordMember>();
       foreach (var perm in permissions) {
         var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
-        if (role.Key != 0) roleListForOverwrites.Add(role.Value);
+        if (role.Key != 0) {
+          var exists = roleListForOverwrites.Any(x => x.Id == role.Key);
+          if (!exists)
+            roleListForOverwrites.Add(role.Value);
+        }
+
         var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
-        if (member2 is not null && member2.Id != 0) memberListForOverwrites.Add(member2);
+        if (member2 is not null && member2.Id != 0) {
+          var exists = memberListForOverwrites.Any(x => x.Id == member2.Id);
+          if (!exists)
+            memberListForOverwrites.Add(member2);
+        }
       }
 
 
@@ -96,12 +105,12 @@ public static class OnMessageCreated
       var embedNewTicket = ModmailEmbeds.ToMail.NewTicket(member);
       var sb = new StringBuilder();
       if (roleListForOverwrites.Count > 0) {
-        sb.AppendLine("Roles:");
+        sb.AppendLine(Texts.ROLES + ":");
         foreach (var role in roleListForOverwrites) sb.AppendLine(role.Mention);
       }
 
       if (memberListForOverwrites.Count > 0) {
-        sb.AppendLine("Members:");
+        sb.AppendLine(Texts.MEMBERS + ":");
         foreach (var member2 in memberListForOverwrites) sb.AppendLine(member2.Mention);
       }
 
