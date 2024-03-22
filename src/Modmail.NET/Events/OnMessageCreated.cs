@@ -35,6 +35,14 @@ public static class OnMessageCreated
       //ignored
       return;
 
+    //keeps other threads for same user locked until this one is done
+    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
+    if (metran is null) {
+      //VERY UNLIKELY TO HAPPEN
+      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
     //Check if user has active modmail
     // await using var db = new ModmailDbContext();
@@ -58,13 +66,7 @@ public static class OnMessageCreated
 
     var activeTicket = await dbService.GetActiveTicketAsync(authorId);
     var logChannel = guild.GetChannel(option.LogChannelId);
-    //keeps other threads for same user locked until this one is done
-    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
-    if (metran is null) {
-      //VERY UNLIKELY TO HAPPEN
-      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
-      return;
-    }
+
 
     if (activeTicket is null) {
       //make new channel
