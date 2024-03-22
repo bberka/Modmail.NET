@@ -320,4 +320,38 @@ public class TeamSlashCommands : ApplicationCommandModule
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
   }
+
+  [SlashCommand("rename", "Rename a team.")]
+  public async Task RenameTeam(InteractionContext ctx,
+                               [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
+                               string teamName,
+                               [Option("newName", "New team name")] string newName) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    var currentGuildId = ctx.Guild.Id;
+    if (currentGuildId != MMConfig.This.MainServerId) {
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+
+    if (team is null) {
+      var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    team.Name = newName;
+    await dbService.UpdateTeamAsync(team);
+
+    var embed = ModmailEmbeds.Base("Team renamed!", "", DiscordColor.Green);
+    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
+    await ctx.Interaction.EditOriginalResponseAsync(builder2);
+  }
 }
