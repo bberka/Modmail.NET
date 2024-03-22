@@ -20,7 +20,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
                           bool sensitiveLogging = false,
                           [Option("take-feedback", "Whether to take feedback after closing tickets")]
                           bool takeFeedbackAfterClosing = false,
-                          [Option("greening-message", "The greeting message")]
+                          [Option("greeting-message", "The greeting message")]
                           string? greetingMessage = null,
                           [Option("closing-message", "The closing message")]
                           string? closingMessage = null
