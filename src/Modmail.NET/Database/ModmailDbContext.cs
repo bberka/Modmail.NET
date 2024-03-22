@@ -17,6 +17,7 @@ public class ModmailDbContext : DbContext
   public DbSet<TicketNote> TicketNotes { get; set; }
   public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; }
   public DbSet<TicketBlacklist> TicketBlacklists { get; set; }
+  public DbSet<TicketType> TicketTypes { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     switch (MMConfig.This.DbType) {
