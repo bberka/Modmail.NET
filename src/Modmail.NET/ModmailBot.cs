@@ -85,7 +85,6 @@ public class ModmailBot
   public async Task SetupDatabase() {
     await using var dbContext = new ModmailDbContext();
     try {
-      await dbContext.Database.EnsureCreatedAsync();
       await dbContext.Database.MigrateAsync();
       Log.Information("Database migration completed!");
     }
