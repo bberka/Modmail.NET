@@ -79,6 +79,8 @@ public static class Texts
   public const string SERVER_SETUP_COMPLETE = "Server setup complete!";
   public const string SERVER_CONFIG_UPDATED = "Server configuration updated!";
   public const string MODERATION_CONCERNS = "moderation concerns";
+  public const string SYSTEM_IS_BUSY = "System is busy";
+  public const string YOUR_MESSAGE_COULD_NOT_BE_PROCESSED = "Your message could not be processed. Please try again later.";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

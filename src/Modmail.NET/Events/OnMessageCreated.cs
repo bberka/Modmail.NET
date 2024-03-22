@@ -2,6 +2,7 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Metran;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
@@ -12,6 +13,8 @@ namespace Modmail.NET.Events;
 
 public static class OnMessageCreated
 {
+  private static readonly MetranContainer<ulong> ProcessingUserMessageContainer = new();
+
   public static async Task Handle(DiscordClient sender, MessageCreateEventArgs args) {
     await Task.WhenAll(HandlePrivateMessage(sender, args.Message, args.Channel, args.Author),
                        HandleGuildMessage(sender, args.Message, args.Channel, args.Author, args.Guild));
@@ -55,7 +58,13 @@ public static class OnMessageCreated
 
     var activeTicket = await dbService.GetActiveTicketAsync(authorId);
     var logChannel = guild.GetChannel(option.LogChannelId);
-
+    //keeps other threads for same user locked until this one is done
+    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
+    if (metran is null) {
+      //VERY UNLIKELY TO HAPPEN
+      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
+      return;
+    }
 
     if (activeTicket is null) {
       //make new channel
@@ -186,6 +195,13 @@ public static class OnMessageCreated
     if (message.Content.StartsWith(MMConfig.This.BotPrefix))
       //ignored
       return;
+
+    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
+    if (metran is null) {
+      //VERY UNLIKELY TO HAPPEN
+      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
+      return;
+    }
 
     var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
     if (id == Guid.Empty) {
