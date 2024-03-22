@@ -78,6 +78,7 @@ public static class Texts
   public const string MODMAIL_LOG_CHANNEL_TOPIC = "Modmail log channel";
   public const string SERVER_SETUP_COMPLETE = "Server setup complete!";
   public const string SERVER_CONFIG_UPDATED = "Server configuration updated!";
+  public const string MODERATION_CONCERNS = "moderation concerns";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

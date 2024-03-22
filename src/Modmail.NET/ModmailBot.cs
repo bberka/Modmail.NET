@@ -70,6 +70,10 @@ public class ModmailBot
 
     await SetupDatabase();
 
+    await Task.Delay(5);
+
+    await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
+
     await Task.Delay(-1);
   }
 
