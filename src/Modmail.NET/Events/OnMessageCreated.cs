@@ -156,6 +156,7 @@ public static class OnMessageCreated
     }
     else {
       //continue on existing channel
+      await Task.Delay(70); //wait for channel creation process to finish
       var mailChannel = guild.GetChannel(activeTicket.ModMessageChannelId);
       var embed = ModmailEmbeds.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embed);
