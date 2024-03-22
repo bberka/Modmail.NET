@@ -201,6 +201,14 @@ public class DbService : IDbService
     return await _dbContext.GuildOptions.AnyAsync();
   }
 
+  public async Task<bool> IsUserInAnyTeamAsync(ulong memberId) {
+    return await _dbContext.GuildTeamMembers.AnyAsync(x => x.Key == memberId && x.Type == TeamMemberDataType.UserId);
+  }
+
+  public async Task<bool> IsRoleInAnyTeamAsync(ulong roleId) {
+    return await _dbContext.GuildTeamMembers.AnyAsync(x => x.Key == roleId && x.Type == TeamMemberDataType.RoleId);
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();

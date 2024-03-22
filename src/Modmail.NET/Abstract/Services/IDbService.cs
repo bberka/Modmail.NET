@@ -37,4 +37,6 @@ public interface IDbService
   Task<Ticket> GetClosedTicketAsync(Guid ticketId);
   Task AddFeedbackAsync(Guid ticketId, int starCount, string textInput);
   Task<bool> AnyServerSetupAsync();
+  Task<bool> IsUserInAnyTeamAsync(ulong memberId);
+  Task<bool> IsRoleInAnyTeamAsync(ulong roleId);
 }

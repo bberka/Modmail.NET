@@ -158,6 +158,15 @@ public class TeamSlashCommands : ApplicationCommandModule
 
     await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
 
+
+    var isUserAlreadyInTeam = await dbService.IsUserInAnyTeamAsync(member.Id);
+    if (isUserAlreadyInTeam) {
+      var embed2 = ModmailEmbeds.Base("Member already in a team!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var memberEntity = new GuildTeamMember {
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.UserId,
@@ -241,6 +250,14 @@ public class TeamSlashCommands : ApplicationCommandModule
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var isRoleAlreadyInTeam = await dbService.IsRoleInAnyTeamAsync(role.Id);
+    if (isRoleAlreadyInTeam) {
+      var embed2 = ModmailEmbeds.Base("Role already in a team!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;
