@@ -12,10 +12,11 @@ public class TicketType
   public DateTime? UpdateDateUtc { get; set; }
   public string Key { get; set; }
   public string Name { get; set; }
-  public string ChannelNameTemplate { get; set; }
   public string? Emoji { get; set; }
-  public string? ColorHexCode { get; set; }
+
+  // public string? ColorHexCode { get; set; }
   public string? Description { get; set; }
+
   public int Order { get; set; }
-  public ulong? CategoryId { get; set; }
+  // public ulong? CategoryId { get; set; }
 }

@@ -32,11 +32,15 @@ public class Ticket
   public string? FeedbackMessage { get; set; }
 
   public bool Anonymous { get; set; }
+
+  public Guid? TicketTypeId { get; set; }
+
   //FK
 
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
 
   public virtual GuildOption GuildOption { get; set; }
+  public virtual TicketType? TicketType { get; set; }
   public virtual List<TicketMessage> TicketMessages { get; set; }
 
   public virtual List<TicketNote> TicketNotes { get; set; }

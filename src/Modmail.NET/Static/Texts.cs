@@ -4,7 +4,7 @@ namespace Modmail.NET.Static;
 
 public static class Texts
 {
-  public const string SERVER_NOT_SETUP = "Server not setup!";
+  public const string SERVER_NOT_SETUP = "Server is not setup!";
   public const string SETUP_SERVER_BEFORE_USING = "Please setup the server before using this command.";
   public const string OPENED_BY_USER = "Opened By User";
   public const string OPENED_BY_USER_ID = "Opened By User Id";
@@ -81,6 +81,24 @@ public static class Texts
   public const string MODERATION_CONCERNS = "moderation concerns";
   public const string SYSTEM_IS_BUSY = "System is busy";
   public const string YOUR_MESSAGE_COULD_NOT_BE_PROCESSED = "Your message could not be processed. Please try again later.";
+  public const string TICKET_TYPE_CREATED = "Ticket Type Created";
+  public const string TICKET_TYPE_CREATED_DESCRIPTION = "Ticket type `{0}` created";
+  public const string TICKET_TYPE_EXISTS = "Ticket Type Exists";
+  public const string TICKET_TYPE_EXISTS_DESCRIPTION = "Ticket type with name '{0}' already exists";
+  public const string TICKET_TYPES = "Ticket Types";
+  public const string TICKET_TYPE_NOT_FOUND = "Ticket type not found";
+  public const string TICKET_TYPE_NOT_FOUND_DESCRIPTION = "Ticket type with name '{0}' not found";
+  public const string TICKET_TYPE_DELETED = "Ticket Type Deleted";
+  public const string TICKET_TYPE_DELETED_DESCRIPTION = "Ticket type {0} deleted";
+  public const string INVALID_ORDER = "Invalid Order";
+  public const string INVALID_ORDER_DESCRIPTION = "Order value is invalid";
+  public const string PLEASE_SELECT_A_TICKET_TYPE = "Please select a ticket type";
+  public const string TICKET_NOT_FOUND = "Ticket not found";
+  public const string TICKET_TYPE = "Ticket Type";
+  public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
+  public const string TICKET_TYPE_SELECTED = "Ticket type selected";
+  public const string TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` selected";
+  public const string USER_NOT_FOUND = "User not found";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

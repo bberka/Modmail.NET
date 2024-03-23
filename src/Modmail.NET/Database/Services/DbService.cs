@@ -209,6 +209,36 @@ public class DbService : IDbService
     return await _dbContext.GuildTeamMembers.AnyAsync(x => x.Key == roleId && x.Type == TeamMemberDataType.RoleId);
   }
 
+  public async Task AddTicketTypeAsync(TicketType ticketType) {
+    await _dbContext.TicketTypes.AddAsync(ticketType);
+    await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task<TicketType?> GetTicketTypeByIdAsync(Guid id) {
+    return await _dbContext.TicketTypes.FindAsync(id);
+  }
+
+  public async Task<TicketType?> GetTicketTypeByKeyAsync(string key) {
+    return await _dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == key);
+  }
+
+  public async Task<TicketType?> GetTicketTypeByNameAsync(string name) {
+    return await _dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Name == name);
+  }
+
+  public async Task<bool> TicketTypeExists(string relatedContent) {
+    return await _dbContext.TicketTypes.AnyAsync(x => x.Name == relatedContent && x.Key == relatedContent && x.Description == relatedContent && x.Emoji == relatedContent);
+  }
+
+  public async Task<List<TicketType>> GetEnabledTicketTypesAsync() {
+    return await _dbContext.TicketTypes.Where(x => x.IsEnabled).ToListAsync();
+  }
+
+  public async Task RemoveTicketTypeAsync(TicketType ticketType) {
+    _dbContext.TicketTypes.Remove(ticketType);
+    await _dbContext.SaveChangesAsync();
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();

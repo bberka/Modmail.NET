@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Commands;
@@ -65,6 +66,7 @@ public class ModmailBot
     slash.RegisterCommands<TicketSlashCommands>();
     slash.RegisterCommands<TeamSlashCommands>();
     slash.RegisterCommands<BlacklistSlashCommands>();
+    slash.RegisterCommands<TicketTypeSlashCommands>();
 
     await Client.ConnectAsync();
 
@@ -92,5 +94,21 @@ public class ModmailBot
       Log.Error(ex, "Failed to setup server: Database migration failed");
       throw;
     }
+  }
+
+  public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
+    foreach (var guild in Client.Guilds) {
+      try {
+        var member = await guild.Value.GetMemberAsync(userId, false);
+        if (member != null) {
+          return member;
+        }
+      }
+      catch (Exception ex) {
+        Log.Error(ex, "Failed to get member from guild {GuildId} for user {UserId}", guild.Key, userId);
+      }
+    }
+
+    return null;
   }
 }

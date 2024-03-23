@@ -61,19 +61,27 @@ public class TicketSlashCommands : ApplicationCommandModule
     ticket.CloseReason = reason;
     await dbService.UpdateTicketAsync(ticket);
 
-    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
-    var embed = ModmailEmbeds.ToUser.TicketClosed(ctx.Guild, ticketOpenUser, guildOption);
-    await ticketOpenUser.SendMessageAsync(embed);
+    await currentChannel.DeleteAsync("ticket_closed");
+
+    var privateChannel = (DiscordDmChannel)await ModmailBot.This.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
+    var user = privateChannel.Recipients.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
+    if (privateChannel is null || user is null) {
+      Log.Warning("TicketOpenUser not found for ticket: {TicketId}", ticketId);
+      return;
+    }
+
+    var embed = ModmailEmbeds.ToUser.TicketClosed(ctx.Guild, guildOption);
+    await privateChannel.SendMessageAsync(embed);
 
     if (guildOption.TakeFeedbackAfterClosing) {
       var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId, currentGuild);
-      await ticketOpenUser.SendMessageAsync(interactionFeedback);
+      await privateChannel.SendMessageAsync(interactionFeedback);
     }
 
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
-                                                    ticketOpenUser,
+                                                    user,
                                                     ctx.Guild,
                                                     ticketId,
                                                     ticket.RegisterDateUtc,
@@ -81,10 +89,9 @@ public class TicketSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(logEmbed);
 
 
-    var embed2 = ModmailEmbeds.Base("Ticket closed!", "", DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base(Texts.TICKET_CLOSED, "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
-
 
     await currentChannel.DeleteAsync("ticket_closed");
 
@@ -141,8 +148,12 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
     // var guildId = ticket.GuildOptionId;
-    var ticketOpenUser = await currentGuild.GetMemberAsync(ticket.DiscordUserInfoId);
-
+    var privateChannel = (DiscordDmChannel)await ModmailBot.This.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
+    var ticketOpenUser = privateChannel.Users.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
+    if (privateChannel is null || ticketOpenUser is null) {
+      Log.Warning("TicketOpenUser not found for ticket: {TicketId}", ticketId);
+      return;
+    }
 
     var newChName = "";
     switch (priority) {

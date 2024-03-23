@@ -79,39 +79,45 @@ public static class OnMessageCreated
       var members = await guild.GetAllMembersAsync();
       var roles = guild.Roles;
 
-      var roleListForOverwrites = new List<DiscordRole>();
-      var memberListForOverwrites = new List<DiscordMember>();
+      var modRoleListForOverwrites = new List<DiscordRole>();
+      var modMemberListForOverwrites = new List<DiscordMember>();
       foreach (var perm in permissions) {
         var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
         if (role.Key != 0) {
-          var exists = roleListForOverwrites.Any(x => x.Id == role.Key);
+          var exists = modRoleListForOverwrites.Any(x => x.Id == role.Key);
           if (!exists)
-            roleListForOverwrites.Add(role.Value);
+            modRoleListForOverwrites.Add(role.Value);
         }
 
         var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
         if (member2 is not null && member2.Id != 0) {
-          var exists = memberListForOverwrites.Any(x => x.Id == member2.Id);
+          var exists = modMemberListForOverwrites.Any(x => x.Id == member2.Id);
           if (!exists)
-            memberListForOverwrites.Add(member2);
+            modMemberListForOverwrites.Add(member2);
         }
       }
 
 
-      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
+      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites, modRoleListForOverwrites);
       var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
-      var member = await guild.GetMemberAsync(author.Id);
-      var embedNewTicket = ModmailEmbeds.ToMail.NewTicket(member);
-      var sb = new StringBuilder();
-      if (roleListForOverwrites.Count > 0) {
-        sb.AppendLine(Texts.ROLES + ":");
-        foreach (var role in roleListForOverwrites) sb.AppendLine(role.Mention);
+      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(author.Id);
+      if (member is null) {
+        Log.Error("Member not found for user: {UserId}", authorId);
+        return;
       }
 
-      if (memberListForOverwrites.Count > 0) {
+
+      var embedNewTicket = ModmailEmbeds.ToMail.NewTicket(member, ticketId);
+      var sb = new StringBuilder();
+      if (modRoleListForOverwrites.Count > 0) {
+        sb.AppendLine(Texts.ROLES + ":");
+        foreach (var role in modRoleListForOverwrites) sb.AppendLine(role.Mention);
+      }
+
+      if (modMemberListForOverwrites.Count > 0) {
         sb.AppendLine(Texts.MEMBERS + ":");
-        foreach (var member2 in memberListForOverwrites) sb.AppendLine(member2.Mention);
+        foreach (var member2 in modMemberListForOverwrites) sb.AppendLine(member2.Mention);
       }
 
 
@@ -119,7 +125,6 @@ public static class OnMessageCreated
 
       var embedUserMessage = ModmailEmbeds.ToMail.MessageReceived(author, message);
       await mailChannel.SendMessageAsync(embedUserMessage);
-
 
       var ticket = new Ticket {
         DiscordUserInfoId = authorId,
@@ -135,16 +140,23 @@ public static class OnMessageCreated
         IsForcedClosed = false
       };
 
+
       await dbService.AddTicketAsync(ticket);
 
 
-      var embedTicketCreated = ModmailEmbeds.ToUser.TicketCreated(guild, author, message, option);
+      var ticketTypes = await dbService.GetEnabledTicketTypesAsync();
+
+      var embedTicketCreated = ModmailEmbeds.ToUser.TicketCreated(guild,
+                                                                  author,
+                                                                  message,
+                                                                  option,
+                                                                  ticketTypes,
+                                                                  ticketId);
       var embedUserMessageSentToUser = ModmailEmbeds.ToUser.MessageSent(guild, author, message);
 
-      await channel.SendMessageAsync(x => {
-        x.AddEmbed(embedTicketCreated);
-        x.AddEmbed(embedUserMessageSentToUser);
-      });
+      var ticketCreatedMessage = await channel.SendMessageAsync(embedTicketCreated);
+      TicketTypeSelectionTimeoutMgr.This.AddMessage(ticketCreatedMessage);
+      await channel.SendMessageAsync(embedUserMessageSentToUser);
 
 
       var embedLog = ModmailEmbeds.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
@@ -250,7 +262,12 @@ public static class OnMessageCreated
     var dcUserInfo = new DiscordUserInfo(modUser);
     await dbService.UpdateUserInfoAsync(dcUserInfo);
 
-    var user = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
+    var user = await ModmailBot.This.GetMemberFromAnyGuildAsync(ticket.DiscordUserInfoId);
+    if (user is null) {
+      Log.Error("Member not found for user: {UserId}", ticket.DiscordUserInfoId);
+      return;
+    }
+
     var embed = ModmailEmbeds.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 

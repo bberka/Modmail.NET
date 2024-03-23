@@ -39,4 +39,11 @@ public interface IDbService
   Task<bool> AnyServerSetupAsync();
   Task<bool> IsUserInAnyTeamAsync(ulong memberId);
   Task<bool> IsRoleInAnyTeamAsync(ulong roleId);
+  Task AddTicketTypeAsync(TicketType ticketType);
+  Task<TicketType?> GetTicketTypeByIdAsync(Guid id);
+  Task<TicketType?> GetTicketTypeByKeyAsync(string key);
+  Task<TicketType?> GetTicketTypeByNameAsync(string name);
+  Task<bool> TicketTypeExists(string relatedContent);
+  Task<List<TicketType>> GetEnabledTicketTypesAsync();
+  Task RemoveTicketTypeAsync(TicketType ticketType);
 }

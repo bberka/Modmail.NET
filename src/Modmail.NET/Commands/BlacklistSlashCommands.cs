@@ -72,7 +72,14 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
 
     if (notifyUser) {
-      var member = await ctx.Guild.GetMemberAsync(user.Id);
+      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
+      if (member is null) {
+        var embed5 = ModmailEmbeds.Base(Texts.USER_NOT_FOUND, "", DiscordColor.Red);
+        var builder = new DiscordWebhookBuilder().AddEmbed(embed5);
+        await ctx.EditResponseAsync(builder);
+        return;
+      }
+
       var dmEmbed = ModmailEmbeds.ToUser.Blacklisted(ctx.Guild, ctx.User, reason);
       await member.SendMessageAsync(dmEmbed);
     }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -10,9 +11,10 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240322160049_ticket-type-update-1")]
+    partial class tickettypeupdate1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.28");
@@ -201,16 +203,11 @@ namespace Modmail.NET.Migrations
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("TicketTypeId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DiscordUserInfoId");
 
                     b.HasIndex("GuildOptionId");
-
-                    b.HasIndex("TicketTypeId");
 
                     b.ToTable("Tickets");
                 });
@@ -420,15 +417,9 @@ namespace Modmail.NET.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Modmail.NET.Entities.TicketType", "TicketType")
-                        .WithMany()
-                        .HasForeignKey("TicketTypeId");
-
                     b.Navigation("DiscordUserInfo");
 
                     b.Navigation("GuildOption");
-
-                    b.Navigation("TicketType");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketBlacklist", b =>

@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
@@ -14,7 +15,7 @@ public static class OnChannelDeleted
     var channelTopic = channel.Topic;
     var guild = channel.Guild;
 
-    var currentUser = await guild.GetMemberAsync(sender.CurrentUser.Id);
+    var currentUser = sender.CurrentUser;
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId != Guid.Empty) {
       var dbService = ServiceLocator.Get<IDbService>();
@@ -38,21 +39,28 @@ public static class OnChannelDeleted
         await dbService.UpdateTicketAsync(ticket);
 
 
-        var ticketOpenUser = await guild.GetMemberAsync(ticket.DiscordUserInfoId);
+        var privateChannel = (DiscordDmChannel)await ModmailBot.This.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
+        var user = privateChannel.Users.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
+        var ticketOpenUser = await ModmailBot.This.GetMemberFromAnyGuildAsync(ticket.DiscordUserInfoId);
+        if (privateChannel is null || user is null) {
+          Log.Warning("TicketOpenUser not found for ticket: {TicketId}", ticketId);
+          return;
+        }
+
         var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
-                                                        ticketOpenUser,
+                                                        user,
                                                         guild,
                                                         ticketId,
                                                         ticket.RegisterDateUtc,
                                                         Texts.CHANNEL_WAS_DELETED);
         await logChannel.SendMessageAsync(logEmbed);
 
-        var embed = ModmailEmbeds.ToUser.TicketClosed(guild, ticketOpenUser, ticket.GuildOption);
-        await ticketOpenUser.SendMessageAsync(embed);
+        var embed = ModmailEmbeds.ToUser.TicketClosed(guild, ticket.GuildOption);
+        await privateChannel.SendMessageAsync(embed);
 
         if (ticket.GuildOption.TakeFeedbackAfterClosing) {
           var interactionFeedback = ModmailInteractions.CreateFeedbackInteraction(ticketId, guild);
-          await ticketOpenUser.SendMessageAsync(interactionFeedback);
+          await privateChannel.SendMessageAsync(interactionFeedback);
         }
       }
     }
