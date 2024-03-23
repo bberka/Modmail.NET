@@ -36,6 +36,7 @@ Before trying to use the bot on multiple servers you must now about the limitati
 2. Ticket management/commands only allowed on the main server, which id provided in configuration
 3. Team management/commands is locked to main server only, meaning teams and members can only be managed in main server
 4. Modmail setting management/commands is locked to main server only
+5. Ticket types management/commands is locked to main server only
 
 You can simply invite bot to multiple servers and you can start using the bot
 
