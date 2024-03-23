@@ -218,14 +218,14 @@ public static class ModmailEmbeds
 
   public static class ToMail
   {
-    public static DiscordMessageBuilder TicketTypeSelected(DiscordUser user, TicketType type) {
+    public static DiscordEmbed TicketTypeSelected(DiscordUser user, TicketType type) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.TICKET_TYPE_SELECTED)
                   .WithDescription(string.Format(Texts.TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL, type.Emoji, type.Name))
                   .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
                   .WithTimestamp(DateTime.Now)
                   .WithColor(DiscordColor.SpringGreen);
-      return new DiscordMessageBuilder().AddEmbed(embed);
+      return embed;
     }
 
     public static DiscordEmbed NewTicket(DiscordUser member, Guid id) {
@@ -300,7 +300,7 @@ public static class ModmailEmbeds
 
   public static class ToLog
   {
-    public static DiscordMessageBuilder TicketTypeSelected(DiscordUser user, TicketType type, Ticket ticket) {
+    public static DiscordEmbed TicketTypeSelected(DiscordUser user, TicketType type, Ticket ticket) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.TICKET_TYPE_SELECTED)
                   .WithDescription(string.Format(Texts.TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL, type.Emoji, type.Name))
@@ -308,7 +308,7 @@ public static class ModmailEmbeds
                   .WithTimestamp(DateTime.Now)
                   .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper())
                   .WithColor(DiscordColor.SpringGreen);
-      return new DiscordMessageBuilder().AddEmbed(embed);
+      return embed;
     }
 
     public static DiscordEmbed TicketCreated(DiscordUser user,

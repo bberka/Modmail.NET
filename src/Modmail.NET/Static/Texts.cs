@@ -99,6 +99,7 @@ public static class Texts
   public const string TICKET_TYPE_SELECTED = "Ticket type selected";
   public const string TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` selected";
   public const string USER_NOT_FOUND = "User not found";
+  public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL = "This command can only be used in a ticket channel";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

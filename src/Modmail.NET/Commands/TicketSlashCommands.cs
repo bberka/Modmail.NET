@@ -39,7 +39,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId == Guid.Empty) {
-      var embed3 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Red);
+      var embed3 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL, "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
       await ctx.Interaction.EditOriginalResponseAsync(builder);
       return;

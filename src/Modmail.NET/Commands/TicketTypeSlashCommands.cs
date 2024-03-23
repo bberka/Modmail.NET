@@ -4,6 +4,7 @@ using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Providers;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Commands;
@@ -17,14 +18,12 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                      string name,
                                      [Option("emoji", "The emoji used for this ticket type")]
                                      DiscordEmoji? emoji = null,
-                                     [Option("color-hex-code", "The color hex code used for this ticket type")]
-                                     string? colorHexCode = null,
+                                     // [Option("color-hex-code", "The color hex code used for this ticket type")]
+                                     // string? colorHexCode = null,
                                      [Option("description", "The description of the ticket type")]
                                      string? description = null,
                                      [Option("order", "The order of the ticket type")]
-                                     long order = 0,
-                                     [Option("enabled", "Whether the ticket type is enabled")]
-                                     bool isEnabled = true
+                                     long order = 0
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     if (ctx.Guild.Id != MMConfig.This.MainServerId) {
@@ -62,11 +61,9 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       Key = idClean,
       Name = name,
       Emoji = emoji,
-      // ColorHexCode = colorHexCode,
       Description = description,
       Order = (int)order,
       RegisterDateUtc = DateTime.UtcNow,
-      IsEnabled = isEnabled,
     };
     await dbService.AddTicketTypeAsync(ticketType);
 
@@ -128,5 +125,106 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     var webHook = new DiscordWebhookBuilder()
       .AddEmbed(embed);
     await ctx.EditResponseAsync(webHook);
+  }
+
+  [SlashCommand("get", "Gets the ticket type for the current ticket channel")]
+  public async Task GetTicketType(InteractionContext ctx) {
+    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    if (ctx.Guild.Id != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var dbService = ServiceLocator.Get<IDbService>();
+    var ticketType = await dbService.GetTicketTypeByChannelIdAsync(ctx.Channel.Id);
+    if (ticketType is null) {
+      var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_NOT_FOUND, Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, DiscordColor.Red);
+      var webHook1 = new DiscordWebhookBuilder()
+        .AddEmbed(embed1);
+      await ctx.EditResponseAsync(webHook1);
+      return;
+    }
+
+    var embed = ModmailEmbeds.Base(Texts.TICKET_TYPE,
+                                   $"`{ticketType.Name}` - {ticketType.Description}",
+                                   DiscordColor.Blurple);
+    var webHook = new DiscordWebhookBuilder()
+      .AddEmbed(embed);
+    await ctx.EditResponseAsync(webHook);
+  }
+
+  [SlashCommand("set", "Sets the ticket type for the current ticket channel")]
+  public async Task SetTicketType(InteractionContext ctx,
+                                  [Autocomplete(typeof(TicketTypeProvider))] [Option("name", "The name of the ticket type")]
+                                  string name,
+                                  [Option("overwrite", "Whether to overwrite the existing ticket type")]
+                                  bool overwrite) {
+    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    if (ctx.Guild.Id != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+    var dbService = ServiceLocator.Get<IDbService>();
+
+    var guildOption = await dbService.GetOptionAsync(ctx.Guild.Id);
+    if (guildOption is null) {
+      var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, "", DiscordColor.Green);
+      var webHook2 = new DiscordWebhookBuilder()
+        .AddEmbed(embed2);
+      await ctx.EditResponseAsync(webHook2);
+      return;
+    }
+
+    var ticketType = await dbService.GetTicketTypeByNameAsync(name);
+    if (ticketType is null) {
+      var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_NOT_FOUND, string.Format(Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, name), DiscordColor.Red);
+      var webHook1 = new DiscordWebhookBuilder()
+        .AddEmbed(embed1);
+      await ctx.EditResponseAsync(webHook1);
+      return;
+    }
+
+    var channelTopicStr = ctx.Channel.Topic;
+    var parsedTicketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopicStr);
+    if (parsedTicketId == null || parsedTicketId == Guid.Empty) {
+      var embed2 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL, "", DiscordColor.Red);
+      var webHook2 = new DiscordWebhookBuilder()
+        .AddEmbed(embed2);
+      await ctx.EditResponseAsync(webHook2);
+      return;
+    }
+
+    var ticket = await dbService.GetActiveTicketAsync(parsedTicketId);
+    if (ticket is null) {
+      var embed2 = ModmailEmbeds.Base(Texts.TICKET_NOT_FOUND, "", DiscordColor.Red);
+      var webHook2 = new DiscordWebhookBuilder()
+        .AddEmbed(embed2);
+      await ctx.EditResponseAsync(webHook2);
+      return;
+    }
+
+    ticket.TicketTypeId = ticketType.Id;
+    await dbService.UpdateTicketAsync(ticket);
+
+
+    var embedTypeSelectedToMailCh = ModmailEmbeds.ToMail.TicketTypeSelected(ctx.User, ticketType);
+    await ctx.Channel.SendMessageAsync(embedTypeSelectedToMailCh);
+
+
+    var embedTypeSelectedToLogCh = ModmailEmbeds.ToLog.TicketTypeSelected(ctx.User, ticketType, ticket);
+    var logChannel = await ModmailBot.This.Client.GetChannelAsync(guildOption.LogChannelId);
+    await logChannel.SendMessageAsync(embedTypeSelectedToLogCh);
+
+    var wh = new DiscordWebhookBuilder()
+      .AddEmbed(embedTypeSelectedToMailCh);
+    // .AddEmbed(ModmailEmbeds.Base(Texts.TICKET_TYPE_SELECTED, string.Format(Texts.TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL, ticketType.Name, ticketType.Description), DiscordColor.Green);
+    await ctx.EditResponseAsync(wh);
   }
 }

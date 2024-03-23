@@ -46,4 +46,5 @@ public interface IDbService
   Task<bool> TicketTypeExists(string relatedContent);
   Task<List<TicketType>> GetEnabledTicketTypesAsync();
   Task RemoveTicketTypeAsync(TicketType ticketType);
+  Task<TicketType?> GetTicketTypeByChannelIdAsync(ulong channelId);
 }

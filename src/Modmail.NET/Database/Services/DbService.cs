@@ -231,12 +231,20 @@ public class DbService : IDbService
   }
 
   public async Task<List<TicketType>> GetEnabledTicketTypesAsync() {
-    return await _dbContext.TicketTypes.Where(x => x.IsEnabled).ToListAsync();
+    return await _dbContext.TicketTypes.ToListAsync();
   }
 
   public async Task RemoveTicketTypeAsync(TicketType ticketType) {
     _dbContext.TicketTypes.Remove(ticketType);
     await _dbContext.SaveChangesAsync();
+  }
+
+  public async Task<TicketType?> GetTicketTypeByChannelIdAsync(ulong channelId) {
+    return await _dbContext.Tickets
+                           .Include(x => x.TicketType)
+                           .Where(x => x.ModMessageChannelId == channelId)
+                           .Select(x => x.TicketType)
+                           .FirstOrDefaultAsync();
   }
 
   public async Task AddTeamAsync(GuildTeam team) {
