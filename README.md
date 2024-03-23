@@ -27,6 +27,7 @@ If you wish to use it be aware of potential errors
 - Caching user information that are interacting with the ticket system  
 - Blacklist, blocking users from opening tickets 
 - Getting feedback from user when ticket closed
+- Ticket type system, users can select ticket types to tell mods what the ticket is about
 
 # Multiple Servers Usage
 Before trying to use the bot on multiple servers you must now about the limitations;
@@ -49,12 +50,11 @@ Ticket channels will created in main server
 
 # Possible Upcoming Features
 - Web UI and/or API to manage tickets and see transcript information
-- Encrpyt message information
+- Encrypt message information
 - Confirmation for close and opening tickets
 - Language file support
 - Editing embeds and colors and maybe more (need web ui for this) 
-- Ticket types and set member permissions based on ticket types
-- Once ticket type selected add form modal to receive information before actually creating the ticket
+- Improve ticket type system, force ticket type selection before opening ticket etc.
 
 # Commands
 Parameter types with '*' are required
