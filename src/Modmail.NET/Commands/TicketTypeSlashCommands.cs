@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Abstract.Services;
+using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Providers;
@@ -10,6 +11,7 @@ using Modmail.NET.Static;
 namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("ticket-type", "Commands for managing ticket types")]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
 public class TicketTypeSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("create", "Create a new ticket type")]
