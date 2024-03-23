@@ -21,7 +21,7 @@ If you wish to use it be aware of potential errors
 - Toggle sensitive logging (Logging messages to tickets)
 - Toggle anonymous messages by mods, allows responding tickets anonymously
 - Setting up teams adding roles and members to team
-- Setting priority for tickets (adds emoji to tikcet channel name)
+- Setting priority for tickets (adds emoji to ticket channel name)
 - Adding private mod notes to tickets that can be viewed later only by mods
 - Pinging team roles/members on ticket open
 - Caching user information that are interacting with the ticket system  
@@ -101,7 +101,7 @@ Parameter types with '*' are required
 
 `/blacklist view`  View all blacklisted users
 
-## Ticket Type Group Slash Commands ~~~~
+## Ticket Type Group Slash Commands 
 `/ticket-type create (string* typeName, string description, DiscordEmoji emoji, long order)`: Create a new ticket type
 
 `/ticket-type delete (string* typeName)`: Delete a ticket type
