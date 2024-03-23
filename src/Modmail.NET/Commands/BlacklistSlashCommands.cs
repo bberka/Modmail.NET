@@ -65,7 +65,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
 
     await dbService.AddBlacklistAsync(user.Id, ctx.Guild.Id, reason);
 
-    var embedLog = ModmailEmbeds.ToLog.BlacklistAdded(ctx.Guild, ctx.User, user, reason);
+    var embedLog = ModmailEmbeds.ToLog.BlacklistAdded(ctx.User, user, reason);
     await logChannel.SendMessageAsync(embedLog);
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);
@@ -121,7 +121,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     }
 
     await dbService.RemoveBlacklistAsync(user.Id);
-    var embedLog = ModmailEmbeds.ToLog.BlacklistRemoved(ctx.Guild, ctx.User, user);
+    var embedLog = ModmailEmbeds.ToLog.BlacklistRemoved(ctx.User, user);
     await logChannel.SendMessageAsync(embedLog);
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);

@@ -15,7 +15,7 @@ public static class OnChannelDeleted
     var channelTopic = channel.Topic;
     var guild = channel.Guild;
 
-    var currentUser = sender.CurrentUser;
+    var mod = sender.CurrentUser;
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
     if (ticketId != Guid.Empty) {
       var dbService = ServiceLocator.Get<IDbService>();
@@ -47,9 +47,8 @@ public static class OnChannelDeleted
           return;
         }
 
-        var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
+        var logEmbed = ModmailEmbeds.ToLog.TicketClosed(mod,
                                                         user,
-                                                        guild,
                                                         ticketId,
                                                         ticket.RegisterDateUtc,
                                                         Texts.CHANNEL_WAS_DELETED);

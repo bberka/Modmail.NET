@@ -71,7 +71,7 @@ public static class ComponentInteractionCreated
 
         await dbService.UpdateTicketAsync(ticket);
 
-        await args.Message.ModifyAsync(x => { x.Embed = ModmailEmbeds.ToUser.TicketCreatedUpdated(guild, guildOption, ticketId, ticketType); });
+        await args.Message.ModifyAsync(x => { x.Embed = ModmailEmbeds.ToUser.TicketCreatedUpdated(guild, guildOption, ticketType); });
 
         TicketTypeSelectionTimeoutMgr.This.RemoveMessage(args.Message.Id);
 
@@ -86,7 +86,7 @@ public static class ComponentInteractionCreated
 
         var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ticket.ModMessageChannelId);
         if (mailChannel is not null) {
-          var embed2 = ModmailEmbeds.ToMail.TicketTypeSelected(args.User, ticketType);
+          var embed2 = ModmailEmbeds.ToMail.TicketTypeChanged(args.User, ticketType);
           await mailChannel.SendMessageAsync(embed2);
         }
         else {

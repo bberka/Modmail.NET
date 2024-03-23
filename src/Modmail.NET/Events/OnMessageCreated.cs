@@ -59,7 +59,7 @@ public static class OnMessageCreated
 
     var activeBlock = await dbService.GetUserBlacklistStatus(authorId);
     if (activeBlock) {
-      var embed = ModmailEmbeds.ToUser.UserBlocked(author, guild);
+      var embed = ModmailEmbeds.ToUser.UserBlocked(guild);
       await channel.SendMessageAsync(embed);
       return;
     }
@@ -147,7 +147,6 @@ public static class OnMessageCreated
       var ticketTypes = await dbService.GetEnabledTicketTypesAsync();
 
       var embedTicketCreated = ModmailEmbeds.ToUser.TicketCreated(guild,
-                                                                  author,
                                                                   message,
                                                                   option,
                                                                   ticketTypes,
@@ -159,7 +158,7 @@ public static class OnMessageCreated
       await channel.SendMessageAsync(embedUserMessageSentToUser);
 
 
-      var embedLog = ModmailEmbeds.ToLog.TicketCreated(author, message, mailChannel, guild, ticket.Id);
+      var embedLog = ModmailEmbeds.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
       await logChannel.SendMessageAsync(embedLog);
 
 
@@ -170,8 +169,7 @@ public static class OnMessageCreated
         var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
                                                            message,
                                                            channel,
-                                                           ticket.Id,
-                                                           guildId);
+                                                           ticket.Id);
         await logChannel.SendMessageAsync(embed3);
       }
     }
@@ -195,8 +193,7 @@ public static class OnMessageCreated
         var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
                                                            message,
                                                            channel,
-                                                           activeTicket.Id,
-                                                           guildId);
+                                                           activeTicket.Id);
         await logChannel.SendMessageAsync(embed3);
       }
     }
@@ -271,7 +268,7 @@ public static class OnMessageCreated
     var embed = ModmailEmbeds.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
     await user.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbeds.ToMail.MessageSent(modUser, user, message, channel, ticket.Anonymous);
+    var embed2 = ModmailEmbeds.ToMail.MessageSent(modUser, message, ticket.Anonymous);
     await ticketChannel.SendMessageAsync(embed2);
     await message.DeleteAsync();
 
@@ -291,7 +288,6 @@ public static class OnMessageCreated
                                                         message,
                                                         channel,
                                                         ticket.Id,
-                                                        guildId,
                                                         ticket.Anonymous);
       await logChannel.SendMessageAsync(embed3);
     }

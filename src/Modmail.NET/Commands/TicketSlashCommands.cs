@@ -82,7 +82,6 @@ public class TicketSlashCommands : ApplicationCommandModule
     var logChannel = currentGuild.GetChannel(logChannelId);
     var logEmbed = ModmailEmbeds.ToLog.TicketClosed(currentUser,
                                                     user,
-                                                    ctx.Guild,
                                                     ticketId,
                                                     ticket.RegisterDateUtc,
                                                     reason);
@@ -176,11 +175,14 @@ public class TicketSlashCommands : ApplicationCommandModule
     var embed = ModmailEmbeds.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     await privateChannel.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbeds.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
+    var embed2 = ModmailEmbeds.ToLog.TicketPriorityChanged(ctx.User, ticket, oldPriority, priority, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed2);
 
+    var embedMailTicketPriorityChanged = ModmailEmbeds.ToMail.TicketPriorityChanged(ctx.User, oldPriority, priority);
+    var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
+    await mailChannel.SendMessageAsync(embedMailTicketPriorityChanged);
 
     var embed3 = ModmailEmbeds.Base("Priority set!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed3);
@@ -237,18 +239,18 @@ public class TicketSlashCommands : ApplicationCommandModule
     };
     await dbService.AddNoteAsync(noteEntity);
 
-    var embed = ModmailEmbeds.ToLog.NoteAdded(ctx.Guild, ctx.User, note, ticket);
+    var embed = ModmailEmbeds.ToLog.NoteAdded(ctx.User, note, ticket);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed);
 
-    var embed2 = ModmailEmbeds.Base("Note added!", "`Note Content:`" + note, DiscordColor.Green);
+    var embed2 = ModmailEmbeds.Base("Note added!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
 
     var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
 
-    var embed3 = ModmailEmbeds.ToMail.NoteAdded(ctx.Guild, ctx.User, note);
+    var embed3 = ModmailEmbeds.ToMail.NoteAdded(ctx.User, note);
     await mailChannel.SendMessageAsync(embed3);
 
     Log.Information("Note added: {TicketId} in guild {GuildOptionId}", ticketId, ticket.GuildOption.GuildId);
@@ -295,7 +297,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     ticket.Anonymous = !ticket.Anonymous;
     await dbService.UpdateTicketAsync(ticket);
 
-    var embed = ModmailEmbeds.ToLog.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
+    var embed = ModmailEmbeds.ToLog.AnonymousToggled(ctx.User, ticket, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
     var logChannel = currentGuild.GetChannel(logChannelId);
     await logChannel.SendMessageAsync(embed);
@@ -306,7 +308,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
 
-    var embed3 = ModmailEmbeds.ToMail.AnonymousToggled(ctx.Guild, ctx.User, ticket, ticket.Anonymous);
+    var embed3 = ModmailEmbeds.ToMail.AnonymousToggled(ctx.User, ticket.Anonymous);
     await mailChannel.SendMessageAsync(embed3);
 
     Log.Information("Anonymous mode toggled: {TicketId} in guild {GuildOptionId}", ticketId, ticket.GuildOption.GuildId);

@@ -96,10 +96,11 @@ public static class Texts
   public const string TICKET_NOT_FOUND = "Ticket not found";
   public const string TICKET_TYPE = "Ticket Type";
   public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
-  public const string TICKET_TYPE_SELECTED = "Ticket type selected";
-  public const string TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` selected";
+  public const string TICKET_TYPE_CHANGED = "Ticket type changed";
+  public const string TICKET_TYPE_CHANGED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` changed";
   public const string USER_NOT_FOUND = "User not found";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL = "This command can only be used in a ticket channel";
+  public const string REASON = "Reason";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

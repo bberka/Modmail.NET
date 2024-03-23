@@ -214,7 +214,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     await dbService.UpdateTicketAsync(ticket);
 
 
-    var embedTypeSelectedToMailCh = ModmailEmbeds.ToMail.TicketTypeSelected(ctx.User, ticketType);
+    var embedTypeSelectedToMailCh = ModmailEmbeds.ToMail.TicketTypeChanged(ctx.User, ticketType);
     await ctx.Channel.SendMessageAsync(embedTypeSelectedToMailCh);
 
 
@@ -223,8 +223,8 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(embedTypeSelectedToLogCh);
 
     var wh = new DiscordWebhookBuilder()
-      .AddEmbed(embedTypeSelectedToMailCh);
-    // .AddEmbed(ModmailEmbeds.Base(Texts.TICKET_TYPE_SELECTED, string.Format(Texts.TICKET_TYPE_SELECTED_MESSAGE_TO_MAIL, ticketType.Name, ticketType.Description), DiscordColor.Green);
+      .AddEmbed(ModmailEmbeds.Base(Texts.TICKET_TYPE_CHANGED, "", ModmailEmbeds.TicketTypeChangedColor));
+    // .AddEmbed(ModmailEmbeds.Base(Texts.TICKET_TYPE_CHANGED, string.Format(Texts.TICKET_TYPE_CHANGED_MESSAGE_TO_MAIL, ticketType.Name, ticketType.Description), DiscordColor.Green);
     await ctx.EditResponseAsync(wh);
   }
 }
