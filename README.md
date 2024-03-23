@@ -101,6 +101,17 @@ Parameter types with '*' are required
 
 `/blacklist view`  View all blacklisted users
 
+## Ticket Type Group Slash Commands ~~~~
+`/ticket-type create (string* typeName, string description, DiscordEmoji emoji, long order)`: Create a new ticket type
+
+`/ticket-type delete (string* typeName)`: Delete a ticket type
+
+`/ticket-type list`: List all ticket types
+
+`/ticket-type set (string* typeName, bool* overwrite)`: Set the ticket type for the current ticket
+
+`/ticket-type get`: Gets the ticket type for the current ticket channel
+
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
