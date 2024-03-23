@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Commands;
@@ -26,6 +27,17 @@ public class ModmailBot
 
     var kernel = new StandardKernel(new MmKernel());
     ServiceLocator.Initialize(kernel);
+
+    AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
+      var isDiscordException = args.ExceptionObject is DiscordException;
+      if (isDiscordException) {
+        var casted = (DiscordException)args.ExceptionObject;
+        Log.Error(casted, "Unhandled Discord exception {JsonMessage} {@Data}", casted.JsonMessage, casted.Data);
+      }
+      else {
+        Log.Error((Exception)args.ExceptionObject, "Unhandled exception");
+      }
+    };
   }
 
   public static ModmailBot This {
