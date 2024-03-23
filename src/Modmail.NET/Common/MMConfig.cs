@@ -25,7 +25,9 @@ public class MMConfig
     LogLevel = Enum.Parse<LogEventLevel>(_configManager["LOG_LEVEL"] ?? "Information", true);
     LogSinkToFile = bool.Parse(_configManager["LOG_SINK_TO_FILE"] ?? "true");
     LogSinkToConsole = bool.Parse(_configManager["LOG_SINK_TO_CONSOLE"] ?? "true");
+    AddToAutoStart = bool.Parse(_configManager["ADD_TO_AUTOSTART"] ?? "false");
   }
+
 
   public static MMConfig This {
     get {
@@ -74,4 +76,7 @@ public class MMConfig
 
   //Name: LOG_SINK_TO_CONSOLE
   public bool LogSinkToConsole { get; set; }
+
+  //Name: ADD_TO_AUTOSTART
+  public bool AddToAutoStart { get; set; }
 }

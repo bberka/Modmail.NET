@@ -38,6 +38,8 @@ public class ModmailBot
         Log.Error((Exception)args.ExceptionObject, "Unhandled exception");
       }
     };
+    Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
+    AutoStartManager.SaveAutoStart();
   }
 
   public static ModmailBot This {
