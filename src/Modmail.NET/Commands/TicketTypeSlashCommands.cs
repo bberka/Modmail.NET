@@ -27,6 +27,14 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                      bool isEnabled = true
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    if (ctx.Guild.Id != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
+
     var id = Guid.NewGuid();
     var idClean = id.ToString().Replace("-", "");
     var dbService = ServiceLocator.Get<IDbService>();
@@ -74,6 +82,14 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                      string name
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    if (ctx.Guild.Id != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var ticketType = await dbService.GetTicketTypeByNameAsync(name);
@@ -95,6 +111,14 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
   [SlashCommand("list", "List all ticket types")]
   public async Task ListTicketTypes(InteractionContext ctx) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+    if (ctx.Guild.Id != MMConfig.This.MainServerId) {
+      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
+
     var dbService = ServiceLocator.Get<IDbService>();
 
     var ticketTypes = await dbService.GetEnabledTicketTypesAsync();
