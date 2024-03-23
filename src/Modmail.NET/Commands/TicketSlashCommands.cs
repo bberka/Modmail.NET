@@ -149,7 +149,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
     // var guildId = ticket.GuildOptionId;
     var privateChannel = (DiscordDmChannel)await ModmailBot.This.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-    var ticketOpenUser = privateChannel.Users.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
+    var ticketOpenUser = privateChannel.Recipients.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
     if (privateChannel is null || ticketOpenUser is null) {
       Log.Warning("TicketOpenUser not found for ticket: {TicketId}", ticketId);
       return;
@@ -174,7 +174,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
     var embed = ModmailEmbeds.ToUser.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
-    await ticketOpenUser.SendMessageAsync(embed);
+    await privateChannel.SendMessageAsync(embed);
 
     var embed2 = ModmailEmbeds.ToLog.TicketPriorityChanged(ctx.Guild, ctx.User, oldPriority, priority, ticket.Anonymous);
     var logChannelId = await dbService.GetLogChannelIdAsync(ticket.GuildOption.GuildId);

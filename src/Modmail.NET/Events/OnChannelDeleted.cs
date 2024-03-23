@@ -40,7 +40,7 @@ public static class OnChannelDeleted
 
 
         var privateChannel = (DiscordDmChannel)await ModmailBot.This.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-        var user = privateChannel.Users.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
+        var user = privateChannel.Recipients.FirstOrDefault(x => x.Id == ticket.DiscordUserInfoId);
         var ticketOpenUser = await ModmailBot.This.GetMemberFromAnyGuildAsync(ticket.DiscordUserInfoId);
         if (privateChannel is null || user is null) {
           Log.Warning("TicketOpenUser not found for ticket: {TicketId}", ticketId);
