@@ -101,6 +101,8 @@ public static class Texts
   public const string USER_NOT_FOUND = "User not found";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL = "This command can only be used in a ticket channel";
   public const string REASON = "Reason";
+  public const string TICKET_TYPE_UPDATED = "Ticket Type Updated";
+  public const string TICKET_TYPE_UPDATED_DESCRIPTION = "Ticket type {0} updated";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

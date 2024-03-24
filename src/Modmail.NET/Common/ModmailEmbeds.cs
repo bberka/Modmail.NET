@@ -226,6 +226,16 @@ public static class ModmailEmbeds
       if (!string.IsNullOrEmpty(reason)) embed.AddField(Texts.REASON, reason);
       return embed;
     }
+
+    public static DiscordEmbed? TicketTypeEmbedMessage(TicketType ticketType) {
+      if (string.IsNullOrEmpty(ticketType.EmbedMessageTitle) || string.IsNullOrEmpty(ticketType.EmbedMessageContent)) return null;
+      var embed = new DiscordEmbedBuilder()
+        .WithColor(TicketTypeChangedColor);
+      if (!string.IsNullOrEmpty(ticketType.EmbedMessageTitle)) embed.WithTitle(ticketType.EmbedMessageTitle);
+      if (!string.IsNullOrEmpty(ticketType.EmbedMessageContent)) embed.WithDescription(ticketType.EmbedMessageContent);
+
+      return embed;
+    }
   }
 
   public static class ToMail

@@ -47,4 +47,5 @@ public interface IDbService
   Task<List<TicketType>> GetEnabledTicketTypesAsync();
   Task RemoveTicketTypeAsync(TicketType ticketType);
   Task<TicketType?> GetTicketTypeByChannelIdAsync(ulong channelId);
+  Task UpdateTicketTypeAsync(TicketType ticketType);
 }

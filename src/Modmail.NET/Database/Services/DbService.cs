@@ -247,6 +247,11 @@ public class DbService : IDbService
                            .FirstOrDefaultAsync();
   }
 
+  public async Task UpdateTicketTypeAsync(TicketType ticketType) {
+    _dbContext.TicketTypes.Update(ticketType);
+    await _dbContext.SaveChangesAsync();
+  }
+
   public async Task AddTeamAsync(GuildTeam team) {
     await _dbContext.GuildTeams.AddAsync(team);
     await _dbContext.SaveChangesAsync();

@@ -93,6 +93,11 @@ public static class ComponentInteractionCreated
           Log.Error("Mail channel {MailChannelId} not found", ticket.ModMessageChannelId);
         }
 
+        var embed3 = ModmailEmbeds.ToUser.TicketTypeEmbedMessage(ticketType);
+        if (embed3 is not null) {
+          await args.Channel.SendMessageAsync(embed3);
+        }
+
         break;
       }
     }
