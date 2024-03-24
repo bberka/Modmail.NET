@@ -1,10 +1,36 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
+using Modmail.NET.Models;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Common;
 
 public static class UtilPermission
 {
+  public static ( List<DiscordMember> members, List<DiscordRole> roles) ParsePermissionInfo(List<PermissionInfo> permissions,
+                                                                                            IReadOnlyCollection<DiscordMember> members,
+                                                                                            IReadOnlyDictionary<ulong, DiscordRole> roles) {
+    var modRoleListForOverwrites = new List<DiscordRole>();
+    var modMemberListForOverwrites = new List<DiscordMember>();
+    foreach (var perm in permissions) {
+      var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
+      if (role.Key != 0) {
+        var exists = modRoleListForOverwrites.Any(x => x.Id == role.Key);
+        if (!exists)
+          modRoleListForOverwrites.Add(role.Value);
+      }
+
+      var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
+      if (member2 is not null && member2.Id != 0) {
+        var exists = modMemberListForOverwrites.Any(x => x.Id == member2.Id);
+        if (!exists)
+          modMemberListForOverwrites.Add(member2);
+      }
+    }
+
+    return (modMemberListForOverwrites, modRoleListForOverwrites);
+  }
+
   public static List<DiscordOverwriteBuilder> GetTicketPermissionOverwrites(DiscordGuild guild,
                                                                             List<DiscordMember> members,
                                                                             List<DiscordRole> roles) {

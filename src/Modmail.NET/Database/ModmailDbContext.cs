@@ -37,4 +37,25 @@ public class ModmailDbContext : DbContext
         throw new ArgumentOutOfRangeException();
     }
   }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder) {
+    modelBuilder.Entity<Ticket>()
+                .Navigation(x => x.GuildOption)
+                .AutoInclude();
+
+    modelBuilder.Entity<Ticket>()
+                .Navigation(x => x.TicketType)
+                .AutoInclude();
+
+    modelBuilder.Entity<Ticket>()
+                .Navigation(x => x.OpenerUserInfo)
+                .AutoInclude();
+
+    modelBuilder.Entity<Ticket>()
+                .Navigation(x => x.CloserUserInfo)
+                .AutoInclude();
+    modelBuilder.Entity<GuildTeam>()
+                .Navigation(x => x.GuildTeamMembers)
+                .AutoInclude();
+  }
 }

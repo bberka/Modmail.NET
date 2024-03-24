@@ -12,7 +12,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.RenameColumn(
                 name: "BlacklistForMinutes",
                 table: "TicketBlacklists",
-                newName: "GuildOptionId");
+                newName: "GuildId");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "EndDateUtc",
@@ -24,12 +24,12 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketBlacklists_GuildOptionId",
                 table: "TicketBlacklists",
-                column: "GuildOptionId");
+                column: "GuildId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_TicketBlacklists_GuildOptions_GuildOptionId",
                 table: "TicketBlacklists",
-                column: "GuildOptionId",
+                column: "GuildId",
                 principalTable: "GuildOptions",
                 principalColumn: "GuildId",
                 onDelete: ReferentialAction.Cascade);
@@ -50,7 +50,7 @@ namespace Modmail.NET.Migrations
                 table: "TicketBlacklists");
 
             migrationBuilder.RenameColumn(
-                name: "GuildOptionId",
+                name: "GuildId",
                 table: "TicketBlacklists",
                 newName: "BlacklistForMinutes");
         }

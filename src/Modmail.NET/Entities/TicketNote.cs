@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Modmail.NET.Common;
+using Modmail.NET.Database;
 
 namespace Modmail.NET.Entities;
 
@@ -16,4 +18,10 @@ public class TicketNote
 
 
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
+
+  public async Task AddAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await dbContext.TicketNotes.AddAsync(this);
+    await dbContext.SaveChangesAsync();
+  }
 }

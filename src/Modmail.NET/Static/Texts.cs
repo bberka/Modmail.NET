@@ -6,9 +6,7 @@ public static class Texts
 {
   public const string SERVER_NOT_SETUP = "Server is not setup!";
   public const string SETUP_SERVER_BEFORE_USING = "Please setup the server before using this command.";
-  public const string OPENED_BY_USER = "Opened By User";
-  public const string OPENED_BY_USER_ID = "Opened By User Id";
-  public const string OPENED_BY_USERNAME = "Opened By Username";
+  public const string OPENED_BY = "Opened By";
   public const string TICKET_ID = "Ticket Id";
   public const string OPENED_AT = "Opened At";
   public const string CLOSED_BY = "Closed By";
@@ -103,6 +101,10 @@ public static class Texts
   public const string REASON = "Reason";
   public const string TICKET_TYPE_UPDATED = "Ticket Type Updated";
   public const string TICKET_TYPE_UPDATED_DESCRIPTION = "Ticket type {0} updated";
+  public const string CLOSE_TICKET = "Close Ticket";
+  public const string CLOSE_TICKET_WITH_REASON = "Close Ticket with Reason";
+  public const string TICKET_CLOSED_SUCCESSFULLY = "Ticket closed successfully";
+  public const string TICKET_ALREADY_CLOSED = "Ticket already closed";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

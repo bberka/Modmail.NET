@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
@@ -25,6 +25,7 @@ public static class ModmailEmbeds
   public static readonly DiscordColor NoteAddedColor = DiscordColor.Teal;
   public static readonly DiscordColor AnonymousToggledColor = DiscordColor.Grayple;
   public static readonly DiscordColor FeedbackColor = DiscordColor.Orange;
+
 
   public static DiscordEmbed Base(string title, string text = "", DiscordColor? color = null) {
     color ??= DiscordColor.White;
@@ -105,21 +106,22 @@ public static class ModmailEmbeds
 
   public static class ToUser
   {
-    public static DiscordEmbed UserBlocked(DiscordGuild guild) {
+    public static DiscordEmbed UserBlocked(string guildName, string guildIcon) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.YOU_HAVE_BEEN_BLACKLISTED)
                   .WithDescription(Texts.YOU_HAVE_BEEN_BLACKLISTED_DESCRIPTION)
-                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithFooter(guildName, guildIcon)
                   .WithTimestamp(DateTime.Now)
                   .WithColor(ErrorColor);
       return embed;
     }
 
-    public static DiscordEmbed MessageSent(DiscordGuild guild,
+    public static DiscordEmbed MessageSent(string guildName,
+                                           string guildIcon,
                                            DiscordUser user,
                                            DiscordMessage message) {
       var embed = new DiscordEmbedBuilder()
-                  .WithFooter(guild.Name, guild.IconUrl)
+                  .WithFooter(guildName, guildIcon)
                   .WithDescription(message.Content)
                   .WithTimestamp(message.Timestamp)
                   .WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl)
@@ -188,34 +190,6 @@ public static class ModmailEmbeds
       return embed;
     }
 
-    public static DiscordEmbed TicketClosed(DiscordGuild guild, GuildOption option) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.YOUR_TICKET_HAS_BEEN_CLOSED)
-                  .WithDescription(Texts.YOUR_TICKET_HAS_BEEN_CLOSED_DESCRIPTION)
-                  .WithFooter(guild.Name, guild.IconUrl)
-                  .WithTimestamp(DateTime.Now)
-                  .WithColor(TicketClosedColor);
-      if (!string.IsNullOrEmpty(option.ClosingMessage))
-        embed.WithDescription(option.ClosingMessage);
-      return embed;
-    }
-
-
-    public static DiscordEmbed TicketPriorityChanged(DiscordGuild guild,
-                                                     DiscordUser modUser,
-                                                     TicketPriority oldPriority,
-                                                     TicketPriority newPriority,
-                                                     bool anonymous) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithFooter(guild.Name, guild.IconUrl)
-                  .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                  .WithTimestamp(DateTime.Now)
-                  .WithColor(TicketPriorityChangedColor)
-                  .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                  .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true);
-      if (!anonymous) embed.WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
-      return embed.Build();
-    }
 
     public static DiscordEmbed Blacklisted(DiscordGuild guild, DiscordUser user, string? reason) {
       var embed = new DiscordEmbedBuilder()
@@ -250,7 +224,7 @@ public static class ModmailEmbeds
       return embed;
     }
 
-    public static DiscordEmbed NewTicket(DiscordUser member, Guid ticketId) {
+    public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<DiscordRole> modRoleListForOverwrites, List<DiscordMember> modMemberListForOverwrites) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.NEW_TICKET)
                   .WithTimestamp(DateTime.Now)
@@ -259,7 +233,34 @@ public static class ModmailEmbeds
                   .AddField(Texts.USER, member.Mention, true)
                   .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper(), true)
                   .WithColor(TicketCreatedColor);
-      return embed;
+
+      var messageBuilder = new DiscordMessageBuilder()
+                           .AddEmbed(embed)
+                           .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger,
+                                                                     UtilInteraction.BuildKey("close_ticket", ticketId.ToString()),
+                                                                     Texts.CLOSE_TICKET,
+                                                                     emoji: new DiscordComponentEmoji("🔒"))
+                                          // ,
+                                          // new DiscordButtonComponent(ButtonStyle.Danger,
+                                          //                            UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
+                                          //                            Texts.CLOSE_TICKET_WITH_REASON,
+                                          //                            emoji: new DiscordComponentEmoji("🔒"))
+                                         );
+
+      var sb = new StringBuilder();
+      if (modRoleListForOverwrites.Count > 0) {
+        sb.AppendLine(Texts.ROLES + ":");
+        foreach (var role in modRoleListForOverwrites) sb.AppendLine(role.Mention);
+      }
+
+      if (modMemberListForOverwrites.Count > 0) {
+        sb.AppendLine(Texts.MEMBERS + ":");
+        foreach (var member2 in modMemberListForOverwrites) sb.AppendLine(member2.Mention);
+      }
+
+      messageBuilder.WithContent(sb.ToString());
+
+      return messageBuilder;
     }
 
     public static DiscordEmbed MessageReceived(DiscordUser user,
@@ -310,17 +311,6 @@ public static class ModmailEmbeds
                                      : Texts.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION);
       return embed;
     }
-
-    public static DiscordEmbed TicketPriorityChanged(DiscordUser mod, TicketPriority oldPriority, TicketPriority newPriority) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                  .WithColor(TicketPriorityChangedColor)
-                  .WithTimestamp(DateTime.Now)
-                  .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                  .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true)
-                  .WithAuthor(mod.GetUsername(), iconUrl: mod.AvatarUrl);
-      return embed;
-    }
   }
 
 
@@ -337,68 +327,22 @@ public static class ModmailEmbeds
       return embed;
     }
 
-    public static DiscordEmbed TicketCreated(DiscordUser user,
-                                             DiscordMessage initialMessage,
-                                             DiscordChannel mailChannel,
-                                             Guid ticketId) {
+    public static DiscordEmbed NewTicketCreated(DiscordUser user,
+                                                DiscordMessage initialMessage,
+                                                DiscordChannel mailChannel,
+                                                Guid ticketId) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.NEW_TICKET_CREATED)
                   .WithAuthor(user.Username, iconUrl: user.AvatarUrl)
                   .WithTimestamp(initialMessage.Timestamp)
                   .WithColor(TicketCreatedColor)
                   .AddField(Texts.USER, user.Mention, true)
-                  .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                  .AddField(Texts.USERNAME, user.GetUsername(), true)
-                  .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper(), true)
-                  .AddField(Texts.TICKET_CREATED_AT, initialMessage.CreationTimestamp.ToString(), true)
-                  .AddField(Texts.CHANNEL_ID, mailChannel.Id.ToString(), true);
+                  .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper(), true);
       return embed;
-    }
-
-    public static DiscordEmbed TicketClosed(DiscordUser mod,
-                                            DiscordUser user,
-                                            Guid ticketId,
-                                            DateTime createdAt,
-                                            string? reason = null
-    ) {
-      if (string.IsNullOrEmpty(reason)) reason = Texts.NO_REASON_PROVIDED;
-
-      var embed = new DiscordEmbedBuilder()
-                  // .WithDescription("Ticket has been closed.")
-                  .WithTimestamp(DateTime.Now)
-                  .WithTitle(Texts.TICKET_CLOSED)
-                  .WithAuthor(mod.GetUsername(), iconUrl: mod.AvatarUrl)
-                  .WithColor(TicketClosedColor)
-                  .AddField(Texts.OPENED_BY_USER, user.Mention, true)
-                  .AddField(Texts.OPENED_BY_USER_ID, user.Id.ToString(), true)
-                  .AddField(Texts.OPENED_BY_USERNAME, user.GetUsername(), true)
-                  .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper(), true)
-                  .AddField(Texts.OPENED_AT, createdAt.ToString(CultureInfo.InvariantCulture), true)
-                  .AddField(Texts.CLOSED_BY, mod.Mention, true)
-                  .AddField(Texts.CLOSE_REASON, reason, true);
-      return embed;
-    }
-
-
-    public static DiscordEmbed TicketPriorityChanged(
-      DiscordUser modUser,
-      Ticket ticket,
-      TicketPriority oldPriority,
-      TicketPriority newPriority,
-      bool anonymous) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                  .WithTimestamp(DateTime.Now)
-                  .WithColor(TicketPriorityChangedColor)
-                  .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper())
-                  .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                  .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true);
-      if (!anonymous) embed.WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
-      return embed.Build();
     }
 
     public static DiscordEmbed MessageSentByMod(DiscordUser mod,
-                                                DiscordUser user,
+                                                DiscordUserInfo user,
                                                 DiscordMessage message,
                                                 DiscordChannel channel,
                                                 Guid ticketId,
@@ -422,7 +366,6 @@ public static class ModmailEmbeds
 
     public static DiscordEmbed MessageSentByUser(DiscordUser user,
                                                  DiscordMessage message,
-                                                 DiscordChannel channel,
                                                  Guid ticketId) {
       var embed = new DiscordEmbedBuilder()
                   .WithTitle(Texts.MESSAGE_SENT_BY_USER)
@@ -432,7 +375,6 @@ public static class ModmailEmbeds
                   .WithColor(MessageSentColor)
                   .AddField(Texts.TICKET_ID, ticketId.ToString().ToUpper())
                   .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                  .AddField(Texts.CHANNEL_ID, channel.Id.ToString(), true)
         ;
 
       for (var i = 0; i < message.Attachments.Count; i++) embed.AddField($"{Texts.ATTACHMENT} {i + 1}", message.Attachments[i].Url);
@@ -489,43 +431,75 @@ public static class ModmailEmbeds
                   .AddField(Texts.USERNAME, user.GetUsername(), true);
       return embed;
     }
-
-    public static DiscordEmbed FeedbackReceived(int starCount, string textInput, DiscordGuild mainGuild, DiscordUser interactionUser) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.FEEDBACK_RECEIVED)
-                  .WithDescription(textInput)
-                  .WithTimestamp(DateTime.Now)
-                  .WithFooter(mainGuild.Name, mainGuild.IconUrl)
-                  .AddField(Texts.STAR, starCount.ToString(), true)
-                  .AddField(Texts.USER, interactionUser.Mention, true)
-                  .AddField(Texts.USER_ID, interactionUser.Id.ToString(), true)
-                  .WithColor(FeedbackColor)
-                  .WithAuthor(interactionUser.GetUsername(), iconUrl: interactionUser.AvatarUrl);
-      return embed;
-    }
   }
 
   public static class Interaction
   {
-    public static DiscordEmbed EmbedFeedback(DiscordGuild guild) {
+    public static DiscordInteractionResponseBuilder Error(string title, string message = "") {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.FEEDBACK)
-                  .WithDescription(Texts.FEEDBACK_DESCRIPTION)
-                  .WithTimestamp(DateTime.Now)
-                  .WithFooter(guild.Name, guild.IconUrl)
-                  .WithColor(FeedbackColor);
-      return embed;
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(ErrorColor);
+      return new DiscordInteractionResponseBuilder().AddEmbed(embed);
     }
 
-    public static DiscordEmbed EmbedFeedbackDone(int starCount, string textInput, DiscordGuild guild) {
+    public static DiscordInteractionResponseBuilder Success(string title, string message = "") {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.FEEDBACK_RECEIVED)
-                  .WithTimestamp(DateTime.Now)
-                  .WithFooter(guild.Name, guild.IconUrl)
-                  .AddField(Texts.STAR, Texts.STAR_EMOJI + starCount)
-                  .AddField(Texts.FEEDBACK, textInput)
-                  .WithColor(FeedbackColor);
-      return embed;
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(SuccessColor);
+      return new DiscordInteractionResponseBuilder().AddEmbed(embed);
+    }
+
+    public static DiscordInteractionResponseBuilder Info(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(InfoColor);
+      return new DiscordInteractionResponseBuilder().AddEmbed(embed);
+    }
+
+    public static DiscordInteractionResponseBuilder Warning(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(WarningColor);
+      return new DiscordInteractionResponseBuilder().AddEmbed(embed);
+    }
+  }
+
+  public static class Webhook
+  {
+    public static DiscordWebhookBuilder Error(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(ErrorColor);
+      return new DiscordWebhookBuilder().AddEmbed(embed);
+    }
+
+    public static DiscordWebhookBuilder Success(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(SuccessColor);
+      return new DiscordWebhookBuilder().AddEmbed(embed);
+    }
+
+    public static DiscordWebhookBuilder Info(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(InfoColor);
+      return new DiscordWebhookBuilder().AddEmbed(embed);
+    }
+
+    public static DiscordWebhookBuilder Warning(string title, string message = "") {
+      var embed = new DiscordEmbedBuilder()
+                  .WithTitle(title)
+                  .WithDescription(message)
+                  .WithColor(WarningColor);
+      return new DiscordWebhookBuilder().AddEmbed(embed);
     }
   }
 }

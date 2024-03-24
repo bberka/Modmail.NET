@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common;
+using Modmail.NET.Database;
 
 namespace Modmail.NET.Entities;
 
@@ -16,4 +19,55 @@ public class TicketType
   public int Order { get; set; }
   public string? EmbedMessageTitle { get; set; }
   public string? EmbedMessageContent { get; set; }
+
+
+  public async Task UpdateAsync() {
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    dbContext.TicketTypes.Update(this);
+    await dbContext.SaveChangesAsync();
+  }
+
+  public async Task AddAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await dbContext.TicketTypes.AddAsync(this);
+    await dbContext.SaveChangesAsync();
+  }
+
+  public static async Task<TicketType?> GetByIdAsync(Guid id) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.TicketTypes.FindAsync(id);
+  }
+
+  public static async Task<TicketType?> GetByKeyAsync(string key) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == key);
+  }
+
+  public static async Task<TicketType?> GetByNameAsync(string name) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Name == name);
+  }
+
+  public static async Task<bool> ExistsAsync(string relatedContent) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.TicketTypes.AnyAsync(x => x.Name == relatedContent);
+  }
+
+  public static async Task<List<TicketType>> GetAllAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.TicketTypes.ToListAsync();
+  }
+
+  public async Task RemoveAsync() {
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    dbContext.TicketTypes.Remove(this);
+    await dbContext.SaveChangesAsync();
+  }
+
+  public static async Task<TicketType?> GetByChannelIdAsync(ulong channelId) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
+                          .Select(x => x.TicketType)
+                          .FirstOrDefaultAsync();
+  }
 }

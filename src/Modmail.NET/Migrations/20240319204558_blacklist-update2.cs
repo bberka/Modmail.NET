@@ -20,7 +20,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketBlacklists_DiscordUserInfoId_GuildOptionId",
                 table: "TicketBlacklists",
-                columns: new[] { "DiscordUserInfoId", "GuildOptionId" },
+                columns: new[] { "DiscordUserId", "GuildId" },
                 unique: true);
         }
 
@@ -40,7 +40,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketBlacklists_DiscordUserInfoId",
                 table: "TicketBlacklists",
-                column: "DiscordUserInfoId");
+                column: "DiscordUserId");
         }
     }
 }

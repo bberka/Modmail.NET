@@ -12,7 +12,9 @@ public static class UtilMapper
       DiscordUserInfoId = message.Author.Id,
       MessageContent = message.Content,
       TicketId = ticketId,
-      TicketMessageAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList()
+      TicketMessageAttachments = message.Attachments.Select(x => DiscordAttachmentToEntity(x, id)).ToList(),
+      MessageDiscordId = message.Id,
+      RegisterDateUtc = DateTime.UtcNow,
     };
   }
 

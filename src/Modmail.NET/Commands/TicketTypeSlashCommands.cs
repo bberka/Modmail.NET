@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
@@ -12,6 +11,8 @@ namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("ticket-type", "Commands for managing ticket types")]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
+[UpdateUserInformation]
+[RequireMainServer]
 public class TicketTypeSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("create", "Create a new ticket type")]
@@ -42,7 +43,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
 
     var id = Guid.NewGuid();
     var idClean = id.ToString().Replace("-", "");
-    var dbService = ServiceLocator.Get<IDbService>();
+
 
     if (order > int.MaxValue || order < int.MinValue) {
       var embed1 = ModmailEmbeds.Base(Texts.INVALID_ORDER, Texts.INVALID_ORDER_DESCRIPTION, DiscordColor.Red);
@@ -52,7 +53,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var exists = await dbService.TicketTypeExists(name);
+    var exists = await TicketType.ExistsAsync(name);
     if (exists) {
       var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_EXISTS, string.Format(Texts.TICKET_TYPE_EXISTS_DESCRIPTION, name), DiscordColor.Red);
       var webHook1 = new DiscordWebhookBuilder()
@@ -73,7 +74,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       EmbedMessageTitle = embedMessageTitle,
       EmbedMessageContent = embedMessageContent
     };
-    await dbService.AddTicketTypeAsync(ticketType);
+    await ticketType.AddAsync();
 
     var embed2 = ModmailEmbeds.Base(Texts.TICKET_TYPE_CREATED, string.Format(Texts.TICKET_TYPE_CREATED_DESCRIPTION, name), DiscordColor.Green);
     var webHook2 = new DiscordWebhookBuilder()
@@ -81,7 +82,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     await ctx.EditResponseAsync(webHook2);
   }
 
-  [SlashCommand("update", "Update a existing ticket type")]
+  [SlashCommand("update", "UpdateAsync a existing ticket type")]
   public async Task UpdateTicketType(InteractionContext ctx,
                                      [Option("name", "The name of the ticket type")] [Autocomplete(typeof(TicketTypeProvider))]
                                      string name,
@@ -109,7 +110,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
 
     var id = Guid.NewGuid();
     var idClean = id.ToString().Replace("-", "");
-    var dbService = ServiceLocator.Get<IDbService>();
+
 
     if (order > int.MaxValue || order < int.MinValue) {
       var embed1 = ModmailEmbeds.Base(Texts.INVALID_ORDER, Texts.INVALID_ORDER_DESCRIPTION, DiscordColor.Red);
@@ -119,7 +120,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var ticketType = await dbService.GetTicketTypeByNameAsync(name);
+    var ticketType = await TicketType.GetByNameAsync(name);
     if (ticketType is null) {
       var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_EXISTS, string.Format(Texts.TICKET_TYPE_EXISTS_DESCRIPTION, name), DiscordColor.Red);
       var webHook1 = new DiscordWebhookBuilder()
@@ -139,7 +140,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     if (embedMessageContent != null)
       ticketType.EmbedMessageContent = embedMessageContent;
 
-    await dbService.UpdateTicketTypeAsync(ticketType);
+    await ticketType.UpdateAsync();
 
 
     var embed2 = ModmailEmbeds.Base(Texts.TICKET_TYPE_UPDATED, string.Format(Texts.TICKET_TYPE_UPDATED_DESCRIPTION, name), DiscordColor.Green);
@@ -162,9 +163,8 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
-    var ticketType = await dbService.GetTicketTypeByNameAsync(name);
+    var ticketType = await TicketType.GetByNameAsync(name);
     if (ticketType is null) {
       var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_NOT_FOUND, string.Format(Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, name), DiscordColor.Red);
       var webHook1 = new DiscordWebhookBuilder()
@@ -173,7 +173,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    await dbService.RemoveTicketTypeAsync(ticketType);
+    await ticketType.RemoveAsync();
     var embed2 = ModmailEmbeds.Base(Texts.TICKET_TYPE_DELETED, string.Format(Texts.TICKET_TYPE_DELETED_DESCRIPTION, name), DiscordColor.Green);
     var webHook2 = new DiscordWebhookBuilder()
       .AddEmbed(embed2);
@@ -191,9 +191,8 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
-    var ticketTypes = await dbService.GetEnabledTicketTypesAsync();
+    var ticketTypes = await TicketType.GetAllAsync();
     var embed = ModmailEmbeds.Base(Texts.TICKET_TYPES,
                                    string.Join(Environment.NewLine, ticketTypes.Select(x => $"`{x.Name}` - {x.Description}")),
                                    DiscordColor.Blurple);
@@ -213,8 +212,8 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
-    var ticketType = await dbService.GetTicketTypeByChannelIdAsync(ctx.Channel.Id);
+
+    var ticketType = await TicketType.GetByChannelIdAsync(ctx.Channel.Id);
     if (ticketType is null) {
       var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_NOT_FOUND, Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, DiscordColor.Red);
       var webHook1 = new DiscordWebhookBuilder()
@@ -246,9 +245,8 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
-    var guildOption = await dbService.GetOptionAsync(ctx.Guild.Id);
+    var guildOption = await GuildOption.GetAsync();
     if (guildOption is null) {
       var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, "", DiscordColor.Green);
       var webHook2 = new DiscordWebhookBuilder()
@@ -257,7 +255,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var ticketType = await dbService.GetTicketTypeByNameAsync(name);
+    var ticketType = await TicketType.GetByNameAsync(name);
     if (ticketType is null) {
       var embed1 = ModmailEmbeds.Base(Texts.TICKET_TYPE_NOT_FOUND, string.Format(Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, name), DiscordColor.Red);
       var webHook1 = new DiscordWebhookBuilder()
@@ -276,7 +274,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var ticket = await dbService.GetActiveTicketAsync(parsedTicketId);
+    var ticket = await Ticket.GetActiveAsync(parsedTicketId);
     if (ticket is null) {
       var embed2 = ModmailEmbeds.Base(Texts.TICKET_NOT_FOUND, "", DiscordColor.Red);
       var webHook2 = new DiscordWebhookBuilder()
@@ -286,7 +284,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     }
 
     ticket.TicketTypeId = ticketType.Id;
-    await dbService.UpdateTicketAsync(ticket);
+    await ticket.UpdateAsync();
 
 
     var embedTypeSelectedToMailCh = ModmailEmbeds.ToMail.TicketTypeChanged(ctx.User, ticketType);

@@ -11,7 +11,7 @@ public static class Const
   public const string LOG_CHANNEL_NAME = "📄modmail-logs";
 
 
-  public const string TICKET_NAME_TEMPLATE = "ticket-{0}";
+  public const string TICKET_NAME_TEMPLATE = NORMAL_PRIORITY_EMOJI + "ticket-{0}";
   public const string HIGH_PRIORITY_EMOJI = "🔴";
   public const string NORMAL_PRIORITY_EMOJI = "⚪";
   public const string LOW_PRIORITY_EMOJI = "🟢";

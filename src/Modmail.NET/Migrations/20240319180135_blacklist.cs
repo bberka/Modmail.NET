@@ -109,7 +109,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketBlacklists_DiscordUserInfoId",
                 table: "TicketBlacklists",
-                column: "DiscordUserInfoId");
+                column: "DiscordUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Entities;
 using Modmail.NET.Static;
 using Serilog;
 
@@ -12,8 +12,8 @@ public static class ComponentInteractionCreated
 {
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
     var interaction = args.Interaction;
-    var id = interaction.Data.CustomId;
-    var (interactionName, parameters) = UtilInteraction.ParseKey(id);
+    var key = interaction.Data.CustomId;
+    var (interactionName, parameters) = UtilInteraction.ParseKey(key);
     var messageId = args.Message.Id;
 
     switch (interactionName) {
@@ -40,15 +40,14 @@ public static class ComponentInteractionCreated
           return;
         }
 
-        var dbService = ServiceLocator.Get<IDbService>();
-        var ticketType = await dbService.GetTicketTypeByKeyAsync(selectedTypeKey);
+        var ticketType = await TicketType.GetByKeyAsync(selectedTypeKey);
         if (ticketType == null) {
           Log.Warning("Ticket type {TicketTypeKey} was not found for ticket {TicketId}", selectedTypeKey, ticketId);
           await args.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage);
           return;
         }
 
-        var ticket = await dbService.GetActiveTicketAsync(ticketId);
+        var ticket = await Ticket.GetActiveAsync(ticketId);
         if (ticket == null) {
           Log.Warning("Ticket {TicketId} was not found", ticketId);
           await args.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage);
@@ -57,7 +56,7 @@ public static class ComponentInteractionCreated
 
         var guild = await ModmailBot.This.Client.GetGuildAsync(MMConfig.This.MainServerId);
 
-        var guildOption = await dbService.GetOptionAsync(guild.Id);
+        var guildOption = await GuildOption.GetAsync();
         if (guildOption == null) {
           var embed1 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, "", DiscordColor.Red);
           await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
@@ -69,7 +68,7 @@ public static class ComponentInteractionCreated
 
         ticket.TicketTypeId = ticketType.Id;
 
-        await dbService.UpdateTicketAsync(ticket);
+        await ticket.UpdateAsync();
 
         await args.Message.ModifyAsync(x => { x.Embed = ModmailEmbeds.ToUser.TicketCreatedUpdated(guild, guildOption, ticketType); });
 
@@ -97,6 +96,34 @@ public static class ComponentInteractionCreated
         if (embed3 is not null) {
           await args.Channel.SendMessageAsync(embed3);
         }
+
+        break;
+      }
+      case "close_ticket": {
+        await args.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+
+        var ticketIdParam = parameters[0];
+        var ticketId = Guid.Parse(ticketIdParam);
+
+        // 
+        var ticket = await Ticket.GetActiveAsync(ticketId);
+        if (ticket is not null) {
+          await args.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Success(Texts.TICKET_CLOSED));
+          await ticket.CloseTicketAsync(args.User.Id, null, args.Channel);
+        }
+        else {
+          //TODO: Handle ticket not found
+        }
+
+        break;
+      }
+      case "close_ticket_with_reason": {
+        var ticketIdParam = parameters[0];
+        var ticketId = Guid.Parse(ticketIdParam);
+
+        //create modal
+
+        //TODO:
 
         break;
       }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -10,9 +11,10 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240324211357_update2")]
+    partial class update2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.28");
@@ -240,10 +242,10 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<ulong>("DiscordUserId")
+                    b.Property<ulong>("DiscordUserInfoId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("GuildId")
+                    b.Property<ulong>("GuildOptionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Reason")
@@ -254,9 +256,9 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("GuildOptionId");
 
-                    b.HasIndex("DiscordUserId", "GuildId")
+                    b.HasIndex("DiscordUserInfoId", "GuildOptionId")
                         .IsUnique();
 
                     b.ToTable("TicketBlacklists");
@@ -466,13 +468,13 @@ namespace Modmail.NET.Migrations
                 {
                     b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "DiscordUserInfo")
                         .WithMany("TicketBlacklists")
-                        .HasForeignKey("DiscordUserId")
+                        .HasForeignKey("DiscordUserInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
                         .WithMany("TicketBlacklists")
-                        .HasForeignKey("GuildId")
+                        .HasForeignKey("GuildOptionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

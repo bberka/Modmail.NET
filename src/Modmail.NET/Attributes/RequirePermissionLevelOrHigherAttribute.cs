@@ -1,8 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using Microsoft.Extensions.DependencyInjection;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Attributes;
@@ -25,10 +24,9 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
     var guild = ctx.Guild;
     if (guild is null) return false;
 
-    var dbService = ctx.Services.GetService<IDbService>();
 
     var roleIdList = ctx.Member.Roles.Select(x => x.Id).ToList();
-    var permLevel = await dbService!.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
+    var permLevel = await GuildTeamMember.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
     if (permLevel is null) return false;
     var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)_teamPermissionLevel;

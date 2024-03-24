@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
@@ -12,6 +11,8 @@ namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("modmail", "Modmail management commands.")]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
+[UpdateUserInformation]
+[RequireMainServer]
 public class ModmailSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("setup", "Setup the modmail bot.")]
@@ -36,10 +37,8 @@ public class ModmailSlashCommands : ApplicationCommandModule
     }
 
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
     // await using var db = new ModmailDbContext();
-    var existingMmOption = await dbService.GetOptionAsync(currentGuildId);
+    var existingMmOption = await GuildOption.GetAsync();
     if (existingMmOption is not null) {
       var embed3 = ModmailEmbeds.Base(Texts.THIS_SERVER_ALREADY_SETUP, "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
@@ -47,18 +46,18 @@ public class ModmailSlashCommands : ApplicationCommandModule
       return;
     }
 
-    // var anyServerSetup = await dbService.AnyServerSetupAsync();
-    // if (anyServerSetup) {
-    //   var embed3 = ModmailEmbeds.Base(Texts.ANOTHER_SERVER_ALREADY_SETUP, "", DiscordColor.Red);
-    //   var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-    //   await ctx.Interaction.EditOriginalResponseAsync(builder);
-    //   return;
-    // }
+    var anyServerSetup = await GuildOption.Any();
+    if (anyServerSetup) {
+      var embed3 = ModmailEmbeds.Base(Texts.ANOTHER_SERVER_ALREADY_SETUP, "", DiscordColor.Red);
+      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
+      await ctx.Interaction.EditOriginalResponseAsync(builder);
+      return;
+    }
 
     var guild = ctx.Guild;
     var guildId = guild.Id;
 
-    var permissions = await dbService.GetPermissionInfoOrHigherAsync(guildId, TeamPermissionLevel.Admin);
+    var permissions = await GuildTeamMember.GetPermissionInfoOrHigherAsync(guildId, TeamPermissionLevel.Admin);
     var members = await guild.GetAllMembersAsync();
     var roles = guild.Roles;
 
@@ -94,12 +93,12 @@ public class ModmailSlashCommands : ApplicationCommandModule
       guildOption.GreetingMessage = greetingMessage;
     if (!string.IsNullOrEmpty(closingMessage))
       guildOption.ClosingMessage = closingMessage;
-    await dbService.AddGuildOptionAsync(guildOption);
+    await guildOption.AddAsync();
 
     var embed2 = ModmailEmbeds.Base(Texts.SERVER_SETUP_COMPLETE, "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
-    Log.Information("Server setup complete for guild: {GuildOptionId}", currentGuildId);
+    Log.Information("Server setup complete for guild: {GuildId}", currentGuildId);
   }
 
   [SlashCommand("configure", "Configure the modmail bot.")]
@@ -115,10 +114,9 @@ public class ModmailSlashCommands : ApplicationCommandModule
   ) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
     var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    var guildOption = await GuildOption.GetAsync();
     if (guildOption is null) {
       var builder = new DiscordWebhookBuilder().AddEmbed(ModmailEmbeds.ErrorServerNotSetup());
       await ctx.Interaction.EditOriginalResponseAsync(builder);
@@ -134,22 +132,21 @@ public class ModmailSlashCommands : ApplicationCommandModule
       guildOption.GreetingMessage = greetingMessage;
     if (!string.IsNullOrEmpty(closingMessage))
       guildOption.ClosingMessage = closingMessage;
-    await dbService.UpdateGuildOptionAsync(guildOption);
+    await guildOption.UpdateAsync();
 
     var embed2 = ModmailEmbeds.Base(Texts.SERVER_CONFIG_UPDATED, "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
     await ctx.Interaction.EditOriginalResponseAsync(builder2);
-    Log.Information("Server configuration updated for guild: {GuildOptionId}", currentGuildId);
+    Log.Information("Server configuration updated for guild: {GuildId}", currentGuildId);
   }
 
   [SlashCommand("get-settings", "Get the modmail bot settings.")]
   public async Task GetSettings(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
     var currentGuildId = ctx.Guild.Id;
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    var guildOption = await GuildOption.GetAsync();
     if (guildOption is null) {
       var builder = new DiscordWebhookBuilder().AddEmbed(ModmailEmbeds.ErrorServerNotSetup());
       await ctx.Interaction.EditOriginalResponseAsync(builder);

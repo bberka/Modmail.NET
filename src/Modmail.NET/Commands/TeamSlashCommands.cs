@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
@@ -12,6 +11,8 @@ namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("team", "Team management commands.")]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
+[UpdateUserInformation]
+[RequireMainServer]
 public class TeamSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]
@@ -26,11 +27,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-
-    var teams = await dbService.GetTeamsAsync(currentGuildId);
+    var teams = await GuildTeam.GetAllAsync(currentGuildId);
     if (teams is null || teams.Count == 0) {
       var embed2 = ModmailEmbeds.Base("No teams found!", "", DiscordColor.Red);
 
@@ -61,9 +58,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var guildOption = await dbService.GetOptionAsync(currentGuildId);
+    var guildOption = await GuildOption.GetAsync();
     if (guildOption is null) {
       var embed2 = ModmailEmbeds.Base("Server not setup!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -71,8 +66,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-
-    var existingTeam = (await dbService.GetTeamsAsync(currentGuildId)).FirstOrDefault(x => x.Name == teamName);
+    var existingTeam = await GuildTeam.GetByNameAsync(guildOption.GuildId, teamName);
     if (existingTeam is not null) {
       var embed2 = ModmailEmbeds.Base("Team already exists!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -90,7 +84,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       Id = Guid.NewGuid(),
       PermissionLevel = permissionLevel
     };
-    await dbService.AddTeamAsync(team);
+    await team.AddAsync();
 
     var embed = ModmailEmbeds.Base("Team created!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -111,9 +105,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -121,7 +113,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    await dbService.RemoveTeamAsync(team);
+    await team.RemoveAsync();
 
     var embed = ModmailEmbeds.Base("Team removed!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -145,9 +137,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -156,10 +146,10 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
+    await DiscordUserInfo.AddOrUpdateAsync(member);
 
 
-    var isUserAlreadyInTeam = await dbService.IsUserInAnyTeamAsync(member.Id);
+    var isUserAlreadyInTeam = await GuildTeamMember.IsUserInAnyTeamAsync(member.Id);
     if (isUserAlreadyInTeam) {
       var embed2 = ModmailEmbeds.Base("Member already in a team!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -174,7 +164,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       RegisterDateUtc = DateTime.UtcNow
     };
     team.GuildTeamMembers.Add(memberEntity);
-    await dbService.UpdateTeamAsync(team);
+    await team.UpdateAsync();
 
     var embed = ModmailEmbeds.Base("Member added to team!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -197,10 +187,8 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
-
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -209,7 +197,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(member));
+    await DiscordUserInfo.AddOrUpdateAsync(member);
 
     var memberEntity = team.GuildTeamMembers.FirstOrDefault(x => x.Key == member.Id);
     if (memberEntity is null) {
@@ -220,7 +208,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
     team.GuildTeamMembers.Remove(memberEntity);
-    await dbService.UpdateTeamAsync(team);
+    await team.UpdateAsync();
 
     var embed = ModmailEmbeds.Base("Member removed from team!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -244,9 +232,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -255,7 +241,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var isRoleAlreadyInTeam = await dbService.IsRoleInAnyTeamAsync(role.Id);
+    var isRoleAlreadyInTeam = await GuildTeamMember.IsRoleInAnyTeamAsync(role.Id);
     if (isRoleAlreadyInTeam) {
       var embed2 = ModmailEmbeds.Base("Role already in a team!", "", DiscordColor.Red);
       var builder = new DiscordWebhookBuilder().AddEmbed(embed2);
@@ -270,7 +256,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       RegisterDateUtc = DateTime.UtcNow
     };
     team.GuildTeamMembers.Add(roleEntity);
-    await dbService.UpdateTeamAsync(team);
+    await team.UpdateAsync();
 
     var embed = ModmailEmbeds.Base("Role added to team!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -294,9 +280,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
 
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -314,7 +298,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
     team.GuildTeamMembers.Remove(roleEntity);
-    await dbService.UpdateTeamAsync(team);
+    await team.UpdateAsync();
 
     var embed = ModmailEmbeds.Base("Role removed from team!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);
@@ -336,9 +320,8 @@ public class TeamSlashCommands : ApplicationCommandModule
       return;
     }
 
-    var dbService = ServiceLocator.Get<IDbService>();
 
-    var team = await dbService.GetTeamByNameAsync(currentGuildId, teamName);
+    var team = await GuildTeam.GetByNameAsync(currentGuildId, teamName);
 
     if (team is null) {
       var embed2 = ModmailEmbeds.Base("Team not found!", "", DiscordColor.Red);
@@ -348,7 +331,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
 
     team.Name = newName;
-    await dbService.UpdateTeamAsync(team);
+    await team.UpdateAsync();
 
     var embed = ModmailEmbeds.Base("Team renamed!", "", DiscordColor.Green);
     var builder2 = new DiscordWebhookBuilder().AddEmbed(embed);

@@ -239,7 +239,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_GuildTeams_GuildOptionId",
                 table: "GuildTeams",
-                column: "GuildOptionId");
+                column: "GuildId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketFeedbacks_TicketId",
@@ -255,7 +255,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketMessages_DiscordUserInfoId",
                 table: "TicketMessages",
-                column: "DiscordUserInfoId");
+                column: "DiscordUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketMessages_TicketId",
@@ -265,7 +265,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_TicketNotes_DiscordUserInfoId",
                 table: "TicketNotes",
-                column: "DiscordUserInfoId");
+                column: "DiscordUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketNotes_TicketId",
@@ -275,12 +275,12 @@ namespace Modmail.NET.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_DiscordUserInfoId",
                 table: "Tickets",
-                column: "DiscordUserInfoId");
+                column: "DiscordUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_GuildOptionId",
                 table: "Tickets",
-                column: "GuildOptionId");
+                column: "GuildId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

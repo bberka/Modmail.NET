@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Commands;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
+using Modmail.NET.Entities;
 using Modmail.NET.Events;
 using Modmail.NET.Static;
 using Ninject;
@@ -108,6 +109,8 @@ public class ModmailBot
       Log.Error(ex, "Failed to setup server: Database migration failed");
       throw;
     }
+
+    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
   }
 
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
@@ -124,5 +127,25 @@ public class ModmailBot
     }
 
     return null;
+  }
+
+  public async Task<DiscordGuild> GetMainGuildAsync() {
+    var guildId = MMConfig.This.MainServerId;
+    var guild = await Client.GetGuildAsync(guildId);
+    if (guild == null) {
+      Log.Error("Main guild not found: {GuildId}", guildId);
+      throw new Exception("Main guild not found");
+    }
+
+    var guildOption = await GuildOption.GetAsync();
+
+    if (guildOption is not null) {
+      guildOption.Name = guild.Name;
+      guildOption.IconUrl = guild.IconUrl;
+      guildOption.BannerUrl = guild.BannerUrl;
+      await guildOption.UpdateAsync();
+    }
+
+    return guild;
   }
 }
