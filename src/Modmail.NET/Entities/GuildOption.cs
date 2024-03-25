@@ -10,8 +10,6 @@ public class GuildOption
   [Key]
   public ulong GuildId { get; set; }
 
-
-  public bool IsAutoUpdateGuildInformation { get; set; } = true;
   public string Name { get; set; } = "Modmail";
   public string IconUrl { get; set; } = "";
 
