@@ -528,29 +528,12 @@ public class Ticket
 
     var mainGuild = await ModmailBot.This.GetMainGuildAsync();
 
-    var feedbackDone = new DiscordEmbedBuilder()
-                       .WithTitle(Texts.FEEDBACK_RECEIVED)
-                       .WithCustomTimestamp()
-                       .WithFooter(GuildOption.Name, GuildOption.IconUrl)
-                       .AddField(Texts.STAR, Texts.STAR_EMOJI + starCount)
-                       .AddField(Texts.FEEDBACK, textInput)
-                       .WithColor(Colors.FeedbackColor);
 
-    await feedbackMessage.ModifyAsync(x => { x.AddEmbed(feedbackDone); });
+    await feedbackMessage.ModifyAsync(x => { x.AddEmbed(EmbedUser.FeedbackReceivedUpdateMessage(this)); });
 
     var logChannel = mainGuild.GetChannel(GuildOption.LogChannelId);
     if (logChannel is not null) {
-      var logEmbed = new DiscordEmbedBuilder()
-                     .WithTitle(Texts.FEEDBACK_RECEIVED)
-                     .WithDescription(textInput)
-                     .WithCustomTimestamp()
-                     .WithFooter(mainGuild.Name, mainGuild.IconUrl)
-                     .AddField(Texts.TICKET_ID, Id.ToString().ToUpper(), false)
-                     .AddField(Texts.USER, OpenerUserInfo.GetMention(), true)
-                     .AddField(Texts.STAR, starCount.ToString(), true)
-                     .WithColor(Colors.FeedbackColor)
-                     .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl);
-      await logChannel.SendMessageAsync(logEmbed);
+      await logChannel.SendMessageAsync(EmbedLog.FeedbackReceived(this));
     }
   }
 
@@ -567,18 +550,12 @@ public class Ticket
     await dbContext.TicketNotes.AddAsync(noteEntity);
     await dbContext.SaveChangesAsync();
 
+    var user = await DiscordUserInfo.GetAsync(userId);
 
     var logChannelId = await GuildOption.GetLogChannelIdAsync(GuildOption.GuildId);
     var logChannel = await ModmailBot.This.Client.GetChannelAsync(logChannelId);
     if (logChannel is not null) {
-      var noteAddedColorEmbed = new DiscordEmbedBuilder()
-                                .WithTitle(Texts.NOTE_ADDED)
-                                .WithDescription(note)
-                                .WithColor(Colors.NoteAddedColor)
-                                .WithCustomTimestamp()
-                                .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl)
-                                .AddField(Texts.TICKET_ID, Id.ToString().ToUpper());
-      await logChannel.SendMessageAsync(noteAddedColorEmbed);
+      await logChannel.SendMessageAsync(EmbedLog.NoteAdded(this, noteEntity, user));
     }
     else {
       //TODO: Handle log privateChannel not found
@@ -587,13 +564,7 @@ public class Ticket
 
     var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
     if (mailChannel is not null) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.NOTE_ADDED)
-                  .WithDescription(note)
-                  .WithColor(Colors.NoteAddedColor)
-                  .WithCustomTimestamp()
-                  .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl);
-      await mailChannel.SendMessageAsync(embed);
+      await mailChannel.SendMessageAsync(EmbedTicket.NoteAdded(noteEntity, user));
     }
     else {
       //TODO: Handle mail channel not found

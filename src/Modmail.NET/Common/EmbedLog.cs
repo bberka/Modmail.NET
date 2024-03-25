@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 using Modmail.NET.Static;
 
@@ -75,5 +76,31 @@ public static
                 .AddField(Texts.USER_ID, user.Id.ToString(), true)
                 .AddField(Texts.USERNAME, user.GetUsername(), true);
     return embed;
+  }
+
+  public static DiscordEmbed FeedbackReceived(Ticket ticket) {
+    var logEmbed = new DiscordEmbedBuilder()
+                   .WithTitle(Texts.FEEDBACK_RECEIVED)
+                   .WithDescription(ticket.FeedbackMessage)
+                   .WithCustomTimestamp()
+                   .WithGuildInfoFooter(ticket.GuildOption)
+                   .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper(), false)
+                   .AddField(Texts.USER, ticket.OpenerUserInfo.GetMention(), true) //not sure needed
+                   .AddField(Texts.STAR, ticket.FeedbackStar.ToString(), true)
+                   .WithColor(Colors.FeedbackColor)
+                   .WithUserAsAuthor(ticket.OpenerUserInfo);
+
+    return logEmbed;
+  }
+
+  public static DiscordEmbed NoteAdded(Ticket ticket, TicketNote note, DiscordUserInfo user) {
+    var noteAddedColorEmbed = new DiscordEmbedBuilder()
+                              .WithColor(Colors.NoteAddedColor)
+                              .WithTitle(Texts.NOTE_ADDED)
+                              .WithDescription(note.Content)
+                              .WithCustomTimestamp()
+                              .WithUserAsAuthor(user)
+                              .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper());
+    return noteAddedColorEmbed;
   }
 }

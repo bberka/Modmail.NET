@@ -9,6 +9,7 @@ namespace Modmail.NET.Events;
 public static class ComponentInteractionCreated
 {
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
+    await DiscordUserInfo.AddOrUpdateAsync(args.User);
     var interaction = args.Interaction;
     var key = interaction.Data.CustomId;
     var (interactionName, parameters) = UtilInteraction.ParseKey(key);

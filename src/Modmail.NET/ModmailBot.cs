@@ -78,6 +78,26 @@ public class ModmailBot
     Client.ComponentInteractionCreated += ComponentInteractionCreated.Handle;
     Client.ModalSubmitted += ModalSubmitted.Handle;
 
+    //FOR USER DATA UPDATE ONLY
+    Client.GuildMemberAdded += OnGuildMemberAdded.Handle;
+    Client.GuildMemberRemoved += OnGuildMemberRemoved.Handle;
+    Client.GuildBanAdded += OnGuildBanAdded.Handle;
+    Client.GuildBanRemoved += OnGuildBanRemoved.Handle;
+    Client.MessageAcknowledged += OnMessageAcknowledged.Handle;
+    Client.TypingStarted += OnTypingStarted.Handle;
+    Client.UserUpdated += OnUserUpdated.Handle;
+    Client.UserSettingsUpdated += OnUserSettingsUpdated.Handle;
+    Client.ScheduledGuildEventUserAdded += OnScheduledGuildEventUserAdded.Handle;
+    Client.ScheduledGuildEventUserRemoved += OnScheduledGuildEventUserRemoved.Handle;
+    Client.MessageReactionAdded += OnMessageReactionAdded.Handle;
+    Client.MessageReactionRemoved += OnMessageReactionRemoved.Handle;
+    Client.MessageReactionRemovedEmoji += OnMessageReactionRemovedEmoji.Handle;
+    Client.MessageReactionsCleared += OnMessageReactionsCleared.Handle;
+    Client.MessageDeleted += OnMessageDeleted.Handle;
+    Client.MessageUpdated += OnMessageUpdated.Handle;
+    Client.ThreadCreated += OnThreadCreated.Handle;
+
+
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();
     slash.RegisterCommands<TicketSlashCommands>();
@@ -121,6 +141,7 @@ public class ModmailBot
       try {
         var member = await guild.Value.GetMemberAsync(userId, false);
         if (member != null) {
+          await DiscordUserInfo.AddOrUpdateAsync(member);
           return member;
         }
       }
@@ -148,6 +169,8 @@ public class ModmailBot
       guildOption.IconUrl = guild.IconUrl;
       guildOption.BannerUrl = guild.BannerUrl;
       await guildOption.UpdateAsync();
+
+      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
     }
 
     return guild;

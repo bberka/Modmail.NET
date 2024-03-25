@@ -86,4 +86,14 @@ public static class EmbedTicket
 
     return messageBuilder;
   }
+
+  public static DiscordEmbedBuilder NoteAdded(TicketNote note, DiscordUserInfo user) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.NOTE_ADDED)
+                .WithDescription(note.Content)
+                .WithColor(Colors.NoteAddedColor)
+                .WithCustomTimestamp()
+                .WithUserAsAuthor(user);
+    return embed;
+  }
 }

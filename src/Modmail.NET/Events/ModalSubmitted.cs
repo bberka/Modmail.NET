@@ -12,6 +12,8 @@ public static class ModalSubmitted
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
     await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(Texts.THANK_YOU_FOR_FEEDBACK));
 
+    await DiscordUserInfo.AddOrUpdateAsync(args.Interaction.User);
+
     var interaction = args.Interaction;
     var id = interaction.Data.CustomId;
     var (interactionName, parameters) = UtilInteraction.ParseKey(id);
