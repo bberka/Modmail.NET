@@ -3,12 +3,14 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Aspects;
 using Modmail.NET.Commands;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Events;
+using Modmail.NET.Manager;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 using Ninject;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -21,9 +23,9 @@ public class ModmailBot
 
 
   private ModmailBot() {
-    _ = MMConfig.This; // Initialize the environment container
+    _ = BotConfig.This; // Initialize the environment container
     UtilLogConfig.Configure();
-    if (MMConfig.This.Environment == EnvironmentType.Development)
+    if (BotConfig.This.Environment == EnvironmentType.Development)
       Log.Information("Running in development mode");
 
     var kernel = new StandardKernel(new MmKernel());
@@ -40,7 +42,7 @@ public class ModmailBot
       }
     };
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    AutoStartManager.SaveAutoStart();
+    AutoStartMgr.SaveAutoStart();
   }
 
   public static ModmailBot This {
@@ -56,7 +58,7 @@ public class ModmailBot
   public async Task StartAsync() {
     // Start the bot
     Client = new DiscordClient(new DiscordConfiguration {
-      Token = MMConfig.This.BotToken,
+      Token = BotConfig.This.BotToken,
       AutoReconnect = true,
       TokenType = TokenType.Bot,
       Intents = DiscordIntents.All,
@@ -113,6 +115,7 @@ public class ModmailBot
     await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
   }
 
+
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
     foreach (var guild in Client.Guilds) {
       try {
@@ -129,8 +132,9 @@ public class ModmailBot
     return null;
   }
 
+  [CacheAspect(CacheSeconds = 60)]
   public async Task<DiscordGuild> GetMainGuildAsync() {
-    var guildId = MMConfig.This.MainServerId;
+    var guildId = BotConfig.This.MainServerId;
     var guild = await Client.GetGuildAsync(guildId);
     if (guild == null) {
       Log.Error("Main guild not found: {GuildId}", guildId);

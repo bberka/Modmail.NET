@@ -1,6 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
@@ -15,7 +14,7 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
   }
 
   public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx) {
-    var isOwner = MMConfig.This.OwnerUsers.Contains(ctx.User.Id);
+    var isOwner = BotConfig.This.OwnerUsers.Contains(ctx.User.Id);
     if (isOwner) return true;
 
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);

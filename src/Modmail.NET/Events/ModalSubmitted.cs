@@ -1,9 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Events;
 
@@ -33,7 +33,7 @@ public static class ModalSubmitted
         if (ticket is null) throw new InvalidOperationException("Ticket not found: " + ticketId);
 
         var feedbackMessage = await args.Interaction.Channel.GetMessageAsync(feedbackMessageId);
-        await ticket.ProcessInsertFeedbackAsync(starCount, textInput, feedbackMessage);
+        await ticket.ProcessAddFeedbackAsync(starCount, textInput, feedbackMessage);
 
         break;
     }

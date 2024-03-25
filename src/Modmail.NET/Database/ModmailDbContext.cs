@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
@@ -20,18 +19,18 @@ public class ModmailDbContext : DbContext
   public DbSet<TicketType> TicketTypes { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    switch (MMConfig.This.DbType) {
+    switch (BotConfig.This.DbType) {
       case DbType.Sqlite:
-        optionsBuilder.UseSqlite(MMConfig.This.DbConnectionString);
+        optionsBuilder.UseSqlite(BotConfig.This.DbConnectionString);
         break;
       case DbType.Postgres:
-        optionsBuilder.UseNpgsql(MMConfig.This.DbConnectionString);
+        optionsBuilder.UseNpgsql(BotConfig.This.DbConnectionString);
         break;
       case DbType.MsSql:
-        optionsBuilder.UseSqlServer(MMConfig.This.DbConnectionString);
+        optionsBuilder.UseSqlServer(BotConfig.This.DbConnectionString);
         break;
       case DbType.MySql:
-        optionsBuilder.UseMySql(MMConfig.This.DbConnectionString, ServerVersion.AutoDetect(MMConfig.This.DbConnectionString));
+        optionsBuilder.UseMySql(BotConfig.This.DbConnectionString, ServerVersion.AutoDetect(BotConfig.This.DbConnectionString));
         break;
       default:
         throw new ArgumentOutOfRangeException();

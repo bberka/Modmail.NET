@@ -1,9 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Events;
 
@@ -17,7 +17,7 @@ public static class OnChannelDeleted
       await DiscordUserInfo.AddOrUpdateAsync(user);
       var ticket = await Ticket.GetActiveAsync(ticketId);
       if (ticket is not null) {
-        await ticket.CloseTicketAsync(user.Id, Texts.CHANNEL_WAS_DELETED, args.Channel);
+        await ticket.ProcessCloseTicketAsync(user.Id, Texts.CHANNEL_WAS_DELETED, args.Channel);
       }
     }
   }

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Models;
 using Modmail.NET.Static;

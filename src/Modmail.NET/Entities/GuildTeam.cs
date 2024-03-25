@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Static;
 
@@ -14,12 +13,8 @@ public class GuildTeam
   public TeamPermissionLevel PermissionLevel { get; set; }
   public DateTime RegisterDateUtc { get; set; }
   public DateTime? UpdateDateUtc { get; set; }
-
   public string Name { get; set; }
-
   public bool IsEnabled { get; set; } = true;
-
-
   public ulong GuildOptionId { get; set; }
 
   public virtual GuildOption GuildOption { get; set; }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
+using Modmail.NET.Aspects;
 using Modmail.NET.Database;
 
 namespace Modmail.NET.Entities;
@@ -42,9 +42,10 @@ public class GuildOption
   public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
 
 
+  [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 10)]
   public static async Task<GuildOption?> GetAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == MMConfig.This.MainServerId);
+    return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
   }
 
   public async Task UpdateAsync() {

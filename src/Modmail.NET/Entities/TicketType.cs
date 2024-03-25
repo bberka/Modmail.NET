@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 
 namespace Modmail.NET.Entities;
@@ -17,8 +16,8 @@ public class TicketType
   public string? Emoji { get; set; }
   public string? Description { get; set; }
   public int Order { get; set; }
-  public string? EmbedMessageTitle { get; set; }
-  public string? EmbedMessageContent { get; set; }
+  public string EmbedMessageTitle { get; set; }
+  public string EmbedMessageContent { get; set; }
 
 
   public async Task UpdateAsync() {
@@ -38,19 +37,14 @@ public class TicketType
     return await dbContext.TicketTypes.FindAsync(id);
   }
 
-  public static async Task<TicketType?> GetByKeyAsync(string key) {
+  public static async Task<TicketType?> GetAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == key);
+    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
   }
 
-  public static async Task<TicketType?> GetByNameAsync(string name) {
+  public static async Task<bool> ExistsAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Name == name);
-  }
-
-  public static async Task<bool> ExistsAsync(string relatedContent) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketTypes.AnyAsync(x => x.Name == relatedContent);
+    return await dbContext.TicketTypes.AnyAsync(x => x.Name == keyOrName || x.Key == keyOrName);
   }
 
   public static async Task<List<TicketType>> GetAllAsync() {

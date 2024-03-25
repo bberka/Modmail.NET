@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
+using Modmail.NET.Extensions;
 
 namespace Modmail.NET.Entities;
 
@@ -52,9 +52,9 @@ public class DiscordUserInfo
 
   public string GetMention() => $"<@{Id}>";
 
-  public static async Task<DiscordUserInfo?> GetAsync(ulong userId) {
+  public static async Task<DiscordUserInfo> GetAsync(ulong userId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
+    return await dbContext.DiscordUserInfos.SingleAsync(x => x.Id == userId);
   }
 
   public async Task RemoveAsync() {

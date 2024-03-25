@@ -4,8 +4,9 @@ using DSharpPlus.SlashCommands;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Providers;
 using Modmail.NET.Static;
-using Serilog;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Commands;
 
@@ -21,28 +22,16 @@ public class TicketSlashCommands : ApplicationCommandModule
                                 [Option("reason", "Ticket closing reason")]
                                 string? reason = null) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    // if (ctx.Guild.Id != MMConfig.This.MainServerId) {
-    //   await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER));
-    //   return;
-    // }
-
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
-    // if (ticketId == Guid.Empty) {
-    //   await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL));
-    //   return;
-    // }
-
-
     var ticket = await Ticket.GetActiveAsync(ticketId);
     if (ticket is not null) {
-      //The reason why this is before because channel will be deleted after calling CloseTicketAsync
-      await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Success(Texts.TICKET_CLOSED));
-      await ticket.CloseTicketAsync(ctx.User.Id, reason, ctx.Channel);
+      //The reason why this is before because channel will be deleted after calling ProcessCloseTicketAsync
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_CLOSED));
+      await ticket.ProcessCloseTicketAsync(ctx.User.Id, reason, ctx.Channel);
     }
     else {
       //This should never happen
-      await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Success(Texts.TICKET_NOT_FOUND));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_NOT_FOUND));
     }
   }
 
@@ -51,28 +40,16 @@ public class TicketSlashCommands : ApplicationCommandModule
                                 [Option("priority", "Priority of the ticket")]
                                 TicketPriority priority) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    // if (ctx.Guild.Id != MMConfig.This.MainServerId) {
-    //   await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER));
-    //   return;
-    // }
-
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
-    // if (ticketId == Guid.Empty) {
-    //   await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL));
-    //   return;
-    // }
-
-
     var ticket = await Ticket.GetActiveAsync(ticketId);
     if (ticket is not null) {
-      await ticket.ChangePriority(ctx.User.Id, priority, ctx.Channel);
-      await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Success(Texts.TICKET_PRIORITY_CHANGED));
+      await ticket.ProcessChangePriority(ctx.User.Id, priority, ctx.Channel);
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_PRIORITY_CHANGED));
       return;
     }
     else {
       //This should never happen
-      await ctx.Interaction.EditOriginalResponseAsync(ModmailEmbeds.Webhook.Success(Texts.TICKET_NOT_FOUND));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_NOT_FOUND));
     }
   }
 
@@ -82,119 +59,49 @@ public class TicketSlashCommands : ApplicationCommandModule
                             [Option("note", "Note to add")] string note) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
-    var currentGuildId = ctx.Guild.Id;
-    if (currentGuildId != MMConfig.This.MainServerId) {
-      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
 
-
-    var currentChannel = ctx.Channel;
-    var currentGuild = ctx.Guild;
-    var currentMember = ctx.Member;
-    var currentUser = ctx.User;
-    var channelTopic = currentChannel.Topic;
-
-    var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
-    if (ticketId == Guid.Empty) {
-      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
+    var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
     var ticket = await Ticket.GetActiveAsync(ticketId);
-    if (ticket is null) {
-      Log.Verbose("Active ticket not found: {TicketId} {GuildId}", ticketId, currentGuild.Id);
-
-      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
+    if (ticket is not null) {
+      await ticket.ProcessAddNoteAsync(ctx.User.Id, note);
     }
-
-    var noteEntity = new TicketNote {
-      TicketId = ticketId,
-      Content = note,
-      DiscordUserInfoId = currentUser.Id,
-      Username = currentUser.GetUsername(),
-      RegisterDateUtc = DateTime.UtcNow,
-    };
-    await noteEntity.AddAsync();
-
-    var embed = ModmailEmbeds.ToLog.NoteAdded(ctx.User, note, ticket);
-    var logChannelId = await GuildOption.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
-    var logChannel = currentGuild.GetChannel(logChannelId);
-    await logChannel.SendMessageAsync(embed);
-
-    var embed2 = ModmailEmbeds.Base("Note added!", "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-
-    var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
-
-    var embed3 = ModmailEmbeds.ToMail.NoteAdded(ctx.User, note);
-    await mailChannel.SendMessageAsync(embed3);
-
-    Log.Information("Note added: {TicketId} in guild {GuildId}", ticketId, ticket.GuildOption.GuildId);
+    else {
+      //This should never happen
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_NOT_FOUND));
+    }
   }
 
   [SlashCommand("toggle-anonymous", "Toggle anonymous mode for a ticket.")]
   public async Task ToggleAnonymous(InteractionContext ctx) {
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
-    var currentGuildId = ctx.Guild.Id;
-    if (currentGuildId != MMConfig.This.MainServerId) {
-      var embed4 = ModmailEmbeds.Base(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER, "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
-
-    var currentChannel = ctx.Channel;
-    var currentGuild = ctx.Guild;
-    var currentMember = ctx.Member;
-    var currentUser = ctx.User;
-    var channelTopic = currentChannel.Topic;
-
-    var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
-    if (ticketId == Guid.Empty) {
-      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
-    }
-
+    var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
     var ticket = await Ticket.GetActiveAsync(ticketId);
-    if (ticket is null) {
-      Log.Verbose("Active ticket not found: {TicketId} {GuildId}", ticketId, currentGuild.Id);
-
-      var embed4 = ModmailEmbeds.Base("This command can only be used in a ticket channel.", "", DiscordColor.Green);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.Interaction.EditOriginalResponseAsync(builder);
-      return;
+    if (ticket is not null) {
+      await ticket.ProcessToggleAnonymousAsync(ctx.Channel);
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_ANONYMOUS_TOGGLED));
     }
+    else {
+      //This should never happen
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_NOT_FOUND));
+    }
+  }
 
-    ticket.Anonymous = !ticket.Anonymous;
-    await ticket.UpdateAsync();
 
-    var embed = ModmailEmbeds.ToLog.AnonymousToggled(ctx.User, ticket, ticket.Anonymous);
-    var logChannelId = await GuildOption.GetLogChannelIdAsync(ticket.GuildOption.GuildId);
-    var logChannel = currentGuild.GetChannel(logChannelId);
-    await logChannel.SendMessageAsync(embed);
-
-    var embed2 = ModmailEmbeds.Base("Anonymous mode toggled!", "", DiscordColor.Green);
-    var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
-    await ctx.Interaction.EditOriginalResponseAsync(builder2);
-
-    var mailChannel = currentGuild.GetChannel(ticket.ModMessageChannelId);
-
-    var embed3 = ModmailEmbeds.ToMail.AnonymousToggled(ctx.User, ticket.Anonymous);
-    await mailChannel.SendMessageAsync(embed3);
-
-    Log.Information("Anonymous mode toggled: {TicketId} in guild {GuildId}", ticketId, ticket.GuildOption.GuildId);
+  [SlashCommand("set-type", "Set the type of a ticket.")]
+  public async Task SetType(InteractionContext ctx,
+                            [Option("type", "Type of the ticket")] [Autocomplete(typeof(TicketTypeProvider))]
+                            string type) {
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
+    var ticket = await Ticket.GetActiveAsync(ticketId);
+    if (ticket is not null) {
+      await ticket.ProcessChangeTicketTypeAsync(ctx.User.Id, type, ctx.Channel);
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_TYPE_CHANGED));
+    }
+    else {
+      //This should never happen
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_NOT_FOUND));
+    }
   }
 }

@@ -1,6 +1,4 @@
-﻿using Modmail.NET.Common;
-
-namespace Modmail.NET.Static;
+﻿namespace Modmail.NET.Static;
 
 public static class Texts
 {
@@ -30,7 +28,7 @@ public static class Texts
   public const string NOTE_ADDED = "Note Added";
   public const string FEEDBACK = "Feedback";
   public const string FEEDBACK_DESCRIPTION = "Please rate the answers you receive. This helps us improve our moderation team.";
-  public const string FEEDBACK_RECEIVED = "Feedback received";
+  public const string FEEDBACK_RECEIVED = "Feedback Received";
   public const string STAR = "Star";
   public const string ANONYMOUS_TOGGLED = "Anonymous Toggled";
   public const string TOGGLED_BY = "Toggled By";
@@ -93,9 +91,10 @@ public static class Texts
   public const string PLEASE_SELECT_A_TICKET_TYPE = "Please select a ticket type";
   public const string TICKET_NOT_FOUND = "Ticket not found";
   public const string TICKET_TYPE = "Ticket Type";
-  public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
+
+  // public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
   public const string TICKET_TYPE_CHANGED = "Ticket type changed";
-  public const string TICKET_TYPE_CHANGED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` changed";
+  public const string TICKET_TYPE_SET = "Ticket type set to {0} `{1}`";
   public const string USER_NOT_FOUND = "User not found";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL = "This command can only be used in a ticket channel";
   public const string REASON = "Reason";
@@ -105,6 +104,26 @@ public static class Texts
   public const string CLOSE_TICKET_WITH_REASON = "Close Ticket with Reason";
   public const string TICKET_CLOSED_SUCCESSFULLY = "Ticket closed successfully";
   public const string TICKET_ALREADY_CLOSED = "Ticket already closed";
+  public const string TICKET_ANONYMOUS_TOGGLED = "Ticket anonymous toggled";
+  public const string INVALID_USER = "Invalid User";
+  public const string CHANNEL_NOT_FOUND = "Channel not found";
+  public const string INVALID_MESSAGE_ID = "Invalid message id";
+  public const string NO_TEAM_FOUND = "No team found";
+  public const string TEAM_WITH_SAME_NAME_ALREADY_EXISTS = "Team with the same name already exists";
+  public const string TEAM_CREATED_SUCCESSFULLY = "Team created successfully";
+  public const string TEAM_NOT_FOUND = "Team not found";
+  public const string TEAM_REMOVED_SUCCESSFULLY = "Team removed successfully";
+  public const string MEMBER_ALREADY_IN_TEAM = "Member already in team";
+  public const string MEMBER_ADDED_TO_TEAM = "Member added to team";
+  public const string MEMBER_NOT_FOUND_IN_TEAM = "Member not found in team";
+  public const string MEMBER_REMOVED_FROM_TEAM = "Member removed from team";
+  public const string ROLE_ALREADY_IN_TEAM = "Role already in team";
+  public const string ROLE_ADDED_TO_TEAM = "Role added to team";
+  public const string ROLE_NOT_FOUND_IN_TEAM = "Role not found in team";
+  public const string ROLE_REMOVED_FROM_TEAM = "Role removed from team";
+  public const string TEAM_RENAMED_SUCCESSFULLY = "Team renamed successfully";
+  public const string NO_TICKET_TYPES_FOUND = "No ticket types found";
+  public const string TICKET_CLOSED_DUE_TO_BLACKLIST = "Ticket closed due to blacklist";
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine
@@ -121,5 +140,5 @@ public static class Texts
                                                         + "If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
                                                         + Environment.NewLine
                                                         + Environment.NewLine
-                                                        + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ";
+                                                        + $"Messages starting with bot prefix `{BotConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ";
 }
