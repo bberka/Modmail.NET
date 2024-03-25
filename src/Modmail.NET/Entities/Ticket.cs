@@ -707,16 +707,18 @@ public class Ticket
         embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
       await privateChannel.SendMessageAsync(embed);
 
-      privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
-      if (privateMessageWithComponent is not null) {
-        //remove components from private messageContent
-        var embedPmInteraction = privateMessageWithComponent.Embeds.FirstOrDefault();
-        await privateMessageWithComponent.ModifyAsync(x => {
-          x.ClearComponents();
-          x.AddEmbed(embedPmInteraction);
-        });
+      if (BotTicketCreatedMessageInDmId != 0) {
+        privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
+        if (privateMessageWithComponent is not null) {
+          //remove components from private messageContent
+          var embedPmInteraction = privateMessageWithComponent.Embeds.FirstOrDefault();
+          await privateMessageWithComponent.ModifyAsync(x => {
+            x.ClearComponents();
+            x.AddEmbed(embedPmInteraction);
+          });
 
-        TicketTypeSelectionTimeoutMgr.This.RemoveMessage(privateMessageWithComponent.Id);
+          TicketTypeSelectionTimeoutMgr.This.RemoveMessage(privateMessageWithComponent.Id);
+        }
       }
     }
     else {

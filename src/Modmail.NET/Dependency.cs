@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Modmail.NET.Database;
 using Ninject;
 using Ninject.Modules;
@@ -8,7 +9,8 @@ namespace Modmail.NET;
 public class MmKernel : NinjectModule
 {
   public override void Load() {
-    Bind<IMemoryCache>().To<Microsoft.Extensions.Caching.Memory.MemoryCache>().InSingletonScope();
+    Bind<IOptions<MemoryCacheOptions>>().To<BotCacheOptions>().InSingletonScope();
+    Bind<IMemoryCache>().To<MemoryCache>().InSingletonScope();
     Bind<ModmailDbContext>().ToSelf().InTransientScope();
   }
 }
@@ -23,5 +25,12 @@ public static class ServiceLocator
 
   public static T Get<T>() {
     return _kernel.Get<T>();
+  }
+}
+
+public class BotCacheOptions : MemoryCacheOptions
+{
+  public BotCacheOptions() {
+    ExpirationScanFrequency = TimeSpan.FromSeconds(1);
   }
 }
