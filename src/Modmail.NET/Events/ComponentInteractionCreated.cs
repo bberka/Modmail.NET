@@ -61,7 +61,8 @@ public static class ComponentInteractionCreated
       case "close_ticket_with_reason": {
         var ticketIdParam = parameters[0];
         var ticketId = Guid.Parse(ticketIdParam);
-
+        var modal = Modals.CreateCloseTicketWithReasonModal(ticketId);
+        await args.Interaction.CreateResponseAsync(InteractionResponseType.Modal, modal);
         break;
       }
     }

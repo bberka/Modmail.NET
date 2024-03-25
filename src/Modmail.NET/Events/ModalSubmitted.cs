@@ -20,7 +20,7 @@ public static class ModalSubmitted
 
 
     switch (interactionName) {
-      case "feedback":
+      case "feedback": {
         var textInput = args.Values["feedback"];
 
         var starParam = parameters[0];
@@ -38,8 +38,20 @@ public static class ModalSubmitted
         await ticket.ProcessAddFeedbackAsync(starCount, textInput, feedbackMessage);
 
         break;
-    }
+      }
+      case "close_ticket_with_reason": {
+        var textInput = args.Values["reason"];
 
-    await Task.CompletedTask;
+        var ticketIdParam = parameters[0];
+
+        var ticketId = Guid.Parse(ticketIdParam);
+
+        var ticket = await Ticket.GetAsync(ticketId);
+        if (ticket is null) throw new InvalidOperationException("Ticket not found: " + ticketId);
+
+        await ticket.ProcessCloseTicketAsync(args.Interaction.User.Id, textInput, args.Interaction.Channel);
+        break;
+      }
+    }
   }
 }

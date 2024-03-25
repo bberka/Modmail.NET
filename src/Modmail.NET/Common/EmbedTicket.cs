@@ -71,12 +71,11 @@ public static class EmbedTicket
                          .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket", ticketId.ToString()),
                                                                    Texts.CLOSE_TICKET,
+                                                                   emoji: new DiscordComponentEmoji("🔒")),
+                                        new DiscordButtonComponent(ButtonStyle.Danger,
+                                                                   UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
+                                                                   Texts.CLOSE_TICKET_WITH_REASON,
                                                                    emoji: new DiscordComponentEmoji("🔒"))
-                                        // ,
-                                        // new DiscordButtonComponent(ButtonStyle.Danger,
-                                        //                            UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
-                                        //                            Texts.CLOSE_TICKET_WITH_REASON,
-                                        //                            emoji: new DiscordComponentEmoji("🔒"))
                                        );
 
     var sb = new StringBuilder();
