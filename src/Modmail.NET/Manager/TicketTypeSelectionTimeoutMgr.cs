@@ -10,8 +10,8 @@ public class TicketTypeSelectionTimeoutMgr
 
   private TicketTypeSelectionTimeoutMgr() {
     Messages = new();
-    //Repeat every 1 seconds
-    // Timer = new(TimerElapsed, null, 0, 1000);
+    // Repeat every 1 seconds
+    Timer = new(TimerElapsed, null, 0, 1000);
   }
 
   public static TicketTypeSelectionTimeoutMgr This {
@@ -33,22 +33,21 @@ public class TicketTypeSelectionTimeoutMgr
   }
 
   public void RemoveMessage(ulong id) {
-    // var message = Messages.FirstOrDefault(x => x.Key.Id == id);
-    // if (message.Key != null) {
-    //   Messages.TryRemove(message.Key, out _);
-    // }
+    var message = Messages.FirstOrDefault(x => x.Key.Id == id);
+    if (message.Key != null) {
+      Messages.TryRemove(message.Key, out _);
+    }
   }
 
   private void TimerElapsed(object? sender) {
     //remove everything that is older than 3 minutes
-    // foreach (var message in Messages) {
-    //   if (DateTime.UtcNow - message.Value > TimeSpan.FromMinutes(3)) {
-    //     Messages.TryRemove(message.Key, out _);
-    //     var embed = message.Key.Embeds.FirstOrDefault();
-    //     var builder = new DiscordEmbedBuilder(embed);
-    //     builder.AddField(Texts.TICKET_TYPE, Texts.TICKET_TYPE_SELECTION_TIMEOUT);
-    //     message.Key.ModifyAsync(x => { x.AddEmbed(builder); });
-    //   }
-    // }
+    foreach (var message in Messages) {
+      if (DateTime.UtcNow - message.Value <= TimeSpan.FromMinutes(3)) continue;
+      Messages.TryRemove(message.Key, out _);
+      message.Key.ModifyAsync(x => {
+        x.ClearComponents();
+        x.AddEmbeds(message.Key.Embeds);
+      });
+    }
   }
 }
