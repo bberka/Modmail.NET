@@ -134,6 +134,9 @@ public static class Texts
   public const string LOG_CHANNEL_NOT_FOUND = "Log channel not found";
   public const string AN_EXCEPTION_OCCURRED = "An exception occurred, please check the logs";
   public const string YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND = "You do not have permission to use this command";
+  public const string MAIN_GUILD_NOT_FOUND = "Main guild not found";
+  public const string MAIN_GUILD_NOT_FOUND_DESC = "You must invite the bot to the main server first";
+  public const string NO_BLACKLISTED_USERS_FOUND = "No blacklisted users found";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
