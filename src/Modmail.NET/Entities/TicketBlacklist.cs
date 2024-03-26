@@ -28,6 +28,7 @@ public class TicketBlacklist
   public virtual GuildOption GuildOption { get; set; }
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
+    if (userId == 0) throw new InvalidUserIdException();
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserId == userId);
   }
@@ -35,12 +36,26 @@ public class TicketBlacklist
 
   public static async Task<List<TicketBlacklist>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketBlacklists.ToListAsync();
+    var result = await dbContext.TicketBlacklists.ToListAsync();
+    if (result.Count == 0) {
+      throw new NoBlacklistedUsersFoundException();
+    }
+
+    return result;
   }
 
-  public static async Task<TicketBlacklist?> GetAsync(ulong userId) {
+  public static async Task<TicketBlacklist> GetAsync(ulong userId) {
+    if (userId == 0) {
+      throw new InvalidUserIdException();
+    }
+
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketBlacklists.FirstOrDefaultAsync(x => x.DiscordUserId == userId);
+    var result = await dbContext.TicketBlacklists.FirstOrDefaultAsync(x => x.DiscordUserId == userId);
+    if (result is null) {
+      throw new UserIsNotBlacklistedException();
+    }
+
+    return result;
   }
 
   public async Task AddAsync() {
@@ -99,6 +114,22 @@ public class TicketBlacklist
       var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
       if (member is not null) {
         var dmEmbed = EmbedUser.YouHaveBeenBlacklisted(reason);
+        await member.SendMessageAsync(dmEmbed);
+      }
+    }
+  }
+
+  public async Task ProcessRemoveUserFromBlacklist(ulong authorUserId, ulong userId, bool notifyUser) {
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await this.RemoveAsync();
+    var modUser = await DiscordUserInfo.GetAsync(authorUserId);
+    var userInfo = await DiscordUserInfo.GetAsync(userId);
+    var embedLog = EmbedLog.BlacklistRemoved(modUser, userInfo);
+    await logChannel.SendMessageAsync(embedLog);
+    if (notifyUser) {
+      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(userId);
+      if (member is not null) {
+        var dmEmbed = EmbedUser.YouHaveBeenRemovedFromBlacklist(modUser);
         await member.SendMessageAsync(dmEmbed);
       }
     }

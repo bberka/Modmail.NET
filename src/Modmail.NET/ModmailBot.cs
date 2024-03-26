@@ -160,7 +160,7 @@ public class ModmailBot
     var guild = await Client.GetGuildAsync(guildId);
     if (guild == null) {
       Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new Exception("Main guild not found");
+      throw new MainGuildNotFoundException();
     }
 
     var guildOption = await GuildOption.GetAsync();
@@ -182,8 +182,7 @@ public class ModmailBot
     var guild = await GetMainGuildAsync();
     var option = await GuildOption.GetAsync();
     if (option is null) {
-      Log.Error("Guild option not found");
-      throw new Exception("Guild option not found");
+      throw new ServerIsNotSetupException();
     }
 
     var logChannel = guild.GetChannel(option.LogChannelId);

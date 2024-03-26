@@ -66,12 +66,12 @@ public static
     return embed;
   }
 
-  public static DiscordEmbed BlacklistRemoved(DiscordUser author, DiscordUser user) {
+  public static DiscordEmbed BlacklistRemoved(DiscordUserInfo author, DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.USER_BLACKLIST_REMOVED)
-                .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
+                .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.USER, user.Mention, true);
+                .AddField(Texts.USER, user.GetMention(), true);
     return embed;
   }
 

@@ -130,7 +130,7 @@ public static class EmbedUser
   }
 
 
-  public static DiscordEmbedBuilder YouHaveBeenRemovedFromBlacklist(DiscordUser user) {
+  public static DiscordEmbedBuilder YouHaveBeenRemovedFromBlacklist(DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST)
                 .WithDescription(Texts.YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST_DESCRIPTION)

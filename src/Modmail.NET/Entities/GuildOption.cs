@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Aspects;
 using Modmail.NET.Database;
+using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
@@ -41,9 +42,14 @@ public class GuildOption
 
 
   [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 10)]
-  public static async Task<GuildOption?> GetAsync() {
+  public static async Task<GuildOption> GetAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
+    var result = await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
+    if (result is null) {
+      throw new ServerIsNotSetupException();
+    }
+
+    return result;
   }
 
   public async Task UpdateAsync() {

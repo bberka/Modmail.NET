@@ -22,6 +22,7 @@ public class CacheAspect : Attribute
 
   public bool DoNotCacheIfNull { get; set; } = true;
 
+
   [Advice(Kind.Around)]
   public object Intercept(
     [Argument(Source.Target)] Func<object[], object> target,
@@ -39,11 +40,11 @@ public class CacheAspect : Attribute
     return result;
   }
 
-  private static string BuildCacheKey(Type classType, string methodName, object[] args) {
+  private static string BuildCacheKey(Type classType, string methodName, IReadOnlyCollection<object> args) {
     var nameSpace = classType.Namespace;
     var classTypeName = classType.Name;
     var cacheKey = $"{nameSpace}.{classTypeName}.{methodName}";
-    if (args.Length == 0) return cacheKey;
+    if (args.Count == 0) return cacheKey;
     var array = args.Select(x => x.GetHashCode()).ToList();
     var joined = string.Join(", ", array);
     cacheKey += $".{joined}";
