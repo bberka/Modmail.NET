@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Aspects;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
@@ -143,6 +144,8 @@ public class GuildOption
     if (!string.IsNullOrEmpty(closingMessage))
       guildOption.ClosingMessage = closingMessage;
     await guildOption.AddAsync();
+
+    await logChannel.SendMessageAsync(EmbedLog.SetupComplete(guildOption));
   }
 
   public async Task ProcessConfigureAsync(DiscordGuild guild, bool? sensitiveLogging, bool? takeFeedbackAfterClosing, string? greetingMessage, string? closingMessage) {

@@ -192,8 +192,6 @@ public class Ticket
     else {
       //TODO: Handle ticket privateChannel not found
     }
-
-    Log.Information("Priority changed {TicketId} by {GuildId}", Id, modUserId);
   }
 
 
@@ -430,8 +428,6 @@ public class Ticket
     else {
       //TODO: Handle mail channel not found
     }
-
-    Log.Information("Note added {TicketId} by {UserId}", Id, userId);
   }
 
   public async Task ProcessToggleAnonymousAsync(DiscordChannel? ticketChannel = null) {
@@ -457,8 +453,6 @@ public class Ticket
     else {
       //TODO: Handle mail channel not found
     }
-
-    Log.Information("Anonymous mode toggled {TicketId} by {UserId}", Id, OpenerUserId);
   }
 
   public async Task ProcessChangeTicketTypeAsync(ulong userId,

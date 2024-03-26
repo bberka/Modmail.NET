@@ -179,4 +179,87 @@ public static
                 .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
     return embed;
   }
+
+  public static DiscordEmbedBuilder TeamCreated(string teamName, TeamPermissionLevel permissionLevel) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_CREATED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TEAM_NAME, teamName, true)
+                .AddField(Texts.PERMISSION_LEVEL, permissionLevel.ToString(), true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamRemoved(string teamName) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_REMOVED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TEAM_NAME, teamName, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamMemberAdded(DiscordUserInfo userInfo, string name) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_MEMBER_ADDED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.USER, userInfo.GetMention(), true)
+                .AddField(Texts.TEAM_NAME, name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamMemberRemoved(DiscordUserInfo userInfo, string name) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_MEMBER_REMOVED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.USER, userInfo.GetMention(), true)
+                .AddField(Texts.TEAM_NAME, name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamRoleAdded(DiscordRole role, string name) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_ROLE_ADDED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.ROLE, role.Mention, true)
+                .AddField(Texts.TEAM_NAME, name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamRoleRemoved(DiscordRole role, string name) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_ROLE_REMOVED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.ROLE, role.Mention, true)
+                .AddField(Texts.TEAM_NAME, name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamRenamed(string oldName, string newName) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_RENAMED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.OLD_NAME, oldName, true)
+                .AddField(Texts.NEW_NAME, newName, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder SetupComplete(GuildOption guildOption) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.SETUP_COMPLETE)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.GUILD_ID, guildOption.GuildId.ToString(), false)
+                .AddField(Texts.GUILD_NAME, guildOption.Name, true)
+                .AddField(Texts.CATEGORY_ID, guildOption.CategoryId.ToString(), true)
+                .AddField(Texts.LOG_CHANNEL_ID, guildOption.LogChannelId.ToString(), true)
+                .AddField(Texts.SENSITIVE_LOGGING, guildOption.IsSensitiveLogging.ToString(), true)
+                .AddField(Texts.TAKE_FEEDBACK_AFTER_CLOSING, guildOption.TakeFeedbackAfterClosing.ToString(), true);
+    return embed;
+  }
 }

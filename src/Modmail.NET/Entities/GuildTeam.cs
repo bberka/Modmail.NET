@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
@@ -82,6 +83,9 @@ public class GuildTeam
       PermissionLevel = permissionLevel
     };
     await team.AddAsync();
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamCreated(teamName, permissionLevel));
   }
 
   private static async Task<bool> Exists(ulong guildId, string teamName) {
@@ -92,6 +96,8 @@ public class GuildTeam
   public static async Task ProcessRemoveTeamAsync(ulong guildId, string teamName) {
     var team = await GuildTeam.GetByNameAsync(guildId, teamName);
     await team.RemoveAsync();
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamRemoved(teamName));
   }
 
   public async Task ProcessAddTeamMemberAsync(ulong memberId) {
@@ -108,6 +114,11 @@ public class GuildTeam
     };
     GuildTeamMembers.Add(memberEntity);
     await UpdateAsync();
+
+
+    var userInfo = await DiscordUserInfo.GetAsync(memberId);
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamMemberAdded(userInfo, Name));
   }
 
   public async Task ProcessRemoveTeamMember(ulong memberId) {
@@ -118,6 +129,10 @@ public class GuildTeam
 
     GuildTeamMembers.Remove(memberEntity);
     await UpdateAsync();
+
+    var userInfo = await DiscordUserInfo.GetAsync(memberId);
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamMemberRemoved(userInfo, Name));
   }
 
   public async Task ProcessAddRoleToTeam(DiscordRole role) {
@@ -134,6 +149,9 @@ public class GuildTeam
     };
     GuildTeamMembers.Add(roleEntity);
     await UpdateAsync();
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamRoleAdded(role, Name));
   }
 
   public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
@@ -144,10 +162,17 @@ public class GuildTeam
 
     GuildTeamMembers.Remove(roleEntity);
     await UpdateAsync();
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamRoleRemoved(role, Name));
   }
 
   public async Task ProcessRenameAsync(string newName) {
+    var oldName = Name;
     Name = newName;
     await UpdateAsync();
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TeamRenamed(oldName, newName));
   }
 }

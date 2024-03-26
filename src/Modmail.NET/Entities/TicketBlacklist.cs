@@ -71,22 +71,11 @@ public class TicketBlacklist
   }
 
   public static async Task ProcessAddUserToBlacklist(ulong modId, ulong userId, string reason, bool notifyUser) {
-    var option = await GuildOption.GetAsync();
-    if (option is null) {
-      throw new ServerIsNotSetupException();
-    }
+    // var option = await GuildOption.GetAsync();
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-
-    if (logChannel is null) {
-      throw new LogChannelNotFoundException();
-    }
-
     var activeTicket = await Ticket.GetActiveAsync(userId);
-    if (activeTicket is not null) {
-      await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, doNotSendFeedbackMessage: true);
-    }
-
+    await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, doNotSendFeedbackMessage: true);
 
     var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
     if (activeBlock) {

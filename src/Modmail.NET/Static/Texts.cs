@@ -139,6 +139,21 @@ public static class Texts
   public const string NO_BLACKLISTED_USERS_FOUND = "No blacklisted users found";
   public const string TEAM_ALREADY_EXISTS = "Team already exists";
   public const string INVALID_NAME = "Invalid name";
+  public const string TEAM_CREATED = "Team created";
+  public const string TEAM_NAME = "Team Name";
+  public const string TEAM_REMOVED = "Team removed";
+  public const string TEAM_MEMBER_ADDED = "Team member added";
+  public const string TEAM_MEMBER_REMOVED = "Team member removed";
+  public const string TEAM_ROLE_ADDED = "Team role added";
+  public const string TEAM_ROLE_REMOVED = "Team role removed";
+  public const string TEAM_RENAMED = "Team renamed";
+  public const string OLD_NAME = "Old Name";
+  public const string NEW_NAME = "New Name";
+  public const string SETUP_COMPLETE = "Setup complete";
+  public const string GUILD_NAME = "Guild Name";
+  public const string GUILD_ID = "Guild Id";
+  public const string CATEGORY_ID = "Category Id";
+  public const string LOG_CHANNEL_ID = "Log Channel Id";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
