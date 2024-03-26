@@ -152,4 +152,31 @@ public static
                 .AddField(Texts.CLOSE_REASON, ticket.CloseReason, true);
     return embed;
   }
+
+  public static DiscordEmbedBuilder TicketTypeDeleted(TicketType ticketType) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TICKET_TYPE_DELETED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TicketTypeUpdated(TicketType ticketType) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TICKET_TYPE_UPDATED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TicketTypeCreated(TicketType ticketType) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TICKET_TYPE_CREATED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+    return embed;
+  }
 }

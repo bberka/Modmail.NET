@@ -79,7 +79,7 @@ public static class Texts
   public const string YOUR_MESSAGE_COULD_NOT_BE_PROCESSED = "Your message could not be processed. Please try again later.";
   public const string TICKET_TYPE_CREATED = "Ticket Type Created";
   public const string TICKET_TYPE_CREATED_DESCRIPTION = "Ticket type `{0}` created";
-  public const string TICKET_TYPE_EXISTS = "Ticket Type Exists";
+  public const string TICKET_TYPE_ALREADY_EXISTS = "Ticket Type Already Exists";
   public const string TICKET_TYPE_EXISTS_DESCRIPTION = "Ticket type with name '{0}' already exists";
   public const string TICKET_TYPES = "Ticket Types";
   public const string TICKET_TYPE_NOT_FOUND = "Ticket type not found";
@@ -138,6 +138,7 @@ public static class Texts
   public const string MAIN_GUILD_NOT_FOUND_DESC = "You must invite the bot to the main server first";
   public const string NO_BLACKLISTED_USERS_FOUND = "No blacklisted users found";
   public const string TEAM_ALREADY_EXISTS = "Team already exists";
+  public const string INVALID_NAME = "Invalid name";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
+using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
@@ -20,13 +23,13 @@ public class TicketType
   public string EmbedMessageContent { get; set; }
 
 
-  public async Task UpdateAsync() {
+  private async Task UpdateAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
     dbContext.TicketTypes.Update(this);
     await dbContext.SaveChangesAsync();
   }
 
-  public async Task AddAsync() {
+  private async Task AddAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     await dbContext.TicketTypes.AddAsync(this);
     await dbContext.SaveChangesAsync();
@@ -37,9 +40,14 @@ public class TicketType
     return await dbContext.TicketTypes.FindAsync(id);
   }
 
-  public static async Task<TicketType?> GetAsync(string keyOrName) {
+  public static async Task<TicketType> GetAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
+    var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
+    if (result is null) {
+      throw new TicketTypeNotFoundException(keyOrName);
+    }
+
+    return result;
   }
 
   public static async Task<bool> ExistsAsync(string keyOrName) {
@@ -49,19 +57,90 @@ public class TicketType
 
   public static async Task<List<TicketType>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.TicketTypes.ToListAsync();
+    var result = await dbContext.TicketTypes.ToListAsync();
+    if (result.Count == 0) {
+      throw new NoTicketTypesFoundException();
+    }
+
+    return result;
   }
 
-  public async Task RemoveAsync() {
+  private async Task RemoveAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
     dbContext.TicketTypes.Remove(this);
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task<TicketType?> GetByChannelIdAsync(ulong channelId) {
+  public static async Task<TicketType> GetByChannelIdAsync(ulong channelId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
-                          .Select(x => x.TicketType)
-                          .FirstOrDefaultAsync();
+    var result = await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
+                                .Select(x => x.TicketType)
+                                .FirstOrDefaultAsync();
+    if (result is null) throw new TicketTypeNotFoundException(channelId.ToString());
+    return result;
+  }
+
+  public static async Task<TicketType> ProcessCreateTicketTypeAsync(
+    string name,
+    DiscordEmoji? emoji,
+    string? description,
+    long order,
+    string embedMessageTitle,
+    string embedMessageContent) {
+    if (string.IsNullOrEmpty(name)) {
+      throw new InvalidNameException(name);
+    }
+
+    var exists = await ExistsAsync(name);
+    if (exists) {
+      throw new TicketTypeAlreadyExistsException(name);
+    }
+
+    var id = Guid.NewGuid();
+    var idClean = id.ToString().Replace("-", "");
+    var ticketType = new TicketType {
+      Id = id,
+      Key = idClean,
+      Name = name,
+      Emoji = emoji,
+      Description = description,
+      Order = (int)order,
+      RegisterDateUtc = DateTime.UtcNow,
+      EmbedMessageTitle = embedMessageTitle,
+      EmbedMessageContent = embedMessageContent,
+    };
+    await ticketType.AddAsync();
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TicketTypeCreated(ticketType));
+    return ticketType;
+  }
+
+  public async Task ProcessUpdateTicketTypeAsync(string name,
+                                                 DiscordEmoji? emoji,
+                                                 string? description,
+                                                 long order,
+                                                 string embedMessageTitle,
+                                                 string embedMessageContent) {
+    if (emoji != null)
+      Emoji = emoji;
+    if (description != null)
+      Description = description;
+    if (order != 0)
+      Order = (int)order;
+    if (string.IsNullOrEmpty(embedMessageTitle))
+      EmbedMessageTitle = embedMessageTitle;
+    if (string.IsNullOrEmpty(embedMessageContent))
+      EmbedMessageContent = embedMessageContent;
+
+    await UpdateAsync();
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TicketTypeUpdated(this));
+  }
+
+  public async Task ProcessRemoveAsync() {
+    await RemoveAsync();
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TicketTypeDeleted(this));
   }
 }
