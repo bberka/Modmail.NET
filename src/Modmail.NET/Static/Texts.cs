@@ -60,7 +60,7 @@ public static class Texts
   public const string MEMBERS = "Members";
   public const string ROLE = "Role";
   public const string THANK_YOU_FOR_FEEDBACK = "Thank you for your feedback!";
-  public const string? CHANNEL_WAS_DELETED = "Channel was deleted";
+  public const string CHANNEL_WAS_DELETED = "Channel was deleted";
   public const string USER_HAS_ACTIVE_TICKET = "User has an active ticket!";
   public const string PLEASE_CLOSE_THE_TICKET_BEFORE_BLACKLISTING = "Please close the ticket before blacklisting the user.";
   public const string USER_ALREADY_BLACKLISTED = "User is already blacklisted";
@@ -69,7 +69,7 @@ public static class Texts
   public const string USER_IS_BLACKLISTED = "User is blacklisted";
   public const string BLACKLISTED_USERS = "Blacklisted Users";
   public const string ANOTHER_SERVER_ALREADY_SETUP = "Another server is already setup, this bot only supports single server setup.";
-  public const string THIS_SERVER_ALREADY_SETUP = "This server already setup!";
+  public const string MAIN_SERVER_ALREADY_SETUP = "Main server already setup!";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER = "This command can only be used in the main server.";
   public const string MODMAIL_LOG_CHANNEL_TOPIC = "Modmail log channel";
   public const string SERVER_SETUP_COMPLETE = "Server setup complete!";

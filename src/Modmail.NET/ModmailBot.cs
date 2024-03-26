@@ -170,7 +170,6 @@ public class ModmailBot
       guildOption.IconUrl = guild.IconUrl;
       guildOption.BannerUrl = guild.BannerUrl;
       await guildOption.UpdateAsync();
-
       await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
     }
 
