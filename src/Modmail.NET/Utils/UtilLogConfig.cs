@@ -12,6 +12,7 @@ public static class UtilLogConfig
                  .Enrich.FromLogContext()
                  .Enrich.WithThreadId()
                  .MinimumLevel.Is(BotConfig.This.LogLevel)
+                 .Enrich.FromLogContext()
                  .WriteTo.Console(outputTemplate: template)
                  .WriteTo.File(new CompactJsonFormatter(), logPath, rollingInterval: RollingInterval.Day)
                  .CreateLogger();
