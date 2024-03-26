@@ -74,7 +74,7 @@ public class TicketBlacklist
     // var option = await GuildOption.GetAsync();
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    var activeTicket = await Ticket.GetActiveAsync(userId);
+    var activeTicket = await Ticket.GetActiveTicketAsync(userId);
     await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, doNotSendFeedbackMessage: true);
 
     var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);

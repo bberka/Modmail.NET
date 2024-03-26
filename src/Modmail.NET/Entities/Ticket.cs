@@ -71,7 +71,7 @@ public class Ticket
   }
 
 
-  public static async Task<Ticket> GetActiveAsync(ulong userId) {
+  public static async Task<Ticket> GetActiveTicketAsync(ulong userId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
@@ -79,7 +79,14 @@ public class Ticket
     return ticket;
   }
 
-  public static async Task<Ticket> GetActiveAsync(Guid ticketId) {
+  public static async Task<Ticket?> GetActiveTicketNullableAsync(ulong userId) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var ticket = await dbContext.Tickets
+                                .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
+    return ticket;
+  }
+
+  public static async Task<Ticket> GetActiveTicketAsync(Guid ticketId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
     if (ticket is null) throw new TicketNotFoundException();

@@ -4,8 +4,10 @@ using DSharpPlus.EventArgs;
 using Metran;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
+using Serilog;
 
 namespace Modmail.NET.Events;
 
@@ -29,26 +31,37 @@ public static class OnMessageCreated
     if (message.Content.StartsWith(BotConfig.This.BotPrefix))
       return;
 
-    //keeps other threads for same user locked until this one is done
-    using var metran = ProcessingUserMessageContainer.BeginTransaction(userId, 50, 100); // 100ms * 50 = 5 seconds
-    if (metran is null) {
-      //VERY UNLIKELY TO HAPPEN
-      await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
-      return;
-    }
+    const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandlePrivateTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
+    try {
+      //keeps other threads for same user locked until this one is done
+      using var metran = ProcessingUserMessageContainer.BeginTransaction(userId, 50, 100); // 100ms * 50 = 5 seconds
+      if (metran is null) {
+        //VERY UNLIKELY TO HAPPEN
+        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
+        return;
+      }
 
-    var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
-    if (activeBlock) {
-      await channel.SendMessageAsync(EmbedUser.YouHaveBeenBlacklisted());
-      return;
-    }
+      var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
+      if (activeBlock) {
+        await channel.SendMessageAsync(EmbedUser.YouHaveBeenBlacklisted());
+        return;
+      }
 
-    var activeTicket = await Ticket.GetActiveAsync(userId);
-    if (activeTicket is not null) {
-      await activeTicket.ProcessUserSentMessageAsync(message, channel);
+      var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
+      if (activeTicket is not null) {
+        await activeTicket.ProcessUserSentMessageAsync(message, channel);
+      }
+      else {
+        await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
+      }
+
+      Log.Information(logMessage, channel.Id, userId, message.Content);
     }
-    else {
-      await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, channel.Id, userId, message.Content);
+    }
+    catch (Exception ex) {
+      Log.Error(ex, logMessage, channel.Id, userId, message.Content);
     }
   }
 
@@ -57,26 +70,30 @@ public static class OnMessageCreated
                                                            DiscordChannel channel,
                                                            DiscordUser modUser,
                                                            DiscordGuild guild) {
-    var channelId = channel.Id;
-    var authorId = modUser.Id;
-    var messageContent = message.Content;
-    var attachments = message.Attachments;
-    var guildId = guild.Id;
-    if (message.Content.StartsWith(BotConfig.This.BotPrefix))
-      return;
+    const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandleGuildTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
+    try {
+      if (message.Content.StartsWith(BotConfig.This.BotPrefix))
+        return;
 
-    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
-    if (metran is null) {
-      await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
-      return;
+      using var metran = ProcessingUserMessageContainer.BeginTransaction(message.Author.Id, 50, 100); // 100ms * 50 = 5 seconds
+      if (metran is null) {
+        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
+        return;
+      }
+
+      var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
+      if (id == Guid.Empty) return;
+
+      var ticket = await Ticket.GetActiveTicketAsync(id);
+
+      await ticket.ProcessModSendMessageAsync(modUser, message, channel, guild);
+      Log.Information(logMessage, channel.Id, modUser.Id, message.Content);
     }
-
-    var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
-    if (id == Guid.Empty) return;
-
-    var ticket = await Ticket.GetActiveAsync(id);
-    if (ticket is null) return;
-
-    await ticket.ProcessModSendMessageAsync(modUser, message, channel, guild);
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, channel.Id, modUser.Id, message.Content);
+    }
+    catch (Exception ex) {
+      Log.Error(ex, logMessage, channel.Id, modUser.Id, message.Content);
+    }
   }
 }
