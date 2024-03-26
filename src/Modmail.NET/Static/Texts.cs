@@ -128,6 +128,11 @@ public static class Texts
   public const string ENTER_A_REASON_FOR_CLOSING_THIS_TICKET = "Enter a reason for closing this ticket";
   public const string ANONYMOUS_MOD_ON = "Anonymous mod on";
   public const string ANONYMOUS_MOD_OFF = "Anonymous mod off";
+  public const string YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST = "You have been removed from blacklist";
+  public const string YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST_DESCRIPTION = "You have been removed from the blacklist. You can now use the modmail system.";
+  public const string NO_BLACKLISTED_USERS = "There is no blacklisted users";
+  public const string LOG_CHANNEL_NOT_FOUND = "Log channel not found";
+  public const string AN_EXCEPTION_OCCURRED = "An exception occurred, please check the logs";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

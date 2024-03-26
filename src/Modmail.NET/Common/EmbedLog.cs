@@ -55,14 +55,13 @@ public static
   }
 
 
-  public static DiscordEmbed BlacklistAdded(DiscordUser author, DiscordUser user, string? reason) {
+  public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string? reason) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.USER_BLACKLISTED)
                 .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.USER, user.Mention, true)
-                .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                .AddField(Texts.USERNAME, user.GetUsername(), true);
+                .AddField(Texts.USER, user.GetMention(), true);
+
 
     return embed;
   }
@@ -72,9 +71,7 @@ public static
                 .WithTitle(Texts.USER_BLACKLIST_REMOVED)
                 .WithAuthor(author.GetUsername(), iconUrl: author.AvatarUrl)
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.USER, user.Mention, true)
-                .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                .AddField(Texts.USERNAME, user.GetUsername(), true);
+                .AddField(Texts.USER, user.Mention, true);
     return embed;
   }
 

@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 
@@ -50,5 +53,54 @@ public class TicketBlacklist
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     dbContext.TicketBlacklists.Remove(this);
     await dbContext.SaveChangesAsync();
+  }
+
+  public static async Task ProcessAddUserToBlacklist(ulong modId, ulong userId, string reason, bool notifyUser) {
+    var option = await GuildOption.GetAsync();
+    if (option is null) {
+      throw new ServerIsNotSetupException();
+    }
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+
+    if (logChannel is null) {
+      throw new LogChannelNotFoundException();
+    }
+
+    var activeTicket = await Ticket.GetActiveAsync(userId);
+    if (activeTicket is not null) {
+      await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, doNotSendFeedbackMessage: true);
+    }
+
+
+    var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
+    if (activeBlock) {
+      throw new UserAlreadyBlacklistedException();
+    }
+
+
+    var blackList = new TicketBlacklist() {
+      Id = Guid.NewGuid(),
+      Reason = reason,
+      GuildId = BotConfig.This.MainServerId,
+      DiscordUserId = userId,
+      RegisterDateUtc = DateTime.UtcNow,
+    };
+    await blackList.AddAsync();
+
+    var user = await Entities.DiscordUserInfo.GetAsync(userId);
+    var modUser = await Entities.DiscordUserInfo.GetAsync(modId);
+
+    var embedLog = EmbedLog.BlacklistAdded(modUser, user, reason);
+    await logChannel.SendMessageAsync(embedLog);
+
+
+    if (notifyUser) {
+      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
+      if (member is not null) {
+        var dmEmbed = EmbedUser.YouHaveBeenBlacklisted(reason);
+        await member.SendMessageAsync(dmEmbed);
+      }
+    }
   }
 }

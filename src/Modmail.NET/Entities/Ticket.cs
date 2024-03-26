@@ -99,7 +99,8 @@ public class Ticket
 
   public async Task ProcessCloseTicketAsync(ulong closerUserId,
                                             string? closeReason = null,
-                                            DiscordChannel? modChatChannel = null) {
+                                            DiscordChannel? modChatChannel = null,
+                                            bool doNotSendFeedbackMessage = false) {
     ArgumentNullException.ThrowIfNull(GuildOption);
     ArgumentNullException.ThrowIfNull(OpenerUserInfo);
     if (closerUserId == 0) throw new InvalidUserIdException();
@@ -125,7 +126,7 @@ public class Ticket
     if (pmChannel != null) {
       await pmChannel.SendMessageAsync(EmbedUser.TicketClosed(this));
 
-      if (GuildOption.TakeFeedbackAfterClosing) {
+      if (GuildOption.TakeFeedbackAfterClosing && !doNotSendFeedbackMessage) {
         await pmChannel.SendMessageAsync(EmbedUser.GiveFeedbackMessage(this));
       }
     }
@@ -133,16 +134,8 @@ public class Ticket
       //TODO: Handle private messageContent privateChannel not found
     }
 
-    var logChannel = await ModmailBot.This.Client.GetChannelAsync(GuildOption.LogChannelId);
-    if (logChannel != null) {
-      // var embed = Colors.ToLog.TicketClosed(this);
-
-
-      await logChannel.SendMessageAsync(EmbedLog.TicketClosed(this));
-    }
-    else {
-      //TODO: Handle log privateChannel not found
-    }
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.TicketClosed(this));
 
     Log.Information("Ticket closed {TicketId} by {CloserUserId}", Id, closerUserId);
   }
@@ -311,12 +304,12 @@ public class Ticket
 
     await ticket.AddAsync();
 
-    var ticketTypes = await Entities.TicketType.GetAllAsync();
+    var ticketTypes = await TicketType.GetAllAsync();
 
-    var ticketCreatedMessage = await privateChannel.SendMessageAsync(EmbedTicket.YouHaveCreatedNewTicket(guild,
-                                                                                                         guildOption,
-                                                                                                         ticketTypes,
-                                                                                                         ticketId));
+    var ticketCreatedMessage = await privateChannel.SendMessageAsync(EmbedUser.YouHaveCreatedNewTicket(guild,
+                                                                                                       guildOption,
+                                                                                                       ticketTypes,
+                                                                                                       ticketId));
 
     TicketTypeSelectionTimeoutMgr.This.AddMessage(ticketCreatedMessage);
     var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(EmbedMessage.MessageSentByUser(message));

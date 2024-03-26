@@ -4,7 +4,9 @@ using DSharpPlus.SlashCommands;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
+using Serilog;
 
 namespace Modmail.NET.Commands;
 
@@ -18,70 +20,32 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                         [Option("user", "The user to blacklist.")]
                         DiscordUser user,
                         [Option("notify-user", "Whether to notify the user about the blacklist.")]
-                        bool notifyUser,
+                        bool notifyUser = true,
                         [Option("reason", "The reason for blacklisting.")]
-                        string reason
+                        string reason = "No reason provided."
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
     await DiscordUserInfo.AddOrUpdateAsync(user);
-    var option = await GuildOption.GetAsync();
-    if (option is null) {
-      await ctx.EditResponseAsync(Webhooks.Error(Texts.SERVER_NOT_SETUP));
-      return;
+    try {
+      await TicketBlacklist.ProcessAddUserToBlacklist(ctx.User.Id, user.Id, reason, notifyUser);
+      await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
     }
-
-    var logChannelId = option.LogChannelId;
-    var logChannel = ctx.Guild.GetChannel(logChannelId);
-
-    if (logChannel is null) {
-      await ctx.EditResponseAsync(Webhooks.Error(Texts.SERVER_NOT_SETUP));
-      return;
+    catch (BotExceptionBase exception) {
+      Log.Error(exception, "An exception occurred while adding a user to the blacklist");
+      await ctx.EditResponseAsync(Webhooks.Warning(exception.TitleMessage, exception.ContentMessage ?? ""));
     }
-
-    var activeTicket = await Ticket.GetActiveAsync(user.Id);
-    if (activeTicket is not null) {
-      await activeTicket.ProcessCloseTicketAsync(ctx.User.Id, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST);
-    }
-
-
-    var activeBlock = await TicketBlacklist.IsBlacklistedAsync(user.Id);
-    if (activeBlock) {
-      await ctx.EditResponseAsync(Webhooks.Error(Texts.USER_ALREADY_BLACKLISTED));
-      return;
-    }
-
-    var blackList = new TicketBlacklist() {
-      Id = Guid.NewGuid(),
-      Reason = reason,
-      GuildId = BotConfig.This.MainServerId,
-      DiscordUserId = user.Id,
-      RegisterDateUtc = DateTime.UtcNow,
-    };
-    await blackList.AddAsync();
-
-    var embedLog = EmbedLog.BlacklistAdded(ctx.User, user, reason);
-    await logChannel.SendMessageAsync(embedLog);
-
-    await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
-
-
-    if (notifyUser) {
-      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
-      if (member is null) {
-        await ctx.EditResponseAsync(Webhooks.Error(Texts.USER_NOT_FOUND));
-        return;
-      }
-
-      var dmEmbed = EmbedTicket.YouHaveBeenBlacklisted(ctx.User, reason);
-      await member.SendMessageAsync(dmEmbed);
+    catch (Exception e) {
+      Log.Error(e, "An exception occurred while adding a user to the blacklist");
+      await ctx.EditResponseAsync(Webhooks.Error(Texts.AN_EXCEPTION_OCCURRED));
     }
   }
 
   [SlashCommand("remove", "Remove a user from the blacklist.")]
   public async Task Remove(InteractionContext ctx,
                            [Option("user", "The user to remove from the blacklist.")]
-                           DiscordUser user
+                           DiscordUser user,
+                           [Option("notify-user", "Whether to notify the user about the removal.")]
+                           bool notifyUser = true
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
@@ -113,6 +77,15 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     await logChannel.SendMessageAsync(embedLog);
     var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
     await ctx.EditResponseAsync(builderLog);
+
+
+    if (notifyUser) {
+      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
+      if (member is not null) {
+        var dmEmbed = EmbedUser.YouHaveBeenRemovedFromBlacklist(ctx.User);
+        await member.SendMessageAsync(dmEmbed);
+      }
+    }
   }
 
   [SlashCommand("status", "Check if a user is blacklisted.")]
@@ -120,7 +93,6 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                            [Option("user", "The user to check.")] DiscordUser user
   ) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
     var isBlocked = await TicketBlacklist.IsBlacklistedAsync(user.Id);
     await ctx.EditResponseAsync(Webhooks.Info(Texts.USER_BLACKLIST_STATUS,
                                               isBlocked
@@ -131,7 +103,12 @@ public class BlacklistSlashCommands : ApplicationCommandModule
   [SlashCommand("view", "View all blacklisted users.")]
   public async Task View(InteractionContext ctx) {
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-    var blacklistedUsers = (await TicketBlacklist.GetAllAsync()).Select(x => $"<@{x}>");
+    var blacklistedUsers = (await TicketBlacklist.GetAllAsync()).Select(x => $"<@{x}>").ToList();
+    if (blacklistedUsers.Count == 0) {
+      await ctx.EditResponseAsync(Webhooks.Info(Texts.NO_BLACKLISTED_USERS));
+      return;
+    }
+
     await ctx.EditResponseAsync(Webhooks.Info(Texts.BLACKLISTED_USERS, string.Join("\n", blacklistedUsers)));
   }
 }

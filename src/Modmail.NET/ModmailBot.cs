@@ -8,6 +8,7 @@ using Modmail.NET.Commands;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Events;
+using Modmail.NET.Exceptions;
 using Modmail.NET.Manager;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
@@ -174,5 +175,23 @@ public class ModmailBot
     }
 
     return guild;
+  }
+
+  [CacheAspect(CacheSeconds = 300)]
+  public async Task<DiscordChannel> GetLogChannelAsync() {
+    var guild = await GetMainGuildAsync();
+    var option = await GuildOption.GetAsync();
+    if (option is null) {
+      Log.Error("Guild option not found");
+      throw new Exception("Guild option not found");
+    }
+
+    var logChannel = guild.GetChannel(option.LogChannelId);
+
+    if (logChannel is null) {
+      throw new LogChannelNotFoundException();
+    }
+
+    return logChannel;
   }
 }
