@@ -137,6 +137,7 @@ public static class Texts
   public const string MAIN_GUILD_NOT_FOUND = "Main guild not found";
   public const string MAIN_GUILD_NOT_FOUND_DESC = "You must invite the bot to the main server first";
   public const string NO_BLACKLISTED_USERS_FOUND = "No blacklisted users found";
+  public const string TEAM_ALREADY_EXISTS = "Team already exists";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
