@@ -126,6 +126,9 @@ public static class Texts
   public const string TICKET_CLOSED_DUE_TO_BLACKLIST = "Ticket closed due to blacklist";
   public const string PLEASE_TELL_US_REASONS_FOR_YOUR_RATING = "Please tell us reasons for your rating";
   public const string ENTER_A_REASON_FOR_CLOSING_THIS_TICKET = "Enter a reason for closing this ticket";
+  public const string ANONYMOUS_MOD_ON = "Anonymous mod on";
+  public const string ANONYMOUS_MOD_OFF = "Anonymous mod off";
+
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine

@@ -95,4 +95,39 @@ public static class EmbedTicket
                 .WithUserAsAuthor(user);
     return embed;
   }
+
+  public static DiscordEmbedBuilder AnonymousToggled(Ticket ticket) {
+    var embed2 = new DiscordEmbedBuilder()
+                 .WithTitle(ticket.Anonymous
+                              ? Texts.ANONYMOUS_MOD_ON
+                              : Texts.ANONYMOUS_MOD_OFF)
+                 .WithColor(Colors.AnonymousToggledColor)
+                 .WithCustomTimestamp()
+                 .WithUserAsAuthor(ticket.OpenerUserInfo)
+                 .WithDescription(ticket.Anonymous
+                                    ? Texts.TICKET_SET_ANONYMOUS_DESCRIPTION
+                                    : Texts.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION);
+    return embed2;
+  }
+
+  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TICKET_TYPE_CHANGED)
+                .WithDescription(string.Format(Texts.TICKET_TYPE_SET, ticketType.Emoji, ticketType.Name))
+                .WithUserAsAuthor(user)
+                .WithCustomTimestamp()
+                .WithColor(Colors.TicketTypeChangedColor);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo modUser, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
+                .WithColor(Colors.TicketPriorityChangedColor)
+                .WithCustomTimestamp()
+                .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
+                .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true)
+                .WithUserAsAuthor(modUser);
+    return embed;
+  }
 }

@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Extensions;
 using Modmail.NET.Manager;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
@@ -116,50 +114,19 @@ public class Ticket
     CloseReason = closeReason;
     CloserUserId = closerUserId;
 
+    var closerUser = await DiscordUserInfo.GetAsync(closerUserId);
+    CloserUserInfo = closerUser;
+
     await this.UpdateAsync();
 
     await modChatChannel.DeleteAsync(Texts.TICKET_CLOSED);
 
     var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (pmChannel != null) {
-      // var embed = Colors.ToUser.TicketClosed(this);
-      var ticketClosedMsgToUser = new DiscordEmbedBuilder()
-                                  .WithTitle(Texts.YOUR_TICKET_HAS_BEEN_CLOSED)
-                                  .WithDescription(Texts.YOUR_TICKET_HAS_BEEN_CLOSED_DESCRIPTION)
-                                  .WithFooter(GuildOption.Name, iconUrl: GuildOption.IconUrl)
-                                  .WithCustomTimestamp()
-                                  .WithColor(Colors.TicketClosedColor);
-      if (!string.IsNullOrEmpty(GuildOption.ClosingMessage))
-        ticketClosedMsgToUser.WithDescription(GuildOption.ClosingMessage);
-
-      if (!Anonymous) {
-        ticketClosedMsgToUser.WithAuthor(CloserUserInfo.Username, iconUrl: CloserUserInfo.AvatarUrl);
-      }
-
-      await pmChannel.SendMessageAsync(ticketClosedMsgToUser);
+      await pmChannel.SendMessageAsync(EmbedUser.TicketClosed(this));
 
       if (GuildOption.TakeFeedbackAfterClosing) {
-        var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
-        var starList = new List<DiscordComponent> {
-          new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, Id), "1", false, new DiscordComponentEmoji("⭐")),
-          new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 2, Id), "2", false, new DiscordComponentEmoji("⭐")),
-          new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 3, Id), "3", false, new DiscordComponentEmoji("⭐")),
-          new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 4, Id), "4", false, new DiscordComponentEmoji("⭐")),
-          new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 5, Id), "5", false, new DiscordComponentEmoji("⭐"))
-        };
-
-        var ticketFeedbackEmbed = new DiscordEmbedBuilder()
-                                  .WithTitle(Texts.FEEDBACK)
-                                  .WithDescription(Texts.FEEDBACK_DESCRIPTION)
-                                  .WithCustomTimestamp()
-                                  .WithFooter(GuildOption.Name, GuildOption.IconUrl)
-                                  .WithColor(Colors.FeedbackColor);
-
-        var response = ticketFeedbackMsgToUser
-                       .AddEmbed(ticketFeedbackEmbed)
-                       .AddComponents(starList);
-
-        await pmChannel.SendMessageAsync(response);
+        await pmChannel.SendMessageAsync(EmbedUser.GiveFeedbackMessage(this));
       }
     }
     else {
@@ -171,18 +138,7 @@ public class Ticket
       // var embed = Colors.ToLog.TicketClosed(this);
 
 
-      var embed = new DiscordEmbedBuilder()
-                  // .WithDescription("Ticket has been closed.")
-                  .WithCustomTimestamp()
-                  .WithTitle(Texts.TICKET_CLOSED)
-                  .WithAuthor(CloserUserInfo.Username, iconUrl: CloserUserInfo.AvatarUrl)
-                  .WithColor(Colors.TicketClosedColor)
-                  .AddField(Texts.TICKET_ID, Id.ToString().ToUpper(), false)
-                  .AddField(Texts.OPENED_BY, OpenerUserInfo.GetMention(), true)
-                  .AddField(Texts.CLOSED_BY, CloserUserInfo.GetMention(), true)
-                  .AddField(Texts.CLOSE_REASON, CloseReason, true);
-
-      await logChannel.SendMessageAsync(embed);
+      await logChannel.SendMessageAsync(EmbedLog.TicketClosed(this));
     }
     else {
       //TODO: Handle log privateChannel not found
@@ -212,15 +168,7 @@ public class Ticket
 
     var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (privateChannel is not null) {
-      var ticketPriorityChangedMsgToUser = new DiscordEmbedBuilder()
-                                           .WithFooter(GuildOption.Name, GuildOption.IconUrl)
-                                           .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                                           .WithCustomTimestamp()
-                                           .WithColor(Colors.TicketPriorityChangedColor)
-                                           .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                                           .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true);
-      if (!Anonymous) ticketPriorityChangedMsgToUser.WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
-      await privateChannel.SendMessageAsync(ticketPriorityChangedMsgToUser);
+      await privateChannel.SendMessageAsync(EmbedUser.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
     }
     else {
       //TODO: Handle private messageContent privateChannel not found
@@ -229,15 +177,7 @@ public class Ticket
 
     var logChannel = await ModmailBot.This.Client.GetChannelAsync(GuildOption.LogChannelId);
     if (logChannel is not null) {
-      var ticketPriorityChangedMsgToLog = new DiscordEmbedBuilder()
-                                          .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                                          .WithCustomTimestamp()
-                                          .WithColor(Colors.TicketPriorityChangedColor)
-                                          .AddField(Texts.TICKET_ID, Id.ToString().ToUpper())
-                                          .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                                          .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true);
-      if (!Anonymous) ticketPriorityChangedMsgToLog.WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
-      await logChannel.SendMessageAsync(ticketPriorityChangedMsgToLog);
+      await logChannel.SendMessageAsync(EmbedLog.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
     }
     else {
       //TODO: Handle log privateChannel not found
@@ -260,14 +200,8 @@ public class Ticket
 
       await ticketChannel.ModifyAsync(x => { x.Name = newChName; });
 
-      var ticketPriorityChangedMsgToMail = new DiscordEmbedBuilder()
-                                           .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
-                                           .WithColor(Colors.TicketPriorityChangedColor)
-                                           .WithCustomTimestamp()
-                                           .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
-                                           .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true)
-                                           .WithAuthor(modUser.Username, iconUrl: modUser.AvatarUrl);
-      await ticketChannel.SendMessageAsync(ticketPriorityChangedMsgToMail);
+
+      await ticketChannel.SendMessageAsync(EmbedTicket.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
     }
     else {
       //TODO: Handle ticket privateChannel not found
@@ -295,14 +229,7 @@ public class Ticket
 
     var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
     if (mailChannel is not null) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithColor(Colors.MessageReceivedColor)
-                  .WithUserAsAuthor(user)
-                  .WithDescription(message.Content)
-                  .WithCustomTimestamp()
-                  .WithGuildInfoFooter()
-                  .AddAttachment(message.Attachments);
-      await mailChannel.SendMessageAsync(embed);
+      await mailChannel.SendMessageAsync(EmbedMessage.MessageReceivedFromUser(message));
     }
     else {
       //TODO: Handle mail privateChannel not found
@@ -311,31 +238,13 @@ public class Ticket
     var ticketMessage = TicketMessage.MapFrom(Id, message);
     await ticketMessage.AddAsync();
 
-
-    var embedUserMessageDelivered = new DiscordEmbedBuilder()
-                                    .WithGuildInfoFooter(GuildOption)
-                                    .WithDescription(message.Content)
-                                    .WithCustomTimestamp()
-                                    .WithUserAsAuthor(user)
-                                    .WithColor(Colors.MessageSentColor)
-                                    .AddAttachment(message.Attachments);
-
-    await privateChannel.SendMessageAsync(embedUserMessageDelivered);
+    await privateChannel.SendMessageAsync(EmbedMessage.MessageSentByUser(message));
 
     if (GuildOption.IsSensitiveLogging) {
       var logChannel = await ModmailBot.This.Client.GetChannelAsync(GuildOption.LogChannelId);
 
       if (logChannel is not null) {
-        var embed = new DiscordEmbedBuilder()
-                    .WithTitle(Texts.MESSAGE_SENT_BY_USER)
-                    .WithUserAsAuthor(user)
-                    .WithDescription(message.Content)
-                    .WithCustomTimestamp()
-                    .WithColor(Colors.MessageSentColor)
-                    .AddField(Texts.TICKET_ID, Id.ToString().ToUpper())
-                    .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                    .AddAttachment(message.Attachments);
-        await logChannel.SendMessageAsync(embed);
+        await logChannel.SendMessageAsync(EmbedLog.MessageSentByUser(message, Id));
       }
       else {
         //TODO: Handle log privateChannel not found
@@ -371,14 +280,7 @@ public class Ticket
 
     var newTicketMessageBuilder = EmbedTicket.NewTicket(member, ticketId, modRoleListForOverwrites, modMemberListForOverwrites);
     await mailChannel.SendMessageAsync(newTicketMessageBuilder);
-    var embedUserMessage = new DiscordEmbedBuilder()
-                           .WithColor(Colors.MessageReceivedColor)
-                           .WithUserAsAuthor(user)
-                           .WithDescription(message.Content)
-                           .WithCustomTimestamp()
-                           .WithGuildInfoFooter()
-                           .AddAttachment(message.Attachments);
-    await mailChannel.SendMessageAsync(embedUserMessage);
+    await mailChannel.SendMessageAsync(EmbedMessage.MessageReceivedFromUser(message));
 
     var ticketMessage = TicketMessage.MapFrom(ticketId, message);
 
@@ -411,24 +313,13 @@ public class Ticket
 
     var ticketTypes = await Entities.TicketType.GetAllAsync();
 
-    var embedTicketCreated = EmbedTicket.YouHaveCreatedNewTicket(guild,
-                                                                 guildOption,
-                                                                 ticketTypes,
-                                                                 ticketId);
+    var ticketCreatedMessage = await privateChannel.SendMessageAsync(EmbedTicket.YouHaveCreatedNewTicket(guild,
+                                                                                                         guildOption,
+                                                                                                         ticketTypes,
+                                                                                                         ticketId));
 
-
-    var embedUserMessageSentToUser = new DiscordEmbedBuilder()
-                                     .WithColor(Colors.MessageSentColor)
-                                     .WithUserAsAuthor(user)
-                                     .WithDescription(message.Content)
-                                     .WithCustomTimestamp()
-                                     .WithGuildInfoFooter()
-                                     .AddAttachment(message.Attachments);
-
-
-    var ticketCreatedMessage = await privateChannel.SendMessageAsync(embedTicketCreated);
     TicketTypeSelectionTimeoutMgr.This.AddMessage(ticketCreatedMessage);
-    var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(embedUserMessageSentToUser);
+    var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(EmbedMessage.MessageSentByUser(message));
 
     ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
     await ticket.UpdateAsync();
@@ -438,18 +329,8 @@ public class Ticket
 
     if (logChannel is not null) {
       await logChannel.SendMessageAsync(newTicketCreatedLog);
-
       if (guildOption.IsSensitiveLogging) {
-        var embed = new DiscordEmbedBuilder()
-                    .WithTitle(Texts.MESSAGE_SENT_BY_USER)
-                    .WithUserAsAuthor(user)
-                    .WithDescription(message.Content)
-                    .WithCustomTimestamp()
-                    .WithColor(Colors.MessageSentColor)
-                    .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper())
-                    .AddField(Texts.USER_ID, user.Id.ToString(), true)
-                    .AddAttachment(message.Attachments);
-        await logChannel.SendMessageAsync(embed);
+        await logChannel.SendMessageAsync(EmbedLog.MessageSentByUser(message, ticket.Id));
       }
     }
   }
@@ -462,12 +343,6 @@ public class Ticket
     ArgumentNullException.ThrowIfNull(message);
     ArgumentNullException.ThrowIfNull(channel);
     ArgumentNullException.ThrowIfNull(guild);
-
-    // var user = await ModmailBot.This.GetMemberFromAnyGuildAsync(ticket.messageId);
-    // if (user is null) {
-    //   Log.Error("Member not found for user: {UserId}", ticket.messageId);
-    //   return;
-    // }
 
     var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (privateChannel is not null) {
@@ -583,16 +458,7 @@ public class Ticket
     var logChannelId = await GuildOption.GetLogChannelIdAsync(GuildOption.GuildId);
     var logChannel = await ModmailBot.This.Client.GetChannelAsync(logChannelId);
     if (logChannel is not null) {
-      var aToggledEmbed = new DiscordEmbedBuilder()
-                          .WithTitle(Texts.ANONYMOUS_TOGGLED)
-                          .WithColor(Colors.AnonymousToggledColor)
-                          .WithCustomTimestamp()
-                          .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl)
-                          .AddField(Texts.TICKET_ID, Id.ToString().ToUpper());
-      aToggledEmbed.WithDescription(Anonymous
-                                      ? Texts.TICKET_SET_ANONYMOUS_DESCRIPTION
-                                      : Texts.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION);
-      await logChannel.SendMessageAsync(aToggledEmbed);
+      await logChannel.SendMessageAsync(EmbedLog.AnonymousToggled(this));
     }
     else {
       //TODO: Handle log channel not found
@@ -600,16 +466,7 @@ public class Ticket
 
     ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
     if (ticketChannel is not null) {
-      var embed2 = new DiscordEmbedBuilder()
-                   .WithTitle(Texts.ANONYMOUS_TOGGLED)
-                   .WithColor(Colors.AnonymousToggledColor)
-                   .WithCustomTimestamp()
-                   .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl)
-                   .WithDescription(Anonymous
-                                      ? Texts.TICKET_SET_ANONYMOUS_DESCRIPTION
-                                      : Texts.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION);
-
-      await ticketChannel.SendMessageAsync(embed2);
+      await ticketChannel.SendMessageAsync(EmbedTicket.AnonymousToggled(this));
     }
     else {
       //TODO: Handle mail channel not found
@@ -637,14 +494,7 @@ public class Ticket
     var logChannelId = await GuildOption.GetLogChannelIdAsync(GuildOption.GuildId);
     var logChannel = await ModmailBot.This.Client.GetChannelAsync(logChannelId);
     if (logChannel is not null) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.TICKET_TYPE_CHANGED)
-                  .WithDescription(string.Format(Texts.TICKET_TYPE_SET, ticketType.Emoji, ticketType.Name))
-                  .WithAuthor(OpenerUserInfo.Username, iconUrl: OpenerUserInfo.AvatarUrl)
-                  .WithCustomTimestamp()
-                  .AddField(Texts.TICKET_ID, Id.ToString().ToUpper())
-                  .WithColor(Colors.TicketTypeChangedColor);
-      await logChannel.SendMessageAsync(embed);
+      await logChannel.SendMessageAsync(EmbedLog.TicketTypeChanged(this, ticketType));
     }
     else {
       //TODO: Handle log channel not found
@@ -653,14 +503,7 @@ public class Ticket
     var userInfo = await DiscordUserInfo.GetAsync(userId);
     ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
     if (ticketChannel is not null) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.TICKET_TYPE_CHANGED)
-                  .WithDescription(string.Format(Texts.TICKET_TYPE_SET, ticketType.Emoji, ticketType.Name))
-                  .WithAuthor(userInfo.Username, iconUrl: userInfo.AvatarUrl)
-                  .WithCustomTimestamp()
-                  .WithColor(Colors.TicketTypeChangedColor);
-
-      await ticketChannel.SendMessageAsync(embed);
+      await ticketChannel.SendMessageAsync(EmbedTicket.TicketTypeChanged(userInfo, ticketType));
     }
     else {
       //TODO: Handle mail channel not found
@@ -669,23 +512,14 @@ public class Ticket
     var privateChannelId = PrivateMessageChannelId;
     privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(privateChannelId);
     if (privateChannel is not null) {
-      var embed = new DiscordEmbedBuilder()
-                  .WithTitle(Texts.TICKET_TYPE_CHANGED)
-                  .WithDescription(string.Format(Texts.TICKET_TYPE_SET, ticketType.Emoji, ticketType.Name))
-                  .WithCustomTimestamp()
-                  .WithColor(Colors.TicketTypeChangedColor);
-      if (!string.IsNullOrEmpty(ticketType.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
-        embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
-      await privateChannel.SendMessageAsync(embed);
-
+      await privateChannel.SendMessageAsync(EmbedUser.TicketTypeChanged(ticketType));
       if (BotTicketCreatedMessageInDmId != 0) {
         privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
         if (privateMessageWithComponent is not null) {
           //remove components from private messageContent
-          var embedPmInteraction = privateMessageWithComponent.Embeds.FirstOrDefault();
           await privateMessageWithComponent.ModifyAsync(x => {
             x.ClearComponents();
-            x.AddEmbed(embedPmInteraction);
+            x.AddEmbeds(privateMessageWithComponent.Embeds);
           });
 
           TicketTypeSelectionTimeoutMgr.This.RemoveMessage(privateMessageWithComponent.Id);
