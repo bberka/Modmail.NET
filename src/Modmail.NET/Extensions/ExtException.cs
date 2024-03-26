@@ -1,0 +1,45 @@
+﻿using DSharpPlus.Entities;
+using Modmail.NET.Common;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Static;
+
+namespace Modmail.NET.Extensions;
+
+public static class ExtException
+{
+  public static DiscordWebhookBuilder ToWebhookResponse(this BotExceptionBase exception) {
+    return Webhooks.Warning(exception.TitleMessage, exception.ContentMessage ?? "");
+  }
+
+  public static DiscordEmbedBuilder ToEmbedResponse(this BotExceptionBase exception) {
+    return Embeds.Warning(exception.TitleMessage, exception.ContentMessage ?? "");
+  }
+
+  public static DiscordInteractionResponseBuilder ToInteractionResponse(this BotExceptionBase exception) {
+    return Interactions.Warning(exception.TitleMessage, exception.ContentMessage ?? "");
+  }
+
+  public static DiscordWebhookBuilder ToWebhookResponse(this Exception exception) {
+    if (BotConfig.This.Environment == EnvironmentType.Development) {
+      return Webhooks.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+    }
+
+    return Webhooks.Error(Texts.AN_EXCEPTION_OCCURRED);
+  }
+
+  public static DiscordEmbedBuilder ToEmbedResponse(this Exception exception) {
+    if (BotConfig.This.Environment == EnvironmentType.Development) {
+      return Embeds.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+    }
+
+    return Embeds.Error(Texts.AN_EXCEPTION_OCCURRED);
+  }
+
+  public static DiscordInteractionResponseBuilder ToInteractionResponse(this Exception exception) {
+    if (BotConfig.This.Environment == EnvironmentType.Development) {
+      return Interactions.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+    }
+
+    return Interactions.Error(Texts.AN_EXCEPTION_OCCURRED);
+  }
+}
