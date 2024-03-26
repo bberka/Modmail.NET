@@ -71,31 +71,27 @@ public class Ticket
   }
 
 
-  public static async Task<Ticket?> GetActiveAsync(ulong userId) {
+  public static async Task<Ticket> GetActiveAsync(ulong userId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
+    if (ticket is null) throw new TicketNotFoundException();
     return ticket;
   }
 
-  public static async Task<Ticket?> GetActiveAsync(Guid ticketId) {
+  public static async Task<Ticket> GetActiveAsync(Guid ticketId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
+    if (ticket is null) throw new TicketNotFoundException();
     return ticket;
   }
 
-  public static async Task<Ticket?> GetAsync(Guid id) {
+  public static async Task<Ticket> GetAsync(Guid id) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+    if (ticket is null) throw new TicketNotFoundException();
     return ticket;
   }
-
-  public static async Task<Ticket?> GetClosedAsync(Guid ticketId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && x.ClosedDateUtc.HasValue);
-    return ticket;
-  }
-
 
   public async Task ProcessCloseTicketAsync(ulong closerUserId,
                                             string? closeReason = null,
@@ -118,26 +114,23 @@ public class Ticket
     var closerUser = await DiscordUserInfo.GetAsync(closerUserId);
     CloserUserInfo = closerUser;
 
-    await this.UpdateAsync();
+    await UpdateAsync();
 
     await modChatChannel.DeleteAsync(Texts.TICKET_CLOSED);
 
     var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (pmChannel != null) {
       await pmChannel.SendMessageAsync(EmbedUser.TicketClosed(this));
-
       if (GuildOption.TakeFeedbackAfterClosing && !doNotSendFeedbackMessage) {
         await pmChannel.SendMessageAsync(EmbedUser.GiveFeedbackMessage(this));
       }
     }
     else {
-      //TODO: Handle private messageContent privateChannel not found
+      Log.Warning("Private messageContent channel not found {TicketId} {ChannelId}", Id, PrivateMessageChannelId);
     }
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(EmbedLog.TicketClosed(this));
-
-    Log.Information("Ticket closed {TicketId} by {CloserUserId}", Id, closerUserId);
   }
 
   public async Task ProcessChangePriority(ulong modUserId,
