@@ -13,7 +13,7 @@ public class RequireMainServerAttribute : SlashCheckBaseAttribute
       return true;
     }
 
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER));
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER).AsEphemeral());
     return false;
   }
 }
