@@ -11,8 +11,8 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    [Migration("20240325235204_mg5")]
-    partial class mg5
+    [Migration("20240327133404_mg1")]
+    partial class mg1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

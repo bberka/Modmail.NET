@@ -34,7 +34,6 @@ namespace Modmail.NET.Migrations
                 {
                     GuildId = table.Column<ulong>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    IsAutoUpdateGuildInformation = table.Column<bool>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     IconUrl = table.Column<string>(type: "TEXT", nullable: false),
                     BannerUrl = table.Column<string>(type: "TEXT", nullable: true),
@@ -66,8 +65,8 @@ namespace Modmail.NET.Migrations
                     Emoji = table.Column<string>(type: "TEXT", nullable: true),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     Order = table.Column<int>(type: "INTEGER", nullable: false),
-                    EmbedMessageTitle = table.Column<string>(type: "TEXT", nullable: true),
-                    EmbedMessageContent = table.Column<string>(type: "TEXT", nullable: true)
+                    EmbedMessageTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    EmbedMessageContent = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,6 +136,7 @@ namespace Modmail.NET.Migrations
                     PrivateMessageChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     ModMessageChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     InitialMessageId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    BotTicketCreatedMessageInDmId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Priority = table.Column<int>(type: "INTEGER", nullable: false),
                     CloseReason = table.Column<string>(type: "TEXT", nullable: true),
                     IsForcedClosed = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -231,8 +231,7 @@ namespace Modmail.NET.Migrations
                     RegisterDateUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     TicketId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    DiscordUserId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    Username = table.Column<string>(type: "TEXT", nullable: false)
+                    DiscordUserId = table.Column<ulong>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
