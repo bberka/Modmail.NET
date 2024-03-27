@@ -155,6 +155,11 @@ public static class Texts
   public const string CATEGORY_ID = "Category Id";
   public const string LOG_CHANNEL_ID = "Log Channel Id";
   public const string CONFIGURATION_UPDATED = "Configuration updated";
+  public const string EMOJI = "Emoji";
+  public const string DESCRIPTION = "Description";
+  public const string EMBED_MESSAGE_TITLE = "Embed Message Title";
+  public const string EMBED_MESSAGE_CONTENT = "Embed Message Content";
+  public const string ORDER = "Order";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

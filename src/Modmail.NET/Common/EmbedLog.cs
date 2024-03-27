@@ -167,7 +167,12 @@ public static
                 .WithTitle(Texts.TICKET_TYPE_UPDATED)
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true)
+                .AddField(Texts.EMOJI, ticketType.Emoji, true)
+                .AddField(Texts.ORDER, ticketType.Order.ToString(), true)
+                .AddField(Texts.DESCRIPTION, ticketType.Description ?? "N/A", false)
+                .AddField(Texts.EMBED_MESSAGE_TITLE, ticketType.EmbedMessageTitle, false)
+                .AddField(Texts.EMBED_MESSAGE_CONTENT, ticketType.EmbedMessageContent, false);
     return embed;
   }
 
@@ -176,7 +181,13 @@ public static
                 .WithTitle(Texts.TICKET_TYPE_CREATED)
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true)
+                .AddField(Texts.EMOJI, ticketType.Emoji, true)
+                .AddField(Texts.ORDER, ticketType.Order.ToString(), true)
+                .AddField(Texts.DESCRIPTION, ticketType.Description ?? "N/A", false)
+                .AddField(Texts.EMBED_MESSAGE_TITLE, ticketType.EmbedMessageTitle, false)
+                .AddField(Texts.EMBED_MESSAGE_CONTENT, ticketType.EmbedMessageContent, false)
+      ;
     return embed;
   }
 
