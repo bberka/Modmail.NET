@@ -149,7 +149,8 @@ public static
                 .AddField(Texts.TICKET_ID, ticket.Id.ToString().ToUpper(), false)
                 .AddField(Texts.OPENED_BY, ticket.OpenerUserInfo.GetMention(), true)
                 .AddField(Texts.CLOSED_BY, ticket.CloserUserInfo.GetMention(), true)
-                .AddField(Texts.CLOSE_REASON, ticket.CloseReason, true);
+                .AddField(Texts.CLOSE_REASON, ticket.CloseReason, true)
+      ;
     return embed;
   }
 
@@ -158,7 +159,13 @@ public static
                 .WithTitle(Texts.TICKET_TYPE_DELETED)
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.TICKET_TYPE, ticketType.Name, true);
+                .AddField(Texts.TICKET_TYPE, ticketType.Name, true)
+                .AddField(Texts.EMOJI, ticketType.Emoji, true)
+                .AddField(Texts.ORDER, ticketType.Order.ToString(), true)
+                .AddField(Texts.DESCRIPTION, ticketType.Description ?? "N/A", false)
+                .AddField(Texts.EMBED_MESSAGE_TITLE, ticketType.EmbedMessageTitle, false)
+                .AddField(Texts.EMBED_MESSAGE_CONTENT, ticketType.EmbedMessageContent, false)
+      ;
     return embed;
   }
 

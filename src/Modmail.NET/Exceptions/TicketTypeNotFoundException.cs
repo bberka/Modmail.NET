@@ -8,5 +8,9 @@ public class TicketTypeNotFoundException : BotExceptionBase
     KeyOrName = keyOrName;
   }
 
+  public TicketTypeNotFoundException() : base(Texts.TICKET_TYPE_NOT_FOUND) {
+    KeyOrName = string.Empty;
+  }
+
   public string KeyOrName { get; }
 }

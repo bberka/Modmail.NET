@@ -138,7 +138,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
 
   [SlashCommand("delete", "Delete a ticket type")]
   public async Task DeleteTicketType(InteractionContext ctx,
-                                     [Option("name", "The name of the ticket type")]
+                                     [Option("name", "The name of the ticket type")] [Autocomplete(typeof(TicketTypeProvider))]
                                      string name
   ) {
     const string logMessage = $"[{nameof(TicketTypeSlashCommands)}]{nameof(DeleteTicketType)}({{name}})";
@@ -172,7 +172,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     }
     catch (BotExceptionBase ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Fatal(ex, logMessage);
+      Log.Warning(ex, logMessage);
     }
     catch (Exception ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());
@@ -181,6 +181,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("get", "Gets the ticket type for the current ticket channel")]
+  [RequireTicketChannel]
   public async Task GetTicketType(InteractionContext ctx) {
     const string logMessage = $"[{nameof(TicketTypeSlashCommands)}]{nameof(GetTicketType)}()";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -192,7 +193,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     }
     catch (BotExceptionBase ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Fatal(ex, logMessage);
+      Log.Warning(ex, logMessage);
     }
     catch (Exception ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());

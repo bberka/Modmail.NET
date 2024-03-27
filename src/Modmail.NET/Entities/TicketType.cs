@@ -76,7 +76,7 @@ public class TicketType
     var result = await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
                                 .Select(x => x.TicketType)
                                 .FirstOrDefaultAsync();
-    if (result is null) throw new TicketTypeNotFoundException(channelId.ToString());
+    if (result is null) throw new TicketTypeNotFoundException();
     return result;
   }
 
