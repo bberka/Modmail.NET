@@ -27,9 +27,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                      [Option("embed-message-content", "The content of the embed message")]
                                      string embedMessageContent,
                                      [Option("emoji", "The emoji used for this ticket type")]
-                                     DiscordEmoji? emoji = null,
-                                     // [Option("color-hex-code", "The color hex code used for this ticket type")]
-                                     // string? colorHexCode = null,
+                                     DiscordEmoji emoji,
                                      [Option("description", "The description of the ticket type")]
                                      string? description = null,
                                      [Option("order", "The order of the ticket type")]
@@ -87,7 +85,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                      [Option("embed-message-content", "The content of the embed message")]
                                      string embedMessageContent,
                                      [Option("emoji", "The emoji used for this ticket type")]
-                                     DiscordEmoji? emoji = null,
+                                     DiscordEmoji emoji,
                                      [Option("description", "The description of the ticket type")]
                                      string? description = null,
                                      [Option("order", "The order of the ticket type")]
