@@ -154,6 +154,7 @@ public static class Texts
   public const string GUILD_ID = "Guild Id";
   public const string CATEGORY_ID = "Category Id";
   public const string LOG_CHANNEL_ID = "Log Channel Id";
+  public const string CONFIGURATION_UPDATED = "Configuration updated";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

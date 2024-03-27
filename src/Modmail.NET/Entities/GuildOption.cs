@@ -162,5 +162,9 @@ public class GuildOption
     if (!string.IsNullOrEmpty(closingMessage))
       ClosingMessage = closingMessage;
     await UpdateAsync();
+
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(EmbedLog.ConfigurationUpdated(this));
   }
 }

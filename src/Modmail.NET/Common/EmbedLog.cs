@@ -259,7 +259,23 @@ public static
                 .AddField(Texts.CATEGORY_ID, guildOption.CategoryId.ToString(), true)
                 .AddField(Texts.LOG_CHANNEL_ID, guildOption.LogChannelId.ToString(), true)
                 .AddField(Texts.SENSITIVE_LOGGING, guildOption.IsSensitiveLogging.ToString(), true)
-                .AddField(Texts.TAKE_FEEDBACK_AFTER_CLOSING, guildOption.TakeFeedbackAfterClosing.ToString(), true);
+                .AddField(Texts.TAKE_FEEDBACK_AFTER_CLOSING, guildOption.TakeFeedbackAfterClosing.ToString(), true)
+                .AddField(Texts.GREETING_MESSAGE, guildOption.GreetingMessage, false)
+                .AddField(Texts.CLOSING_MESSAGE, guildOption.ClosingMessage, false);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder ConfigurationUpdated(GuildOption guildOption) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.CONFIGURATION_UPDATED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.GUILD_ID, guildOption.GuildId.ToString(), false)
+                .AddField(Texts.GUILD_NAME, guildOption.Name, true)
+                .AddField(Texts.SENSITIVE_LOGGING, guildOption.IsSensitiveLogging.ToString(), true)
+                .AddField(Texts.TAKE_FEEDBACK_AFTER_CLOSING, guildOption.TakeFeedbackAfterClosing.ToString(), true)
+                .AddField(Texts.GREETING_MESSAGE, guildOption.GreetingMessage, false)
+                .AddField(Texts.CLOSING_MESSAGE, guildOption.ClosingMessage, false);
     return embed;
   }
 }
