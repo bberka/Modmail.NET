@@ -58,10 +58,6 @@ public class TicketType
   public static async Task<List<TicketType>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketTypes.ToListAsync();
-    if (result.Count == 0) {
-      throw new NoTicketTypesFoundException();
-    }
-
     return result;
   }
 

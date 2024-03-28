@@ -166,8 +166,14 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
 
     try {
       var ticketTypes = await TicketType.GetAllAsync();
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPES,
-                                                string.Join(Environment.NewLine, ticketTypes.Select(x => $"`{x.Name}` - {x.Description}"))));
+      if (ticketTypes.Count == 0) {
+        await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPES, Texts.NO_TICKET_TYPES_FOUND));
+      }
+      else {
+        await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPES,
+                                                  string.Join(Environment.NewLine, ticketTypes.Select(x => $"`{x.Name}` - {x.Description}"))));
+      }
+
       Log.Information(logMessage);
     }
     catch (BotExceptionBase ex) {
