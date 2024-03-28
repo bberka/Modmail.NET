@@ -1,16 +1,19 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Attributes;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Extensions;
 using Modmail.NET.Static;
+using Serilog;
 
 namespace Modmail.NET.Commands;
 
 [SlashCommandGroup("blacklist", "Blacklist management commands.")]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
+[UpdateUserInformation]
 public class BlacklistSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("add", "Add a user to the blacklist.")]
@@ -18,143 +21,120 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                         [Option("user", "The user to blacklist.")]
                         DiscordUser user,
                         [Option("notify-user", "Whether to notify the user about the blacklist.")]
-                        bool notifyUser,
+                        bool notifyUser = true,
                         [Option("reason", "The reason for blacklisting.")]
-                        string reason
+                        string reason = "No reason provided."
   ) {
+    const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Add)}({{ContextUserId}},{{UserId}},{{NotifyUser}},{{Reason}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var option = await dbService.GetOptionAsync(ctx.Guild.Id);
-    if (option is null) {
-      var embed1 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
-      var builder1 = new DiscordWebhookBuilder().AddEmbed(embed1);
-      await ctx.EditResponseAsync(builder1);
-      return;
+    try {
+      await DiscordUserInfo.AddOrUpdateAsync(user);
+      await TicketBlacklist.ProcessAddUserToBlacklist(ctx.User.Id, user.Id, reason, notifyUser);
+      await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
+      Log.Information(logMessage,
+                      ctx.User.Id,
+                      user.Id,
+                      notifyUser,
+                      reason);
     }
-
-    var logChannelId = option.LogChannelId;
-    var logChannel = ctx.Guild.GetChannel(logChannelId);
-
-    if (logChannel is null) {
-      var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
-      var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
-      await ctx.EditResponseAsync(builder2);
-      return;
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex,
+                  logMessage,
+                  ctx.User.Id,
+                  user.Id,
+                  notifyUser,
+                  reason);
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
     }
-
-    var activeTicket = await dbService.GetActiveTicketAsync(user.Id);
-    if (activeTicket is not null) {
-      var embed3 = ModmailEmbeds.Base(Texts.USER_HAS_ACTIVE_TICKET, Texts.PLEASE_CLOSE_THE_TICKET_BEFORE_BLACKLISTING, DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed3);
-      await ctx.EditResponseAsync(builder);
-      return;
-    }
-
-
-    var activeBlock = await dbService.GetUserBlacklistStatus(user.Id);
-    if (activeBlock) {
-      var embed4 = ModmailEmbeds.Base(Texts.USER_ALREADY_BLACKLISTED, "", DiscordColor.Red);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.EditResponseAsync(builder);
-      return;
-    }
-
-    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(ctx.User));
-    await dbService.UpdateUserInfoAsync(new DiscordUserInfo(user));
-
-    await dbService.AddBlacklistAsync(user.Id, ctx.Guild.Id, reason);
-
-    var embedLog = ModmailEmbeds.ToLog.BlacklistAdded(ctx.User, user, reason);
-    await logChannel.SendMessageAsync(embedLog);
-    var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
-    await ctx.EditResponseAsync(builderLog);
-
-
-    if (notifyUser) {
-      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
-      if (member is null) {
-        var embed5 = ModmailEmbeds.Base(Texts.USER_NOT_FOUND, "", DiscordColor.Red);
-        var builder = new DiscordWebhookBuilder().AddEmbed(embed5);
-        await ctx.EditResponseAsync(builder);
-        return;
-      }
-
-      var dmEmbed = ModmailEmbeds.ToUser.Blacklisted(ctx.Guild, ctx.User, reason);
-      await member.SendMessageAsync(dmEmbed);
+    catch (Exception ex) {
+      Log.Fatal(ex,
+                logMessage,
+                ctx.User.Id,
+                user.Id,
+                notifyUser,
+                reason);
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
     }
   }
 
   [SlashCommand("remove", "Remove a user from the blacklist.")]
   public async Task Remove(InteractionContext ctx,
                            [Option("user", "The user to remove from the blacklist.")]
-                           DiscordUser user
+                           DiscordUser user,
+                           [Option("notify-user", "Whether to notify the user about the removal.")]
+                           bool notifyUser = true
   ) {
+    const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Remove)}({{ContextUserId}},{{UserId}},{{NotifyUser}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var option = await dbService.GetOptionAsync(ctx.Guild.Id);
-    if (option is null) {
-      var embed1 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
-      var builder1 = new DiscordWebhookBuilder().AddEmbed(embed1);
-      await ctx.EditResponseAsync(builder1);
-      return;
+    try {
+      await DiscordUserInfo.AddOrUpdateAsync(user);
+      var ticketBlacklist = await TicketBlacklist.GetAsync(user.Id);
+      await ticketBlacklist.ProcessRemoveUserFromBlacklist(ctx.User.Id, user.Id, notifyUser);
+      Log.Information(logMessage,
+                      ctx.User.Id,
+                      user.Id,
+                      notifyUser);
+      await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
     }
-
-    var logChannelId = option.LogChannelId;
-    var logChannel = ctx.Guild.GetChannel(logChannelId);
-
-    if (logChannel is null) {
-      var embed2 = ModmailEmbeds.Base(Texts.SERVER_NOT_SETUP, Texts.SETUP_SERVER_BEFORE_USING, DiscordColor.Red);
-      var builder2 = new DiscordWebhookBuilder().AddEmbed(embed2);
-      await ctx.EditResponseAsync(builder2);
-      return;
+    catch (BotExceptionBase ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Warning(ex,
+                  logMessage,
+                  ctx.User.Id,
+                  user.Id,
+                  notifyUser);
     }
-
-    var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
-    if (!isBlocked) {
-      var embed4 = ModmailEmbeds.Base(Texts.USER_IS_NOT_BLACKLISTED, "", DiscordColor.Yellow);
-      var builder = new DiscordWebhookBuilder().AddEmbed(embed4);
-      await ctx.EditResponseAsync(builder);
-      return;
+    catch (Exception ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Fatal(ex,
+                logMessage,
+                ctx.User.Id,
+                user.Id,
+                notifyUser);
     }
-
-    await dbService.RemoveBlacklistAsync(user.Id);
-    var embedLog = ModmailEmbeds.ToLog.BlacklistRemoved(ctx.User, user);
-    await logChannel.SendMessageAsync(embedLog);
-    var builderLog = new DiscordWebhookBuilder().AddEmbed(embedLog);
-    await ctx.EditResponseAsync(builderLog);
   }
 
   [SlashCommand("status", "Check if a user is blacklisted.")]
   public async Task Status(InteractionContext ctx,
                            [Option("user", "The user to check.")] DiscordUser user
   ) {
+    const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Status)}({{ContextUserId}},{{UserId}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var isBlocked = await dbService.GetUserBlacklistStatus(user.Id);
-    var embed = ModmailEmbeds.Base(Texts.USER_BLACKLIST_STATUS,
-                                   isBlocked
-                                     ? Texts.USER_IS_BLACKLISTED
-                                     : Texts.USER_IS_NOT_BLACKLISTED,
-                                   isBlocked
-                                     ? DiscordColor.Red
-                                     : DiscordColor.Green);
-    var builder = new DiscordWebhookBuilder().AddEmbed(embed);
-    await ctx.EditResponseAsync(builder);
+    try {
+      var isBlocked = await TicketBlacklist.IsBlacklistedAsync(user.Id);
+      await ctx.EditResponseAsync(Webhooks.Info(Texts.USER_BLACKLIST_STATUS,
+                                                isBlocked
+                                                  ? Texts.USER_IS_BLACKLISTED
+                                                  : Texts.USER_IS_NOT_BLACKLISTED));
+      Log.Information(logMessage, ctx.User.Id, user.Id);
+    }
+    catch (BotExceptionBase ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Warning(ex, logMessage, ctx.User.Id, user.Id);
+    }
+    catch (Exception ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Fatal(ex, logMessage, ctx.User.Id, user.Id);
+    }
   }
 
   [SlashCommand("view", "View all blacklisted users.")]
   public async Task View(InteractionContext ctx) {
+    const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(View)}({{ContextUserId}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    var dbService = ServiceLocator.Get<IDbService>();
-    var blacklistedUsers = (await dbService.GetBlacklistedUsersAsync(ctx.Guild.Id)).Select(x => $"<@{x}>");
-    var embed = ModmailEmbeds.Base(Texts.BLACKLISTED_USERS, string.Join("\n", blacklistedUsers), DiscordColor.Green);
-    var builder = new DiscordWebhookBuilder().AddEmbed(embed);
-    await ctx.EditResponseAsync(builder);
+    try {
+      var blacklistedUsers = await TicketBlacklist.GetAllAsync();
+      var str = string.Join("\n", blacklistedUsers.Select(x => $"<@{x.DiscordUserId}>").ToList());
+      await ctx.EditResponseAsync(Webhooks.Info(Texts.BLACKLISTED_USERS, str));
+      Log.Information(logMessage, ctx.User.Id);
+    }
+    catch (BotExceptionBase ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Warning(ex, logMessage, ctx.User.Id);
+    }
+    catch (Exception ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Fatal(ex, logMessage, ctx.User.Id);
+    }
   }
 }

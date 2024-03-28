@@ -1,12 +1,12 @@
-﻿using System.Text;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Metran;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 using Serilog;
 
 namespace Modmail.NET.Events;
@@ -16,280 +16,84 @@ public static class OnMessageCreated
   private static readonly MetranContainer<ulong> ProcessingUserMessageContainer = new();
 
   public static async Task Handle(DiscordClient sender, MessageCreateEventArgs args) {
-    await Task.WhenAll(HandlePrivateMessage(sender, args.Message, args.Channel, args.Author),
-                       HandleGuildMessage(sender, args.Message, args.Channel, args.Author, args.Guild));
+    await DiscordUserInfo.AddOrUpdateAsync(args.Author);
+    if (args.Message.Author.IsBot) return;
+    if (args.Message.IsTTS) return;
+    if (args.Channel.IsPrivate) await HandlePrivateTicketMessageAsync(sender, args.Message, args.Channel, args.Author);
+    else await HandleGuildTicketMessageAsync(sender, args.Message, args.Channel, args.Author, args.Guild);
   }
 
-  internal static async Task HandlePrivateMessage(DiscordClient sender,
-                                                  DiscordMessage message,
-                                                  DiscordChannel channel,
-                                                  DiscordUser author) {
-    if (message.Author.IsBot) return;
-    if (message.IsTTS) return;
-    if (!channel.IsPrivate) return;
-    var channelId = channel.Id;
-    var authorId = author.Id;
-    var guildId = MMConfig.This.MainServerId;
-
-    if (message.Content.StartsWith(MMConfig.This.BotPrefix))
-      //ignored
+  internal static async Task HandlePrivateTicketMessageAsync(DiscordClient sender,
+                                                             DiscordMessage message,
+                                                             DiscordChannel channel,
+                                                             DiscordUser user) {
+    var userId = user.Id;
+    if (message.Content.StartsWith(BotConfig.This.BotPrefix))
       return;
 
-    //keeps other threads for same user locked until this one is done
-    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
-    if (metran is null) {
-      //VERY UNLIKELY TO HAPPEN
-      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
-      return;
-    }
-
-    var dbService = ServiceLocator.Get<IDbService>();
-    //Check if user has active modmail
-    // await using var db = new ModmailDbContext();
-    var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
-    if (option is null) {
-      Log.Error("Option not found for guild: {GuildOptionId}", guildId);
-      return;
-    }
-
-    var guild = await sender.GetGuildAsync(option.GuildId);
-
-    var dcUserInfo = new DiscordUserInfo(author);
-    await dbService.UpdateUserInfoAsync(dcUserInfo);
-
-    var activeBlock = await dbService.GetUserBlacklistStatus(authorId);
-    if (activeBlock) {
-      var embed = ModmailEmbeds.ToUser.UserBlocked(guild);
-      await channel.SendMessageAsync(embed);
-      return;
-    }
-
-    var activeTicket = await dbService.GetActiveTicketAsync(authorId);
-    var logChannel = guild.GetChannel(option.LogChannelId);
-
-
-    if (activeTicket is null) {
-      //make new channel
-      var channelName = string.Format(Const.TICKET_NAME_TEMPLATE, author.Username.Trim());
-      var category = guild.GetChannel(option.CategoryId);
-
-      var ticketId = Guid.NewGuid();
-
-      var permissions = await dbService.GetPermissionInfoAsync(guildId);
-      var members = await guild.GetAllMembersAsync();
-      var roles = guild.Roles;
-
-      var modRoleListForOverwrites = new List<DiscordRole>();
-      var modMemberListForOverwrites = new List<DiscordMember>();
-      foreach (var perm in permissions) {
-        var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
-        if (role.Key != 0) {
-          var exists = modRoleListForOverwrites.Any(x => x.Id == role.Key);
-          if (!exists)
-            modRoleListForOverwrites.Add(role.Value);
-        }
-
-        var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
-        if (member2 is not null && member2.Id != 0) {
-          var exists = modMemberListForOverwrites.Any(x => x.Id == member2.Id);
-          if (!exists)
-            modMemberListForOverwrites.Add(member2);
-        }
-      }
-
-
-      var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites, modRoleListForOverwrites);
-      var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
-
-      var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(author.Id);
-      if (member is null) {
-        Log.Error("Member not found for user: {UserId}", authorId);
+    const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandlePrivateTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
+    try {
+      //keeps other threads for same user locked until this one is done
+      using var metran = ProcessingUserMessageContainer.BeginTransaction(userId, 50, 100); // 100ms * 50 = 5 seconds
+      if (metran is null) {
+        //VERY UNLIKELY TO HAPPEN
+        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
         return;
       }
 
-
-      var embedNewTicket = ModmailEmbeds.ToMail.NewTicket(member, ticketId);
-      var sb = new StringBuilder();
-      if (modRoleListForOverwrites.Count > 0) {
-        sb.AppendLine(Texts.ROLES + ":");
-        foreach (var role in modRoleListForOverwrites) sb.AppendLine(role.Mention);
+      var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
+      if (activeBlock) {
+        await channel.SendMessageAsync(EmbedUser.YouHaveBeenBlacklisted());
+        return;
       }
 
-      if (modMemberListForOverwrites.Count > 0) {
-        sb.AppendLine(Texts.MEMBERS + ":");
-        foreach (var member2 in modMemberListForOverwrites) sb.AppendLine(member2.Mention);
+      var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
+      if (activeTicket is not null) {
+        await activeTicket.ProcessUserSentMessageAsync(message, channel);
+      }
+      else {
+        await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
       }
 
-
-      await mailChannel.SendMessageAsync(sb.ToString(), embedNewTicket);
-
-      var embedUserMessage = ModmailEmbeds.ToMail.MessageReceived(author, message);
-      await mailChannel.SendMessageAsync(embedUserMessage);
-
-      var ticket = new Ticket {
-        DiscordUserInfoId = authorId,
-        ModMessageChannelId = mailChannel.Id,
-        RegisterDateUtc = DateTime.UtcNow,
-        PrivateMessageChannelId = channelId,
-        InitialMessageId = message.Id,
-        Priority = TicketPriority.Normal,
-        LastMessageDateUtc = DateTime.UtcNow,
-        GuildOptionId = guildId,
-        Id = ticketId,
-        Anonymous = false,
-        IsForcedClosed = false
-      };
-
-
-      await dbService.AddTicketAsync(ticket);
-
-
-      var ticketTypes = await dbService.GetEnabledTicketTypesAsync();
-
-      var embedTicketCreated = ModmailEmbeds.ToUser.TicketCreated(guild,
-                                                                  message,
-                                                                  option,
-                                                                  ticketTypes,
-                                                                  ticketId);
-      var embedUserMessageSentToUser = ModmailEmbeds.ToUser.MessageSent(guild, author, message);
-
-      var ticketCreatedMessage = await channel.SendMessageAsync(embedTicketCreated);
-      TicketTypeSelectionTimeoutMgr.This.AddMessage(ticketCreatedMessage);
-      await channel.SendMessageAsync(embedUserMessageSentToUser);
-
-
-      var embedLog = ModmailEmbeds.ToLog.TicketCreated(author, message, mailChannel, ticket.Id);
-      await logChannel.SendMessageAsync(embedLog);
-
-
-      if (option.IsSensitiveLogging) {
-        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
-        await dbService.AddMessageLog(dbMessageLog);
-
-        var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
-                                                           message,
-                                                           channel,
-                                                           ticket.Id);
-        await logChannel.SendMessageAsync(embed3);
-      }
+      Log.Information(logMessage, channel.Id, userId, message.Content);
     }
-    else {
-      //continue on existing channel
-      await Task.Delay(70); //wait for channel creation process to finish
-      var mailChannel = guild.GetChannel(activeTicket.ModMessageChannelId);
-      var embed = ModmailEmbeds.ToMail.MessageReceived(author, message);
-      await mailChannel.SendMessageAsync(embed);
-
-      activeTicket.LastMessageDateUtc = DateTime.UtcNow;
-      await dbService.UpdateTicketAsync(activeTicket);
-
-      var embedUserMessageDelivered = ModmailEmbeds.ToUser.MessageSent(guild, author, message);
-      await channel.SendMessageAsync(embedUserMessageDelivered);
-
-      if (option.IsSensitiveLogging) {
-        var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, activeTicket.Id);
-        await dbService.AddMessageLog(dbMessageLog);
-
-        var embed3 = ModmailEmbeds.ToLog.MessageSentByUser(author,
-                                                           message,
-                                                           channel,
-                                                           activeTicket.Id);
-        await logChannel.SendMessageAsync(embed3);
-      }
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, channel.Id, userId, message.Content);
+    }
+    catch (Exception ex) {
+      Log.Error(ex, logMessage, channel.Id, userId, message.Content);
     }
   }
 
-  internal static async Task HandleGuildMessage(DiscordClient sender,
-                                                DiscordMessage message,
-                                                DiscordChannel channel,
-                                                DiscordUser modUser,
-                                                DiscordGuild guild) {
-    if (message.Author.IsBot) return;
-    if (message.IsTTS) return;
-    if (channel.IsPrivate) return;
-    if (guild is null) return;
-    var channelId = channel.Id;
-    var authorId = modUser.Id;
-    var messageContent = message.Content;
-    var attachments = message.Attachments;
-    var guildId = guild.Id;
-    if (message.Content.StartsWith(MMConfig.This.BotPrefix))
-      //ignored
-      return;
+  internal static async Task HandleGuildTicketMessageAsync(DiscordClient sender,
+                                                           DiscordMessage message,
+                                                           DiscordChannel channel,
+                                                           DiscordUser modUser,
+                                                           DiscordGuild guild) {
+    const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandleGuildTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
+    try {
+      if (message.Content.StartsWith(BotConfig.This.BotPrefix))
+        return;
 
-    using var metran = ProcessingUserMessageContainer.BeginTransaction(authorId, 50, 100); // 100ms * 50 = 5 seconds
-    if (metran is null) {
-      //VERY UNLIKELY TO HAPPEN
-      await channel.SendMessageAsync(ModmailEmbeds.Base(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED, DiscordColor.DarkRed));
-      return;
+      using var metran = ProcessingUserMessageContainer.BeginTransaction(message.Author.Id, 50, 100); // 100ms * 50 = 5 seconds
+      if (metran is null) {
+        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
+        return;
+      }
+
+      var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
+      if (id == Guid.Empty) return;
+
+      var ticket = await Ticket.GetActiveTicketAsync(id);
+
+      await ticket.ProcessModSendMessageAsync(modUser, message, channel, guild);
+      Log.Information(logMessage, channel.Id, modUser.Id, message.Content);
     }
-
-    var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
-    if (id == Guid.Empty) {
-      Log.Verbose("Failed to parse mail id from channel topic");
-      return;
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, channel.Id, modUser.Id, message.Content);
     }
-
-    var dbService = ServiceLocator.Get<IDbService>();
-
-    var option = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
-    if (option is null) {
-      Log.Error("Option not found for guild: {GuildOptionId}", guildId);
-      return;
-    }
-
-
-    // await using var db = new ModmailDbContext();
-    var ticket = await dbService.GetActiveTicketAsync(id);
-    if (ticket is null) {
-      Log.Error("Modmail not found for channel: {ChannelId}", channelId);
-      return;
-    }
-
-    // var option = await db.GetOptionAsync(MMConfig.This.MainServerId);
-
-    var ticketChannel = guild.GetChannel(ticket.ModMessageChannelId);
-    if (ticketChannel is null) {
-      Log.Error("Modmail channel not found for channel: {ChannelId}", channelId);
-      return;
-    }
-    // var logChannel = ModmailBot.This.GetLogChannelAsync();
-
-
-    var dcUserInfo = new DiscordUserInfo(modUser);
-    await dbService.UpdateUserInfoAsync(dcUserInfo);
-
-    var user = await ModmailBot.This.GetMemberFromAnyGuildAsync(ticket.DiscordUserInfoId);
-    if (user is null) {
-      Log.Error("Member not found for user: {UserId}", ticket.DiscordUserInfoId);
-      return;
-    }
-
-    var embed = ModmailEmbeds.ToUser.MessageReceived(modUser, message, guild, ticket.Anonymous);
-    await user.SendMessageAsync(embed);
-
-    var embed2 = ModmailEmbeds.ToMail.MessageSent(modUser, message, ticket.Anonymous);
-    await ticketChannel.SendMessageAsync(embed2);
-    await message.DeleteAsync();
-
-    ticket.LastMessageDateUtc = DateTime.UtcNow;
-    await dbService.UpdateTicketAsync(ticket);
-
-
-    if (option.IsSensitiveLogging) {
-      var dbMessageLog = UtilMapper.DiscordMessageToEntity(message, ticket.Id);
-      await dbService.AddMessageLog(dbMessageLog);
-
-
-      var logChannelId = option.LogChannelId;
-      var logChannel = guild.GetChannel(logChannelId);
-      var embed3 = ModmailEmbeds.ToLog.MessageSentByMod(modUser,
-                                                        user,
-                                                        message,
-                                                        channel,
-                                                        ticket.Id,
-                                                        ticket.Anonymous);
-      await logChannel.SendMessageAsync(embed3);
+    catch (Exception ex) {
+      Log.Error(ex, logMessage, channel.Id, modUser.Id, message.Content);
     }
   }
 }

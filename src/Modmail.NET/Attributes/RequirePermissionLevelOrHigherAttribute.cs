@@ -1,8 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using Microsoft.Extensions.DependencyInjection;
-using Modmail.NET.Abstract.Services;
 using Modmail.NET.Common;
+using Modmail.NET.Entities;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Attributes;
@@ -16,24 +15,33 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
   }
 
   public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx) {
-    var isOwner = MMConfig.This.OwnerUsers.Contains(ctx.User.Id);
+    var isOwner = BotConfig.This.OwnerUsers.Contains(ctx.User.Id);
     if (isOwner) return true;
 
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);
     if (isAdmin) return true;
 
     var guild = ctx.Guild;
-    if (guild is null) return false;
+    if (guild is null) {
+      await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER).AsEphemeral());
+      return false;
+    }
 
-    var dbService = ctx.Services.GetService<IDbService>();
 
     var roleIdList = ctx.Member.Roles.Select(x => x.Id).ToList();
-    var permLevel = await dbService!.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
-    if (permLevel is null) return false;
+    var permLevel = await GuildTeamMember.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
+    if (permLevel is null) {
+      await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND).AsEphemeral());
+      return false;
+    }
+
     var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)_teamPermissionLevel;
-    if (permLevelInt >= expectedLevelInt) return true;
+    if (permLevelInt < expectedLevelInt) {
+      await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND).AsEphemeral());
+      return false;
+    }
 
-    return false;
+    return true;
   }
 }

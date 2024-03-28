@@ -3,11 +3,15 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Aspects;
 using Modmail.NET.Commands;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
+using Modmail.NET.Entities;
 using Modmail.NET.Events;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Manager;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 using Ninject;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -20,9 +24,9 @@ public class ModmailBot
 
 
   private ModmailBot() {
-    _ = MMConfig.This; // Initialize the environment container
+    _ = BotConfig.This; // Initialize the environment container
     UtilLogConfig.Configure();
-    if (MMConfig.This.Environment == EnvironmentType.Development)
+    if (BotConfig.This.Environment == EnvironmentType.Development)
       Log.Information("Running in development mode");
 
     var kernel = new StandardKernel(new MmKernel());
@@ -39,7 +43,7 @@ public class ModmailBot
       }
     };
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    AutoStartManager.SaveAutoStart();
+    AutoStartMgr.SaveAutoStart();
   }
 
   public static ModmailBot This {
@@ -55,7 +59,7 @@ public class ModmailBot
   public async Task StartAsync() {
     // Start the bot
     Client = new DiscordClient(new DiscordConfiguration {
-      Token = MMConfig.This.BotToken,
+      Token = BotConfig.This.BotToken,
       AutoReconnect = true,
       TokenType = TokenType.Bot,
       Intents = DiscordIntents.All,
@@ -74,6 +78,26 @@ public class ModmailBot
     Client.InteractionCreated += InteractionCreated.Handle;
     Client.ComponentInteractionCreated += ComponentInteractionCreated.Handle;
     Client.ModalSubmitted += ModalSubmitted.Handle;
+
+    //FOR USER DATA UPDATE ONLY
+    Client.GuildMemberAdded += OnGuildMemberAdded.Handle;
+    Client.GuildMemberRemoved += OnGuildMemberRemoved.Handle;
+    Client.GuildBanAdded += OnGuildBanAdded.Handle;
+    Client.GuildBanRemoved += OnGuildBanRemoved.Handle;
+    Client.MessageAcknowledged += OnMessageAcknowledged.Handle;
+    Client.TypingStarted += OnTypingStarted.Handle;
+    Client.UserUpdated += OnUserUpdated.Handle;
+    Client.UserSettingsUpdated += OnUserSettingsUpdated.Handle;
+    Client.ScheduledGuildEventUserAdded += OnScheduledGuildEventUserAdded.Handle;
+    Client.ScheduledGuildEventUserRemoved += OnScheduledGuildEventUserRemoved.Handle;
+    Client.MessageReactionAdded += OnMessageReactionAdded.Handle;
+    Client.MessageReactionRemoved += OnMessageReactionRemoved.Handle;
+    Client.MessageReactionRemovedEmoji += OnMessageReactionRemovedEmoji.Handle;
+    Client.MessageReactionsCleared += OnMessageReactionsCleared.Handle;
+    Client.MessageDeleted += OnMessageDeleted.Handle;
+    Client.MessageUpdated += OnMessageUpdated.Handle;
+    Client.ThreadCreated += OnThreadCreated.Handle;
+
 
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();
@@ -108,13 +132,17 @@ public class ModmailBot
       Log.Error(ex, "Failed to setup server: Database migration failed");
       throw;
     }
+
+    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
   }
+
 
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
     foreach (var guild in Client.Guilds) {
       try {
         var member = await guild.Value.GetMemberAsync(userId, false);
         if (member != null) {
+          await DiscordUserInfo.AddOrUpdateAsync(member);
           return member;
         }
       }
@@ -124,5 +152,44 @@ public class ModmailBot
     }
 
     return null;
+  }
+
+  [CacheAspect(CacheSeconds = 60)]
+  public async Task<DiscordGuild> GetMainGuildAsync() {
+    var guildId = BotConfig.This.MainServerId;
+    var guild = await Client.GetGuildAsync(guildId);
+    if (guild == null) {
+      Log.Error("Main guild not found: {GuildId}", guildId);
+      throw new MainGuildNotFoundException();
+    }
+
+    var guildOption = await GuildOption.GetAsync();
+
+    if (guildOption is not null) {
+      guildOption.Name = guild.Name;
+      guildOption.IconUrl = guild.IconUrl;
+      guildOption.BannerUrl = guild.BannerUrl;
+      await guildOption.UpdateAsync();
+      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
+    }
+
+    return guild;
+  }
+
+  [CacheAspect(CacheSeconds = 300)]
+  public async Task<DiscordChannel> GetLogChannelAsync() {
+    var guild = await GetMainGuildAsync();
+    var option = await GuildOption.GetAsync();
+    if (option is null) {
+      throw new ServerIsNotSetupException();
+    }
+
+    var logChannel = guild.GetChannel(option.LogChannelId);
+
+    if (logChannel is null) {
+      throw new LogChannelNotFoundException();
+    }
+
+    return logChannel;
   }
 }

@@ -1,60 +1,66 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Modmail.NET.Abstract.Services;
-using Modmail.NET.Common;
+using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
+using Serilog;
 
 namespace Modmail.NET.Events;
 
 public static class ModalSubmitted
 {
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
+    const string logMessage = $"[{nameof(ModalSubmitted)}]{nameof(Handle)}({{CustomId}},{{InteractionId}})";
     await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(Texts.THANK_YOU_FOR_FEEDBACK));
 
-    var interaction = args.Interaction;
-    var id = interaction.Data.CustomId;
-    var (interactionName, parameters) = UtilInteraction.ParseKey(id);
+    try {
+      await DiscordUserInfo.AddOrUpdateAsync(args.Interaction.User);
 
+      // var interaction = args.Interaction;
+      var id = args.Interaction.Data.CustomId;
+      var (interactionName, parameters) = UtilInteraction.ParseKey(id);
+      switch (interactionName) {
+        case "feedback": {
+          var textInput = args.Values["feedback"];
 
-    switch (interactionName) {
-      case "feedback":
-        var textInput = args.Values["feedback"];
+          var starParam = parameters[0];
+          var ticketIdParam = parameters[1];
+          var messageIdParam = parameters[2];
 
-        var starParam = parameters[0];
-        var ticketIdParam = parameters[1];
-        var messageIdParam = parameters[2];
+          var starCount = int.Parse(starParam);
+          var ticketId = Guid.Parse(ticketIdParam);
+          var feedbackMessageId = ulong.Parse(messageIdParam);
 
-        var starCount = int.Parse(starParam);
-        var ticketId = Guid.Parse(ticketIdParam);
-        var messageId = ulong.Parse(messageIdParam);
+          var ticket = await Ticket.GetAsync(ticketId);
 
-        var dbService = ServiceLocator.Get<IDbService>();
-
-        var guildOption = await dbService.GetOptionAsync(MMConfig.This.MainServerId);
-        if (guildOption is null) throw new InvalidOperationException("Guild option not found: " + MMConfig.This.MainServerId);
-
-        if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + MMConfig.This.MainServerId);
-
-
-        var mainGuild = await ModmailBot.This.Client.GetGuildAsync(MMConfig.This.MainServerId);
-
-
-        await dbService.AddFeedbackAsync(ticketId, starCount, textInput);
-
-        var message = await args.Interaction.Channel.GetMessageAsync(messageId);
-        var feedbackDoneEmbed = ModmailEmbeds.Interaction.EmbedFeedbackDone(starCount, textInput, mainGuild);
-        await message.ModifyAsync(x => { x.AddEmbed(feedbackDoneEmbed); });
-
-        var logChannel = mainGuild.GetChannel(guildOption.LogChannelId);
-        if (logChannel is not null) {
-          var logEmbed = ModmailEmbeds.ToLog.FeedbackReceived(starCount, textInput, mainGuild, args.Interaction.User);
-          await logChannel.SendMessageAsync(logEmbed);
+          var feedbackMessage = await args.Interaction.Channel.GetMessageAsync(feedbackMessageId);
+          await ticket.ProcessAddFeedbackAsync(starCount, textInput, feedbackMessage);
+          Log.Information(logMessage, args.Interaction.Data.CustomId, args.Interaction.Id);
+          break;
         }
+        case "close_ticket_with_reason": {
+          var textInput = args.Values["reason"];
 
-        break;
+          var ticketIdParam = parameters[0];
+
+          var ticketId = Guid.Parse(ticketIdParam);
+
+          var ticket = await Ticket.GetAsync(ticketId);
+
+          await ticket.ProcessCloseTicketAsync(args.Interaction.User.Id, textInput, args.Interaction.Channel);
+          Log.Information(logMessage, args.Interaction.Data.CustomId, args.Interaction.Id);
+          break;
+        }
+      }
     }
 
-    await Task.CompletedTask;
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, args.Interaction.Data.CustomId, args.Interaction.Id);
+    }
+    catch (Exception ex) {
+      Log.Error(ex, logMessage, args.Interaction.Data.CustomId, args.Interaction.Id);
+    }
   }
 }

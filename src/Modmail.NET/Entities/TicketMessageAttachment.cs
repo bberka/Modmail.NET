@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DSharpPlus.Entities;
 
 namespace Modmail.NET.Entities;
 
@@ -22,4 +23,17 @@ public class TicketMessageAttachment
 
   //FK
   public virtual TicketMessage TicketMessage { get; set; }
+
+  public static TicketMessageAttachment MapFrom(DiscordAttachment attachment, Guid ticketMessageId) {
+    return new TicketMessageAttachment {
+      Url = attachment.Url,
+      ProxyUrl = attachment.ProxyUrl,
+      TicketMessageId = ticketMessageId,
+      Height = attachment.Height,
+      Width = attachment.Width,
+      FileName = attachment.FileName,
+      FileSize = attachment.FileSize,
+      MediaType = attachment.MediaType
+    };
+  }
 }

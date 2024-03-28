@@ -1,14 +1,10 @@
-﻿using Modmail.NET.Common;
-
-namespace Modmail.NET.Static;
+﻿namespace Modmail.NET.Static;
 
 public static class Texts
 {
   public const string SERVER_NOT_SETUP = "Server is not setup!";
   public const string SETUP_SERVER_BEFORE_USING = "Please setup the server before using this command.";
-  public const string OPENED_BY_USER = "Opened By User";
-  public const string OPENED_BY_USER_ID = "Opened By User Id";
-  public const string OPENED_BY_USERNAME = "Opened By Username";
+  public const string OPENED_BY = "Opened By";
   public const string TICKET_ID = "Ticket Id";
   public const string OPENED_AT = "Opened At";
   public const string CLOSED_BY = "Closed By";
@@ -32,7 +28,7 @@ public static class Texts
   public const string NOTE_ADDED = "Note Added";
   public const string FEEDBACK = "Feedback";
   public const string FEEDBACK_DESCRIPTION = "Please rate the answers you receive. This helps us improve our moderation team.";
-  public const string FEEDBACK_RECEIVED = "Feedback received";
+  public const string FEEDBACK_RECEIVED = "Feedback Received";
   public const string STAR = "Star";
   public const string ANONYMOUS_TOGGLED = "Anonymous Toggled";
   public const string TOGGLED_BY = "Toggled By";
@@ -64,7 +60,7 @@ public static class Texts
   public const string MEMBERS = "Members";
   public const string ROLE = "Role";
   public const string THANK_YOU_FOR_FEEDBACK = "Thank you for your feedback!";
-  public const string? CHANNEL_WAS_DELETED = "Channel was deleted";
+  public const string CHANNEL_WAS_DELETED = "Channel was deleted";
   public const string USER_HAS_ACTIVE_TICKET = "User has an active ticket!";
   public const string PLEASE_CLOSE_THE_TICKET_BEFORE_BLACKLISTING = "Please close the ticket before blacklisting the user.";
   public const string USER_ALREADY_BLACKLISTED = "User is already blacklisted";
@@ -73,7 +69,7 @@ public static class Texts
   public const string USER_IS_BLACKLISTED = "User is blacklisted";
   public const string BLACKLISTED_USERS = "Blacklisted Users";
   public const string ANOTHER_SERVER_ALREADY_SETUP = "Another server is already setup, this bot only supports single server setup.";
-  public const string THIS_SERVER_ALREADY_SETUP = "This server already setup!";
+  public const string MAIN_SERVER_ALREADY_SETUP = "Main server already setup!";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER = "This command can only be used in the main server.";
   public const string MODMAIL_LOG_CHANNEL_TOPIC = "Modmail log channel";
   public const string SERVER_SETUP_COMPLETE = "Server setup complete!";
@@ -83,7 +79,7 @@ public static class Texts
   public const string YOUR_MESSAGE_COULD_NOT_BE_PROCESSED = "Your message could not be processed. Please try again later.";
   public const string TICKET_TYPE_CREATED = "Ticket Type Created";
   public const string TICKET_TYPE_CREATED_DESCRIPTION = "Ticket type `{0}` created";
-  public const string TICKET_TYPE_EXISTS = "Ticket Type Exists";
+  public const string TICKET_TYPE_ALREADY_EXISTS = "Ticket Type Already Exists";
   public const string TICKET_TYPE_EXISTS_DESCRIPTION = "Ticket type with name '{0}' already exists";
   public const string TICKET_TYPES = "Ticket Types";
   public const string TICKET_TYPE_NOT_FOUND = "Ticket type not found";
@@ -95,14 +91,76 @@ public static class Texts
   public const string PLEASE_SELECT_A_TICKET_TYPE = "Please select a ticket type";
   public const string TICKET_NOT_FOUND = "Ticket not found";
   public const string TICKET_TYPE = "Ticket Type";
-  public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
+
+  // public const string TICKET_TYPE_SELECTION_TIMEOUT = "Ticket type selection timeout";
   public const string TICKET_TYPE_CHANGED = "Ticket type changed";
-  public const string TICKET_TYPE_CHANGED_MESSAGE_TO_MAIL = "Ticket type {0} `{1}` changed";
+  public const string TICKET_TYPE_SET = "Ticket type set to {0} `{1}`";
   public const string USER_NOT_FOUND = "User not found";
   public const string THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL = "This command can only be used in a ticket channel";
   public const string REASON = "Reason";
   public const string TICKET_TYPE_UPDATED = "Ticket Type Updated";
   public const string TICKET_TYPE_UPDATED_DESCRIPTION = "Ticket type {0} updated";
+  public const string CLOSE_TICKET = "Close Ticket";
+  public const string CLOSE_TICKET_WITH_REASON = "Close Ticket with Reason";
+  public const string TICKET_CLOSED_SUCCESSFULLY = "Ticket closed successfully";
+  public const string TICKET_ALREADY_CLOSED = "Ticket already closed";
+  public const string TICKET_ANONYMOUS_TOGGLED = "Ticket anonymous toggled";
+  public const string INVALID_USER = "Invalid User";
+  public const string CHANNEL_NOT_FOUND = "Channel not found";
+  public const string INVALID_MESSAGE_ID = "Invalid message id";
+  public const string NO_TEAM_FOUND = "No team found";
+  public const string TEAM_WITH_SAME_NAME_ALREADY_EXISTS = "Team with the same name already exists";
+  public const string TEAM_CREATED_SUCCESSFULLY = "Team created successfully";
+  public const string TEAM_NOT_FOUND = "Team not found";
+  public const string TEAM_REMOVED_SUCCESSFULLY = "Team removed successfully";
+  public const string MEMBER_ALREADY_IN_TEAM = "Member already in team";
+  public const string MEMBER_ADDED_TO_TEAM = "Member added to team";
+  public const string MEMBER_NOT_FOUND_IN_TEAM = "Member not found in team";
+  public const string MEMBER_REMOVED_FROM_TEAM = "Member removed from team";
+  public const string ROLE_ALREADY_IN_TEAM = "Role already in team";
+  public const string ROLE_ADDED_TO_TEAM = "Role added to team";
+  public const string ROLE_NOT_FOUND_IN_TEAM = "Role not found in team";
+  public const string ROLE_REMOVED_FROM_TEAM = "Role removed from team";
+  public const string TEAM_RENAMED_SUCCESSFULLY = "Team renamed successfully";
+  public const string NO_TICKET_TYPES_FOUND = "No ticket types found";
+  public const string TICKET_CLOSED_DUE_TO_BLACKLIST = "Ticket closed due to blacklist";
+  public const string PLEASE_TELL_US_REASONS_FOR_YOUR_RATING = "Please tell us reasons for your rating";
+  public const string ENTER_A_REASON_FOR_CLOSING_THIS_TICKET = "Enter a reason for closing this ticket";
+  public const string ANONYMOUS_MOD_ON = "Anonymous mod on";
+  public const string ANONYMOUS_MOD_OFF = "Anonymous mod off";
+  public const string YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST = "You have been removed from blacklist";
+  public const string YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST_DESCRIPTION = "You have been removed from the blacklist. You can now use the modmail system.";
+  public const string NO_BLACKLISTED_USERS = "There is no blacklisted users";
+  public const string LOG_CHANNEL_NOT_FOUND = "Log channel not found";
+  public const string AN_EXCEPTION_OCCURRED = "An exception occurred, please check the logs";
+  public const string YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND = "You do not have permission to use this command";
+  public const string MAIN_GUILD_NOT_FOUND = "Main guild not found";
+  public const string MAIN_GUILD_NOT_FOUND_DESC = "You must invite the bot to the main server first";
+  public const string NO_BLACKLISTED_USERS_FOUND = "No blacklisted users found";
+  public const string TEAM_ALREADY_EXISTS = "Team already exists";
+  public const string INVALID_NAME = "Invalid name";
+  public const string TEAM_CREATED = "Team created";
+  public const string TEAM_NAME = "Team Name";
+  public const string TEAM_REMOVED = "Team removed";
+  public const string TEAM_MEMBER_ADDED = "Team member added";
+  public const string TEAM_MEMBER_REMOVED = "Team member removed";
+  public const string TEAM_ROLE_ADDED = "Team role added";
+  public const string TEAM_ROLE_REMOVED = "Team role removed";
+  public const string TEAM_RENAMED = "Team renamed";
+  public const string OLD_NAME = "Old Name";
+  public const string NEW_NAME = "New Name";
+  public const string SETUP_COMPLETE = "Setup complete";
+  public const string GUILD_NAME = "Guild Name";
+  public const string GUILD_ID = "Guild Id";
+  public const string CATEGORY_ID = "Category Id";
+  public const string LOG_CHANNEL_ID = "Log Channel Id";
+  public const string CONFIGURATION_UPDATED = "Configuration updated";
+  public const string EMOJI = "Emoji";
+  public const string DESCRIPTION = "Description";
+  public const string EMBED_MESSAGE_TITLE = "Embed Message Title";
+  public const string EMBED_MESSAGE_CONTENT = "Embed Message Content";
+  public const string ORDER = "Order";
+
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
                                                         + Environment.NewLine
@@ -119,5 +177,5 @@ public static class Texts
                                                         + "If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command."
                                                         + Environment.NewLine
                                                         + Environment.NewLine
-                                                        + $"Messages starting with bot prefix `{MMConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ";
+                                                        + $"Messages starting with bot prefix `{BotConfig.This.BotPrefix}` are ignored, can be used for staff discussion. ";
 }

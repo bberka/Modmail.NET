@@ -56,6 +56,9 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BannerUrl")
+                        .HasColumnType("TEXT");
+
                     b.Property<ulong>("CategoryId")
                         .HasColumnType("INTEGER");
 
@@ -67,6 +70,10 @@ namespace Modmail.NET.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("IconUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("INTEGER");
 
@@ -75,6 +82,10 @@ namespace Modmail.NET.Migrations
 
                     b.Property<ulong>("LogChannelId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("TEXT");
@@ -162,13 +173,16 @@ namespace Modmail.NET.Migrations
                     b.Property<bool>("Anonymous")
                         .HasColumnType("INTEGER");
 
+                    b.Property<ulong>("BotTicketCreatedMessageInDmId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("CloseReason")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ClosedDateUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<ulong>("DiscordUserInfoId")
+                    b.Property<ulong?>("CloserUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FeedbackMessage")
@@ -192,6 +206,9 @@ namespace Modmail.NET.Migrations
                     b.Property<ulong>("ModMessageChannelId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<ulong>("OpenerUserId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Priority")
                         .HasColumnType("INTEGER");
 
@@ -206,9 +223,11 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordUserInfoId");
+                    b.HasIndex("CloserUserId");
 
                     b.HasIndex("GuildOptionId");
+
+                    b.HasIndex("OpenerUserId");
 
                     b.HasIndex("TicketTypeId");
 
@@ -221,10 +240,10 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<ulong>("DiscordUserInfoId")
+                    b.Property<ulong>("DiscordUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("GuildOptionId")
+                    b.Property<ulong>("GuildId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Reason")
@@ -235,9 +254,9 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildOptionId");
+                    b.HasIndex("GuildId");
 
-                    b.HasIndex("DiscordUserInfoId", "GuildOptionId")
+                    b.HasIndex("DiscordUserId", "GuildId")
                         .IsUnique();
 
                     b.ToTable("TicketBlacklists");
@@ -255,6 +274,9 @@ namespace Modmail.NET.Migrations
                     b.Property<string>("MessageContent")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<ulong>("MessageDiscordId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("TEXT");
@@ -325,7 +347,7 @@ namespace Modmail.NET.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<ulong>("DiscordUserInfoId")
+                    b.Property<ulong>("DiscordUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("RegisterDateUtc")
@@ -334,13 +356,9 @@ namespace Modmail.NET.Migrations
                     b.Property<Guid>("TicketId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscordUserInfoId");
+                    b.HasIndex("DiscordUserId");
 
                     b.HasIndex("TicketId");
 
@@ -357,9 +375,11 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EmbedMessageContent")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EmbedMessageTitle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Emoji")
@@ -411,11 +431,9 @@ namespace Modmail.NET.Migrations
 
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
-                    b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "DiscordUserInfo")
+                    b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "CloserUserInfo")
                         .WithMany()
-                        .HasForeignKey("DiscordUserInfoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CloserUserId");
 
                     b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
                         .WithMany("Tickets")
@@ -423,13 +441,21 @@ namespace Modmail.NET.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "OpenerUserInfo")
+                        .WithMany()
+                        .HasForeignKey("OpenerUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Modmail.NET.Entities.TicketType", "TicketType")
                         .WithMany()
                         .HasForeignKey("TicketTypeId");
 
-                    b.Navigation("DiscordUserInfo");
+                    b.Navigation("CloserUserInfo");
 
                     b.Navigation("GuildOption");
+
+                    b.Navigation("OpenerUserInfo");
 
                     b.Navigation("TicketType");
                 });
@@ -438,13 +464,13 @@ namespace Modmail.NET.Migrations
                 {
                     b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "DiscordUserInfo")
                         .WithMany("TicketBlacklists")
-                        .HasForeignKey("DiscordUserInfoId")
+                        .HasForeignKey("DiscordUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Modmail.NET.Entities.GuildOption", "GuildOption")
                         .WithMany("TicketBlacklists")
-                        .HasForeignKey("GuildOptionId")
+                        .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -461,13 +487,15 @@ namespace Modmail.NET.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Modmail.NET.Entities.Ticket", null)
+                    b.HasOne("Modmail.NET.Entities.Ticket", "Ticket")
                         .WithMany("TicketMessages")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("DiscordUserInfo");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessageAttachment", b =>
@@ -485,7 +513,7 @@ namespace Modmail.NET.Migrations
                 {
                     b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "DiscordUserInfo")
                         .WithMany()
-                        .HasForeignKey("DiscordUserInfoId")
+                        .HasForeignKey("DiscordUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
