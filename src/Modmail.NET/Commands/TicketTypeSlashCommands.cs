@@ -179,25 +179,4 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
       Log.Fatal(ex, logMessage);
     }
   }
-
-  [SlashCommand("get", "Gets the ticket type for the current ticket channel")]
-  [RequireTicketChannel]
-  public async Task GetTicketType(InteractionContext ctx) {
-    const string logMessage = $"[{nameof(TicketTypeSlashCommands)}]{nameof(GetTicketType)}()";
-    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
-
-    try {
-      var ticketType = await TicketType.GetByChannelIdAsync(ctx.Channel.Id);
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPE, $"`{ticketType.Name}` - {ticketType.Description}"));
-      Log.Information(logMessage);
-    }
-    catch (BotExceptionBase ex) {
-      await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Warning(ex, logMessage);
-    }
-    catch (Exception ex) {
-      await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Fatal(ex, logMessage);
-    }
-  }
 }

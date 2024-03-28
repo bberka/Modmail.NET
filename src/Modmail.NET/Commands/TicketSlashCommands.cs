@@ -17,10 +17,10 @@ namespace Modmail.NET.Commands;
 [UpdateUserInformation]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
 [RequireMainServer]
-[RequireTicketChannel]
 public class TicketSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("close", "Close a ticket.")]
+  [RequireTicketChannel]
   public async Task CloseTicket(InteractionContext ctx,
                                 [Option("reason", "Ticket closing reason")]
                                 string? reason = null) {
@@ -44,6 +44,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("set-priority", "Set the priority of a ticket.")]
+  [RequireTicketChannel]
   public async Task SetPriority(InteractionContext ctx,
                                 [Option("priority", "Priority of the ticket")]
                                 TicketPriority priority) {
@@ -68,6 +69,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("add-note", "Add a note to a ticket.")]
+  [RequireTicketChannel]
   public async Task AddNote(InteractionContext ctx,
                             [Option("note", "Note to add")] string note) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(AddNote)}({{ContextUserId}},{{note}})";
@@ -90,6 +92,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("toggle-anonymous", "Toggle anonymous mode for a ticket.")]
+  [RequireTicketChannel]
   public async Task ToggleAnonymous(InteractionContext ctx) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(ToggleAnonymous)}({{ContextUserId}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -112,6 +115,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("set-type", "Set the type of a ticket.")]
+  [RequireTicketChannel]
   public async Task SetType(InteractionContext ctx,
                             [Option("type", "Type of the ticket")] [Autocomplete(typeof(TicketTypeProvider))]
                             string type) {
@@ -131,6 +135,27 @@ public class TicketSlashCommands : ApplicationCommandModule
     catch (Exception e) {
       await ctx.Interaction.EditOriginalResponseAsync(e.ToWebhookResponse());
       Log.Fatal(e, logMessage, ctx.User.Id, type);
+    }
+  }
+
+
+  [SlashCommand("get-type", "Gets the ticket type for the current ticket channel")]
+  [RequireTicketChannel]
+  public async Task GetTicketType(InteractionContext ctx) {
+    const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(GetTicketType)}()";
+    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    try {
+      var ticketType = await TicketType.GetByChannelIdAsync(ctx.Channel.Id);
+      await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPE, $"`{ticketType.Name}` - {ticketType.Description}"));
+      Log.Information(logMessage);
+    }
+    catch (BotExceptionBase ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Warning(ex, logMessage);
+    }
+    catch (Exception ex) {
+      await ctx.EditResponseAsync(ex.ToWebhookResponse());
+      Log.Fatal(ex, logMessage);
     }
   }
 }
