@@ -31,7 +31,7 @@ public static class EmbedUser
     return embed;
   }
 
-  public static DiscordEmbedBuilder TicketClosed(Ticket ticket) {
+  public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.YOUR_TICKET_HAS_BEEN_CLOSED)
                 .WithDescription(Texts.YOUR_TICKET_HAS_BEEN_CLOSED_DESCRIPTION)
@@ -41,12 +41,12 @@ public static class EmbedUser
     if (!string.IsNullOrEmpty(ticket.GuildOption.ClosingMessage))
       embed.WithDescription(ticket.GuildOption.ClosingMessage);
 
-    if (!ticket.Anonymous) {
-      embed.WithUserAsAuthor(ticket.CloserUserInfo);
-    }
-    else {
-      embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
-    }
+    // if (!ticket.Anonymous) {
+    //   embed.WithUserAsAuthor(ticket.CloserUserInfo);
+    // }
+    // else {
+    //   embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
+    // }
 
     return embed;
   }
