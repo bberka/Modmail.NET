@@ -1,4 +1,6 @@
-﻿namespace Modmail.NET.Utils;
+﻿using Modmail.NET.Exceptions;
+
+namespace Modmail.NET.Utils;
 
 public static class UtilInteraction
 {
@@ -8,7 +10,8 @@ public static class UtilInteraction
     return $"{name}{SPLIT_TEXT}{string.Join(SPLIT_TEXT, parameters)}";
   }
 
-  public static (string name, string[] parameters) ParseKey(string key) {
+  public static (string name, string[] parameters) ParseKey(string? key) {
+    if (string.IsNullOrEmpty(key)) throw new InvalidInteractionKeyException();
     var split = key.Split(SPLIT_TEXT);
     var name = split[0];
     var parameters = split[1..];

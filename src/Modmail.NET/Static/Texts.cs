@@ -160,6 +160,7 @@ public static class Texts
   public const string EMBED_MESSAGE_TITLE = "Embed Message Title";
   public const string EMBED_MESSAGE_CONTENT = "Embed Message Content";
   public const string ORDER = "Order";
+  public const string INVALID_INTERACTION_KEY = "Invalid interaction key";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."
