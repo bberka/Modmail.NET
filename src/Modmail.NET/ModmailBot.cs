@@ -85,7 +85,6 @@ public class ModmailBot
     Client.GuildBanAdded += OnGuildBanAdded.Handle;
     Client.GuildBanRemoved += OnGuildBanRemoved.Handle;
     Client.MessageAcknowledged += OnMessageAcknowledged.Handle;
-    Client.TypingStarted += OnTypingStarted.Handle;
     Client.UserUpdated += OnUserUpdated.Handle;
     Client.UserSettingsUpdated += OnUserSettingsUpdated.Handle;
     Client.ScheduledGuildEventUserAdded += OnScheduledGuildEventUserAdded.Handle;
