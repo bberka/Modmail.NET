@@ -21,7 +21,7 @@ public class TicketTypeSelectionTimeoutMgr
     }
   }
 
-  public ConcurrentDictionary<DiscordMessage, DateTime> Messages { get; }
+  public ConcurrentDictionary<DiscordMessage, DateTime> Messages { get; private set; }
   public Timer Timer { get; }
 
   public void AddMessage(DiscordMessage message) {
@@ -41,13 +41,20 @@ public class TicketTypeSelectionTimeoutMgr
 
   private void TimerElapsed(object? sender) {
     //remove everything that is older than 3 minutes
+
+    var newDict = new ConcurrentDictionary<DiscordMessage, DateTime>();
     foreach (var message in Messages) {
-      if (DateTime.UtcNow - message.Value <= TimeSpan.FromMinutes(3)) continue;
-      Messages.TryRemove(message.Key, out _);
+      if (DateTime.UtcNow - message.Value <= TimeSpan.FromMinutes(3)) {
+        newDict.TryAdd(message.Key, message.Value);
+        continue;
+      }
+
       message.Key.ModifyAsync(x => {
         x.ClearComponents();
         x.AddEmbeds(message.Key.Embeds);
       });
     }
+
+    Messages = newDict;
   }
 }
