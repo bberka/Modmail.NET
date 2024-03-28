@@ -7,13 +7,15 @@ public static class ExtDiscordUser
   //implement caching for log channel etc.
 
   public static string GetUsername(this DiscordUser user) {
-    return user.Discriminator == "0"
+    if (user == null) return string.Empty;
+    return user.Discriminator == "0" || string.IsNullOrEmpty(user.Discriminator)
              ? user.Username
              : $"{user.Username}#{user.Discriminator}";
   }
 
   public static string GetUsername(this DiscordMember member) {
-    return member.Discriminator == "0"
+    if (member == null) return string.Empty;
+    return member.Discriminator == "0" || string.IsNullOrEmpty(member.Discriminator)
              ? member.Username
              : $"{member.Username}#{member.Discriminator}";
   }
