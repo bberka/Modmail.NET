@@ -60,7 +60,8 @@ public static
                 .WithTitle(Texts.USER_BLACKLISTED)
                 .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.USER, user.GetMention(), true);
+                .AddField(Texts.USER, user.GetMention(), true)
+                .AddField(Texts.USER_ID, user.Id.ToString(), true);
 
 
     return embed;
@@ -71,7 +72,8 @@ public static
                 .WithTitle(Texts.USER_BLACKLIST_REMOVED)
                 .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.USER, user.GetMention(), true);
+                .AddField(Texts.USER, user.GetMention(), true)
+                .AddField(Texts.USER_ID, user.Id.ToString(), true);
     return embed;
   }
 
