@@ -119,12 +119,13 @@ public class Ticket
     ArgumentNullException.ThrowIfNull(GuildOption);
     ArgumentNullException.ThrowIfNull(OpenerUserInfo);
     if (closerUserId == 0) throw new InvalidUserIdException();
-    if (string.IsNullOrEmpty(CloseReason)) CloseReason = Texts.NO_REASON_PROVIDED;
+    if (string.IsNullOrEmpty(closeReason)) closeReason = Texts.NO_REASON_PROVIDED;
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
     CloserUserInfo = await DiscordUserInfo.GetAsync(closerUserId);
     ArgumentNullException.ThrowIfNull(CloserUserInfo);
 
     modChatChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+
 
     ClosedDateUtc = DateTime.UtcNow;
     CloseReason = closeReason;

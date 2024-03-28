@@ -32,11 +32,11 @@ public static class ComponentInteractionCreated
 
           await args.Interaction.CreateResponseAsync(InteractionResponseType.Modal, feedbackModal);
           Log.Information(logMessage,
-                          args.Interaction.Data.CustomId,
-                          args.User.Id,
-                          args.Channel.Id,
-                          args.Interaction.Id,
-                          messageId);
+                          args.Interaction?.Data?.CustomId,
+                          args.User?.Id,
+                          args.Channel?.Id,
+                          args.Interaction?.Id,
+                          args.Message?.Id);
           break;
         }
         case "ticket_type": {
@@ -52,11 +52,11 @@ public static class ComponentInteractionCreated
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
           await ticket.ProcessChangeTicketTypeAsync(args.User.Id, selectedTypeKey, null, args.Channel, args.Message);
           Log.Information(logMessage,
-                          args.Interaction.Data.CustomId,
-                          args.User.Id,
-                          args.Channel.Id,
-                          args.Interaction.Id,
-                          messageId);
+                          args.Interaction?.Data?.CustomId,
+                          args.User?.Id,
+                          args.Channel?.Id,
+                          args.Interaction?.Id,
+                          args.Message?.Id);
           break;
         }
         case "close_ticket": {
@@ -67,11 +67,11 @@ public static class ComponentInteractionCreated
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
           await ticket.ProcessCloseTicketAsync(args.User.Id, null, args.Channel);
           Log.Information(logMessage,
-                          args.Interaction.Data.CustomId,
-                          args.User.Id,
-                          args.Channel.Id,
-                          args.Interaction.Id,
-                          messageId);
+                          args.Interaction?.Data?.CustomId,
+                          args.User?.Id,
+                          args.Channel?.Id,
+                          args.Interaction?.Id,
+                          args.Message?.Id);
           break;
         }
         case "close_ticket_with_reason": {
@@ -81,11 +81,11 @@ public static class ComponentInteractionCreated
           await args.Interaction.CreateResponseAsync(InteractionResponseType.Modal, modal);
 
           Log.Information(logMessage,
-                          args.Interaction.Data.CustomId,
-                          args.User.Id,
-                          args.Channel.Id,
-                          args.Interaction.Id,
-                          messageId);
+                          args.Interaction?.Data?.CustomId,
+                          args.User?.Id,
+                          args.Channel?.Id,
+                          args.Interaction?.Id,
+                          args.Message?.Id);
           break;
         }
       }
@@ -95,20 +95,20 @@ public static class ComponentInteractionCreated
     catch (BotExceptionBase ex) {
       Log.Warning(ex,
                   logMessage,
-                  args.Interaction.Data.CustomId,
-                  args.User.Id,
-                  args.Channel.Id,
-                  args.Interaction.Id,
-                  args.Message.Id);
+                  args.Interaction?.Data?.CustomId,
+                  args.User?.Id,
+                  args.Channel?.Id,
+                  args.Interaction?.Id,
+                  args.Message?.Id);
     }
     catch (Exception ex) {
       Log.Fatal(ex,
                 logMessage,
-                args.Interaction.Data.CustomId,
-                args.User.Id,
-                args.Channel.Id,
-                args.Interaction.Id,
-                args.Message.Id);
+                args.Interaction?.Data?.CustomId,
+                args.User?.Id,
+                args.Channel?.Id,
+                args.Interaction?.Id,
+                args.Message?.Id);
     }
   }
 }
