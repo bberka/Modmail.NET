@@ -47,6 +47,8 @@ public static class UtilPermission
       memberPerm.Allow(Permissions.SendMessages);
       memberPerm.Allow(Permissions.EmbedLinks);
       memberPerm.Allow(Permissions.AttachFiles);
+      memberPerm.Deny(Permissions.ManageChannels);
+
       overwrites.Add(memberPerm);
     }
 
@@ -57,6 +59,8 @@ public static class UtilPermission
       rolePerm.Allow(Permissions.SendMessages);
       rolePerm.Allow(Permissions.EmbedLinks);
       rolePerm.Allow(Permissions.AttachFiles);
+      rolePerm.Deny(Permissions.ManageChannels);
+
       overwrites.Add(rolePerm);
     }
 
