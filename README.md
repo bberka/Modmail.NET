@@ -18,16 +18,16 @@ If you wish to use it be aware of potential errors
 - Close tickets by using command or deleting the channel
 - Logging to messages/transcript to database and modmail log channel (sensitive logging)
 - Admins or mod team can respond tickets by sending message to created channel
-- Toggle sensitive logging (Logging messages to tickets)
 - Toggle anonymous messages by mods, allows responding tickets anonymously
-- Setting up teams adding roles and members to team
+- Setting up teams adding roles and members to team for ticket management and access
 - Setting priority for tickets (adds emoji to ticket channel name)
-- Adding private mod notes to tickets that can be viewed later only by mods
+- Adding private mod notes to tickets
 - Pinging team roles/members on ticket open
-- Caching user information that are interacting with the ticket system  
+- Caching user information 
 - Blacklist, blocking users from opening tickets 
-- Getting feedback from user when ticket closed
-- Ticket type system, users can select ticket types to tell mods what the ticket is about
+- Getting feedback from user after ticket is closed
+- Ticket type system, users can select ticket types to select what the ticket is about
+- Moderators can talk with each other in ticket channel with by starting messages with bot prefix
 
 # Multiple Servers Usage
 Before trying to use the bot on multiple servers you must now about the limitations;
@@ -55,62 +55,217 @@ Ticket channels will created in main server
 - Confirmation for close and opening tickets
 - Language file support
 - Editing embeds and colors and maybe more (need web ui for this) 
-- Improve ticket type system, force ticket type selection before opening ticket etc.
+- Improve ticket type system, add optional feature forcing ticket type selection to be set before opening ticket etc.
+- Add form modals when selecting ticket type and send information to ticket channel
 
 # Commands
 Parameter types with '*' are required
 
 ## Modmail Group Slash Commands 
-`/modmail setup (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Setup the modmail bot
+Requires TeamPermissionLevel.Admin or higher
 
-`/modmail configure (bool sensitiveLogging, bool takeFeedbackAfterClosing, string greetingMessage, string closingMessage)`: Configure the modmail bot after being setup
+Only available for main server id in configuration
 
-`/modmail get-settings`: Get the modmail bot settings 
+### `/modmail setup`
+
+- **Description**: Setup the modmail bot.
+- **Parameters**:
+  - `sensitive-logging`: Whether to log modmail messages.
+  - `take-feedback`: Whether to take feedback after closing tickets.
+  - `greeting-message`: The greeting message.
+  - `closing-message`: The closing message.
+
+### `/modmail configure`
+
+- **Description**: Configure the modmail bot.
+- **Parameters**:
+  - `sensitive-logging`: Whether to log modmail messages. (Optional)
+  - `take-feedback`: Whether to take feedback after closing tickets. (Optional)
+  - `greeting-message`: The greeting message. (Optional)
+  - `closing-message`: The closing message. (Optional)
+
+### `/modmail get-settings`
+
+- **Description**: Get the modmail bot settings.
 
 
 ## Ticket Group Slash Commands 
-`/ticket close (string reason)`: Close a ticket
+Requires TeamPermissionLevel.Moderator or higher
 
-`/ticket set-priority (TicketPriority* priority)`: Set the priority of a ticket
+Only available in main server id set in configuration
 
-`/ticket add-note (string* note)`: Add a note to a ticket
+Only available in ticket channel
 
-`/ticket toggle-anonymous`: Toggle anonymous mode for a ticke
+This set of commands allows moderators or higher-level users to manage tickets in the Discord server.
 
-## Team Group Slash Commands 
-`/team list`: List all teams
+### `/ticket close`
 
-`/team create (string* teamName, TeamPermissionLevel* permissionLevel)`: Create a new team
+- **Description**: Close a ticket.
+- **Parameters**:
+  - `reason`: Ticket closing reason. (Optional)
 
-`/team remove (string* teamName)`: Remove a team
+### `/ticket set-priority`
 
-`/team add-user (string* teamName, DiscordUser* member)`: Add a user to a team
+- **Description**: Set the priority of a ticket.
+- **Parameters**:
+  - `priority`: Priority of the ticket.
 
-`/team remove-user (string* teamName, DiscordUser* member)`: Remove a user from a team
+### `/ticket add-note`
 
-`/team add-role (string* teamName, DiscordRole* role)`: Adds a role to a team
+- **Description**: Add a note to a ticket.
+- **Parameters**:
+  - `note`: Note to add.
 
-`/team remove-role (string* teamName, DiscordRole* role)`: Removes a role from a team
+### `/ticket toggle-anonymous`
 
-## Blacklist Group Slash Commands 
-`/blacklist add (DiscordUser* user, bool* notifyUser, string* reason)`: Add a user to the blacklist
+- **Description**: Toggle anonymous mode for a ticket.
 
-`/blacklist remove (DiscordUser* user)`: The user to remove from the blacklist
+### `/ticket set-type`
 
-`/blacklist status (DiscordUser* user)`: Check if a user is blacklisted
+- **Description**: Set the type of a ticket.
+- **Parameters**:
+  - `type`: Type of the ticket.
 
-`/blacklist view`  View all blacklisted users
+### `/ticket get-type`
 
-## Ticket Type Group Slash Commands 
-`/ticket-type create (string* typeName, string description, DiscordEmoji emoji, long order)`: Create a new ticket type
+- **Description**: Gets the ticket type for the current ticket channel.
+- **Usage**: `/ticket-type get`
 
-`/ticket-type delete (string* typeName)`: Delete a ticket type
 
-`/ticket-type list`: List all ticket types
+## Team Group Slash Commands
+Requires TeamPermissionLevel.Admin or higher
 
-`/ticket-type set (string* typeName, bool* overwrite)`: Set the ticket type for the current ticket
+Only available in main server id set in configuration
 
-`/ticket-type get`: Gets the ticket type for the current ticket channel
+This set of commands allows admins or higher-level users to manage teams in the Discord server.
+### `/team list`
+
+- **Description**: List all teams.
+
+### `/team create`
+
+- **Description**: Create a new team.
+- **Parameters**:
+  - `teamName`: Team name.
+  - `permissionLevel`: Permission level.
+
+### `/team remove`
+
+- **Description**: Remove a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+
+### `/team add-user`
+
+- **Description**: Add a user to a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+  - `member`: Member to add to the team.
+
+### `/team remove-user`
+
+- **Description**: Remove a user from a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+  - `member`: Member to remove from the team.
+
+### `/team add-role`
+
+- **Description**: Adds a role to a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+  - `role`: Role to add to the team.
+
+### `/team remove-role`
+
+- **Description**: Removes a role from a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+  - `role`: Role to remove from the team.
+
+### `/team rename`
+
+- **Description**: Rename a team.
+- **Parameters**:
+  - `teamName`: Team name. (Auto-completed)
+  - `newName`: New team name.
+
+
+## Blacklist Group Slash Commands
+Requires TeamPermissionLevel.Moderator or higher
+
+This set of commands allows moderators or higher-level users to manage the blacklist in the Discord server.
+
+### `/blacklist add`
+
+- **Description**: Add a user to the blacklist.
+- **Parameters**:
+    - `user`: The user to blacklist.
+    - `[notify-user]`: Whether to notify the user about the blacklist. Default is `True`.
+    - `[reason]`: The reason for blacklisting. Default is "No reason provided."
+- **Usage**: `/blacklist add [user] [notify-user] [reason]`
+
+### `/blacklist remove`
+
+- **Description**: Remove a user from the blacklist.
+- **Parameters**:
+    - `user`: The user to remove from the blacklist.
+    - `[notify-user]`: Whether to notify the user about the removal. Default is `True`.
+- **Usage**: `/blacklist remove [user] [notify-user]`
+
+### `/blacklist status`
+
+- **Description**: Check if a user is blacklisted.
+- **Parameters**:
+    - `user`: The user to check.
+- **Usage**: `/blacklist status [user]`
+
+### `/blacklist view`
+
+- **Description**: View all blacklisted users.
+- **Usage**: `/blacklist view`
+
+
+
+## Ticket Type Group Slash Commands
+Requires TeamPermissionLevel.Admin or higher
+
+### `/ticket-type create`
+
+- **Description**: Create a new ticket type.
+- **Parameters**:
+  - `name`: The name of the ticket type.
+  - `embed-message-title`: The title of the embed message.
+  - `embed-message-content`: The content of the embed message.
+  - `emoji`: The emoji used for this ticket type.
+  - `description` (optional): The description of the ticket type.
+  - `order` (optional): The order of the ticket type. Default is 0.
+- **Usage**: `/ticket-type create [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`
+
+### `/ticket-type update`
+
+- **Description**: Update existing ticket type.
+- **Parameters**:
+  - `name`: The name of the ticket type. (Auto-completed)
+  - `embed-message-title`: The title of the embed message.
+  - `embed-message-content`: The content of the embed message.
+  - `emoji`: The emoji used for this ticket type.
+  - `description` (optional): The description of the ticket type.
+  - `order` (optional): The order of the ticket type. Default is 0.
+- **Usage**: `/ticket-type update [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`
+
+### `/ticket-type delete`
+
+- **Description**: Delete a ticket type.
+- **Parameters**:
+  - `name`: The name of the ticket type. (Auto-completed)
+- **Usage**: `/ticket-type delete [name]`
+
+### `/ticket-type list`
+
+- **Description**: List all ticket types.
+- **Usage**: `/ticket-type list`
+
 
 
 # Disclaimer
