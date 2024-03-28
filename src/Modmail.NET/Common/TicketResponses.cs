@@ -8,7 +8,10 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Common;
 
-public static class EmbedTicket
+/// <summary>
+/// Contains the embed messages bot to send to ticket channels
+/// </summary>
+public static class TicketResponses
 {
   public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<DiscordRole> modRoleListForOverwrites, List<DiscordMember> modMemberListForOverwrites) {
     var embed = new DiscordEmbedBuilder()
@@ -82,6 +85,32 @@ public static class EmbedTicket
                 .AddField(Texts.OLD_PRIORITY, oldPriority.ToString(), true)
                 .AddField(Texts.NEW_PRIORITY, newPriority.ToString(), true)
                 .WithUserAsAuthor(modUser);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder MessageSent(DiscordMessage message, bool anonymous) {
+    var embed = new DiscordEmbedBuilder()
+                .WithDescription(message.Content)
+                .WithCustomTimestamp()
+                .WithColor(Colors.MessageSentColor)
+                .WithUserAsAuthor(message.Author)
+                .AddAttachment(message.Attachments);
+
+    if (anonymous) {
+      embed.WithFooter(Texts.THIS_MESSAGE_SENT_ANONYMOUSLY);
+    }
+
+    return embed;
+  }
+
+
+  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message) {
+    var embed = new DiscordEmbedBuilder()
+                .WithDescription(message.Content)
+                .WithCustomTimestamp()
+                .WithColor(Colors.MessageReceivedColor)
+                .AddAttachment(message.Attachments)
+                .WithUserAsAuthor(message.Author);
     return embed;
   }
 }

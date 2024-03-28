@@ -107,7 +107,7 @@ public class TicketType
     };
     await ticketType.AddAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(EmbedLog.TicketTypeCreated(ticketType));
+    await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
     return ticketType;
   }
 
@@ -131,12 +131,12 @@ public class TicketType
     await UpdateAsync();
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(EmbedLog.TicketTypeUpdated(this));
+    await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
   }
 
   public async Task ProcessRemoveAsync() {
     await RemoveAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(EmbedLog.TicketTypeDeleted(this));
+    await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
   }
 }

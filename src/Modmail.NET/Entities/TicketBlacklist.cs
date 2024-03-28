@@ -95,14 +95,14 @@ public class TicketBlacklist
     var user = await Entities.DiscordUserInfo.GetAsync(userId);
     var modUser = await Entities.DiscordUserInfo.GetAsync(modId);
 
-    var embedLog = EmbedLog.BlacklistAdded(modUser, user, reason);
+    var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
     await logChannel.SendMessageAsync(embedLog);
 
 
     if (notifyUser) {
       var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
       if (member is not null) {
-        var dmEmbed = EmbedUser.YouHaveBeenBlacklisted(reason);
+        var dmEmbed = UserResponses.YouHaveBeenBlacklisted(reason);
         await member.SendMessageAsync(dmEmbed);
       }
     }
@@ -112,13 +112,13 @@ public class TicketBlacklist
     await this.RemoveAsync();
     var modUser = await DiscordUserInfo.GetAsync(authorUserId);
     var userInfo = await DiscordUserInfo.GetAsync(userId);
-    var embedLog = EmbedLog.BlacklistRemoved(modUser, userInfo);
+    var embedLog = LogResponses.BlacklistRemoved(modUser, userInfo);
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(embedLog);
     if (notifyUser) {
       var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(userId);
       if (member is not null) {
-        var dmEmbed = EmbedUser.YouHaveBeenRemovedFromBlacklist(modUser);
+        var dmEmbed = UserResponses.YouHaveBeenRemovedFromBlacklist(modUser);
         await member.SendMessageAsync(dmEmbed);
       }
     }

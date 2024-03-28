@@ -43,7 +43,7 @@ public static class OnMessageCreated
 
       var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
       if (activeBlock) {
-        await channel.SendMessageAsync(EmbedUser.YouHaveBeenBlacklisted());
+        await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
         return;
       }
 

@@ -5,8 +5,10 @@ using Modmail.NET.Static;
 
 namespace Modmail.NET.Common;
 
-public static
-  class EmbedLog
+/// <summary>
+///  Contains the embed messages bot to send to log channel
+/// </summary>
+public static class LogResponses
 {
   public static DiscordEmbedBuilder NewTicketCreated(DiscordMessage initialMessage,
                                                      DiscordChannel mailChannel,

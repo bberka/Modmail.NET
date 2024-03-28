@@ -145,7 +145,7 @@ public class GuildOption
       guildOption.ClosingMessage = closingMessage;
     await guildOption.AddAsync();
 
-    await logChannel.SendMessageAsync(EmbedLog.SetupComplete(guildOption));
+    await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
   }
 
   public async Task ProcessConfigureAsync(DiscordGuild guild, bool? sensitiveLogging, bool? takeFeedbackAfterClosing, string? greetingMessage, string? closingMessage) {
@@ -165,6 +165,6 @@ public class GuildOption
 
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(EmbedLog.ConfigurationUpdated(this));
+    await logChannel.SendMessageAsync(LogResponses.ConfigurationUpdated(this));
   }
 }

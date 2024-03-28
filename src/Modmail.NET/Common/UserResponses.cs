@@ -7,7 +7,10 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Common;
 
-public static class EmbedUser
+/// <summary>
+/// Contains the messages bot to send to user
+/// </summary>
+public static class UserResponses
 {
   public static DiscordEmbed FeedbackReceivedUpdateMessage(Ticket ticket) {
     var feedbackDone = new DiscordEmbedBuilder()
@@ -138,6 +141,31 @@ public static class EmbedUser
                 .WithCustomTimestamp()
                 .WithUserAsAuthor(user)
                 .WithColor(Colors.SuccessColor);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder MessageSent(DiscordMessage message) {
+    var embed = new DiscordEmbedBuilder()
+                .WithDescription(message.Content)
+                .WithGuildInfoFooter()
+                .WithCustomTimestamp()
+                .WithColor(Colors.MessageSentColor)
+                .WithUserAsAuthor(message.Author)
+                .AddAttachment(message.Attachments);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message, bool anonymous) {
+    var embed = new DiscordEmbedBuilder()
+                .WithDescription(message.Content)
+                .WithGuildInfoFooter()
+                .WithCustomTimestamp()
+                .WithColor(Colors.MessageReceivedColor)
+                .AddAttachment(message.Attachments);
+    if (!anonymous) {
+      embed.WithUserAsAuthor(message.Author);
+    }
+
     return embed;
   }
 }
