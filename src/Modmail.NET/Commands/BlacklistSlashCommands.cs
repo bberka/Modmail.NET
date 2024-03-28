@@ -123,8 +123,9 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(View)}({{ContextUserId}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var blacklistedUsers = (await TicketBlacklist.GetAllAsync()).Select(x => $"<@{x}>").ToList();
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.BLACKLISTED_USERS, string.Join("\n", blacklistedUsers)));
+      var blacklistedUsers = await TicketBlacklist.GetAllAsync();
+      var str = string.Join("\n", blacklistedUsers.Select(x => $"<@{x.DiscordUserId}>").ToList());
+      await ctx.EditResponseAsync(Webhooks.Info(Texts.BLACKLISTED_USERS, str));
       Log.Information(logMessage, ctx.User.Id);
     }
     catch (BotExceptionBase ex) {
