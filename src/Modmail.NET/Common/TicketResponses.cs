@@ -3,6 +3,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
+using Modmail.NET.Models;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
 
@@ -13,7 +14,7 @@ namespace Modmail.NET.Common;
 /// </summary>
 public static class TicketResponses
 {
-  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<DiscordRole> modRoleListForOverwrites, List<DiscordMember> modMemberListForOverwrites) {
+  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<PermissionInfo> permissionInfos) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.NEW_TICKET)
                 .WithCustomTimestamp()
@@ -36,10 +37,11 @@ public static class TicketResponses
                                        );
 
     var sb = new StringBuilder();
-    foreach (var role in modRoleListForOverwrites) sb.AppendLine(role.Mention);
-    foreach (var member2 in modMemberListForOverwrites) sb.AppendLine(member2.Mention);
-    messageBuilder.WithContent(sb.ToString());
+    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) {
+      sb.AppendLine(permissionInfo.GetMention());
+    }
 
+    messageBuilder.WithContent(sb.ToString());
     return messageBuilder;
   }
 
@@ -104,13 +106,25 @@ public static class TicketResponses
   }
 
 
-  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message) {
+  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, List<PermissionInfo>? permissions = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()
                 .WithColor(Colors.MessageReceivedColor)
                 .AddAttachment(message.Attachments)
                 .WithUserAsAuthor(message.Author);
-    return embed;
+
+    var msgBuilder = new DiscordMessageBuilder()
+      .AddEmbed(embed);
+    if (permissions is not null) {
+      var sb = new StringBuilder();
+      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) {
+        sb.AppendLine(permissionInfo.GetMention());
+      }
+
+      msgBuilder.WithContent(sb.ToString());
+    }
+
+    return msgBuilder;
   }
 }

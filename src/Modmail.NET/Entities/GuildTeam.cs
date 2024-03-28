@@ -19,6 +19,8 @@ public class GuildTeam
   public string Name { get; set; }
   public bool IsEnabled { get; set; } = true;
   public ulong GuildOptionId { get; set; }
+  public bool PingOnNewTicket { get; set; }
+  public bool PingOnNewMessage { get; set; }
 
   public virtual GuildOption GuildOption { get; set; }
 
@@ -57,7 +59,7 @@ public class GuildTeam
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task<GuildTeam> GetByNameAsync(ulong guildId, string name) {
+  public static async Task<GuildTeam> GetByNameAsync(string name) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.GuildTeams
                                 .FirstOrDefaultAsync(x => x.Name == name);
@@ -65,9 +67,12 @@ public class GuildTeam
     return result;
   }
 
-  public static async Task ProcessCreateTeamAsync(ulong guildId, string teamName, TeamPermissionLevel permissionLevel) {
-    var guildOption = await GuildOption.GetAsync();
-    var exists = await GuildTeam.Exists(guildOption.GuildId, teamName);
+  public static async Task ProcessCreateTeamAsync(ulong guildId,
+                                                  string teamName,
+                                                  TeamPermissionLevel permissionLevel,
+                                                  bool pingOnNewTicket = false,
+                                                  bool pingOnTicketMessage = false) {
+    var exists = await GuildTeam.Exists(teamName);
     if (exists) {
       throw new TeamAlreadyExistsException();
     }
@@ -80,24 +85,25 @@ public class GuildTeam
       GuildTeamMembers = new List<GuildTeamMember>(),
       UpdateDateUtc = null,
       Id = Guid.NewGuid(),
-      PermissionLevel = permissionLevel
+      PermissionLevel = permissionLevel,
+      PingOnNewMessage = pingOnTicketMessage,
+      PingOnNewTicket = pingOnNewTicket
     };
     await team.AddAsync();
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamCreated(teamName, permissionLevel));
+    await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
   }
 
-  private static async Task<bool> Exists(ulong guildId, string teamName) {
+  private static async Task<bool> Exists(string teamName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.GuildTeams.AnyAsync(x => x.GuildOptionId == guildId && x.Name == teamName);
+    return await dbContext.GuildTeams.AnyAsync(x => x.Name == teamName);
   }
 
-  public static async Task ProcessRemoveTeamAsync(ulong guildId, string teamName) {
-    var team = await GuildTeam.GetByNameAsync(guildId, teamName);
-    await team.RemoveAsync();
+  public async Task ProcessRemoveTeamAsync() {
+    await RemoveAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRemoved(teamName));
+    await logChannel.SendMessageAsync(LogResponses.TeamRemoved(Name));
   }
 
   public async Task ProcessAddTeamMemberAsync(ulong memberId) {
@@ -174,5 +180,55 @@ public class GuildTeam
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, newName));
+  }
+
+  public async Task ProcessUpdateTeamAsync(ulong guildId,
+                                           string teamName,
+                                           TeamPermissionLevel? permissionLevel,
+                                           bool? pingOnNewTicket,
+                                           bool? pingOnTicketMessage,
+                                           bool? isEnabled) {
+    var oldPermissionLevel = PermissionLevel;
+    var oldPingOnNewTicket = PingOnNewTicket;
+    var oldPingOnNewMessage = PingOnNewMessage;
+    var oldIsEnabled = IsEnabled;
+
+    var anyChanges = permissionLevel.HasValue || pingOnNewTicket.HasValue || pingOnTicketMessage.HasValue;
+
+    if (!anyChanges) {
+      return;
+    }
+
+    var team = await GetByNameAsync(teamName);
+    if (permissionLevel.HasValue) {
+      team.PermissionLevel = permissionLevel.Value;
+    }
+
+    if (pingOnNewTicket.HasValue) {
+      team.PingOnNewTicket = pingOnNewTicket.Value;
+    }
+
+    if (pingOnTicketMessage.HasValue) {
+      team.PingOnNewMessage = pingOnTicketMessage.Value;
+    }
+
+    if (isEnabled.HasValue) {
+      team.IsEnabled = isEnabled.Value;
+    }
+
+    team.UpdateDateUtc = DateTime.UtcNow;
+    await team.UpdateAsync();
+
+
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
+                                                               oldPingOnNewTicket,
+                                                               oldPingOnNewMessage,
+                                                               oldIsEnabled,
+                                                               team.PermissionLevel,
+                                                               team.PingOnNewTicket,
+                                                               team.PingOnNewMessage,
+                                                               team.IsEnabled,
+                                                               team.Name));
   }
 }

@@ -105,7 +105,7 @@ public class GuildOption
 
     var guildId = guild.Id;
 
-    var permissions = await GuildTeamMember.GetPermissionInfoOrHigherAsync(guildId, TeamPermissionLevel.Admin);
+    var permissions = await GuildTeamMember.GetPermissionInfoOrHigherAsync(TeamPermissionLevel.Admin);
     var members = await guild.GetAllMembersAsync();
     var roles = guild.Roles;
 

@@ -231,9 +231,11 @@ public class Ticket
     LastMessageDateUtc = DateTime.UtcNow;
     await this.UpdateAsync();
 
+
     var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
     if (mailChannel is not null) {
-      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message));
+      var permissions = await GuildTeamMember.GetPermissionInfoAsync();
+      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message, permissions));
     }
     else {
       //TODO: Handle mail privateChannel not found
@@ -268,7 +270,7 @@ public class Ticket
     var ticketId = Guid.NewGuid();
     var messageId = message.Id;
 
-    var permissions = await GuildTeamMember.GetPermissionInfoAsync(guildOption.CategoryId);
+    var permissions = await GuildTeamMember.GetPermissionInfoAsync();
     var members = await guild.GetAllMembersAsync();
     var roles = guild.Roles;
 
@@ -282,7 +284,7 @@ public class Ticket
     }
 
 
-    var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, modRoleListForOverwrites, modMemberListForOverwrites);
+    var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
     await mailChannel.SendMessageAsync(newTicketMessageBuilder);
     await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message));
 

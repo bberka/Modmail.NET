@@ -23,32 +23,31 @@ public class GuildTeamMember
   public virtual GuildTeam GuildTeam { get; set; }
 
 
-  public static async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, ulong guildId, List<ulong> roleIdList) {
+  public static async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, List<ulong> roleIdList) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var teamMember = await dbContext.GuildTeamMembers
                                     .Include(x => x.GuildTeam)
-                                    .Where(x => x.GuildTeam.GuildOptionId == guildId &&
-                                                ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
+                                    .Where(x => ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
                                     .OrderByDescending(x => x.GuildTeam.PermissionLevel)
                                     .FirstOrDefaultAsync();
     return teamMember?.GuildTeam.PermissionLevel;
   }
 
-  public static async Task<List<PermissionInfo>> GetPermissionInfoAsync(ulong guildId) {
+  public static async Task<List<PermissionInfo>> GetPermissionInfoAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.GuildTeamMembers
                           .Include(x => x.GuildTeam)
-                          .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled)
-                          .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
+                          .Where(x => x.GuildTeam.IsEnabled)
+                          .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type, x.GuildTeam.PingOnNewTicket, x.GuildTeam.PingOnNewMessage))
                           .ToListAsync();
   }
 
-  public static async Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(ulong guildId, TeamPermissionLevel levelOrHigher) {
+  public static async Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(TeamPermissionLevel levelOrHigher) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.GuildTeamMembers
                           .Include(x => x.GuildTeam)
-                          .Where(x => x.GuildTeam.GuildOptionId == guildId && x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
-                          .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type))
+                          .Where(x => x.GuildTeam.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
+                          .Select(x => new PermissionInfo(x.GuildTeam.PermissionLevel, x.Key, x.Type, x.GuildTeam.PingOnNewTicket, x.GuildTeam.PingOnNewMessage))
                           .ToListAsync();
   }
 

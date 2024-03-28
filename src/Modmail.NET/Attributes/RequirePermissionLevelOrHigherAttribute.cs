@@ -29,7 +29,7 @@ public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
 
 
     var roleIdList = ctx.Member.Roles.Select(x => x.Id).ToList();
-    var permLevel = await GuildTeamMember.GetPermissionLevelAsync(ctx.User.Id, guild.Id, roleIdList);
+    var permLevel = await GuildTeamMember.GetPermissionLevelAsync(ctx.User.Id, roleIdList);
     if (permLevel is null) {
       await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND).AsEphemeral());
       return false;

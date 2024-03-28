@@ -161,6 +161,21 @@ public static class Texts
   public const string EMBED_MESSAGE_CONTENT = "Embed Message Content";
   public const string ORDER = "Order";
   public const string INVALID_INTERACTION_KEY = "Invalid interaction key";
+  public const string TEAM_UPDATED = "Team updated";
+  public const string OLD_PERMISSION_LEVEL = "Old Permission Level";
+  public const string NEW_PERMISSION_LEVEL = "New Permission Level";
+  public const string OLD_PING_ON_NEW_TICKET = "Old Ping On New Ticket";
+  public const string NEW_PING_ON_NEW_TICKET = "New Ping On New Ticket";
+  public const string OLD_PING_ON_NEW_MESSAGE = "Old Ping On New Message";
+  public const string NEW_PING_ON_NEW_MESSAGE = "New Ping On New Message";
+  public const string OLD_IS_ENABLED = "Old Is Enabled";
+  public const string NEW_IS_ENABLED = "New Is Enabled";
+  public const string PING_ON_NEW_TICKET = "Ping On New Ticket";
+  public const string PING_ON_NEW_MESSAGE = "Ping On New Message";
+  public const string PERMISSION_LEVEL_UPDATED = "Permission level updated";
+  public const string PING_ON_NEW_TICKET_UPDATED = "Ping on new ticket updated";
+  public const string PING_ON_NEW_MESSAGE_UPDATED = "Ping on new message updated";
+  public const string IS_ENABLED_UPDATED = "Is enabled updated";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

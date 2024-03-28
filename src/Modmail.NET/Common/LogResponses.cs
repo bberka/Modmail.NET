@@ -202,13 +202,15 @@ public static class LogResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder TeamCreated(string teamName, TeamPermissionLevel permissionLevel) {
+  public static DiscordEmbedBuilder TeamCreated(GuildTeam team) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.TEAM_CREATED)
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(Texts.TEAM_NAME, teamName, true)
-                .AddField(Texts.PERMISSION_LEVEL, permissionLevel.ToString(), true);
+                .AddField(Texts.TEAM_NAME, team.Name, true)
+                .AddField(Texts.PERMISSION_LEVEL, team.PermissionLevel.ToString(), true)
+                .AddField(Texts.PING_ON_NEW_TICKET, team.PingOnNewTicket.ToString())
+                .AddField(Texts.PING_ON_NEW_MESSAGE, team.PingOnNewMessage.ToString());
     return embed;
   }
 
@@ -298,6 +300,39 @@ public static class LogResponses
                 .AddField(Texts.TAKE_FEEDBACK_AFTER_CLOSING, guildOption.TakeFeedbackAfterClosing.ToString(), true)
                 .AddField(Texts.GREETING_MESSAGE, guildOption.GreetingMessage, false)
                 .AddField(Texts.CLOSING_MESSAGE, guildOption.ClosingMessage, false);
+    return embed;
+  }
+
+  public static DiscordEmbedBuilder TeamUpdated(TeamPermissionLevel oldPermissionLevel,
+                                                bool oldPingOnNewTicket,
+                                                bool oldPingOnNewMessage,
+                                                bool oldIsEnabled,
+                                                TeamPermissionLevel teamPermissionLevel,
+                                                bool teamPingOnNewTicket,
+                                                bool teamPingOnNewMessage,
+                                                bool teamIsEnabled,
+                                                string teamName) {
+    var embed = new DiscordEmbedBuilder()
+                .WithTitle(Texts.TEAM_UPDATED)
+                .WithCustomTimestamp()
+                .WithColor(Colors.InfoColor)
+                .AddField(Texts.TEAM_NAME, teamName, false);
+    if (oldPermissionLevel != teamPermissionLevel) {
+      embed.AddField(Texts.PERMISSION_LEVEL_UPDATED, $"{oldPermissionLevel} -> {teamPermissionLevel}", true);
+    }
+
+    if (oldPingOnNewTicket != teamPingOnNewTicket) {
+      embed.AddField(Texts.PING_ON_NEW_TICKET_UPDATED, $"{oldPingOnNewTicket} -> {teamPingOnNewTicket}", true);
+    }
+
+    if (oldPingOnNewMessage != teamPingOnNewMessage) {
+      embed.AddField(Texts.PING_ON_NEW_MESSAGE_UPDATED, $"{oldPingOnNewMessage} -> {teamPingOnNewMessage}", true);
+    }
+
+    if (oldIsEnabled != teamIsEnabled) {
+      embed.AddField(Texts.IS_ENABLED_UPDATED, $"{oldIsEnabled} -> {teamIsEnabled}", true);
+    }
+
     return embed;
   }
 }

@@ -44,12 +44,16 @@ public class TeamSlashCommands : ApplicationCommandModule
   public async Task CreateTeam(InteractionContext ctx,
                                [Option("teamName", "Team name")] string teamName,
                                [Option("permissionLevel", "Permission level")]
-                               TeamPermissionLevel permissionLevel
+                               TeamPermissionLevel permissionLevel,
+                               [Option("ping-on-new-ticket", "Ping on new ticket")]
+                               bool pingOnNewTicket = false,
+                               [Option("ping-on-ticket-message", "Ping on ticket message")]
+                               bool pingOnTicketMessage = false
   ) {
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(CreateTeam)}({{ContextUserId}},{{TeamName}},{{PermissionLevel}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      await GuildTeam.ProcessCreateTeamAsync(ctx.Guild.Id, teamName, permissionLevel);
+      await GuildTeam.ProcessCreateTeamAsync(ctx.Guild.Id, teamName, permissionLevel, pingOnNewTicket, pingOnTicketMessage);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_CREATED_SUCCESSFULLY));
       Log.Information(logMessage, ctx.User.Id, teamName, permissionLevel);
     }
@@ -63,6 +67,62 @@ public class TeamSlashCommands : ApplicationCommandModule
     }
   }
 
+  [SlashCommand("update", "Update an existing team.")]
+  public async Task UpdateTeam(InteractionContext ctx,
+                               [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team name")]
+                               string teamName,
+                               [Option("is-enabled", "Is the team enabled")]
+                               bool isEnabled,
+                               [Option("permissionLevel", "Permission level")]
+                               TeamPermissionLevel? permissionLevel = null,
+                               [Option("ping-on-new-ticket", "Ping on new ticket")]
+                               bool? pingOnNewTicket = null,
+                               [Option("ping-on-ticket-message", "Ping on ticket message")]
+                               bool? pingOnTicketMessage = false
+  ) {
+    const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(UpdateTeam)}({{ContextUserId}},{{TeamName}},{{PermissionLevel}},{{PingOnNewTicket}},{{PingOnTicketMessage}},{{IsEnabled}})";
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    try {
+      var team = await GuildTeam.GetByNameAsync(teamName);
+      await team.ProcessUpdateTeamAsync(ctx.Guild.Id,
+                                        teamName,
+                                        permissionLevel,
+                                        pingOnNewTicket,
+                                        pingOnTicketMessage,
+                                        isEnabled);
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_CREATED_SUCCESSFULLY));
+      Log.Information(logMessage,
+                      ctx.User.Id,
+                      teamName,
+                      permissionLevel,
+                      pingOnNewTicket,
+                      pingOnTicketMessage,
+                      isEnabled);
+    }
+    catch (BotExceptionBase ex) {
+      await ctx.Interaction.EditOriginalResponseAsync(ex.ToWebhookResponse());
+      Log.Warning(ex,
+                  logMessage,
+                  ctx.User.Id,
+                  teamName,
+                  permissionLevel,
+                  pingOnNewTicket,
+                  pingOnTicketMessage,
+                  isEnabled);
+    }
+    catch (Exception ex) {
+      await ctx.Interaction.EditOriginalResponseAsync(ex.ToWebhookResponse());
+      Log.Fatal(ex,
+                logMessage,
+                ctx.User.Id,
+                teamName,
+                permissionLevel,
+                pingOnNewTicket,
+                pingOnTicketMessage,
+                isEnabled);
+    }
+  }
+
   [SlashCommand("remove", "Remove a team.")]
   public async Task RemoveTeam(InteractionContext ctx,
                                [Autocomplete(typeof(TeamProvider))] [Option("teamName", "Team teamName")]
@@ -70,7 +130,8 @@ public class TeamSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(RemoveTeam)}({{ContextUserId}},{{TeamName}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      await GuildTeam.ProcessRemoveTeamAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
+      await team.ProcessRemoveTeamAsync();
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_REMOVED_SUCCESSFULLY));
       Log.Information(logMessage, ctx.User.Id, teamName);
     }
@@ -96,7 +157,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     try {
       await DiscordUserInfo.AddOrUpdateAsync(member);
 
-      var team = await GuildTeam.GetByNameAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessAddTeamMemberAsync(member.Id);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.MEMBER_ADDED_TO_TEAM));
       Log.Information(logMessage, ctx.User.Id, teamName, member.Id);
@@ -120,7 +181,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(RemoveTeamMember)}({{ContextUserId}},{{TeamName}},{{MemberId}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var team = await GuildTeam.GetByNameAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
       await DiscordUserInfo.AddOrUpdateAsync(member);
 
       await team.ProcessRemoveTeamMember(member.Id);
@@ -146,7 +207,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(AddRoleToTeam)}({{ContextUserId}},{{TeamName}},{{RoleId}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var team = await GuildTeam.GetByNameAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessAddRoleToTeam(role);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.ROLE_ADDED_TO_TEAM));
       Log.Information(logMessage, ctx.User.Id, teamName, role.Id);
@@ -171,7 +232,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     try {
-      var team = await GuildTeam.GetByNameAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessRemoveRoleFromTeam(role);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.ROLE_REMOVED_FROM_TEAM));
       Log.Information(logMessage, ctx.User.Id, teamName, role.Id);
@@ -195,7 +256,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(RenameTeam)}({{ContextUserId}},{{TeamName}},{{NewName}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var team = await GuildTeam.GetByNameAsync(ctx.Guild.Id, teamName);
+      var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessRenameAsync(newName);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_RENAMED_SUCCESSFULLY));
       Log.Information(logMessage, ctx.User.Id, teamName, newName);

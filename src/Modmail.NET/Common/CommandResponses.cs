@@ -39,7 +39,6 @@ public static class CommandResponses
     // var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.TEAM_LIST)
-                .WithGuildInfoFooter(guild)
                 .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                 .WithColor(Colors.InfoColor);
 
@@ -48,6 +47,8 @@ public static class CommandResponses
       sb.AppendLine($"`{Texts.ENABLED}`: {team.IsEnabled}");
       sb.AppendLine($"`{Texts.PERMISSION_LEVEL}`: {team.PermissionLevel}");
       sb.AppendLine($"`{Texts.MEMBERS}`: {team.GuildTeamMembers.Count}");
+      sb.AppendLine($"`{Texts.PING_ON_NEW_TICKET}`: {team.PingOnNewTicket}");
+      sb.AppendLine($"`{Texts.PING_ON_NEW_MESSAGE}`: {team.PingOnNewMessage}");
       foreach (var member in team.GuildTeamMembers.OrderBy(x => x.Type))
         switch (member.Type) {
           case TeamMemberDataType.RoleId:

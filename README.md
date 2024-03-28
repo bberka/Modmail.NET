@@ -6,17 +6,45 @@ This bot can be easily setup and used on your server for managing community comm
 Bot creates tickets and users message with the bot directly instead of sending message to mods
 
 ## Table of Contents
-- [Features](#features)
+- [Modmail.NET](#modmailnet)
+  - [Table of Contents](#table-of-contents)
 - [Warning](#warning)
+- [Features](#features)
 - [Installation](#installation)
 - [Multiple Servers Usage](#multiple-servers-usage)
 - [Possible Upcoming Features](#possible-upcoming-features)
 - [Commands](#commands)
   - [Modmail Group Slash Commands](#modmail-group-slash-commands)
+    - [`/modmail setup`](#modmail-setup)
+    - [`/modmail configure`](#modmail-configure)
+    - [`/modmail get-settings`](#modmail-get-settings)
   - [Ticket Group Slash Commands](#ticket-group-slash-commands)
+    - [`/ticket close`](#ticket-close)
+    - [`/ticket set-priority`](#ticket-set-priority)
+    - [`/ticket add-note`](#ticket-add-note)
+    - [`/ticket toggle-anonymous`](#ticket-toggle-anonymous)
+    - [`/ticket set-type`](#ticket-set-type)
+    - [`/ticket get-type`](#ticket-get-type)
   - [Team Group Slash Commands](#team-group-slash-commands)
+    - [`/team list`](#team-list)
+    - [`/team create`](#team-create)
+    - [`/team update`](#team-update)
+    - [`/team remove`](#team-remove)
+    - [`/team add-user`](#team-add-user)
+    - [`/team remove-user`](#team-remove-user)
+    - [`/team add-role`](#team-add-role)
+    - [`/team remove-role`](#team-remove-role)
+    - [`/team rename`](#team-rename)
   - [Blacklist Group Slash Commands](#blacklist-group-slash-commands)
+    - [`/blacklist add`](#blacklist-add)
+    - [`/blacklist remove`](#blacklist-remove)
+    - [`/blacklist status`](#blacklist-status)
+    - [`/blacklist view`](#blacklist-view)
   - [Ticket Type Group Slash Commands](#ticket-type-group-slash-commands)
+    - [`/ticket-type create`](#ticket-type-create)
+    - [`/ticket-type update`](#ticket-type-update)
+    - [`/ticket-type delete`](#ticket-type-delete)
+    - [`/ticket-type list`](#ticket-type-list)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 
@@ -162,8 +190,21 @@ This set of commands allows admins or higher-level users to manage teams in the 
 
 - **Description**: Create a new team.
 - **Parameters**:
-  - `teamName`: Team name.
-  - `permissionLevel`: Permission level.
+  - `teamName`: The name of the team.
+  - `permissionLevel`: The permission level for the team.
+  - `ping-on-new-ticket`: (Optional) Whether to ping on a new ticket. Default is `false`.
+  - `ping-on-ticket-message`: (Optional) Whether to ping on a ticket message. Default is `false`.
+
+### `/team update`
+
+- **Description**: Update an existing team.
+- **Parameters**:
+  - `teamName`: The name of the team.
+  - `is-enabled`: Whether the team is enabled.
+  - `permissionLevel`: (Optional) The permission level for the team.
+  - `ping-on-new-ticket`: (Optional) Whether to ping on a new ticket.
+  - `ping-on-ticket-message`: (Optional) Whether to ping on a ticket message.
+
 
 ### `/team remove`
 
