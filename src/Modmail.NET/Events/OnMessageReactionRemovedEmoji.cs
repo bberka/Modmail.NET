@@ -7,6 +7,6 @@ namespace Modmail.NET.Events;
 public class OnMessageReactionRemovedEmoji
 {
   public static async Task Handle(DiscordClient sender, MessageReactionRemoveEmojiEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args.Message.Author);
+    await DiscordUserInfo.AddOrUpdateAsync(args?.Message?.Author);
   }
 }

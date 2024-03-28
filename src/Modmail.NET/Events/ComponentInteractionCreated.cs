@@ -13,7 +13,7 @@ public static class ComponentInteractionCreated
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
     const string logMessage = $"[{nameof(ComponentInteractionCreated)}]{nameof(Handle)}({{CustomId}},{{UserId}},{{ChannelId}},{{InteractionId}},{{MessageId}})";
     try {
-      await DiscordUserInfo.AddOrUpdateAsync(args.User);
+      await DiscordUserInfo.AddOrUpdateAsync(args?.User);
       var interaction = args.Interaction;
       var key = interaction.Data.CustomId;
       var (interactionName, parameters) = UtilInteraction.ParseKey(key);

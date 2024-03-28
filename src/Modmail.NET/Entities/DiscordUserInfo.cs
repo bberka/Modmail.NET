@@ -78,7 +78,8 @@ public class DiscordUserInfo
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task AddOrUpdateAsync(DiscordUser user) {
+  public static async Task AddOrUpdateAsync(DiscordUser? user) {
+    if (user is null) return;
     await new DiscordUserInfo(user).AddOrUpdateAsync();
   }
 

@@ -7,6 +7,6 @@ namespace Modmail.NET.Events;
 public class OnScheduledGuildEventUserRemoved
 {
   public static async Task Handle(DiscordClient sender, ScheduledGuildEventUserRemoveEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args.User);
+    await DiscordUserInfo.AddOrUpdateAsync(args?.User);
   }
 }

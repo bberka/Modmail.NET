@@ -7,6 +7,6 @@ namespace Modmail.NET.Events;
 public class OnMessageReactionsCleared
 {
   public static async Task Handle(DiscordClient sender, MessageReactionsClearEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args.Message.Author);
+    await DiscordUserInfo.AddOrUpdateAsync(args?.Message?.Author);
   }
 }

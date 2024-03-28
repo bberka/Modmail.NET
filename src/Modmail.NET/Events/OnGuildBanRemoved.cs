@@ -7,6 +7,6 @@ namespace Modmail.NET.Events;
 public class OnGuildBanRemoved
 {
   public static async Task Handle(DiscordClient sender, GuildBanRemoveEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args.Member);
+    await DiscordUserInfo.AddOrUpdateAsync(args?.Member);
   }
 }
