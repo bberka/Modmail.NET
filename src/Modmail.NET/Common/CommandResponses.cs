@@ -39,7 +39,7 @@ public static class CommandResponses
     // var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.TEAM_LIST)
-                // .WithDescription(sb.ToString())
+                .WithGuildInfoFooter(guild)
                 .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                 .WithColor(Colors.InfoColor);
 
