@@ -86,6 +86,12 @@ public class Ticket
     return ticket;
   }
 
+  public static async Task<Ticket?> GetActiveTicketNullableAsync(Guid id) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var ticket = await dbContext.Tickets.FindAsync(id);
+    return ticket;
+  }
+
   public static async Task<Ticket> GetActiveTicketAsync(Guid ticketId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
@@ -100,10 +106,16 @@ public class Ticket
     return ticket;
   }
 
+  public static async Task<Ticket?> GetNullableAsync(Guid id) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var ticket = await dbContext.Tickets.FindAsync(id);
+    return ticket;
+  }
+
   public async Task ProcessCloseTicketAsync(ulong closerUserId,
                                             string? closeReason = null,
                                             DiscordChannel? modChatChannel = null,
-                                            bool doNotSendFeedbackMessage = false) {
+                                            bool dontSendFeedbackMessage = false) {
     ArgumentNullException.ThrowIfNull(GuildOption);
     ArgumentNullException.ThrowIfNull(OpenerUserInfo);
     if (closerUserId == 0) throw new InvalidUserIdException();
@@ -127,8 +139,8 @@ public class Ticket
 
     var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (pmChannel != null) {
-      await pmChannel.SendMessageAsync(EmbedUser.TicketClosed(this));
-      if (GuildOption.TakeFeedbackAfterClosing && !doNotSendFeedbackMessage) {
+      await pmChannel.SendMessageAsync(EmbedUser.YourTicketHasBeenClosed(this));
+      if (GuildOption.TakeFeedbackAfterClosing && !dontSendFeedbackMessage) {
         await pmChannel.SendMessageAsync(EmbedUser.GiveFeedbackMessage(this));
       }
     }
@@ -470,7 +482,10 @@ public class Ticket
     if (GuildOption is null) throw new InvalidOperationException("GuildOption is null");
     if (OpenerUserInfo is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (userId == 0) throw new InvalidOperationException("UserId is 0");
-    if (ClosedDateUtc.HasValue) throw new InvalidOperationException("Ticket is already closed");
+    if (ClosedDateUtc.HasValue) {
+      //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
+      throw new TicketAlreadyClosedException();
+    }
 
     var ticketType = await Entities.TicketType.GetAsync(type);
     if (ticketType is null) throw new InvalidOperationException("TicketType is null");

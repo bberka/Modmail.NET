@@ -75,7 +75,7 @@ public class TicketBlacklist
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     var activeTicket = await Ticket.GetActiveTicketAsync(userId);
-    await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, doNotSendFeedbackMessage: true);
+    await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, dontSendFeedbackMessage: true);
 
     var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
     if (activeBlock) {
@@ -109,11 +109,11 @@ public class TicketBlacklist
   }
 
   public async Task ProcessRemoveUserFromBlacklist(ulong authorUserId, ulong userId, bool notifyUser) {
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await this.RemoveAsync();
     var modUser = await DiscordUserInfo.GetAsync(authorUserId);
     var userInfo = await DiscordUserInfo.GetAsync(userId);
     var embedLog = EmbedLog.BlacklistRemoved(modUser, userInfo);
+    var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(embedLog);
     if (notifyUser) {
       var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(userId);
