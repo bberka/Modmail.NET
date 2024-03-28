@@ -46,7 +46,7 @@ public static class ComponentInteractionCreated
           var ticketId = Guid.Parse(ticketIdParam);
           var selectedTypeKey = args.Values.FirstOrDefault();
           if (string.IsNullOrEmpty(selectedTypeKey)) {
-            return;
+            break;
           }
 
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
@@ -102,7 +102,7 @@ public static class ComponentInteractionCreated
                   args.Message.Id);
     }
     catch (Exception ex) {
-      Log.Error(ex,
+      Log.Fatal(ex,
                 logMessage,
                 args.Interaction.Data.CustomId,
                 args.User.Id,
