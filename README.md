@@ -5,13 +5,27 @@ This bot can be easily setup and used on your server for managing community comm
 
 Bot creates tickets and users message with the bot directly instead of sending message to mods
 
-# Contributing
-Create a pull request by using semantic commits and proper explanation
+## Table of Contents
+- [Features](#features)
+- [Warning](#warning)
+- [Installation](#installation)
+- [Multiple Servers Usage](#multiple-servers-usage)
+- [Possible Upcoming Features](#possible-upcoming-features)
+- [Commands](#commands)
+  - [Modmail Group Slash Commands](#modmail-group-slash-commands)
+  - [Ticket Group Slash Commands](#ticket-group-slash-commands)
+  - [Team Group Slash Commands](#team-group-slash-commands)
+  - [Blacklist Group Slash Commands](#blacklist-group-slash-commands)
+  - [Ticket Type Group Slash Commands](#ticket-type-group-slash-commands)
+- [Contributing](#contributing)
+- [Disclaimer](#disclaimer)
 
 # Warning
 This project is may not be ready for production needs more polishing.
 
 If you wish to use it be aware of potential errors
+
+
 
 # Features
 - Open tickets by sending a private message to bot
@@ -29,6 +43,14 @@ If you wish to use it be aware of potential errors
 - Ticket type system, users can select ticket types to select what the ticket is about
 - Moderators can talk with each other in ticket channel with by starting messages with bot prefix
 
+
+# Installation
+1. Install .NET 6
+2. Download project build and publish for your desired platform or download build from github
+3. Visit Discord Developer Portal and create a new application
+4. Configure appsettings.json
+5. Run the app
+
 # Multiple Servers Usage
 Before trying to use the bot on multiple servers you must now about the limitations;
 
@@ -42,12 +64,6 @@ You can simply invite bot to multiple servers and you can start using the bot
 
 Ticket channels will created in main server
 
-# Installation
-1. Install .NET 6
-2. Download project build and publish for your desired platform
-3. Visit Discord Developer Portal and create a new application
-4. Configure app.settings
-5. Run the app
 
 # Possible Upcoming Features
 - Web UI and/or API to manage tickets and see transcript information
@@ -266,7 +282,8 @@ Requires TeamPermissionLevel.Admin or higher
 - **Description**: List all ticket types.
 - **Usage**: `/ticket-type list`
 
-
+# Contributing
+Create a pull request by using semantic commits and proper explanation
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
