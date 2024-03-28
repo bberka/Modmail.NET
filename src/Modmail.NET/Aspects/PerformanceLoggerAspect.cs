@@ -13,15 +13,8 @@ namespace Modmail.NET.Aspects;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class PerformanceLoggerAspect : Attribute
 {
-  private readonly int _logThresholdMilliseconds;
+  public int ThresholdMs { get; set; } = 1000;
 
-  public PerformanceLoggerAspect() {
-    _logThresholdMilliseconds = 1000;
-  }
-
-  public PerformanceLoggerAspect(int logThresholdMilliseconds) {
-    _logThresholdMilliseconds = logThresholdMilliseconds;
-  }
 
   [Advice(Kind.Around)]
   public object Intercept(
@@ -39,7 +32,7 @@ public class PerformanceLoggerAspect : Attribute
     }
     finally {
       sw.Stop();
-      if (_logThresholdMilliseconds < sw.ElapsedMilliseconds)
+      if (ThresholdMs < sw.ElapsedMilliseconds)
         Log.Warning("{ClassName}.{MethodName}({ArgList}) Action too long to execute, executed in {ElapsedMilliseconds} ms", className, methodName, argList, sw.ElapsedMilliseconds);
     }
   }

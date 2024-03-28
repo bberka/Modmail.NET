@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Modmail.NET.Aspects;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
@@ -10,6 +11,7 @@ namespace Modmail.NET.Events;
 
 public static class ComponentInteractionCreated
 {
+  [PerformanceLoggerAspect(ThresholdMs = 3000)]
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
     const string logMessage = $"[{nameof(ComponentInteractionCreated)}]{nameof(Handle)}({{CustomId}},{{UserId}},{{ChannelId}},{{InteractionId}},{{MessageId}})";
     try {
