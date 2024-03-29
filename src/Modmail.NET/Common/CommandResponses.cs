@@ -36,10 +36,8 @@ public static class CommandResponses
   }
 
   public static DiscordWebhookBuilder ListTeams(DiscordGuild guild, List<GuildTeam> teams) {
-    // var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.TEAM_LIST)
-                .WithFooter($"{guild.Name} | {guild.Id}", guild.IconUrl)
                 .WithColor(Colors.InfoColor);
 
     foreach (var team in teams) {
