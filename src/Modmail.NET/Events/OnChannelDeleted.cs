@@ -21,7 +21,17 @@ public static class OnChannelDeleted
         var auditLogEntry = (await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.ChannelDelete)).FirstOrDefault();
         var user = auditLogEntry?.UserResponsible ?? sender.CurrentUser;
         await DiscordUserInfo.AddOrUpdateAsync(user);
-        var ticket = await Ticket.GetActiveTicketAsync(ticketId);
+        var ticket = await Ticket.GetNullableAsync(ticketId);
+
+        //These checks are there to avoid unnecessary logging and exception handling
+        if (ticket is null) {
+          return; // Ticket does not exist
+        }
+
+        if (ticket.ClosedDateUtc.HasValue) {
+          return; // Ticket is already closed
+        }
+
         await ticket.ProcessCloseTicketAsync(user.Id, Texts.CHANNEL_WAS_DELETED, args.Channel);
         Log.Information(logMessage, args.Channel.Id);
       }
