@@ -176,6 +176,7 @@ public static class Texts
   public const string PING_ON_NEW_TICKET_UPDATED = "Ping on new ticket updated";
   public const string PING_ON_NEW_MESSAGE_UPDATED = "Ping on new message updated";
   public const string IS_ENABLED_UPDATED = "Is enabled updated";
+  public const string TEAM_UPDATED_SUCCESSFULLY = "Team updated successfully";
 
 
   public static string NEW_TICKET_DESCRIPTION_MESSAGE = "New ticket has been created. Please respond to this message to continue the conversation."

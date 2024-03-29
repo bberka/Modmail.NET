@@ -90,7 +90,7 @@ public class TeamSlashCommands : ApplicationCommandModule
                                         pingOnNewTicket,
                                         pingOnTicketMessage,
                                         isEnabled);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_CREATED_SUCCESSFULLY));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_UPDATED_SUCCESSFULLY));
       Log.Information(logMessage,
                       ctx.User.Id,
                       teamName,
