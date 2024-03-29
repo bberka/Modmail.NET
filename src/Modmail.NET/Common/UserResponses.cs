@@ -16,7 +16,7 @@ public static class UserResponses
     var feedbackDone = new DiscordEmbedBuilder()
                        .WithTitle(Texts.FEEDBACK_RECEIVED)
                        .WithCustomTimestamp()
-                       .WithGuildInfoFooter(ticket.GuildOption)
+                       .WithGuildInfoFooter()
                        .AddField(Texts.STAR, Texts.STAR_EMOJI + ticket.FeedbackStar)
                        .AddField(Texts.FEEDBACK, ticket.FeedbackMessage)
                        .WithColor(Colors.FeedbackColor);
@@ -34,15 +34,16 @@ public static class UserResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket) {
+  public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket, GuildOption guildOption) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(Texts.YOUR_TICKET_HAS_BEEN_CLOSED)
                 .WithDescription(Texts.YOUR_TICKET_HAS_BEEN_CLOSED_DESCRIPTION)
-                .WithGuildInfoFooter(ticket.GuildOption)
+                .WithGuildInfoFooter(guildOption)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketClosedColor);
-    if (!string.IsNullOrEmpty(ticket.GuildOption.ClosingMessage))
-      embed.WithDescription(ticket.GuildOption.ClosingMessage);
+
+    if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
+      embed.WithDescription(guildOption.ClosingMessage);
 
     // if (!ticket.Anonymous) {
     //   embed.WithUserAsAuthor(ticket.CloserUserInfo);
@@ -54,7 +55,7 @@ public static class UserResponses
     return embed;
   }
 
-  public static DiscordMessageBuilder GiveFeedbackMessage(Ticket ticket) {
+  public static DiscordMessageBuilder GiveFeedbackMessage(Ticket ticket, GuildOption guildOption) {
     var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
     var starList = new List<DiscordComponent> {
       new DiscordButtonComponent(ButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, ticket.Id), "1", false, new DiscordComponentEmoji("⭐")),
@@ -68,7 +69,7 @@ public static class UserResponses
                               .WithTitle(Texts.FEEDBACK)
                               .WithDescription(Texts.FEEDBACK_DESCRIPTION)
                               .WithCustomTimestamp()
-                              .WithGuildInfoFooter(ticket.GuildOption)
+                              .WithGuildInfoFooter(guildOption)
                               .WithColor(Colors.FeedbackColor);
 
     var response = ticketFeedbackMsgToUser
@@ -77,9 +78,9 @@ public static class UserResponses
     return response;
   }
 
-  public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo info, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
+  public static DiscordEmbedBuilder TicketPriorityChanged(GuildOption guildOption, DiscordUserInfo info, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
     var embed = new DiscordEmbedBuilder()
-                .WithGuildInfoFooter(ticket.GuildOption)
+                .WithGuildInfoFooter(guildOption)
                 .WithTitle(Texts.TICKET_PRIORITY_CHANGED)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketPriorityChangedColor)

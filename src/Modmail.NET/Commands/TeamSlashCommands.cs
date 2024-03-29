@@ -26,7 +26,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
 
     try {
-      var teams = await GuildTeam.GetAllAsync(ctx.Guild.Id);
+      var teams = await GuildTeam.GetAllAsync();
       await ctx.Interaction.EditOriginalResponseAsync(CommandResponses.ListTeams(ctx.Guild, teams));
       Log.Information(logMessage, ctx.User.Id);
     }
@@ -53,7 +53,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(TeamSlashCommands)}]{nameof(CreateTeam)}({{ContextUserId}},{{TeamName}},{{PermissionLevel}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      await GuildTeam.ProcessCreateTeamAsync(ctx.Guild.Id, teamName, permissionLevel, pingOnNewTicket, pingOnTicketMessage);
+      await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel, pingOnNewTicket, pingOnTicketMessage);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_CREATED_SUCCESSFULLY));
       Log.Information(logMessage, ctx.User.Id, teamName, permissionLevel);
     }

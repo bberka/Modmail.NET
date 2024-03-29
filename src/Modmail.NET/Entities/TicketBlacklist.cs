@@ -8,7 +8,7 @@ using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 
-[Index(nameof(DiscordUserId), nameof(GuildId), IsUnique = true)]
+[Index(nameof(DiscordUserId), IsUnique = true)]
 public class TicketBlacklist
 {
   [Key]
@@ -20,12 +20,8 @@ public class TicketBlacklist
   [ForeignKey(nameof(DiscordUserInfo))]
   public ulong DiscordUserId { get; set; }
 
-  [ForeignKey(nameof(GuildOption))]
-  public ulong GuildId { get; set; }
-
   //FK
   public virtual DiscordUserInfo DiscordUserInfo { get; set; }
-  public virtual GuildOption GuildOption { get; set; }
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
     if (userId == 0) throw new InvalidUserIdException();
@@ -86,7 +82,6 @@ public class TicketBlacklist
     var blackList = new TicketBlacklist() {
       Id = Guid.NewGuid(),
       Reason = reason,
-      GuildId = BotConfig.This.MainServerId,
       DiscordUserId = userId,
       RegisterDateUtc = DateTime.UtcNow,
     };

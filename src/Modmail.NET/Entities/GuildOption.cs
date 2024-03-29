@@ -45,7 +45,7 @@ public class GuildOption
   public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
 
 
-  [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 10)]
+  [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 60)]
   public static async Task<GuildOption> GetAsync() {
     var result = await GetNullableAsync();
     if (result is null) {
@@ -103,33 +103,10 @@ public class GuildOption
       throw new AnotherServerAlreadySetupException();
     }
 
-    var guildId = guild.Id;
-
-    var permissions = await GuildTeamMember.GetPermissionInfoOrHigherAsync(TeamPermissionLevel.Admin);
-    var members = await guild.GetAllMembersAsync();
-    var roles = guild.Roles;
-
-    var roleListForOverwrites = new List<DiscordRole>();
-    var memberListForOverwrites = new List<DiscordMember>();
-    foreach (var perm in permissions) {
-      var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
-      if (role.Key != 0) roleListForOverwrites.Add(role.Value);
-      var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
-      if (member2 is not null && member2.Id != 0) memberListForOverwrites.Add(member2);
-    }
-
-
-    var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
-
-
-    var category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
-    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, Texts.MODMAIL_LOG_CHANNEL_TOPIC, permissionOverwrites);
-    var categoryId = category.Id;
-    var logChannelId = logChannel.Id;
     var guildOption = new GuildOption {
-      CategoryId = categoryId,
+      CategoryId = 0,
+      LogChannelId = 0,
       GuildId = guild.Id,
-      LogChannelId = logChannelId,
       IsSensitiveLogging = sensitiveLogging,
       IsEnabled = true,
       RegisterDateUtc = DateTime.UtcNow,
@@ -144,6 +121,8 @@ public class GuildOption
     if (!string.IsNullOrEmpty(closingMessage))
       guildOption.ClosingMessage = closingMessage;
     await guildOption.AddAsync();
+
+    var logChannel = await guildOption.ProcessCreateLogChannel(guild);
 
     await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
   }
@@ -166,5 +145,34 @@ public class GuildOption
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.ConfigurationUpdated(this));
+  }
+
+  public async Task<DiscordChannel> ProcessCreateLogChannel(DiscordGuild guild) {
+    var category = guild.GetChannel(CategoryId);
+
+    var permissions = await GuildTeamMember.GetPermissionInfoOrHigherAsync(TeamPermissionLevel.Admin);
+    var members = await guild.GetAllMembersAsync();
+    var roles = guild.Roles;
+
+    var roleListForOverwrites = new List<DiscordRole>();
+    var memberListForOverwrites = new List<DiscordMember>();
+    foreach (var perm in permissions) {
+      var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
+      if (role.Key != 0) roleListForOverwrites.Add(role.Value);
+      var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
+      if (member2 is not null && member2.Id != 0) memberListForOverwrites.Add(member2);
+    }
+
+    var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
+
+    if (category is null) {
+      category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
+    }
+
+    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, Texts.MODMAIL_LOG_CHANNEL_TOPIC, permissionOverwrites);
+    LogChannelId = logChannel.Id;
+    CategoryId = category.Id;
+    await UpdateAsync();
+    return logChannel;
   }
 }

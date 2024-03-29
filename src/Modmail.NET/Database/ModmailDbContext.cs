@@ -38,9 +38,9 @@ public class ModmailDbContext : DbContext
   }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.GuildOption)
-                .AutoInclude();
+    // modelBuilder.Entity<Ticket>()
+    //             .Navigation(x => x.GuildOption)
+    //             .AutoInclude();
 
     modelBuilder.Entity<Ticket>()
                 .Navigation(x => x.TicketType)

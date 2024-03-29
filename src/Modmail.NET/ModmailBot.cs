@@ -164,13 +164,11 @@ public class ModmailBot
 
     var guildOption = await GuildOption.GetAsync();
 
-    if (guildOption is not null) {
-      guildOption.Name = guild.Name;
-      guildOption.IconUrl = guild.IconUrl;
-      guildOption.BannerUrl = guild.BannerUrl;
-      await guildOption.UpdateAsync();
-      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
-    }
+    guildOption.Name = guild.Name;
+    guildOption.IconUrl = guild.IconUrl;
+    guildOption.BannerUrl = guild.BannerUrl;
+    await guildOption.UpdateAsync();
+    await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
 
     return guild;
   }
@@ -186,7 +184,8 @@ public class ModmailBot
     var logChannel = guild.GetChannel(option.LogChannelId);
 
     if (logChannel is null) {
-      throw new LogChannelNotFoundException();
+      logChannel = await option.ProcessCreateLogChannel(guild);
+      Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
     }
 
     return logChannel;

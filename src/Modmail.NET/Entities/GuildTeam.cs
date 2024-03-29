@@ -18,18 +18,14 @@ public class GuildTeam
   public DateTime? UpdateDateUtc { get; set; }
   public string Name { get; set; }
   public bool IsEnabled { get; set; } = true;
-  public ulong GuildOptionId { get; set; }
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
 
-  public virtual GuildOption GuildOption { get; set; }
-
   public virtual List<GuildTeamMember> GuildTeamMembers { get; set; }
 
-  public static async Task<List<GuildTeam>> GetAllAsync(ulong guildId) {
+  public static async Task<List<GuildTeam>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.GuildTeams
-                                .Where(x => x.GuildOptionId == guildId)
                                 .Include(x => x.GuildTeamMembers)
                                 .ToListAsync();
 
@@ -67,8 +63,7 @@ public class GuildTeam
     return result;
   }
 
-  public static async Task ProcessCreateTeamAsync(ulong guildId,
-                                                  string teamName,
+  public static async Task ProcessCreateTeamAsync(string teamName,
                                                   TeamPermissionLevel permissionLevel,
                                                   bool pingOnNewTicket = false,
                                                   bool pingOnTicketMessage = false) {
@@ -78,7 +73,6 @@ public class GuildTeam
     }
 
     var team = new GuildTeam {
-      GuildOptionId = guildId,
       Name = teamName,
       RegisterDateUtc = DateTime.UtcNow,
       IsEnabled = true,
