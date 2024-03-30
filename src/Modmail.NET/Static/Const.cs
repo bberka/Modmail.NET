@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Static;
 
@@ -16,5 +17,5 @@ public static class Const
   public const string NORMAL_PRIORITY_EMOJI = "";
   public const string LOW_PRIORITY_EMOJI = "🟢";
   public const int DB_TIMEOUT = 10;
-  public static readonly DiscordActivity DISCORD_ACTIVITY = new(Texts.MODERATION_CONCERNS, ActivityType.ListeningTo);
+  public static readonly DiscordActivity DISCORD_ACTIVITY = new(LangData.This.GetTranslation(LangKeys.MODERATION_CONCERNS), ActivityType.ListeningTo);
 }
