@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Common;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Attributes;
@@ -14,7 +13,8 @@ public class RequireTicketChannelAttribute : SlashCheckBaseAttribute
       return true;
     }
 
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL).AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                              Interactions.Error(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL.GetTranslation()).AsEphemeral());
     return false;
   }
 }

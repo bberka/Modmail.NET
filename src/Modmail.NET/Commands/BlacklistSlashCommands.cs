@@ -7,7 +7,6 @@ using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
-using Modmail.NET.Static;
 using Serilog;
 
 namespace Modmail.NET.Commands;
@@ -32,7 +31,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     try {
       await DiscordUserInfo.AddOrUpdateAsync(user);
       await TicketBlacklist.ProcessAddUserToBlacklist(ctx.User.Id, user.Id, reason, notifyUser);
-      await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
                       user.Id,
@@ -76,7 +75,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
                       ctx.User.Id,
                       user.Id,
                       notifyUser);
-      await ctx.EditResponseAsync(Webhooks.Success(Texts.USER_BLACKLISTED));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
     }
     catch (BotExceptionBase ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());
@@ -104,10 +103,10 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var isBlocked = await TicketBlacklist.IsBlacklistedAsync(user.Id);
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.USER_BLACKLIST_STATUS,
+      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.USER_BLACKLIST_STATUS.GetTranslation(),
                                                 isBlocked
-                                                  ? Texts.USER_IS_BLACKLISTED
-                                                  : Texts.USER_IS_NOT_BLACKLISTED));
+                                                  ? LangKeys.USER_IS_BLACKLISTED.GetTranslation()
+                                                  : LangKeys.USER_IS_NOT_BLACKLISTED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, user.Id);
     }
     catch (BotExceptionBase ex) {
@@ -127,7 +126,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     try {
       var blacklistedUsers = await TicketBlacklist.GetAllAsync();
       var str = string.Join("\n", blacklistedUsers.Select(x => $"<@{x.DiscordUserId}>").ToList());
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.BLACKLISTED_USERS, str));
+      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.BLACKLISTED_USERS.GetTranslation(), str));
       Log.Information(logMessage, ctx.User.Id);
     }
     catch (BotExceptionBase ex) {

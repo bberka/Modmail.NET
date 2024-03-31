@@ -1,8 +1,6 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class MemberNotFoundInTeamException : BotExceptionBase
 {
-  public MemberNotFoundInTeamException() : base(Texts.MEMBER_NOT_FOUND_IN_TEAM) { }
+  public MemberNotFoundInTeamException() : base(LangData.This.GetTranslation(LangKeys.MEMBER_NOT_FOUND_IN_TEAM)) { }
 }

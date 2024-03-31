@@ -8,7 +8,6 @@ using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Providers;
-using Modmail.NET.Static;
 using Serilog;
 
 namespace Modmail.NET.Commands;
@@ -45,7 +44,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                                     order,
                                                     embedMessageTitle,
                                                     embedMessageContent);
-      await ctx.EditResponseAsync(Webhooks.Success(Texts.TICKET_TYPE_CREATED, string.Format(Texts.TICKET_TYPE_CREATED_DESCRIPTION, name)));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.TICKET_TYPE_CREATED.GetTranslation(), string.Format(LangKeys.TICKET_TYPE_CREATED_DESCRIPTION.GetTranslation(), name)));
       Log.Information(logMessage,
                       name,
                       emoji,
@@ -104,7 +103,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
                                                     order,
                                                     embedMessageTitle,
                                                     embedMessageContent);
-      await ctx.EditResponseAsync(Webhooks.Success(Texts.TICKET_TYPE_UPDATED, string.Format(Texts.TICKET_TYPE_UPDATED_DESCRIPTION, name)));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.TICKET_TYPE_UPDATED.GetTranslation(), string.Format(LangKeys.TICKET_TYPE_UPDATED_DESCRIPTION.GetTranslation(), name)));
       Log.Information(logMessage,
                       name,
                       emoji,
@@ -148,7 +147,7 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     try {
       var ticketType = await TicketType.GetAsync(name);
       await ticketType.ProcessRemoveAsync();
-      await ctx.EditResponseAsync(Webhooks.Error(Texts.TICKET_TYPE_DELETED, string.Format(Texts.TICKET_TYPE_DELETED_DESCRIPTION, name)));
+      await ctx.EditResponseAsync(Webhooks.Error(LangKeys.TICKET_TYPE_DELETED.GetTranslation(), string.Format(LangKeys.TICKET_TYPE_DELETED_DESCRIPTION.GetTranslation(), name)));
       Log.Information(logMessage, name);
     }
     catch (BotExceptionBase ex) {
@@ -169,10 +168,10 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
     try {
       var ticketTypes = await TicketType.GetAllAsync();
       if (ticketTypes.Count == 0) {
-        await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPES, Texts.NO_TICKET_TYPES_FOUND));
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPES.GetTranslation(), LangKeys.NO_TICKET_TYPES_FOUND.GetTranslation()));
       }
       else {
-        await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPES,
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPES.GetTranslation(),
                                                   string.Join(Environment.NewLine, ticketTypes.Select(x => $"`{x.Name}` - {x.Description}"))));
       }
 

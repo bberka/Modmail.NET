@@ -1,8 +1,6 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class NoBlacklistedUsersFoundException : BotExceptionBase
 {
-  public NoBlacklistedUsersFoundException() : base(Texts.NO_BLACKLISTED_USERS_FOUND) { }
+  public NoBlacklistedUsersFoundException() : base(LangData.This.GetTranslation(LangKeys.NO_BLACKLISTED_USERS_FOUND)) { }
 }

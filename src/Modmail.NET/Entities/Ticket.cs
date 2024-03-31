@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Language;
 using Modmail.NET.Manager;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
@@ -112,7 +113,7 @@ public class Ticket
                                             bool dontSendFeedbackMessage = false) {
     ArgumentNullException.ThrowIfNull(OpenerUserInfo);
     if (closerUserId == 0) throw new InvalidUserIdException();
-    if (string.IsNullOrEmpty(closeReason)) closeReason = Texts.NO_REASON_PROVIDED;
+    if (string.IsNullOrEmpty(closeReason)) closeReason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
     CloserUserInfo = await DiscordUserInfo.GetAsync(closerUserId);
     ArgumentNullException.ThrowIfNull(CloserUserInfo);
@@ -130,7 +131,7 @@ public class Ticket
 
     await UpdateAsync();
 
-    await modChatChannel.DeleteAsync(Texts.TICKET_CLOSED);
+    await modChatChannel.DeleteAsync(LangData.This.GetTranslation(LangKeys.TICKET_CLOSED));
 
     var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (pmChannel != null) {

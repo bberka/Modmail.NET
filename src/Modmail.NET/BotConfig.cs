@@ -28,6 +28,7 @@ public class BotConfig
     AddToAutoStart = bool.Parse(_configManager["ADD_TO_AUTOSTART"] ?? "false");
     UseLocalTime = bool.Parse(_configManager["USE_LOCAL_TIME"] ?? "false");
     EncryptionKey = _configManager["ENCRYPTION_KEY"] ?? throw new Exception("ENCRYPTION_KEY is not set.");
+    DefaultLanguage = _configManager["DEFAULT_LANGUAGE"] ?? "en";
   }
 
 
@@ -83,4 +84,7 @@ public class BotConfig
 
   //Name: USE_LOCAL_TIME
   public bool UseLocalTime { get; set; }
+
+  //Name: DEFAULT_LANGUAGE
+  public string DefaultLanguage { get; set; }
 }

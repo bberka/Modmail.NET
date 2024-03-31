@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Entities;
-using Modmail.NET.Static;
+using Modmail.NET.Language;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Extensions;
@@ -10,12 +10,12 @@ public static class ExtEmbed
   public static DiscordEmbedBuilder AddAttachment(this DiscordEmbedBuilder builder, IReadOnlyList<DiscordAttachment>? discordAttachments) {
     if (discordAttachments == null || discordAttachments.Count == 0) return builder;
     for (var i = 0; i < discordAttachments.Count; i++)
-      builder.AddField($"{Texts.ATTACHMENT} {i + 1}", discordAttachments[i].Url);
+      builder.AddField($"{LangData.This.GetTranslation(LangKeys.ATTACHMENT)} {i + 1}", discordAttachments[i].Url);
     return builder;
   }
 
   public static DiscordEmbedBuilder AddAttachment(this DiscordEmbedBuilder builder, DiscordAttachment discordAttachment) {
-    builder.AddField($"{Texts.ATTACHMENT}", discordAttachment.Url);
+    builder.AddField($"{LangData.This.GetTranslation(LangKeys.ATTACHMENT)}", discordAttachment.Url);
     return builder;
   }
 

@@ -5,7 +5,6 @@ using Modmail.NET.Aspects;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Entities;
@@ -169,7 +168,7 @@ public class GuildOption
       category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
     }
 
-    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, Texts.MODMAIL_LOG_CHANNEL_TOPIC, permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, LangData.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
     LogChannelId = logChannel.Id;
     CategoryId = category.Id;
     await UpdateAsync();

@@ -1,8 +1,6 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class MemberAlreadyInTeamException : BotExceptionBase
 {
-  public MemberAlreadyInTeamException() : base(Texts.MEMBER_ALREADY_IN_TEAM) { }
+  public MemberAlreadyInTeamException() : base(LangData.This.GetTranslation(LangKeys.MEMBER_ALREADY_IN_TEAM)) { }
 }

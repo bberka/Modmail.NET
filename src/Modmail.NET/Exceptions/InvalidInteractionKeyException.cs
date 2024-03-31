@@ -1,8 +1,8 @@
-﻿using Modmail.NET.Static;
+﻿using Modmail.NET.Language;
 
 namespace Modmail.NET.Exceptions;
 
 public class InvalidInteractionKeyException : BotExceptionBase
 {
-  public InvalidInteractionKeyException() : base(Texts.INVALID_INTERACTION_KEY) { }
+  public InvalidInteractionKeyException() : base(LangData.This.GetTranslation(LangKeys.INVALID_INTERACTION_KEY)) { }
 }

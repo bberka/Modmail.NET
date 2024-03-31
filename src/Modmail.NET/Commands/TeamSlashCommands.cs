@@ -8,7 +8,6 @@ using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Providers;
-using Modmail.NET.Static;
 using Serilog;
 
 namespace Modmail.NET.Commands;
@@ -54,7 +53,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel, pingOnNewTicket, pingOnTicketMessage);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_CREATED_SUCCESSFULLY));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TEAM_CREATED_SUCCESSFULLY.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, permissionLevel);
     }
     catch (BotExceptionBase ex) {
@@ -90,7 +89,7 @@ public class TeamSlashCommands : ApplicationCommandModule
                                         pingOnNewTicket,
                                         pingOnTicketMessage,
                                         isEnabled);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_UPDATED_SUCCESSFULLY));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TEAM_UPDATED_SUCCESSFULLY.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
                       teamName,
@@ -132,7 +131,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     try {
       var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessRemoveTeamAsync();
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_REMOVED_SUCCESSFULLY));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TEAM_REMOVED_SUCCESSFULLY.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName);
     }
     catch (BotExceptionBase ex) {
@@ -159,7 +158,7 @@ public class TeamSlashCommands : ApplicationCommandModule
 
       var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessAddTeamMemberAsync(member.Id);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.MEMBER_ADDED_TO_TEAM));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.MEMBER_ADDED_TO_TEAM.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, member.Id);
     }
     catch (BotExceptionBase ex) {
@@ -185,7 +184,7 @@ public class TeamSlashCommands : ApplicationCommandModule
       await DiscordUserInfo.AddOrUpdateAsync(member);
 
       await team.ProcessRemoveTeamMember(member.Id);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.MEMBER_REMOVED_FROM_TEAM));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.MEMBER_REMOVED_FROM_TEAM.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, member.Id);
     }
     catch (BotExceptionBase ex) {
@@ -209,7 +208,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     try {
       var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessAddRoleToTeam(role);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.ROLE_ADDED_TO_TEAM));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.ROLE_ADDED_TO_TEAM.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, role.Id);
     }
     catch (BotExceptionBase ex) {
@@ -234,7 +233,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     try {
       var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessRemoveRoleFromTeam(role);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.ROLE_REMOVED_FROM_TEAM));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.ROLE_REMOVED_FROM_TEAM.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, role.Id);
     }
 
@@ -258,7 +257,7 @@ public class TeamSlashCommands : ApplicationCommandModule
     try {
       var team = await GuildTeam.GetByNameAsync(teamName);
       await team.ProcessRenameAsync(newName);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TEAM_RENAMED_SUCCESSFULLY));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TEAM_RENAMED_SUCCESSFULLY.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, teamName, newName);
     }
     catch (BotExceptionBase ex) {

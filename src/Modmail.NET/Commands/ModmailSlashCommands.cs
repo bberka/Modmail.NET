@@ -7,7 +7,6 @@ using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
-using Modmail.NET.Static;
 using Serilog;
 
 namespace Modmail.NET.Commands;
@@ -36,7 +35,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
 
     try {
       await GuildOption.ProcessSetupAsync(ctx.Guild, sensitiveLogging, takeFeedbackAfterClosing, greetingMessage, closingMessage);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.SERVER_SETUP_COMPLETE));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
                       sensitiveLogging,
@@ -82,7 +81,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
     try {
       var guildOption = await GuildOption.GetAsync();
       await guildOption.ProcessConfigureAsync(ctx.Guild, sensitiveLogging, takeFeedbackAfterClosing, greetingMessage, closingMessage);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Error(Texts.SERVER_CONFIG_UPDATED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Error(LangKeys.SERVER_CONFIG_UPDATED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
                       sensitiveLogging,

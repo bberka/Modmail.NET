@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 
@@ -71,7 +70,7 @@ public class TicketBlacklist
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     var activeTicket = await Ticket.GetActiveTicketAsync(userId);
-    await activeTicket.ProcessCloseTicketAsync(userId, Texts.TICKET_CLOSED_DUE_TO_BLACKLIST, dontSendFeedbackMessage: true);
+    await activeTicket.ProcessCloseTicketAsync(userId, LangData.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST), dontSendFeedbackMessage: true);
 
     var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
     if (activeBlock) {

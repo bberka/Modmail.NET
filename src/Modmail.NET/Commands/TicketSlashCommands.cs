@@ -8,7 +8,6 @@ using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Providers;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Serilog;
 
@@ -32,7 +31,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
       await ticket.ProcessCloseTicketAsync(ctx.User.Id, reason, ctx.Channel);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_CLOSED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_CLOSED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, reason);
     }
     catch (BotExceptionBase ex) {
@@ -56,7 +55,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
       await ticket.ProcessChangePriority(ctx.User.Id, priority, ctx.Channel);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_PRIORITY_CHANGED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, priority);
     }
     catch (BotExceptionBase ex) {
@@ -80,7 +79,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
       await ticket.ProcessAddNoteAsync(ctx.User.Id, note);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.NOTE_ADDED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.NOTE_ADDED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, note);
     }
     catch (BotExceptionBase ex) {
@@ -102,7 +101,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
       await ticket.ProcessToggleAnonymousAsync(ctx.Channel);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_ANONYMOUS_TOGGLED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_ANONYMOUS_TOGGLED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id);
     }
     catch (BotExceptionBase ex) {
@@ -127,7 +126,7 @@ public class TicketSlashCommands : ApplicationCommandModule
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
       await ticket.ProcessChangeTicketTypeAsync(ctx.User.Id, type, ctx.Channel);
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(Texts.TICKET_TYPE_CHANGED));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_TYPE_CHANGED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, type);
     }
     catch (BotExceptionBase e) {
@@ -148,7 +147,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketType = await TicketType.GetByChannelIdAsync(ctx.Channel.Id);
-      await ctx.EditResponseAsync(Webhooks.Info(Texts.TICKET_TYPE, $"`{ticketType.Name}` - {ticketType.Description}"));
+      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE.GetTranslation(), $"`{ticketType.Name}` - {ticketType.Description}"));
       Log.Information(logMessage);
     }
     catch (BotExceptionBase ex) {

@@ -4,7 +4,6 @@ using DSharpPlus.EventArgs;
 using Modmail.NET.Aspects;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Serilog;
 
@@ -32,7 +31,7 @@ public static class OnChannelDeleted
           return; // Ticket is already closed
         }
 
-        await ticket.ProcessCloseTicketAsync(user.Id, Texts.CHANNEL_WAS_DELETED, args.Channel);
+        await ticket.ProcessCloseTicketAsync(user.Id, LangData.This.GetTranslation(LangKeys.CHANNEL_WAS_DELETED), args.Channel);
         Log.Information(logMessage, args.Channel.Id);
       }
       catch (BotExceptionBase ex) {
