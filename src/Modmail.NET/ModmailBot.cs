@@ -10,7 +10,6 @@ using Modmail.NET.Entities;
 using Modmail.NET.Events;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Manager;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Ninject;
 using Serilog;
@@ -26,12 +25,6 @@ public class ModmailBot
   private ModmailBot() {
     _ = BotConfig.This; // Initialize the environment container
     UtilLogConfig.Configure();
-    if (BotConfig.This.Environment == EnvironmentType.Development)
-      Log.Information("Running in development mode");
-
-    var kernel = new StandardKernel(new MmKernel());
-    ServiceLocator.Initialize(kernel);
-
     AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
       var isDiscordException = args.ExceptionObject is DiscordException;
       if (isDiscordException) {
@@ -42,6 +35,16 @@ public class ModmailBot
         Log.Error((Exception)args.ExceptionObject, "Unhandled exception");
       }
     };
+
+    _ = LangData.This;
+
+    if (BotConfig.This.Environment == EnvironmentType.Development)
+      Log.Information("Running in development mode");
+
+    var kernel = new StandardKernel(new MmKernel());
+    ServiceLocator.Initialize(kernel);
+
+
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
     AutoStartMgr.SaveAutoStart();
   }
