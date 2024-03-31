@@ -1,14 +1,12 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class TicketTypeNotFoundException : BotExceptionBase
 {
-  public TicketTypeNotFoundException(string keyOrName) : base(Texts.TICKET_TYPE_NOT_FOUND, string.Format(Texts.TICKET_TYPE_NOT_FOUND_DESCRIPTION, keyOrName)) {
+  public TicketTypeNotFoundException(string keyOrName) : base(LangData.This.GetTranslation(LangKeys.TICKET_TYPE_NOT_FOUND), LangData.This.GetTranslation(LangKeys.TICKET_TYPE_NOT_FOUND, keyOrName)) {
     KeyOrName = keyOrName;
   }
 
-  public TicketTypeNotFoundException() : base(Texts.TICKET_TYPE_NOT_FOUND) {
+  public TicketTypeNotFoundException() : base(LangData.This.GetTranslation(LangKeys.TICKET_TYPE_NOT_FOUND)) {
     KeyOrName = string.Empty;
   }
 

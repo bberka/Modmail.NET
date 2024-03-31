@@ -1,8 +1,6 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class NoTicketTypesFoundException : BotExceptionBase
 {
-  public NoTicketTypesFoundException() : base(Texts.NO_TICKET_TYPES_FOUND) { }
+  public NoTicketTypesFoundException() : base(LangData.This.GetTranslation(LangKeys.NO_TICKET_TYPES_FOUND)) { }
 }
