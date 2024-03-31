@@ -4,7 +4,6 @@ using DSharpPlus.EventArgs;
 using Modmail.NET.Aspects;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Serilog;
 
@@ -15,7 +14,8 @@ public static class ModalSubmitted
   [PerformanceLoggerAspect(ThresholdMs = 3000)]
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
     const string logMessage = $"[{nameof(ModalSubmitted)}]{nameof(Handle)}({{CustomId}},{{InteractionId}})";
-    await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(Texts.THANK_YOU_FOR_FEEDBACK));
+    await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                               new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(LangData.This.GetTranslation(LangKeys.THANK_YOU_FOR_FEEDBACK)));
 
     try {
       await DiscordUserInfo.AddOrUpdateAsync(args?.Interaction?.User);

@@ -6,7 +6,6 @@ using Modmail.NET.Aspects;
 using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Serilog;
 
@@ -39,7 +38,7 @@ public static class OnMessageCreated
       using var metran = ProcessingUserMessageContainer.BeginTransaction(userId, 50, 100); // 100ms * 50 = 5 seconds
       if (metran is null) {
         //VERY UNLIKELY TO HAPPEN
-        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
+        await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
         return;
       }
 
@@ -79,7 +78,7 @@ public static class OnMessageCreated
 
       using var metran = ProcessingUserMessageContainer.BeginTransaction(message.Author.Id, 50, 100); // 100ms * 50 = 5 seconds
       if (metran is null) {
-        await channel.SendMessageAsync(Embeds.Error(Texts.SYSTEM_IS_BUSY, Texts.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED));
+        await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
         return;
       }
 

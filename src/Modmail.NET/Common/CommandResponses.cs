@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Common;
 
@@ -12,50 +11,50 @@ public static class CommandResponses
     var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithCustomTimestamp()
-                .WithTitle(Texts.MODMAIL_SETTINGS)
+                .WithTitle(LangKeys.MODMAIL_SETTINGS.GetTranslation())
                 .WithColor(Colors.InfoColor)
                 .WithGuildInfoFooter(guildOption);
 
-    sb.AppendLine($"`{Texts.ENABLED}`: " + guildOption.IsEnabled);
-    sb.AppendLine($"`{Texts.SENSITIVE_LOGGING}`: " + guildOption.IsSensitiveLogging);
-    sb.AppendLine($"`{Texts.TAKE_FEEDBACK_AFTER_CLOSING}`: " + guildOption.TakeFeedbackAfterClosing);
-    sb.AppendLine($"`{Texts.SHOW_CONFIRMATIONS}`: " + guildOption.ShowConfirmationWhenClosingTickets);
+    sb.AppendLine($"`{LangKeys.ENABLED.GetTranslation()}`: " + guildOption.IsEnabled);
+    sb.AppendLine($"`{LangKeys.SENSITIVE_LOGGING.GetTranslation()}`: " + guildOption.IsSensitiveLogging);
+    sb.AppendLine($"`{LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation()}`: " + guildOption.TakeFeedbackAfterClosing);
+    sb.AppendLine($"`{LangKeys.SHOW_CONFIRMATIONS.GetTranslation()}`: " + guildOption.ShowConfirmationWhenClosingTickets);
     // sb.AppendLine("`Allow Anonymous Response`: " + guildOption.AllowAnonymousResponding);
-    sb.AppendLine($"`{Texts.LOG_CHANNEL}`: <#" + guildOption.LogChannelId + "> | " + guildOption.LogChannelId);
-    sb.AppendLine($"`{Texts.TICKET_CATEGORY}`: <#" + guildOption.CategoryId + "> | " + guildOption.CategoryId);
+    sb.AppendLine($"`{LangKeys.LOG_CHANNEL.GetTranslation()}`: <#" + guildOption.LogChannelId + "> | " + guildOption.LogChannelId);
+    sb.AppendLine($"`{LangKeys.TICKET_CATEGORY.GetTranslation()}`: <#" + guildOption.CategoryId + "> | " + guildOption.CategoryId);
 
     embed.WithDescription(sb.ToString());
 
     if (!string.IsNullOrEmpty(guildOption.GreetingMessage))
-      embed.AddField(Texts.GREETING_MESSAGE, guildOption.GreetingMessage);
+      embed.AddField(LangKeys.GREETING_MESSAGE.GetTranslation(), guildOption.GreetingMessage);
 
     if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
-      embed.AddField(Texts.CLOSING_MESSAGE, guildOption.ClosingMessage);
+      embed.AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage);
 
     return new DiscordWebhookBuilder().AddEmbed(embed);
   }
 
   public static DiscordWebhookBuilder ListTeams(DiscordGuild guild, List<GuildTeam> teams) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(Texts.TEAM_LIST)
+                .WithTitle(LangKeys.TEAM_LIST.GetTranslation())
                 .WithColor(Colors.InfoColor);
 
     foreach (var team in teams) {
       var sb = new StringBuilder();
-      sb.AppendLine($"`{Texts.ENABLED}`: {team.IsEnabled}");
-      sb.AppendLine($"`{Texts.PERMISSION_LEVEL}`: {team.PermissionLevel}");
-      sb.AppendLine($"`{Texts.MEMBERS}`: {team.GuildTeamMembers.Count}");
-      sb.AppendLine($"`{Texts.PING_ON_NEW_TICKET}`: {team.PingOnNewTicket}");
-      sb.AppendLine($"`{Texts.PING_ON_NEW_MESSAGE}`: {team.PingOnNewMessage}");
+      sb.AppendLine($"`{LangKeys.ENABLED}`: {team.IsEnabled}");
+      sb.AppendLine($"`{LangKeys.PERMISSION_LEVEL}`: {team.PermissionLevel}");
+      sb.AppendLine($"`{LangKeys.MEMBERS}`: {team.GuildTeamMembers.Count}");
+      sb.AppendLine($"`{LangKeys.PING_ON_NEW_TICKET}`: {team.PingOnNewTicket}");
+      sb.AppendLine($"`{LangKeys.PING_ON_NEW_MESSAGE}`: {team.PingOnNewMessage}");
       foreach (var member in team.GuildTeamMembers.OrderBy(x => x.Type))
         switch (member.Type) {
           case TeamMemberDataType.RoleId:
             //Tag role 
-            sb.AppendLine($"`{Texts.ROLE}`: <@&{member.Key}>");
+            sb.AppendLine($"`{LangKeys.ROLE}`: <@&{member.Key}>");
             break;
           case TeamMemberDataType.UserId:
             //tag member
-            sb.AppendLine($"`{Texts.USER}`: <@{member.Key}>");
+            sb.AppendLine($"`{LangKeys.USER}`: <@{member.Key}>");
             break;
           default:
             throw new ArgumentOutOfRangeException();

@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Common;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Attributes;
 
@@ -13,7 +12,8 @@ public class RequireMainServerAttribute : SlashCheckBaseAttribute
       return true;
     }
 
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, Interactions.Error(Texts.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER).AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                                              Interactions.Error(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation()).AsEphemeral());
     return false;
   }
 }
