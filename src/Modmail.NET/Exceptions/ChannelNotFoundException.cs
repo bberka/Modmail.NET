@@ -1,10 +1,10 @@
-﻿using Modmail.NET.Static;
+﻿using Modmail.NET.Language;
 
 namespace Modmail.NET.Exceptions;
 
 public class ChannelNotFoundException : BotExceptionBase
 {
-  public ChannelNotFoundException(ulong id) : base(Texts.CHANNEL_NOT_FOUND) {
+  public ChannelNotFoundException(ulong id) : base(LangData.This.GetTranslation(LangKeys.CHANNEL_NOT_FOUND)) {
     Id = id;
   }
 

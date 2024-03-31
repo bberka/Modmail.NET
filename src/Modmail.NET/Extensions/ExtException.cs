@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Common;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Language;
 using Modmail.NET.Static;
 
 namespace Modmail.NET.Extensions;
@@ -21,25 +22,25 @@ public static class ExtException
 
   public static DiscordWebhookBuilder ToWebhookResponse(this Exception exception) {
     if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Webhooks.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+      return Webhooks.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
     }
 
-    return Webhooks.Error(Texts.AN_EXCEPTION_OCCURRED);
+    return Webhooks.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
 
   public static DiscordEmbedBuilder ToEmbedResponse(this Exception exception) {
     if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Embeds.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+      return Embeds.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
     }
 
-    return Embeds.Error(Texts.AN_EXCEPTION_OCCURRED);
+    return Embeds.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
 
   public static DiscordInteractionResponseBuilder ToInteractionResponse(this Exception exception) {
     if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Interactions.Error(Texts.AN_EXCEPTION_OCCURRED, exception.Message);
+      return Interactions.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
     }
 
-    return Interactions.Error(Texts.AN_EXCEPTION_OCCURRED);
+    return Interactions.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
 }
