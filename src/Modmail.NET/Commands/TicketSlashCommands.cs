@@ -23,7 +23,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   [SlashCommand("close", "Close a ticket.")]
   [RequireTicketChannel]
   public async Task CloseTicket(InteractionContext ctx,
-                                [Option("reason", "Ticket closing reason")]
+                                [Option("reason", "Ticket closing reason. User will be notified of this reason.")]
                                 string? reason = null) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(CloseTicket)}({{ContextUserId}},{{reason}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -54,7 +54,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
-      await ticket.ProcessChangePriority(ctx.User.Id, priority, ctx.Channel);
+      await ticket.ProcessChangePriorityAsync(ctx.User.Id, priority, ctx.Channel);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, priority);
     }

@@ -118,6 +118,11 @@ public class ModmailBot
 
     await SetupDatabase();
 
+
+    //Service initialization
+    _ = TicketTimeoutMgr.This;
+    _ = TicketTypeSelectionTimeoutMgr.This;
+
     await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);

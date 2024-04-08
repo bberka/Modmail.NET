@@ -28,6 +28,8 @@ public class GuildOption
 
   public bool IsSensitiveLogging { get; set; } = true;
 
+  public int TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
+
   public string GreetingMessage { get; set; }
     = "Thank you for reaching out to our team, we'll reply to you as soon as possible. Please help us speed up this process by describing your request in detail.";
 
@@ -91,7 +93,12 @@ public class GuildOption
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task ProcessSetupAsync(DiscordGuild guild, bool sensitiveLogging, bool takeFeedbackAfterClosing, string? greetingMessage, string? closingMessage) {
+  public static async Task ProcessSetupAsync(DiscordGuild guild,
+                                             bool sensitiveLogging,
+                                             bool takeFeedbackAfterClosing,
+                                             string? greetingMessage,
+                                             string? closingMessage,
+                                             int? ticketTimeoutHours = null) {
     var existingMmOption = await GetNullableAsync();
     if (existingMmOption is not null) {
       throw new MainServerAlreadySetupException();
@@ -114,11 +121,20 @@ public class GuildOption
       IconUrl = guild.IconUrl,
       Name = guild.Name,
       BannerUrl = guild.BannerUrl,
+      TicketTimeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS
     };
     if (!string.IsNullOrEmpty(greetingMessage))
       guildOption.GreetingMessage = greetingMessage;
     if (!string.IsNullOrEmpty(closingMessage))
       guildOption.ClosingMessage = closingMessage;
+    if (ticketTimeoutHours.HasValue) {
+      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) {
+        throw new TicketTimeoutOutOfRangeException();
+      }
+
+      guildOption.TicketTimeoutHours = ticketTimeoutHours.Value;
+    }
+
     await guildOption.AddAsync();
 
     var logChannel = await guildOption.ProcessCreateLogChannel(guild);
@@ -126,7 +142,12 @@ public class GuildOption
     await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
   }
 
-  public async Task ProcessConfigureAsync(DiscordGuild guild, bool? sensitiveLogging, bool? takeFeedbackAfterClosing, string? greetingMessage, string? closingMessage) {
+  public async Task ProcessConfigureAsync(DiscordGuild guild,
+                                          bool? sensitiveLogging,
+                                          bool? takeFeedbackAfterClosing,
+                                          string? greetingMessage,
+                                          string? closingMessage,
+                                          int? ticketTimeoutHours = null) {
     IconUrl = guild.IconUrl;
     Name = guild.Name;
     BannerUrl = guild.BannerUrl;
@@ -139,6 +160,14 @@ public class GuildOption
       GreetingMessage = greetingMessage;
     if (!string.IsNullOrEmpty(closingMessage))
       ClosingMessage = closingMessage;
+    if (ticketTimeoutHours.HasValue) {
+      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) {
+        throw new TicketTimeoutOutOfRangeException();
+      }
+
+      TicketTimeoutHours = ticketTimeoutHours.Value;
+    }
+
     await UpdateAsync();
 
 

@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Language;
 using Modmail.NET.Manager;
-using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Serilog;
 
@@ -148,9 +146,9 @@ public class Ticket
     await logChannel.SendMessageAsync(LogResponses.TicketClosed(this));
   }
 
-  public async Task ProcessChangePriority(ulong modUserId,
-                                          TicketPriority newPriority,
-                                          DiscordChannel? ticketChannel = null) {
+  public async Task ProcessChangePriorityAsync(ulong modUserId,
+                                               TicketPriority newPriority,
+                                               DiscordChannel? ticketChannel = null) {
     ArgumentNullException.ThrowIfNull(OpenerUserInfo);
     if (modUserId == 0) throw new InvalidUserIdException();
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
@@ -503,5 +501,27 @@ public class Ticket
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TicketTypeChanged(this, ticketType));
+  }
+
+  public static async Task<List<Ticket>> GetActiveTicketsAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var tickets = await dbContext.Tickets
+                                 .Where(x => !x.ClosedDateUtc.HasValue)
+                                 .ToListAsync();
+    return tickets;
+  }
+
+
+  public static async Task<List<Ticket>> GetTimeoutTicketsAsync(int timeoutHours) {
+    if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) {
+      timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
+    }
+
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var timeoutDate = DateTime.UtcNow.AddHours(-timeoutHours);
+    var tickets = await dbContext.Tickets
+                                 .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)
+                                 .ToListAsync();
+    return tickets;
   }
 }

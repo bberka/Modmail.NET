@@ -27,14 +27,21 @@ public class ModmailSlashCommands : ApplicationCommandModule
                           [Option("greeting-message", "The greeting message")]
                           string? greetingMessage = null,
                           [Option("closing-message", "The closing message")]
-                          string? closingMessage = null
+                          string? closingMessage = null,
+                          [Option("ticket-timeout-hours", "The number of hours before a ticket is automatically closed. Default is 72 hours.")]
+                          int ticketTimeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS
   ) {
     const string logMessage = $"[{nameof(ModmailSlashCommands)}]{nameof(Setup)}({{ContextUserId}},{{sensitiveLogging}},{{TakeFeedbackAfterClosing}},{{GreetingMessage}},{{ClosingMessage}})";
 
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 
     try {
-      await GuildOption.ProcessSetupAsync(ctx.Guild, sensitiveLogging, takeFeedbackAfterClosing, greetingMessage, closingMessage);
+      await GuildOption.ProcessSetupAsync(ctx.Guild,
+                                          sensitiveLogging,
+                                          takeFeedbackAfterClosing,
+                                          greetingMessage,
+                                          closingMessage,
+                                          ticketTimeoutHours);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
@@ -74,13 +81,20 @@ public class ModmailSlashCommands : ApplicationCommandModule
                               [Option("greeting-message", "The greeting message")]
                               string? greetingMessage = null,
                               [Option("closing-message", "The closing message")]
-                              string? closingMessage = null
+                              string? closingMessage = null,
+                              [Option("ticket-timeout-hours", "The number of hours before a ticket is automatically closed.")]
+                              int? ticketTimeoutHours = null
   ) {
     const string logMessage = $"[{nameof(ModmailSlashCommands)}]{nameof(Configure)}({{ContextUserId}},{{sensitiveLogging}},{{TakeFeedbackAfterClosing}},{{GreetingMessage}},{{ClosingMessage}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var guildOption = await GuildOption.GetAsync();
-      await guildOption.ProcessConfigureAsync(ctx.Guild, sensitiveLogging, takeFeedbackAfterClosing, greetingMessage, closingMessage);
+      await guildOption.ProcessConfigureAsync(ctx.Guild,
+                                              sensitiveLogging,
+                                              takeFeedbackAfterClosing,
+                                              greetingMessage,
+                                              closingMessage,
+                                              ticketTimeoutHours);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Error(LangKeys.SERVER_CONFIG_UPDATED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,

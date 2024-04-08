@@ -118,6 +118,7 @@ Only available for main server id in configuration
   - `take-feedback`: Whether to take feedback after closing tickets.
   - `greeting-message`: The greeting message.
   - `closing-message`: The closing message.
+  - `ticket-timeout-hours`: The number of hours before a ticket is automatically closed. (Optional, default is 72 hours)
 
 ### `/modmail configure`
 
@@ -127,6 +128,7 @@ Only available for main server id in configuration
   - `take-feedback`: Whether to take feedback after closing tickets. (Optional)
   - `greeting-message`: The greeting message. (Optional)
   - `closing-message`: The closing message. (Optional)
+  - `ticket-timeout-hours`: The number of hours before a ticket is automatically closed. (Optional)
 
 ### `/modmail get-settings`
 
