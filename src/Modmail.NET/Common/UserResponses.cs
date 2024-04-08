@@ -44,12 +44,9 @@ public static class UserResponses
     if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
       embed.WithDescription(guildOption.ClosingMessage);
 
-    // if (!ticket.Anonymous) {
-    //   embed.WithUserAsAuthor(ticket.CloserUserInfo);
-    // }
-    // else {
-    //   embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
-    // }
+    if (!string.IsNullOrEmpty(ticket.CloseReason)) {
+      embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
+    }
 
     return embed;
   }
