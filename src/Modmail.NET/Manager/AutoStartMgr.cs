@@ -9,7 +9,7 @@ public static class AutoStartMgr
   /// <summary>
   /// Adds the application to the autostart list on operating system start
   /// </summary>
-  public static void SaveAutoStart() {
+  public static void HandleAutomaticAppStart() {
     if (BotConfig.This.AddToAutoStart == false) return;
     var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
