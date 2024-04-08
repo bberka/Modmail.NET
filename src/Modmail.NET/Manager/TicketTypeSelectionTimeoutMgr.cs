@@ -1,10 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using DSharpPlus.Entities;
+using Serilog;
 using Timer = System.Threading.Timer;
 
 namespace Modmail.NET.Manager;
 
-public class TicketTypeSelectionTimeoutMgr
+public sealed class TicketTypeSelectionTimeoutMgr
 {
   private static TicketTypeSelectionTimeoutMgr? _instance;
 
@@ -12,6 +13,7 @@ public class TicketTypeSelectionTimeoutMgr
     Messages = new();
     // Repeat every 1 seconds
     Timer = new(TimerElapsed, null, 0, 1000);
+    Log.Information("{ServiceName} initialized", nameof(TicketTypeSelectionTimeoutMgr));
   }
 
   public static TicketTypeSelectionTimeoutMgr This {
