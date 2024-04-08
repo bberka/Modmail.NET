@@ -171,5 +171,7 @@
   "PING_ON_NEW_MESSAGE_UPDATED": "Ping on new message updated",
   "IS_ENABLED_UPDATED": "Is enabled updated",
   "TEAM_UPDATED_SUCCESSFULLY": "Team updated successfully",
-  "NEW_TICKET_DESCRIPTION_MESSAGE": "New ticket has been created. Please respond to this message to continue the conversation.{NewLine}{NewLine}If you want to close the ticket, you can use the `/ticket close` command.{NewLine}{NewLine}If you want to change the priority of the ticket, you can use the `/ticket set-priority` command.{NewLine}{NewLine}If you want to add a note to the ticket, you can use the `/ticket add-note` command.{NewLine}{NewLine}If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command.{NewLine}{NewLine}Messages starting with bot prefix `{BotPrefix}` are ignored, can be used for staff discussion."
+  "NEW_TICKET_DESCRIPTION_MESSAGE": "New ticket has been created. Please respond to this message to continue the conversation.{NewLine}{NewLine}If you want to close the ticket, you can use the `/ticket close` command.{NewLine}{NewLine}If you want to change the priority of the ticket, you can use the `/ticket set-priority` command.{NewLine}{NewLine}If you want to add a note to the ticket, you can use the `/ticket add-note` command.{NewLine}{NewLine}If you want to toggle anonymous response, you can use the `/ticket toggle-anonymous` command.{NewLine}{NewLine}Messages starting with bot prefix `{BotPrefix}` are ignored, can be used for staff discussion.",
+  "TICKET_TIMEOUT_VALUE_IS_OUT_OF_RANGE": "Ticket timeout value is out of range",
+  "TICKET_TIMEOUT_VALUE_MUST_BE_BETWEEN_X_AND_Y": "Ticket timeout value must be between {0} and {1}"
 }
