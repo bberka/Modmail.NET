@@ -46,21 +46,9 @@ public class ModmailBot
 
 
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    AutoStartMgr.SaveAutoStart();
-  }
+    AutoStartMgr.HandleAutomaticAppStart();
 
-  public static ModmailBot This {
-    get {
-      _instance ??= new ModmailBot();
-      return _instance;
-    }
-  }
-
-  public DiscordClient Client { get; private set; }
-  // public ServiceProvider Services { get; private set; }
-
-  public async Task StartAsync() {
-    // Start the bot
+    //Define the client
     Client = new DiscordClient(new DiscordConfiguration {
       Token = BotConfig.This.BotToken,
       AutoReconnect = true,
@@ -70,11 +58,14 @@ public class ModmailBot
       LogUnknownEvents = false,
       LoggerFactory = new SerilogLoggerFactory(Log.Logger)
     });
+
+    //Define the events
     Client.Heartbeated += OnHeartbeat.Handle;
     Client.Ready += OnReady.Handle;
     Client.ClientErrored += OnClientError.Handle;
     Client.SocketErrored += OnSocketError.Handle;
 
+    //Ticket events
     Client.MessageCreated += OnMessageCreated.Handle;
     Client.ChannelDeleted += OnChannelDeleted.Handle;
 
@@ -101,12 +92,27 @@ public class ModmailBot
     Client.ThreadCreated += OnThreadCreated.Handle;
 
 
+    //Slash commands
     var slash = Client.UseSlashCommands();
     slash.RegisterCommands<ModmailSlashCommands>();
     slash.RegisterCommands<TicketSlashCommands>();
     slash.RegisterCommands<TeamSlashCommands>();
     slash.RegisterCommands<BlacklistSlashCommands>();
     slash.RegisterCommands<TicketTypeSlashCommands>();
+  }
+
+  public static ModmailBot This {
+    get {
+      _instance ??= new ModmailBot();
+      return _instance;
+    }
+  }
+
+  public DiscordClient Client { get; private set; }
+  // public ServiceProvider Services { get; private set; }
+
+  public async Task StartAsync() {
+    // Start the bot
 
     await Client.ConnectAsync();
 
@@ -115,7 +121,7 @@ public class ModmailBot
     await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
-
+    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
     await Task.Delay(-1);
   }
 
@@ -134,8 +140,6 @@ public class ModmailBot
       Log.Error(ex, "Failed to setup server: Database migration failed");
       throw;
     }
-
-    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
   }
 
 
@@ -143,10 +147,9 @@ public class ModmailBot
     foreach (var guild in Client.Guilds) {
       try {
         var member = await guild.Value.GetMemberAsync(userId, false);
-        if (member != null) {
-          await DiscordUserInfo.AddOrUpdateAsync(member);
-          return member;
-        }
+        if (member == null) continue;
+        await DiscordUserInfo.AddOrUpdateAsync(member);
+        return member;
       }
       catch (Exception ex) {
         Log.Error(ex, "Failed to get member from guild {GuildId} for user {UserId}", guild.Key, userId);
