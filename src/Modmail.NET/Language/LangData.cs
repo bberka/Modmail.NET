@@ -52,6 +52,14 @@ public class LangData
       dict.Add(lang, processLangData);
     }
 
+    var enumValues = Enum.GetValues<LangKeys>();
+    //EXPORT ENUM VALUES TO JSON
+
+    var enumValuesAsDictionary = enumValues.ToDictionary(x => x.ToString(), x => x.ToString());
+
+    var enumValuesJson = JsonConvert.SerializeObject(enumValuesAsDictionary, Formatting.Indented);
+    File.WriteAllText(Path.Combine(langDir, "_keys.json"), enumValuesJson);
+
     _languages = dict;
   }
 
@@ -70,8 +78,12 @@ public class LangData
     return _languages[lang];
   }
 
+  private string GetLanguage() {
+    return BotConfig.This.DefaultLanguage;
+  }
 
-  public string GetTranslation(string lang, LangKeys key) {
+  public string GetTranslation(LangKeys key, params object[] args) {
+    var lang = GetLanguage();
     if (lang.Contains('-')) {
       lang = lang.Split('-')[0];
     }
@@ -81,42 +93,32 @@ public class LangData
       throw new KeyNotFoundException("Translation not found for key : " + key);
     }
 
-    return language[key];
-  }
+    //try parse args to enum LangKeys and if exists replace with translation
 
-  public string GetTranslation(LangKeys key) {
-    return GetTranslation(BotConfig.This.DefaultLanguage, key);
-  }
-
-
-  public string GetTranslation(string lang, LangKeys key, params object[] args) {
-    if (lang.Contains('-')) {
-      lang = lang.Split('-')[0];
-    }
-
-    var translation = GetTranslation(lang, key);
-    return string.Format(translation, args);
-  }
-
-  public string GetTranslation(LangKeys key, params object[] args) {
-    return GetTranslation(BotConfig.This.DefaultLanguage, key, args);
-  }
-
-
-  public string GetTranslation(string lang, LangKeys key, IReadOnlyDictionary<string, string> args) {
-    if (lang.Contains('-')) {
-      lang = lang.Split('-')[0];
-    }
-
-    var translation = new StringBuilder(GetTranslation(lang, key));
+    var newArgs = new List<object>();
     foreach (var arg in args) {
-      translation = translation.Replace($"{{{arg.Key}}}", arg.Value);
+      newArgs.Add(Enum.TryParse<LangKeys>(arg.ToString(), out var newArg)
+                    ? GetTranslation(newArg)
+                    : arg);
     }
 
-    return translation.ToString();
+    return string.Format(language[key], newArgs);
   }
 
-  public string GetTranslation(LangKeys key, IReadOnlyDictionary<string, string> args) {
-    return GetTranslation(BotConfig.This.DefaultLanguage, key, args);
-  }
+  // private string GetTranslation(string lang, LangKeys key, IReadOnlyDictionary<string, string> args) {
+  //   if (lang.Contains('-')) {
+  //     lang = lang.Split('-')[0];
+  //   }
+  //
+  //   var translation = new StringBuilder(GetTranslation(lang, key));
+  //   foreach (var arg in args) {
+  //     translation = translation.Replace($"{{{arg.Key}}}", arg.Value);
+  //   }
+  //
+  //   return translation.ToString();
+  // }
+  //
+  // public string GetTranslation(LangKeys key, IReadOnlyDictionary<string, string> args) {
+  //   return GetTranslation(BotConfig.This.DefaultLanguage, key, args);
+  // }
 }

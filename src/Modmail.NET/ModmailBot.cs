@@ -14,6 +14,7 @@ using Modmail.NET.Utils;
 using Ninject;
 using Serilog;
 using Serilog.Extensions.Logging;
+using NotFoundException = Modmail.NET.Exceptions.NotFoundException;
 
 namespace Modmail.NET;
 
@@ -170,7 +171,7 @@ public class ModmailBot
     var guild = await Client.GetGuildAsync(guildId);
     if (guild == null) {
       Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new MainGuildNotFoundException();
+      throw new NotFoundException(LangKeys.MAIN_GUILD);
     }
 
     var guildOption = await GuildOption.GetAsync();

@@ -4,11 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 
-public class GuildTeam
+public sealed class GuildTeam
 {
   [Key]
   public Guid Id { get; set; }
@@ -21,7 +20,8 @@ public class GuildTeam
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
 
-  public virtual List<GuildTeamMember> GuildTeamMembers { get; set; }
+  //FK
+  public List<GuildTeamMember> GuildTeamMembers { get; set; }
 
   public static async Task<List<GuildTeam>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -30,7 +30,7 @@ public class GuildTeam
                                 .ToListAsync();
 
     if (result.Count == 0) {
-      throw new NoTeamFoundException();
+      throw new EmptyListResultException(LangKeys.TEAM);
     }
 
     return result;
@@ -59,7 +59,7 @@ public class GuildTeam
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.GuildTeams
                                 .FirstOrDefaultAsync(x => x.Name == name);
-    if (result is null) throw new TeamNotFoundException();
+    if (result is null) throw new NotFoundWithException(LangKeys.TEAM, name);
     return result;
   }
 
@@ -124,7 +124,7 @@ public class GuildTeam
   public async Task ProcessRemoveTeamMember(ulong memberId) {
     var memberEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == memberId);
     if (memberEntity is null) {
-      throw new MemberNotFoundInTeamException();
+      throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
     }
 
     GuildTeamMembers.Remove(memberEntity);
@@ -157,7 +157,7 @@ public class GuildTeam
   public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
     var roleEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
     if (roleEntity is null) {
-      throw new RoleNotFoundInTeamException();
+      throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
     }
 
     GuildTeamMembers.Remove(roleEntity);

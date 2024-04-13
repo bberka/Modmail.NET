@@ -11,7 +11,7 @@ using Serilog;
 
 namespace Modmail.NET.Entities;
 
-public class Ticket
+public sealed class Ticket
 {
   [Key]
   public Guid Id { get; set; }
@@ -44,12 +44,12 @@ public class Ticket
 
   //FK
 
-  public virtual DiscordUserInfo OpenerUserInfo { get; set; }
-  public virtual DiscordUserInfo? CloserUserInfo { get; set; }
-  public virtual TicketType? TicketType { get; set; }
-  public virtual List<TicketMessage> TicketMessages { get; set; }
+  public DiscordUserInfo OpenerUserInfo { get; set; }
+  public DiscordUserInfo? CloserUserInfo { get; set; }
+  public TicketType? TicketType { get; set; }
+  public List<TicketMessage> TicketMessages { get; set; }
 
-  public virtual List<TicketNote> TicketNotes { get; set; }
+  public List<TicketNote> TicketNotes { get; set; }
 
   public async Task AddAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -68,7 +68,7 @@ public class Ticket
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
-    if (ticket is null) throw new TicketNotFoundException();
+    if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
   }
 
@@ -88,14 +88,14 @@ public class Ticket
   public static async Task<Ticket> GetActiveTicketAsync(Guid ticketId) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
-    if (ticket is null) throw new TicketNotFoundException();
+    if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
   }
 
   public static async Task<Ticket> GetAsync(Guid id) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == id);
-    if (ticket is null) throw new TicketNotFoundException();
+    if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
   }
 
@@ -221,7 +221,7 @@ public class Ticket
     var user = message.Author;
 
     privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
-    if (privateChannel is null) throw new ChannelNotFoundException(PrivateMessageChannelId);
+    if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, PrivateMessageChannelId);
 
     LastMessageDateUtc = DateTime.UtcNow;
     await this.UpdateAsync();

@@ -8,7 +8,7 @@ using Modmail.NET.Extensions;
 
 namespace Modmail.NET.Entities;
 
-public class DiscordUserInfo
+public sealed class DiscordUserInfo
 {
   public DiscordUserInfo() { }
 
@@ -50,7 +50,9 @@ public class DiscordUserInfo
 
   public string? Locale { get; set; }
 
-  public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
+
+//FK  
+  public List<TicketBlacklist> TicketBlacklists { get; set; }
 
   public string GetMention() => $"<@{Id}>";
 
@@ -69,7 +71,7 @@ public class DiscordUserInfo
       return result;
     }
 
-    throw new UserNotFoundException(userId);
+    throw new NotFoundWithException(LangKeys.USER, userId);
   }
 
   public async Task RemoveAsync() {

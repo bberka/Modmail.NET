@@ -33,7 +33,7 @@ public class TicketBlacklist
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketBlacklists.ToListAsync();
     if (result.Count == 0) {
-      throw new NoBlacklistedUsersFoundException();
+      throw new EmptyListResultException(LangKeys.BLACKLISTED_USERS);
     }
 
     return result;

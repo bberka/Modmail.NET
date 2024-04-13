@@ -44,7 +44,7 @@ public class TicketType
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
     if (result is null) {
-      throw new TicketTypeNotFoundException(keyOrName);
+      throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
     }
 
     return result;
@@ -72,7 +72,7 @@ public class TicketType
     var result = await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
                                 .Select(x => x.TicketType)
                                 .FirstOrDefaultAsync();
-    if (result is null) throw new TicketTypeNotFoundException();
+    if (result is null) throw new NotFoundException(LangKeys.TICKET_TYPE);
     return result;
   }
 
