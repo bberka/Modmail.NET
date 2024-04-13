@@ -512,7 +512,7 @@ public sealed class Ticket
   }
 
 
-  public static async Task<List<Ticket>> GetTimeoutTicketsAsync(int timeoutHours) {
+  public static async Task<List<Ticket>> GetTimeoutTicketsAsync(long timeoutHours) {
     if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) {
       timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
     }

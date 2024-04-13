@@ -28,7 +28,7 @@ public class GuildOption
 
   public bool IsSensitiveLogging { get; set; } = true;
 
-  public int TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
+  public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
   public string GreetingMessage { get; set; }
     = "Thank you for reaching out to our team, we'll reply to you as soon as possible. Please help us speed up this process by describing your request in detail.";
@@ -98,7 +98,7 @@ public class GuildOption
                                              bool takeFeedbackAfterClosing,
                                              string? greetingMessage,
                                              string? closingMessage,
-                                             int? ticketTimeoutHours = null) {
+                                             long? ticketTimeoutHours = null) {
     var existingMmOption = await GetNullableAsync();
     if (existingMmOption is not null) {
       throw new MainServerAlreadySetupException();
@@ -147,7 +147,7 @@ public class GuildOption
                                           bool? takeFeedbackAfterClosing,
                                           string? greetingMessage,
                                           string? closingMessage,
-                                          int? ticketTimeoutHours = null) {
+                                          long? ticketTimeoutHours = null) {
     IconUrl = guild.IconUrl;
     Name = guild.Name;
     BannerUrl = guild.BannerUrl;

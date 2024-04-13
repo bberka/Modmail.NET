@@ -29,7 +29,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
                           [Option("closing-message", "The closing message")]
                           string? closingMessage = null,
                           [Option("ticket-timeout-hours", "The number of hours before a ticket is automatically closed. Default is 72 hours.")]
-                          int ticketTimeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS
+                          long ticketTimeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS
   ) {
     const string logMessage = $"[{nameof(ModmailSlashCommands)}]{nameof(Setup)}({{ContextUserId}},{{sensitiveLogging}},{{TakeFeedbackAfterClosing}},{{GreetingMessage}},{{ClosingMessage}})";
 
@@ -83,7 +83,7 @@ public class ModmailSlashCommands : ApplicationCommandModule
                               [Option("closing-message", "The closing message")]
                               string? closingMessage = null,
                               [Option("ticket-timeout-hours", "The number of hours before a ticket is automatically closed.")]
-                              int? ticketTimeoutHours = null
+                              long? ticketTimeoutHours = null
   ) {
     const string logMessage = $"[{nameof(ModmailSlashCommands)}]{nameof(Configure)}({{ContextUserId}},{{sensitiveLogging}},{{TakeFeedbackAfterClosing}},{{GreetingMessage}},{{ClosingMessage}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
