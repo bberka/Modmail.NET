@@ -284,7 +284,8 @@ public static class LogResponses
                 .AddField(LangKeys.SENSITIVE_LOGGING.GetTranslation(), guildOption.IsSensitiveLogging.ToString(), true)
                 .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
                 .AddField(LangKeys.GREETING_MESSAGE.GetTranslation(), guildOption.GreetingMessage, false)
-                .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false);
+                .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false)
+                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.ClosingMessage, false);
     return embed;
   }
 
@@ -298,7 +299,9 @@ public static class LogResponses
                 .AddField(LangKeys.SENSITIVE_LOGGING.GetTranslation(), guildOption.IsSensitiveLogging.ToString(), true)
                 .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
                 .AddField(LangKeys.GREETING_MESSAGE.GetTranslation(), guildOption.GreetingMessage, false)
-                .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false);
+                .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false)
+                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.ClosingMessage, false);
+    // .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false);
     return embed;
   }
 

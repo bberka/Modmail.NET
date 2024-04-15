@@ -184,5 +184,6 @@ public enum LangKeys
   MAIN_GUILD,
   CHANNEL,
   MEMBER,
-  NO_X_FOUND
+  NO_X_FOUND,
+  TICKET_TIMEOUT_HOURS
 }

@@ -181,5 +181,6 @@
   "MAIN_GUILD": "Main Guild",
   "CHANNEL": "Channel",
   "MEMBER": "Member",
-  "NO_X_FOUND": "No {0} found"
+  "NO_X_FOUND": "No {0} found",
+  "TICKET_TIMEOUT_HOURS": "Ticket Timeout Hours"
 }
