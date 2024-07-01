@@ -11,8 +11,19 @@ public class LangData
   private IReadOnlyDictionary<string, IReadOnlyDictionary<LangKeys, string>> _languages;
 
   private LangData() {
-    var currentDir = Directory.GetCurrentDirectory();
-    var langDir = Path.Combine(currentDir, "Language", "Data");
+    string[] possibleDirectories = [
+      Directory.GetCurrentDirectory(),
+      AppContext.BaseDirectory,
+      AppDomain.CurrentDomain.BaseDirectory
+    ];
+
+    var langDir = "";
+    foreach (var possibleDirectory in possibleDirectories) {
+      langDir = Path.Combine(possibleDirectory, "Language", "Data");
+      if (Directory.Exists(langDir))
+        break;
+    }
+
     if (!Directory.Exists(langDir)) {
       throw new DirectoryNotFoundException("Language data directory not found! Please make sure you have the correct directory structure. Expected directory : " + langDir);
     }
