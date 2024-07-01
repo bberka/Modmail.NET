@@ -1,5 +1,5 @@
 # Modmail.NET
-An Open-Source Modmail Discord Bot made with .NET 6 for self hosting
+An Open-Source Modmail Discord Bot made with .NET 8 for self hosting
 
 This bot can be easily setup and used on your server for managing community communication on a single way.
 
