@@ -29,6 +29,9 @@
 
   <ItemGroup>
     <None Remove="logs\**"/>
+    <None Include="appsettings.example.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
