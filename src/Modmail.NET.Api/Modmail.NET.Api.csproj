@@ -15,4 +15,24 @@
     <ProjectReference Include="..\Modmail.NET\Modmail.NET.csproj"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="logs\**"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="logs\**"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="logs\**"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="logs\**"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="logs\log20240701.json"/>
+  </ItemGroup>
+
 </Project>
