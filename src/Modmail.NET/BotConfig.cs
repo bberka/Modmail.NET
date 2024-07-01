@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Modmail.NET.Static;
 using Serilog.Events;
 
 namespace Modmail.NET;
@@ -20,7 +19,6 @@ public class BotConfig
     BotPrefix = _configManager["BOT_PREFIX"] ?? "!";
     MainServerId = ulong.Parse(_configManager["MAIN_SERVER_ID"] ?? "0");
     OwnerUsers = _configManager["OWNER_USERS"]?.Split(',').Select(ulong.Parse).ToArray() ?? Array.Empty<ulong>();
-    DbType = Enum.Parse<DbType>(_configManager["DB_TYPE"] ?? "Sqlite", true);
     DbConnectionString = _configManager["DB_CONNECTION_STRING"] ?? throw new Exception("DB_CONNECTION_STRING is not set.");
     LogLevel = Enum.Parse<LogEventLevel>(_configManager["LOG_LEVEL"] ?? "Information", true);
     LogSinkToFile = bool.Parse(_configManager["LOG_SINK_TO_FILE"] ?? "true");
@@ -59,10 +57,6 @@ public class BotConfig
 
   //Name: OWNER_USERS
   public ulong[] OwnerUsers { get; set; }
-
-
-  //Name: DB_TYPE
-  public DbType DbType { get; set; }
 
   //Name: DB_CONNECTION_STRING
   public string DbConnectionString { get; set; }
