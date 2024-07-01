@@ -330,3 +330,10 @@ Create a pull request by using semantic commits and proper explanation
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.
+
+# Todos
+- Convert timers to BackgroundServices
+- Add Db logging
+- Implement API endpoints
+- Implement UI for managing
+- Add login system for manager teams so can login with discord~~~~
