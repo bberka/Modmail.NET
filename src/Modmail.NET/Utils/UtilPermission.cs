@@ -38,6 +38,7 @@ public static class UtilPermission
 
     var allPerm = new DiscordOverwriteBuilder(guild.EveryoneRole);
     allPerm.Deny(Permissions.All);
+    allPerm.Allow(Permissions.MentionEveryone);
     overwrites.Add(allPerm);
 
     foreach (var member in members) {
@@ -63,7 +64,6 @@ public static class UtilPermission
 
       overwrites.Add(rolePerm);
     }
-
     return overwrites;
   }
 }
