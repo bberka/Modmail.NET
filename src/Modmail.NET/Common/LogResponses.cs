@@ -285,7 +285,7 @@ public static class LogResponses
                 .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
                 .AddField(LangKeys.GREETING_MESSAGE.GetTranslation(), guildOption.GreetingMessage, false)
                 .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false)
-                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.ClosingMessage, false);
+                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString(), false);
     return embed;
   }
 
