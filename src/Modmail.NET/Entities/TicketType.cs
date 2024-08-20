@@ -9,17 +9,27 @@ namespace Modmail.NET.Entities;
 
 public class TicketType
 {
-  [Key]
   public Guid Id { get; set; }
-
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? UpdateDateUtc { get; set; }
+  
+  [MaxLength(DbLength.KEY_STRING)]
   public string Key { get; set; }
+  
+  [MaxLength(DbLength.NAME)]
   public string Name { get; set; }
+  
+  [MaxLength(DbLength.EMOJI)]
   public string? Emoji { get; set; }
+  
+  [MaxLength(DbLength.DESCRIPTION)]
   public string? Description { get; set; }
   public int Order { get; set; }
+  
+  [MaxLength(DbLength.BOT_MESSAGE)]
   public string EmbedMessageTitle { get; set; }
+  
+  [MaxLength(DbLength.BOT_MESSAGE)]
   public string EmbedMessageContent { get; set; }
 
 

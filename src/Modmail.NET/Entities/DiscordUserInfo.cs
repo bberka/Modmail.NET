@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Aspects;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
@@ -33,26 +34,33 @@ public sealed class DiscordUserInfo
   /// <summary>
   ///   Users Discord Id
   /// </summary>
-  [Key]
   public ulong Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
 
   public DateTime? UpdateDateUtc { get; set; }
 
+  [MaxLength(DbLength.NAME)]
   public string Username { get; set; }
 
+  [MaxLength(DbLength.URL)]
   public string? AvatarUrl { get; set; }
 
+  [MaxLength(DbLength.URL)]
   public string? BannerUrl { get; set; }
 
+  [MaxLength(DbLength.EMAIL)]
   public string? Email { get; set; }
 
+  [MaxLength(DbLength.LOCALE)]
   public string? Locale { get; set; }
 
+  public Guid? TicketBlacklistId { get; set; }
 
-//FK  
-  public List<TicketBlacklist> TicketBlacklists { get; set; }
+  //FK  
+  public TicketBlacklist? Blacklist { get; set; }
+  public List<Ticket> OpenedTickets { get; set; }
+  public List<Ticket> ClosedTickets { get; set; }
 
   public string GetMention() => $"<@{Id}>";
 

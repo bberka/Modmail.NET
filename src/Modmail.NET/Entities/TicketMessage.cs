@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DSharpPlus.Entities;
+using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Utils;
 
@@ -8,22 +9,17 @@ namespace Modmail.NET.Entities;
 
 public class TicketMessage
 {
-  [Key]
   public Guid Id { get; set; }
-
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
-  public ulong DiscordUserInfoId { get; set; }
+  public ulong SenderUserId { get; set; }
+  
+  [MaxLength(DbLength.MESSAGE)]
   public string MessageContent { get; set; }
   public ulong MessageDiscordId { get; set; }
-
-
-  [ForeignKey(nameof(Ticket))]
   public Guid TicketId { get; set; }
 
   //FK
-  public virtual DiscordUserInfo DiscordUserInfo { get; set; }
-  public virtual Ticket Ticket { get; set; }
-  public virtual List<TicketMessageAttachment> TicketMessageAttachments { get; set; }
+  public virtual List<TicketMessageAttachment> Attachments { get; set; }
 
   public async Task AddAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -41,10 +37,10 @@ public class TicketMessage
     var id = Guid.NewGuid();
     return new TicketMessage {
       Id = id,
-      DiscordUserInfoId = message.Author.Id,
+      SenderUserId = message.Author.Id,
       MessageContent = message.Content,
       TicketId = ticketId,
-      TicketMessageAttachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
+      Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
       RegisterDateUtc = DateTime.UtcNow,
     };
@@ -55,10 +51,10 @@ public class TicketMessage
     var id = Guid.NewGuid();
     return new TicketMessage {
       Id = id,
-      DiscordUserInfoId = authorId,
+      SenderUserId = authorId,
       MessageContent = messageContent,
       TicketId = ticketId,
-      TicketMessageAttachments = discordAttachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
+      Attachments = discordAttachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = messageId,
       RegisterDateUtc = UtilDate.GetNow(),
     };

@@ -84,10 +84,10 @@ public static class LogResponses
                    .WithDescription(ticket.FeedbackMessage)
                    .WithCustomTimestamp()
                    .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
-                   .AddField(LangKeys.USER.GetTranslation(), ticket.OpenerUserInfo.GetMention(), true) //not sure needed
+                   .AddField(LangKeys.USER.GetTranslation(), ticket.OpenerUser.GetMention(), true) //not sure needed
                    .AddField(LangKeys.STAR.GetTranslation(), ticket.FeedbackStar.ToString(), true)
                    .WithColor(Colors.FeedbackColor)
-                   .WithUserAsAuthor(ticket.OpenerUserInfo);
+                   .WithUserAsAuthor(ticket.OpenerUser);
 
     return logEmbed;
   }
@@ -110,7 +110,7 @@ public static class LogResponses
                              : LangKeys.ANONYMOUS_MOD_OFF.GetTranslation())
                 .WithColor(Colors.AnonymousToggledColor)
                 .WithCustomTimestamp()
-                .WithUserAsAuthor(ticket.OpenerUserInfo)
+                .WithUserAsAuthor(ticket.OpenerUser)
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithDescription(ticket.Anonymous
                                    ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
@@ -122,7 +122,7 @@ public static class LogResponses
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
                 .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
-                .WithUserAsAuthor(ticket.OpenerUserInfo)
+                .WithUserAsAuthor(ticket.OpenerUser)
                 .WithCustomTimestamp()
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithColor(Colors.TicketTypeChangedColor);
@@ -147,11 +147,11 @@ public static class LogResponses
                 // .WithDescription("Ticket has been closed.")
                 .WithCustomTimestamp()
                 .WithTitle(LangKeys.TICKET_CLOSED.GetTranslation())
-                .WithUserAsAuthor(ticket.CloserUserInfo)
+                .WithUserAsAuthor(ticket.CloserUser)
                 .WithColor(Colors.TicketClosedColor)
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
-                .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUserInfo.GetMention(), true)
-                .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUserInfo.GetMention(), true)
+                .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUser.GetMention(), true)
+                .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUser.GetMention(), true)
                 .AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason, true)
       ;
     return embed;

@@ -11,12 +11,15 @@ namespace Modmail.NET.Entities;
 
 public class GuildOption
 {
-  [Key]
   public ulong GuildId { get; set; }
 
+  [MaxLength(DbLength.NAME)]
   public string Name { get; set; } = "Modmail";
+  
+  [MaxLength(DbLength.URL)]
   public string IconUrl { get; set; } = "";
 
+  [MaxLength(DbLength.URL)]
   public string? BannerUrl { get; set; }
   public ulong LogChannelId { get; set; }
 
@@ -30,9 +33,11 @@ public class GuildOption
 
   public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
+  [MaxLength(DbLength.BOT_MESSAGE)]
   public string GreetingMessage { get; set; }
     = "Thank you for reaching out to our team, we'll reply to you as soon as possible. Please help us speed up this process by describing your request in detail.";
 
+  [MaxLength(DbLength.BOT_MESSAGE)]
   public string ClosingMessage { get; set; } = "Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again.";
 
   public bool TakeFeedbackAfterClosing { get; set; }

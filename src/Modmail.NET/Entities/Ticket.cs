@@ -13,17 +13,11 @@ namespace Modmail.NET.Entities;
 
 public sealed class Ticket
 {
-  [Key]
   public Guid Id { get; set; }
-
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? ClosedDateUtc { get; set; }
-
-  [ForeignKey(nameof(OpenerUserInfo))]
   public ulong OpenerUserId { get; set; } //FK
-
-  [ForeignKey(nameof(CloserUserInfo))]
   public ulong? CloserUserId { get; set; } //FK
 
   public ulong PrivateMessageChannelId { get; set; }
@@ -31,10 +25,14 @@ public sealed class Ticket
   public ulong InitialMessageId { get; set; }
   public ulong BotTicketCreatedMessageInDmId { get; set; }
   public TicketPriority Priority { get; set; }
+  
+  [MaxLength(DbLength.REASON)]
   public string? CloseReason { get; set; }
   public bool IsForcedClosed { get; set; } = false;
 
   public int? FeedbackStar { get; set; }
+  
+  [MaxLength(DbLength.FEEDBACK_MESSAGE)]
   public string? FeedbackMessage { get; set; }
 
   public bool Anonymous { get; set; }
@@ -44,10 +42,10 @@ public sealed class Ticket
 
   //FK
 
-  public DiscordUserInfo OpenerUserInfo { get; set; }
-  public DiscordUserInfo? CloserUserInfo { get; set; }
+  public DiscordUserInfo OpenerUser { get; set; }
+  public DiscordUserInfo? CloserUser { get; set; }
   public TicketType? TicketType { get; set; }
-  public List<TicketMessage> TicketMessages { get; set; }
+  public List<TicketMessage> Messages { get; set; }
 
   public List<TicketNote> TicketNotes { get; set; }
 
@@ -109,12 +107,12 @@ public sealed class Ticket
                                             string? closeReason = null,
                                             DiscordChannel? modChatChannel = null,
                                             bool dontSendFeedbackMessage = false) {
-    ArgumentNullException.ThrowIfNull(OpenerUserInfo);
+    ArgumentNullException.ThrowIfNull(OpenerUser);
     if (closerUserId == 0) throw new InvalidUserIdException();
     if (string.IsNullOrEmpty(closeReason)) closeReason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
-    CloserUserInfo = await DiscordUserInfo.GetAsync(closerUserId);
-    ArgumentNullException.ThrowIfNull(CloserUserInfo);
+    CloserUser = await DiscordUserInfo.GetAsync(closerUserId);
+    ArgumentNullException.ThrowIfNull(CloserUser);
 
     modChatChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
 
@@ -125,7 +123,7 @@ public sealed class Ticket
     CloserUserId = closerUserId;
 
     var closerUser = await DiscordUserInfo.GetAsync(closerUserId);
-    CloserUserInfo = closerUser;
+    CloserUser = closerUser;
 
     await UpdateAsync();
 
@@ -149,7 +147,7 @@ public sealed class Ticket
   public async Task ProcessChangePriorityAsync(ulong modUserId,
                                                TicketPriority newPriority,
                                                DiscordChannel? ticketChannel = null) {
-    ArgumentNullException.ThrowIfNull(OpenerUserInfo);
+    ArgumentNullException.ThrowIfNull(OpenerUser);
     if (modUserId == 0) throw new InvalidUserIdException();
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
 
@@ -188,13 +186,13 @@ public sealed class Ticket
       var newChName = "";
       switch (newPriority) {
         case TicketPriority.Normal:
-          newChName = Const.NORMAL_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUserInfo.Username.Trim());
+          newChName = Const.NORMAL_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
           break;
         case TicketPriority.High:
-          newChName = Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUserInfo.Username.Trim());
+          newChName = Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
           break;
         case TicketPriority.Low:
-          newChName = Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUserInfo.Username.Trim());
+          newChName = Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
           break;
       }
 
@@ -211,7 +209,7 @@ public sealed class Ticket
 
   public async Task ProcessUserSentMessageAsync(DiscordMessage message,
                                                 DiscordChannel? privateChannel = null) {
-    ArgumentNullException.ThrowIfNull(OpenerUserInfo);
+    ArgumentNullException.ThrowIfNull(OpenerUser);
     ArgumentNullException.ThrowIfNull(message);
     ArgumentNullException.ThrowIfNull(message);
     await Task.Delay(50); //wait for privateChannel creation process to finish
@@ -296,7 +294,7 @@ public sealed class Ticket
       CloserUserId = null,
       ClosedDateUtc = null,
       TicketTypeId = null,
-      TicketMessages = new List<TicketMessage>() {
+      Messages = new List<TicketMessage>() {
         ticketMessage
       },
       BotTicketCreatedMessageInDmId = 0
@@ -368,7 +366,7 @@ public sealed class Ticket
   }
 
   public async Task ProcessAddFeedbackAsync(int starCount, string textInput, DiscordMessage feedbackMessage) {
-    if (OpenerUserInfo is null) throw new InvalidOperationException("OpenerUserInfo is null");
+    if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (!ClosedDateUtc.HasValue) throw new InvalidOperationException("Ticket must be closed");
 
     if (starCount < 1 || starCount > 5) {
@@ -402,7 +400,7 @@ public sealed class Ticket
   }
 
   public async Task ProcessAddNoteAsync(ulong userId, string note) {
-    if (OpenerUserInfo is null) throw new InvalidOperationException("OpenerUserInfo is null");
+    if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
 
     var guildOption = await GuildOption.GetAsync();
     var noteEntity = new TicketNote {
@@ -431,7 +429,7 @@ public sealed class Ticket
   }
 
   public async Task ProcessToggleAnonymousAsync(DiscordChannel? ticketChannel = null) {
-    if (OpenerUserInfo is null) throw new InvalidOperationException("OpenerUserInfo is null");
+    if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (ClosedDateUtc.HasValue) throw new InvalidOperationException("Ticket is closed");
 
     Anonymous = !Anonymous;
@@ -455,7 +453,7 @@ public sealed class Ticket
                                                  DiscordChannel? ticketChannel = null,
                                                  DiscordChannel? privateChannel = null,
                                                  DiscordMessage? privateMessageWithComponent = null) {
-    if (OpenerUserInfo is null) throw new InvalidOperationException("OpenerUserInfo is null");
+    if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (userId == 0) throw new InvalidOperationException("UserId is 0");
     if (ClosedDateUtc.HasValue) {
       //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed

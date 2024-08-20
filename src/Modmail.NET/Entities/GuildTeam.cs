@@ -9,12 +9,12 @@ namespace Modmail.NET.Entities;
 
 public sealed class GuildTeam
 {
-  [Key]
   public Guid Id { get; set; }
-
   public TeamPermissionLevel PermissionLevel { get; set; }
   public DateTime RegisterDateUtc { get; set; }
   public DateTime? UpdateDateUtc { get; set; }
+  
+  [MaxLength(DbLength.NAME)]
   public string Name { get; set; }
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }

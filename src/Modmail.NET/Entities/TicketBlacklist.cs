@@ -7,20 +7,15 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
-[Index(nameof(DiscordUserId), IsUnique = true)]
 public class TicketBlacklist
 {
-  [Key]
   public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
+  
+  [MaxLength(DbLength.REASON)]
   public string? Reason { get; set; }
-
-  [ForeignKey(nameof(DiscordUserInfo))]
   public ulong DiscordUserId { get; set; }
-
-  //FK
-  public virtual DiscordUserInfo DiscordUserInfo { get; set; }
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
     if (userId == 0) throw new InvalidUserIdException();
