@@ -99,13 +99,23 @@
   }
 
   private async Task ShowAddDialogAsync() {
-     await DialogService.OpenAsync("Block User", ds =>
+     var result = await DialogService.OpenAsync("Block User", ds =>
                                      @<div>
                                         <AddBlacklistDialog DialogService="@ds"></AddBlacklistDialog>
                                      </div>,
                                    new DialogOptions() {
                                      Width = "400px",
                                    });
+     if (result is true) {
+        await ShowLoading();
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.TicketBlacklists
+                          .Include(x => x.DiscordUser)
+                          .OrderByDescending(x => x.RegisterDateUtc)
+                          .AsQueryable();
+        count = query.Count();
+        data = query.Skip(0).Take(10).AsQueryable();
+     }
   }
 
 

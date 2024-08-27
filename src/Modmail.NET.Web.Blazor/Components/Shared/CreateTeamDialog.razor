@@ -1,5 +1,6 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Language
+@using Modmail.NET.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject  NotificationService NotificationService
@@ -11,9 +12,10 @@
 
   private List<DiscordUserInfo> _users = new();
 
-  private ulong? selectedUserId;
-
-  private string? reason;
+  private TeamPermissionLevel? permissionLevel;
+  private bool pingOnNewTicket = false;
+  private bool pingOnTicketMessage = false;
+  private string? teamName;
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
@@ -26,12 +28,17 @@
   }
 
   private async Task SubmitAsync() {
-    if (selectedUserId is null) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+    if (string.IsNullOrEmpty(teamName)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
       return;
     }
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to block this user?",
+    if (permissionLevel is null) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
+      return;
+    }
+
+    var dialogResult = await DialogService.Confirm("Are you sure you want to create new team ?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -39,25 +46,20 @@
                                                      CloseDialogOnEsc = true,
                                                    });
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
+      const string logMessage = $"[{nameof(CreateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
       try {
-        await TicketBlacklist.ProcessAddUserToBlacklist(selectedUserId.Value, reason);
-        NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
-        Log.Information(logMessage,
-                        selectedUserId.Value,
-                        reason);
+        await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage);
+        Log.Information(logMessage, teamName, permissionLevel);
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
+        DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
+        Log.Warning(ex, logMessage, teamName, permissionLevel);
         NotificationService.Notify(NotificationSeverity.Warning, "Warning", ex.Message);
-        Log.Warning(logMessage,
-                    selectedUserId.Value,
-                    reason);
       }
       catch (Exception ex) {
+        Log.Fatal(ex, logMessage, teamName, permissionLevel);
         NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
-        Log.Fatal(logMessage,
-                  selectedUserId.Value,
-                  reason);
       }
     }
   }
@@ -69,22 +71,36 @@
 
 <RadzenRow>
   <RadzenColumn>
-    <RadzenRow class="">
-      @* <p> *@
-      @*    *@
-      @* </p> *@
-      @* <p> *@
-      @*   You can only see users that are interacted with the bot. *@
-      @* </p> *@
+    @* <RadzenRow class=""> *@
+    @*   $1$ <p> #1# *@
+    @*   $1$    #1# *@
+    @*   $1$ </p> #1# *@
+    @*   $1$ <p> #1# *@
+    @*   $1$   You can only see users that are interacted with the bot. #1# *@
+    @*   $1$ </p> #1# *@
+    @* </RadzenRow> *@
+    <RadzenRow class="rz-my-4">
+      <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
+        <RadzenTextBox Name="team-name" @bind-Value="@teamName" />
+      </RadzenFormField>
     </RadzenRow>
-    <RadzenRow class="">
-      <RadzenDropDown Style="width: 100%; max-width: 300px;" TValue="ulong?" @bind-Value="selectedUserId" Placeholder="Select user" AllowFiltering="true"
-                      Data="@(_users)" TextProperty="@nameof(DiscordUserInfo.Username)" ValueProperty="@nameof(DiscordUserInfo.Id)"/>
+    <RadzenRow class="rz-my-4">
+      <RadzenDropDown Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100"  TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
     </RadzenRow>
-    <RadzenRow class="rz-mt-6">
-      <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Text="Block User" Click="SubmitAsync"/>
+    <RadzenRow class="rz-my-4">
+      <RadzenSwitch @bind-Value=@pingOnNewTicket/>
+      <small class="text-secondary">
+        Ping on new ticket
+      </small>
     </RadzenRow>
-
-
+    <RadzenRow class="rz-my-4">
+      <RadzenSwitch @bind-Value=@pingOnTicketMessage/>
+      <small class="text-secondary">
+        Ping on ticket message
+      </small>
+    </RadzenRow>
+    <RadzenRow class="rz-my-4">
+      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Create Team" Click="SubmitAsync"/>
+    </RadzenRow>
   </RadzenColumn>
 </RadzenRow>
