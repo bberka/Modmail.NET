@@ -81,15 +81,15 @@
                             Data="@data" TItem="TicketDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Title="Opener User Avatar" Frozen="false" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID" Width="80px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@data.OpenerUser.AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="OpenerUser.Username" Title="Opener User" Frozen="false" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Property="OpenerUser.Username" Title="Opener User" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenText Text="@data.OpenerUser.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
@@ -97,14 +97,14 @@
                   </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Title="Closer User Avatar" Frozen="false" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="Closer User Avatar" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenImage Style="width: 100px; height: 100px;" Path="@data.CloserUser?.AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Closer User" Frozen="true" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenText Text="@data.CloserUser?.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
@@ -115,7 +115,7 @@
                 <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)" Title="Register Date Utc" Width="220px"/>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)" Title="Last Message Date Utc" Width="220px"/>
                 <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)" Title="Close Date Utc" Width="220px"/>
-                <RadzenDataGridColumn Title="Ticket Type" Frozen="true" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="Ticket Type" Sortable="true" Filterable="true" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenText Text="@data.TicketType?.Name" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>

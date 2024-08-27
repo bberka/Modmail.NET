@@ -54,7 +54,7 @@
 
   private int count = 0;
 
-  private async Task RemoveBlockAsync(TicketBlacklist blacklist) {
+  private async Task RemoveAsync(TicketBlacklist blacklist) {
     var dialogResult = await DialogService.Confirm("Are you sure you want to remove this user from the blacklist?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
@@ -64,7 +64,7 @@
                                                    });
 
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(Blacklist)}]{nameof(RemoveBlockAsync)}{{UserId}})";
+      const string logMessage = $"[{nameof(Blacklist)}]{nameof(RemoveAsync)}{{UserId}})";
       try {
         await blacklist.ProcessRemoveUserFromBlacklist(blacklist.DiscordUserId);
         Log.Information(logMessage,
@@ -98,7 +98,7 @@
     }
   }
 
-  private async Task ShowDialog_AddBlacklist() {
+  private async Task ShowAddDialogAsync() {
      await DialogService.OpenAsync("Block User", ds =>
                                      @<div>
                                         <AddBlacklistDialog DialogService="@ds"></AddBlacklistDialog>
@@ -140,34 +140,34 @@
               <HeaderTemplate>
                 <RadzenRow>
                   <RadzenColumn Size="12">
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add" Variant="Variant.Filled" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@ShowDialog_AddBlacklist">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add" Variant="Variant.Filled" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@ShowAddDialogAsync">
                       Block User
                     </RadzenButton>
                   </RadzenColumn>
                 </RadzenRow>
               </HeaderTemplate>
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketBlacklist.Id)" Filterable="false" Title="ID" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Title="User Avatar" Frozen="false" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketBlacklist.Id)" Filterable="false" Title="ID"  Width="120px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Title="User Avatar" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@data.DiscordUser.AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="OpenerUser.Username" Title="User" Frozen="false" Sortable="true" Filterable="true" Width="100px" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Property="OpenerUser.Username" Title="User"Sortable="true" Filterable="true" Width="100px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenText Text="@data.DiscordUser.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.RegisterDateUtc)" Filterable="true" Title="Register Date UTC" Frozen="true" Width="80px" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.Reason)" Filterable="true" Title="Reason" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.RegisterDateUtc)" Filterable="true" Title="Register Date UTC" Width="80px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.Reason)" Filterable="true" Title="Reason" Width="120px" TextAlign="TextAlign.Center"/>
 
-                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions"  >
                   <Template Context="data">
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveBlockAsync(data))" @onclick:stopPropagation="true">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveAsync(data))" @onclick:stopPropagation="true">
                     </RadzenButton>
                   </Template>
                 </RadzenDataGridColumn>
