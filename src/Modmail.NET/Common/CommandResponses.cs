@@ -25,12 +25,6 @@ public static class CommandResponses
 
     embed.WithDescription(sb.ToString());
 
-    if (!string.IsNullOrEmpty(guildOption.GreetingMessage))
-      embed.AddField(LangKeys.GREETING_MESSAGE.GetTranslation(), guildOption.GreetingMessage);
-
-    if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
-      embed.AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage);
-
     return new DiscordWebhookBuilder().AddEmbed(embed);
   }
 

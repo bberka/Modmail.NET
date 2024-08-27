@@ -19,7 +19,6 @@ public class LangData
     var files = Directory.GetFiles(langDir, "*.json");
     if (files.Length == 0) throw new FileNotFoundException("No language files found in the directory! Please make sure you have the correct directory structure. Expected directory : " + langDir);
 
-    var culture = new CultureInfo("en-US");
     var dict = new Dictionary<string, IReadOnlyDictionary<LangKeys, string>>();
     foreach (var file in files) {
       var lang = Path.GetFileNameWithoutExtension(file);
@@ -64,9 +63,10 @@ public class LangData
   }
 
   private IReadOnlyDictionary<LangKeys, string> GetLanguage(string lang) {
-    if (!_languages.ContainsKey(lang)) throw new KeyNotFoundException("Language not found : " + lang);
+    if (!_languages.TryGetValue(lang, out var language)) 
+      throw new KeyNotFoundException("Language not found : " + lang);
 
-    return _languages[lang];
+    return language;
   }
 
   private string GetLanguage() {
@@ -78,7 +78,9 @@ public class LangData
     if (lang.Contains('-')) lang = lang.Split('-')[0];
 
     var language = GetLanguage(lang);
-    if (!language.ContainsKey(key)) throw new KeyNotFoundException("Translation not found for key : " + key);
+    if (!language.ContainsKey(key))
+      return string.Empty;
+    // throw new KeyNotFoundException("Translation not found for key : " + key);
 
     //try parse args to enum LangKeys and if exists replace with translation
 

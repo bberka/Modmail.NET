@@ -41,8 +41,9 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketClosedColor);
 
-    if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
-      embed.WithDescription(guildOption.ClosingMessage);
+    var closingMessage = LangKeys.CLOSING_MESSAGE_DESCRIPTION.GetTranslation();
+
+    if (!string.IsNullOrEmpty(closingMessage)) embed.WithDescription(closingMessage);
 
     if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
 
@@ -108,8 +109,9 @@ public static class UserResponses
                 .WithFooter(guild.Name, guild.IconUrl)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor);
-    if (!string.IsNullOrEmpty(option.GreetingMessage))
-      embed.WithDescription(option.GreetingMessage);
+    var greetingMessage = LangKeys.GREETING_MESSAGE_DESCRIPTION.GetTranslation();
+    if (!string.IsNullOrEmpty(greetingMessage)) 
+      embed.WithDescription(greetingMessage);
 
     var builder = new DiscordMessageBuilder()
       .AddEmbed(embed);

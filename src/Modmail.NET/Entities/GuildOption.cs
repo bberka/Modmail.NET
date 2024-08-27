@@ -32,14 +32,6 @@ public class GuildOption
 
   [Range(Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS, Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS)]
   public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
-
-  [MaxLength(DbLength.BOT_MESSAGE)]
-  public string GreetingMessage { get; set; }
-    = "Thank you for reaching out to our team, we'll reply to you as soon as possible. Please help us speed up this process by describing your request in detail.";
-
-  [MaxLength(DbLength.BOT_MESSAGE)]
-  public string ClosingMessage { get; set; } = "Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again.";
-
   public bool TakeFeedbackAfterClosing { get; set; }
 
   //TODO: Implement ShowConfirmationWhenClosingTickets
@@ -65,7 +57,7 @@ public class GuildOption
 
   public static async Task<GuildOption?> GetNullableAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetNullableAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(1));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(2));
 
     async Task<GuildOption?> _get() {
       var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -132,37 +124,6 @@ public class GuildOption
     var logChannel = await guildOption.ProcessCreateLogChannel(guild);
 
     await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
-  }
-
-  public async Task ProcessConfigureAsync(DiscordGuild guild,
-                                          bool? sensitiveLogging,
-                                          bool? takeFeedbackAfterClosing,
-                                          string? greetingMessage,
-                                          string? closingMessage,
-                                          long? ticketTimeoutHours = null) {
-    IconUrl = guild.IconUrl;
-    Name = guild.Name;
-    BannerUrl = guild.BannerUrl;
-    UpdateDateUtc = DateTime.UtcNow;
-    if (sensitiveLogging.HasValue)
-      IsSensitiveLogging = sensitiveLogging.Value;
-    if (takeFeedbackAfterClosing.HasValue)
-      TakeFeedbackAfterClosing = takeFeedbackAfterClosing.Value;
-    if (!string.IsNullOrEmpty(greetingMessage))
-      GreetingMessage = greetingMessage;
-    if (!string.IsNullOrEmpty(closingMessage))
-      ClosingMessage = closingMessage;
-    if (ticketTimeoutHours.HasValue) {
-      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) throw new TicketTimeoutOutOfRangeException();
-
-      TicketTimeoutHours = ticketTimeoutHours.Value;
-    }
-
-    await UpdateAsync();
-
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.ConfigurationUpdated(this));
   }
 
   public async Task<DiscordChannel> ProcessCreateLogChannel(DiscordGuild guild) {
