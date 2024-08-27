@@ -8,6 +8,6 @@ namespace Modmail.NET.Mappers;
 public static partial class TicketDtoMapper
 {
   public static partial IQueryable<TicketDto> ProjectToDto(this IQueryable<Ticket> queryable);
-  
+
   public static partial TicketDto ToDto(this Ticket entity);
 }

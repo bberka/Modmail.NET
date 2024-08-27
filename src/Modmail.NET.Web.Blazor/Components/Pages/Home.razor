@@ -16,7 +16,7 @@
     }
 
     var totalTickets = await dbContext.Tickets.Select(x => new {
-                                        IsClosed = x.ClosedDateUtc.HasValue,
+                                        IsClosed = x.ClosedDateUtc.HasValue
                                       })
                                       .ToListAsync();
     var activeTickets = totalTickets.Count(x => !x.IsClosed);

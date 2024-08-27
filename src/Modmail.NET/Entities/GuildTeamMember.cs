@@ -18,7 +18,7 @@ public class GuildTeamMember
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var teamMember = await dbContext.GuildTeamMembers
                                     .Include(x => x.GuildTeam)
-                                    .Where(x => ((x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId)))
+                                    .Where(x => (x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId))
                                     .OrderByDescending(x => x.GuildTeam.PermissionLevel)
                                     .FirstOrDefaultAsync();
     return teamMember?.GuildTeam.PermissionLevel;

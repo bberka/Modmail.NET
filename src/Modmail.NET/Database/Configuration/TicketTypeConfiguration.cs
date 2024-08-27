@@ -8,9 +8,8 @@ public sealed class TicketTypeConfiguration : IEntityTypeConfiguration<TicketTyp
 {
   public void Configure(EntityTypeBuilder<TicketType> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
-    
   }
 }

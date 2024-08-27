@@ -46,9 +46,7 @@ public static class ComponentInteractionCreated
           var ticketIdParam = parameters[0];
           var ticketId = Guid.Parse(ticketIdParam);
           var selectedTypeKey = args.Values.FirstOrDefault();
-          if (string.IsNullOrEmpty(selectedTypeKey)) {
-            break;
-          }
+          if (string.IsNullOrEmpty(selectedTypeKey)) break;
 
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
           await ticket.ProcessChangeTicketTypeAsync(args.User.Id, selectedTypeKey, null, args.Channel, args.Message);

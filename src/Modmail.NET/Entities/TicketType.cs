@@ -11,23 +11,24 @@ public class TicketType
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? UpdateDateUtc { get; set; }
-  
+
   [MaxLength(DbLength.KEY_STRING)]
   public string Key { get; set; }
-  
+
   [MaxLength(DbLength.NAME)]
   public string Name { get; set; }
-  
+
   [MaxLength(DbLength.EMOJI)]
   public string? Emoji { get; set; }
-  
+
   [MaxLength(DbLength.DESCRIPTION)]
   public string? Description { get; set; }
+
   public int Order { get; set; }
-  
+
   [MaxLength(DbLength.BOT_MESSAGE)]
   public string EmbedMessageTitle { get; set; }
-  
+
   [MaxLength(DbLength.BOT_MESSAGE)]
   public string EmbedMessageContent { get; set; }
 
@@ -52,9 +53,7 @@ public class TicketType
   public static async Task<TicketType> GetAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
-    if (result is null) {
-      throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
-    }
+    if (result is null) throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
 
     return result;
   }
@@ -92,14 +91,10 @@ public class TicketType
     long order,
     string embedMessageTitle,
     string embedMessageContent) {
-    if (string.IsNullOrEmpty(name)) {
-      throw new InvalidNameException(name);
-    }
+    if (string.IsNullOrEmpty(name)) throw new InvalidNameException(name);
 
     var exists = await ExistsAsync(name);
-    if (exists) {
-      throw new TicketTypeAlreadyExistsException(name);
-    }
+    if (exists) throw new TicketTypeAlreadyExistsException(name);
 
     var id = Guid.NewGuid();
     var idClean = id.ToString().Replace("-", "");
@@ -112,7 +107,7 @@ public class TicketType
       Order = (int)order,
       RegisterDateUtc = DateTime.UtcNow,
       EmbedMessageTitle = embedMessageTitle,
-      EmbedMessageContent = embedMessageContent,
+      EmbedMessageContent = embedMessageContent
     };
     await ticketType.AddAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();

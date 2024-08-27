@@ -8,13 +8,13 @@ public sealed class TicketMessageAttachmentConfiguration : IEntityTypeConfigurat
 {
   public void Configure(EntityTypeBuilder<TicketMessageAttachment> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
-    
+
     builder.HasOne<TicketMessage>()
-            .WithMany(x => x.Attachments)
-            .HasForeignKey(x => x.TicketMessageId)
-            .OnDelete(DeleteBehavior.Cascade);
+           .WithMany(x => x.Attachments)
+           .HasForeignKey(x => x.TicketMessageId)
+           .OnDelete(DeleteBehavior.Cascade);
   }
 }

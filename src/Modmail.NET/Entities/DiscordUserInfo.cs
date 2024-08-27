@@ -61,7 +61,9 @@ public sealed class DiscordUserInfo
   public List<Ticket> ClosedTickets { get; set; }
   public List<Ticket> AssignedTickets { get; set; }
 
-  public string GetMention() => $"<@{Id}>";
+  public string GetMention() {
+    return $"<@{Id}>";
+  }
 
   public static async Task<DiscordUserInfo> GetAsync(ulong userId) {
     var key = SimpleCacher.CreateKey(nameof(DiscordUserInfo), nameof(GetAsync), userId);
@@ -99,22 +101,22 @@ public sealed class DiscordUserInfo
   private async Task AddOrUpdateAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
 
-    var dbData = await dbContext.DiscordUserInfos.FindAsync(this.Id);
+    var dbData = await dbContext.DiscordUserInfos.FindAsync(Id);
     if (dbData is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
       var lastUpdate = dbData.UpdateDateUtc ?? dbData.RegisterDateUtc;
       if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) return;
-      this.RegisterDateUtc = dbData.RegisterDateUtc;
+      RegisterDateUtc = dbData.RegisterDateUtc;
       dbData.UpdateDateUtc = DateTime.UtcNow;
-      dbData.Username = this.Username;
-      dbData.AvatarUrl = this.AvatarUrl;
-      dbData.BannerUrl = this.BannerUrl;
-      dbData.Email = this.Email;
-      dbData.Locale = this.Locale;
+      dbData.Username = Username;
+      dbData.AvatarUrl = AvatarUrl;
+      dbData.BannerUrl = BannerUrl;
+      dbData.Email = Email;
+      dbData.Locale = Locale;
       dbContext.DiscordUserInfos.Update(dbData);
     }
     else {
-      this.RegisterDateUtc = DateTime.UtcNow;
+      RegisterDateUtc = DateTime.UtcNow;
       await dbContext.DiscordUserInfos.AddAsync(this);
     }
 

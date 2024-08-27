@@ -10,9 +10,10 @@ public class TicketBlacklist
   public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
-  
+
   [MaxLength(DbLength.REASON)]
   public string? Reason { get; set; }
+
   public ulong DiscordUserId { get; set; }
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
@@ -25,23 +26,17 @@ public class TicketBlacklist
   public static async Task<List<TicketBlacklist>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketBlacklists.ToListAsync();
-    if (result.Count == 0) {
-      throw new EmptyListResultException(LangKeys.BLACKLISTED_USERS);
-    }
+    if (result.Count == 0) throw new EmptyListResultException(LangKeys.BLACKLISTED_USERS);
 
     return result;
   }
 
   public static async Task<TicketBlacklist> GetAsync(ulong userId) {
-    if (userId == 0) {
-      throw new InvalidUserIdException();
-    }
+    if (userId == 0) throw new InvalidUserIdException();
 
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketBlacklists.FirstOrDefaultAsync(x => x.DiscordUserId == userId);
-    if (result is null) {
-      throw new UserIsNotBlacklistedException();
-    }
+    if (result is null) throw new UserIsNotBlacklistedException();
 
     return result;
   }
@@ -62,25 +57,25 @@ public class TicketBlacklist
     // var option = await GuildOption.GetAsync();
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    var activeTicket = await Ticket.GetActiveTicketAsync(userId);
-    await activeTicket.ProcessCloseTicketAsync(userId, LangData.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST), dontSendFeedbackMessage: true);
-
-    var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
-    if (activeBlock) {
-      throw new UserAlreadyBlacklistedException();
+    var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
+    if (activeTicket is not null) {
+      await activeTicket.ProcessCloseTicketAsync(userId, LangData.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST), dontSendFeedbackMessage: true);
     }
+
+    var activeBlock = await IsBlacklistedAsync(userId);
+    if (activeBlock) throw new UserAlreadyBlacklistedException();
 
 
     var blackList = new TicketBlacklist() {
       Id = Guid.NewGuid(),
       Reason = reason,
       DiscordUserId = userId,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = DateTime.UtcNow
     };
     await blackList.AddAsync();
 
-    var user = await Entities.DiscordUserInfo.GetAsync(userId);
-    var modUser = await Entities.DiscordUserInfo.GetAsync(modId);
+    var user = await DiscordUserInfo.GetAsync(userId);
+    var modUser = await DiscordUserInfo.GetAsync(modId);
 
     var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
     await logChannel.SendMessageAsync(embedLog);
@@ -96,7 +91,7 @@ public class TicketBlacklist
   }
 
   public async Task ProcessRemoveUserFromBlacklist(ulong authorUserId, ulong userId, bool notifyUser) {
-    await this.RemoveAsync();
+    await RemoveAsync();
     var modUser = await DiscordUserInfo.GetAsync(authorUserId);
     var userInfo = await DiscordUserInfo.GetAsync(userId);
     var embedLog = LogResponses.BlacklistRemoved(modUser, userInfo);

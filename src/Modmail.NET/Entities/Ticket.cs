@@ -75,7 +75,7 @@ public sealed class Ticket
   public static async Task<List<Ticket>> GetAllTickets(int page = 1, int pageSize = 25) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.Tickets
-                                .ToListAsync();
+                          .ToListAsync();
   }
 
   public static async Task<Ticket?> GetActiveTicketNullableAsync(ulong userId) {
@@ -140,9 +140,7 @@ public sealed class Ticket
     var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
     if (pmChannel != null) {
       await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(this, guildOption));
-      if (guildOption.TakeFeedbackAfterClosing && !dontSendFeedbackMessage) {
-        await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(this, guildOption));
-      }
+      if (guildOption.TakeFeedbackAfterClosing && !dontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(this, guildOption));
     }
     else {
       Log.Warning("Private messageContent channel not found {TicketId} {ChannelId}", Id, PrivateMessageChannelId);
@@ -167,7 +165,7 @@ public sealed class Ticket
     var oldPriority = Priority;
     Priority = newPriority;
 
-    await this.UpdateAsync();
+    await UpdateAsync();
 
     // var modUser = await ModmailBot.This.Client.GetUserAsync(modUserId);
     // if (modUser is null) throw new InvalidOperationException("ModUser is null");
@@ -230,7 +228,7 @@ public sealed class Ticket
     if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, PrivateMessageChannelId);
 
     LastMessageDateUtc = DateTime.UtcNow;
-    await this.UpdateAsync();
+    await UpdateAsync();
 
 
     var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
@@ -254,7 +252,7 @@ public sealed class Ticket
   }
 
   public static async Task ProcessCreateNewTicketAsync(DiscordUser user, DiscordChannel privateChannel, DiscordMessage message) {
-    var guildOption = await Entities.GuildOption.GetAsync();
+    var guildOption = await GuildOption.GetAsync();
     if (guildOption is null) throw new ServerIsNotSetupException();
 
     var guild = await ModmailBot.This.GetMainGuildAsync();
@@ -274,9 +272,7 @@ public sealed class Ticket
     var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
     var member = await ModmailBot.This.GetMemberFromAnyGuildAsync(user.Id);
-    if (member is null) {
-      return;
-    }
+    if (member is null) return;
 
 
     var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
@@ -327,9 +323,7 @@ public sealed class Ticket
     var newTicketCreatedLog = LogResponses.NewTicketCreated(message, mailChannel, ticket.Id);
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(newTicketCreatedLog);
-    if (guildOption.IsSensitiveLogging) {
-      await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, ticket.Id));
-    }
+    if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, ticket.Id));
   }
 
   public async Task ProcessModSendMessageAsync(DiscordUser modUser,
@@ -377,22 +371,14 @@ public sealed class Ticket
     if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (!ClosedDateUtc.HasValue) throw new InvalidOperationException("Ticket must be closed");
 
-    if (starCount < 1 || starCount > 5) {
-      throw new InvalidOperationException("Star count must be between 1 and 5");
-    }
+    if (starCount < 1 || starCount > 5) throw new InvalidOperationException("Star count must be between 1 and 5");
 
     var guildOption = await GuildOption.GetAsync();
-    if (!guildOption.TakeFeedbackAfterClosing) {
-      throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.GuildId);
-    }
+    if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.GuildId);
 
-    if (string.IsNullOrEmpty(textInput)) {
-      throw new InvalidOperationException("Feedback messageContent is empty");
-    }
+    if (string.IsNullOrEmpty(textInput)) throw new InvalidOperationException("Feedback messageContent is empty");
 
-    if (feedbackMessage is null) {
-      throw new InvalidOperationException("Feedback messageContent is null");
-    }
+    if (feedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
 
     FeedbackStar = starCount;
     FeedbackMessage = textInput;
@@ -415,7 +401,7 @@ public sealed class Ticket
       TicketId = Id,
       Content = note,
       DiscordUserId = userId,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = DateTime.UtcNow
     };
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     await dbContext.TicketNotes.AddAsync(noteEntity);
@@ -463,12 +449,11 @@ public sealed class Ticket
                                                  DiscordMessage? privateMessageWithComponent = null) {
     if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
     if (userId == 0) throw new InvalidOperationException("UserId is 0");
-    if (ClosedDateUtc.HasValue) {
+    if (ClosedDateUtc.HasValue)
       //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
       throw new TicketAlreadyClosedException();
-    }
 
-    var ticketType = await Entities.TicketType.GetAsync(type);
+    var ticketType = await TicketType.GetAsync(type);
     if (ticketType is null) throw new InvalidOperationException("TicketType is null");
 
     TicketTypeId = ticketType.Id;
@@ -519,9 +504,7 @@ public sealed class Ticket
 
 
   public static async Task<List<Ticket>> GetTimeoutTicketsAsync(long timeoutHours) {
-    if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) {
-      timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
-    }
+    if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var timeoutDate = DateTime.UtcNow.AddHours(-timeoutHours);

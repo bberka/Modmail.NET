@@ -44,9 +44,7 @@ public static class UserResponses
     if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
       embed.WithDescription(guildOption.ClosingMessage);
 
-    if (!string.IsNullOrEmpty(ticket.CloseReason)) {
-      embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
-    }
+    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
 
     return embed;
   }
@@ -96,9 +94,7 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.ErrorColor);
 
-    if (!string.IsNullOrEmpty(reason)) {
-      embed.AddField(LangKeys.REASON.GetTranslation(), reason);
-    }
+    if (!string.IsNullOrEmpty(reason)) embed.AddField(LangKeys.REASON.GetTranslation(), reason);
 
     return embed;
   }
@@ -159,9 +155,7 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.MessageReceivedColor)
                 .AddAttachment(message.Attachments);
-    if (!anonymous) {
-      embed.WithUserAsAuthor(message.Author);
-    }
+    if (!anonymous) embed.WithUserAsAuthor(message.Author);
 
     return embed;
   }

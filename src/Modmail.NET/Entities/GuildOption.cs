@@ -57,9 +57,7 @@ public class GuildOption
 
     async Task<GuildOption> _get() {
       var result = await GetNullableAsync();
-      if (result is null) {
-        throw new ServerIsNotSetupException();
-      }
+      if (result is null) throw new ServerIsNotSetupException();
 
       return result;
     }
@@ -77,12 +75,10 @@ public class GuildOption
 
   public async Task UpdateAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    this.UpdateDateUtc = DateTime.UtcNow;
+    UpdateDateUtc = DateTime.UtcNow;
     dbContext.GuildOptions.Update(this);
     var affected = await dbContext.SaveChangesAsync();
-    if (affected == 0) {
-      throw new Exception("Failed to update guild option");
-    }
+    if (affected == 0) throw new Exception("Failed to update guild option");
   }
 
   public static async Task<ulong> GetLogChannelIdAsync(ulong guildId) {
@@ -109,47 +105,27 @@ public class GuildOption
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task ProcessSetupAsync(DiscordGuild guild,
-                                             bool sensitiveLogging,
-                                             bool takeFeedbackAfterClosing,
-                                             string? greetingMessage,
-                                             string? closingMessage,
-                                             long? ticketTimeoutHours = null) {
+  public static async Task ProcessSetupAsync(DiscordGuild guild) {
     var existingMmOption = await GetNullableAsync();
-    if (existingMmOption is not null) {
-      throw new MainServerAlreadySetupException();
-    }
+    if (existingMmOption is not null) throw new MainServerAlreadySetupException();
 
     var anyServerSetup = await Any();
-    if (anyServerSetup) {
-      throw new AnotherServerAlreadySetupException();
-    }
+    if (anyServerSetup) throw new AnotherServerAlreadySetupException();
 
     var guildOption = new GuildOption {
       CategoryId = 0,
       LogChannelId = 0,
       GuildId = guild.Id,
-      IsSensitiveLogging = sensitiveLogging,
+      IsSensitiveLogging = false,
       IsEnabled = true,
       RegisterDateUtc = DateTime.UtcNow,
-      TakeFeedbackAfterClosing = takeFeedbackAfterClosing,
+      TakeFeedbackAfterClosing = false,
       ShowConfirmationWhenClosingTickets = false,
       IconUrl = guild.IconUrl,
       Name = guild.Name,
       BannerUrl = guild.BannerUrl,
       TicketTimeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS
     };
-    if (!string.IsNullOrEmpty(greetingMessage))
-      guildOption.GreetingMessage = greetingMessage;
-    if (!string.IsNullOrEmpty(closingMessage))
-      guildOption.ClosingMessage = closingMessage;
-    if (ticketTimeoutHours.HasValue) {
-      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) {
-        throw new TicketTimeoutOutOfRangeException();
-      }
-
-      guildOption.TicketTimeoutHours = ticketTimeoutHours.Value;
-    }
 
     await guildOption.AddAsync();
 
@@ -177,9 +153,7 @@ public class GuildOption
     if (!string.IsNullOrEmpty(closingMessage))
       ClosingMessage = closingMessage;
     if (ticketTimeoutHours.HasValue) {
-      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) {
-        throw new TicketTimeoutOutOfRangeException();
-      }
+      if (ticketTimeoutHours.Value < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS || ticketTimeoutHours.Value > Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS) throw new TicketTimeoutOutOfRangeException();
 
       TicketTimeoutHours = ticketTimeoutHours.Value;
     }
@@ -209,9 +183,7 @@ public class GuildOption
 
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
 
-    if (category is null) {
-      category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
-    }
+    if (category is null) category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
 
     var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, LangData.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
     LogChannelId = logChannel.Id;

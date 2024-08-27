@@ -4,11 +4,11 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Attributes;
 
-public class RequirePermissionLevelOrHigherAttribute : SlashCheckBaseAttribute
+public class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAttribute
 {
   private readonly TeamPermissionLevel _teamPermissionLevel;
 
-  public RequirePermissionLevelOrHigherAttribute(TeamPermissionLevel teamPermissionLevel) {
+  public RequirePermissionLevelOrHigherForSlashAttribute(TeamPermissionLevel teamPermissionLevel) {
     _teamPermissionLevel = teamPermissionLevel;
   }
 

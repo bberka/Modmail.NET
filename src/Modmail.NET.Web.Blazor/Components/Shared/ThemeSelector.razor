@@ -3,8 +3,8 @@
   <RadzenCard Variant="Variant.Outlined">
     <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
       <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem" class="rz-p-sm-2">
-        <RadzenLabel Text="Change the current theme" />
-        <RadzenDropDown Name="ThemeDropDown" TValue="string" Value="@ThemeService.Theme" ValueChanged="@ChangeTheme" Data="@Themes.All" TextProperty=@nameof(Theme.Text) ValueProperty=@nameof(Theme.Value)>
+        <RadzenLabel Text="Change the current theme"/>
+        <RadzenDropDown Name="ThemeDropDown" TValue="string" Value="@ThemeService.Theme" ValueChanged="@ChangeTheme" Data="@Themes.All" TextProperty="@nameof(Theme.Text)" ValueProperty="@nameof(Theme.Value)">
         </RadzenDropDown>
       </RadzenStack>
       @* <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem" class="rz-p-sm-2"> *@
@@ -14,9 +14,10 @@
     </RadzenStack>
   </RadzenCard>
 </RadzenStack>
+
 @code {
-  void ChangeTheme(string value)
-  {
+
+  void ChangeTheme(string value) {
     ThemeService.SetTheme(value);
   }
   //

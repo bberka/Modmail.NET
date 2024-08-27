@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
-<RadzenComponents @rendermode="RenderMode.InteractiveServer"></RadzenComponents>
+<RadzenComponents @rendermode="InteractiveServer"></RadzenComponents>
 
 <RadzenLayout>
   <RadzenHeader >
@@ -33,7 +33,7 @@
     @* </div> *@
   </RadzenSidebar>
   <RadzenBody class="rz-m-4">
-      @Body
+    @Body
   </RadzenBody>
   <RadzenFooter>
     Modmail.NET &copy; 2024
@@ -75,7 +75,7 @@
   bool sidebarExpanded = true;
 
   void GoHome() {
-    NavigationManager.NavigateTo("/",true);
+    NavigationManager.NavigateTo("/", true);
   }
 
 }

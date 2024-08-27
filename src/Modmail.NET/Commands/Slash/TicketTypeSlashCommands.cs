@@ -9,13 +9,13 @@ using Modmail.NET.Extensions;
 using Modmail.NET.Providers;
 using Serilog;
 
-namespace Modmail.NET.Commands;
+namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
 [SlashCommandGroup("ticket-type", "Commands for managing ticket types")]
-[RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
-[UpdateUserInformation]
-[RequireMainServer]
+[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
+[UpdateUserInformationForSlash]
+[RequireMainServerForSlashCommand]
 public class TicketTypeSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("create", "Create a new ticket type")]
@@ -166,13 +166,11 @@ public class TicketTypeSlashCommands : ApplicationCommandModule
 
     try {
       var ticketTypes = await TicketType.GetAllAsync();
-      if (ticketTypes.Count == 0) {
+      if (ticketTypes.Count == 0)
         await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPES.GetTranslation(), LangKeys.NO_TICKET_TYPES_FOUND.GetTranslation()));
-      }
-      else {
+      else
         await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPES.GetTranslation(),
                                                   string.Join(Environment.NewLine, ticketTypes.Select(x => $"`{x.Name}` - {x.Description}"))));
-      }
 
       Log.Information(logMessage);
     }

@@ -3,5 +3,5 @@
 public enum MessageSentBy
 {
   User,
-  Mod,
+  Mod
 }

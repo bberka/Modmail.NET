@@ -12,9 +12,10 @@ public sealed class GuildTeam
   public TeamPermissionLevel PermissionLevel { get; set; }
   public DateTime RegisterDateUtc { get; set; }
   public DateTime? UpdateDateUtc { get; set; }
-  
+
   [MaxLength(DbLength.NAME)]
   public string Name { get; set; }
+
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
@@ -28,9 +29,7 @@ public sealed class GuildTeam
                                 .Include(x => x.GuildTeamMembers)
                                 .ToListAsync();
 
-    if (result.Count == 0) {
-      throw new EmptyListResultException(LangKeys.TEAM);
-    }
+    if (result.Count == 0) throw new EmptyListResultException(LangKeys.TEAM);
 
     return result;
   }
@@ -66,10 +65,8 @@ public sealed class GuildTeam
                                                   TeamPermissionLevel permissionLevel,
                                                   bool pingOnNewTicket = false,
                                                   bool pingOnTicketMessage = false) {
-    var exists = await GuildTeam.Exists(teamName);
-    if (exists) {
-      throw new TeamAlreadyExistsException();
-    }
+    var exists = await Exists(teamName);
+    if (exists) throw new TeamAlreadyExistsException();
 
     var team = new GuildTeam {
       Name = teamName,
@@ -101,9 +98,7 @@ public sealed class GuildTeam
 
   public async Task ProcessAddTeamMemberAsync(ulong memberId) {
     var isUserAlreadyInTeam = await GuildTeamMember.IsUserInAnyTeamAsync(memberId);
-    if (isUserAlreadyInTeam) {
-      throw new MemberAlreadyInTeamException();
-    }
+    if (isUserAlreadyInTeam) throw new MemberAlreadyInTeamException();
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = Id,
@@ -122,9 +117,7 @@ public sealed class GuildTeam
 
   public async Task ProcessRemoveTeamMember(ulong memberId) {
     var memberEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == memberId);
-    if (memberEntity is null) {
-      throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
-    }
+    if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
 
     GuildTeamMembers.Remove(memberEntity);
     await UpdateAsync();
@@ -136,9 +129,7 @@ public sealed class GuildTeam
 
   public async Task ProcessAddRoleToTeam(DiscordRole role) {
     var isRoleAlreadyInTeam = await GuildTeamMember.IsRoleInAnyTeamAsync(role.Id);
-    if (isRoleAlreadyInTeam) {
-      throw new RoleAlreadyInTeamException();
-    }
+    if (isRoleAlreadyInTeam) throw new RoleAlreadyInTeamException();
 
     var roleEntity = new GuildTeamMember {
       GuildTeamId = Id,
@@ -155,9 +146,7 @@ public sealed class GuildTeam
 
   public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
     var roleEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
-    if (roleEntity is null) {
-      throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
-    }
+    if (roleEntity is null) throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
 
     GuildTeamMembers.Remove(roleEntity);
     await UpdateAsync();
@@ -188,26 +177,16 @@ public sealed class GuildTeam
 
     var anyChanges = permissionLevel.HasValue || pingOnNewTicket.HasValue || pingOnTicketMessage.HasValue;
 
-    if (!anyChanges) {
-      return;
-    }
+    if (!anyChanges) return;
 
     var team = await GetByNameAsync(teamName);
-    if (permissionLevel.HasValue) {
-      team.PermissionLevel = permissionLevel.Value;
-    }
+    if (permissionLevel.HasValue) team.PermissionLevel = permissionLevel.Value;
 
-    if (pingOnNewTicket.HasValue) {
-      team.PingOnNewTicket = pingOnNewTicket.Value;
-    }
+    if (pingOnNewTicket.HasValue) team.PingOnNewTicket = pingOnNewTicket.Value;
 
-    if (pingOnTicketMessage.HasValue) {
-      team.PingOnNewMessage = pingOnTicketMessage.Value;
-    }
+    if (pingOnTicketMessage.HasValue) team.PingOnNewMessage = pingOnTicketMessage.Value;
 
-    if (isEnabled.HasValue) {
-      team.IsEnabled = isEnabled.Value;
-    }
+    if (isEnabled.HasValue) team.IsEnabled = isEnabled.Value;
 
     team.UpdateDateUtc = DateTime.UtcNow;
     await team.UpdateAsync();

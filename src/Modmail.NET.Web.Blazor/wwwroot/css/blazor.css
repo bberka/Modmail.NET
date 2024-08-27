@@ -17,9 +17,9 @@
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
@@ -43,7 +43,7 @@
 
 
 #components-reconnect-modal > h5 {
-    color : #ff2626;
+    color: #ff2626;
     font-size: 2rem;
 }
 

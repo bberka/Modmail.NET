@@ -13,8 +13,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHostedService<ModmailHostedService>();
 builder.Services.AddDbContext<ModmailDbContext>();
 
-builder.Services.AddRadzenCookieThemeService(options =>
-{
+builder.Services.AddRadzenCookieThemeService(options => {
   options.Name = WebSharedConstants.THEME_COOKIE_NAME; // The name of the cookie
   options.Duration = TimeSpan.FromDays(365); // The duration of the cookie
 });
@@ -25,7 +24,7 @@ builder.Services.AddRadzenComponents();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment()) {
-  app.UseExceptionHandler("/Error", createScopeForErrors: true);
+  app.UseExceptionHandler("/Error", true);
   app.UseHsts();
 }
 

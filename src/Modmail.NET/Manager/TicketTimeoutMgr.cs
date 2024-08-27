@@ -12,13 +12,13 @@ public sealed class TicketTimeoutMgr
 
   private TicketTimeoutMgr() {
     const int ticketTimeoutCheckIntervalSeconds = 60;
-    _timer = new(TimerElapsed, null, 0, ticketTimeoutCheckIntervalSeconds * 1000);
+    _timer = new Timer(TimerElapsed, null, 0, ticketTimeoutCheckIntervalSeconds * 1000);
     Log.Information("{ServiceName} initialized", nameof(TicketTimeoutMgr));
   }
 
   public static TicketTimeoutMgr This {
     get {
-      _instance ??= new();
+      _instance ??= new TicketTimeoutMgr();
       return _instance;
     }
   }
@@ -31,12 +31,11 @@ public sealed class TicketTimeoutMgr
     try {
       var guildOption = await GuildOption.GetAsync();
       var tickets = await Ticket.GetTimeoutTicketsAsync(guildOption.TicketTimeoutHours);
-      if (tickets.Count > 0) {
+      if (tickets.Count > 0)
         foreach (var ticket in tickets) {
           await ticket.ProcessCloseTicketAsync(ModmailBot.This.Client.CurrentUser.Id, "Ticket timed out");
           Log.Information("Ticket {TicketId} has been closed due to timeout", ticket.Id);
         }
-      }
     }
     catch (BotExceptionBase ex) {
       Log.Error(ex, "Failed to check ticket timeout, bot exception occurred");

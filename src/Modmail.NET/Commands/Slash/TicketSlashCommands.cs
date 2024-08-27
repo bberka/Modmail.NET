@@ -10,17 +10,17 @@ using Modmail.NET.Providers;
 using Modmail.NET.Utils;
 using Serilog;
 
-namespace Modmail.NET.Commands;
+namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
 [SlashCommandGroup("ticket", "Ticket management commands.")]
-[UpdateUserInformation]
-[RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
-[RequireMainServer]
+[UpdateUserInformationForSlash]
+[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Moderator)]
+[RequireMainServerForSlashCommand]
 public class TicketSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("close", "Close a ticket.")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task CloseTicket(InteractionContext ctx,
                                 [Option("reason", "Ticket closing reason. User will be notified of this reason.")]
                                 string? reason = null) {
@@ -44,7 +44,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("set-priority", "Set the priority of a ticket.")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task SetPriority(InteractionContext ctx,
                                 [Option("priority", "Priority of the ticket")]
                                 TicketPriority priority) {
@@ -69,7 +69,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("add-note", "Add a note to a ticket.")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task AddNote(InteractionContext ctx,
                             [Option("note", "Note to add")] string note) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(AddNote)}({{ContextUserId}},{{note}})";
@@ -92,7 +92,7 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
   [SlashCommand("toggle-anonymous", "Toggle anonymous mode for a ticket.")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task ToggleAnonymous(InteractionContext ctx) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(ToggleAnonymous)}({{ContextUserId}})";
     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
@@ -115,7 +115,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("set-type", "Set the type of a ticket.")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task SetType(InteractionContext ctx,
                             [Option("type", "Type of the ticket")] [Autocomplete(typeof(TicketTypeProvider))]
                             string type) {
@@ -140,7 +140,7 @@ public class TicketSlashCommands : ApplicationCommandModule
 
 
   [SlashCommand("get-type", "Gets the ticket type for the current ticket channel")]
-  [RequireTicketChannel]
+  [RequireTicketChannelForSlash]
   public async Task GetTicketType(InteractionContext ctx) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(GetTicketType)}()";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());

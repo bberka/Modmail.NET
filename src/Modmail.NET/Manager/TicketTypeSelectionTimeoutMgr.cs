@@ -10,15 +10,15 @@ public sealed class TicketTypeSelectionTimeoutMgr
   private static TicketTypeSelectionTimeoutMgr? _instance;
 
   private TicketTypeSelectionTimeoutMgr() {
-    Messages = new();
+    Messages = new ConcurrentDictionary<DiscordMessage, DateTime>();
     // Repeat every 1 seconds
-    Timer = new(TimerElapsed, null, 0, 1000);
+    Timer = new Timer(TimerElapsed, null, 0, 1000);
     Log.Information("{ServiceName} initialized", nameof(TicketTypeSelectionTimeoutMgr));
   }
 
   public static TicketTypeSelectionTimeoutMgr This {
     get {
-      _instance ??= new();
+      _instance ??= new TicketTypeSelectionTimeoutMgr();
       return _instance;
     }
   }
@@ -36,9 +36,7 @@ public sealed class TicketTypeSelectionTimeoutMgr
 
   public void RemoveMessage(ulong id) {
     var message = Messages.FirstOrDefault(x => x.Key.Id == id);
-    if (message.Key != null) {
-      Messages.TryRemove(message.Key, out _);
-    }
+    if (message.Key != null) Messages.TryRemove(message.Key, out _);
   }
 
   private void TimerElapsed(object? sender) {

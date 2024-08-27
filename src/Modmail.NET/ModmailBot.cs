@@ -1,4 +1,6 @@
-﻿using DSharpPlus;
+﻿using System.Reflection;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
@@ -94,12 +96,23 @@ public class ModmailBot
 
 
     //Slash commands
+    var assembly = typeof(ModmailBot).Assembly;
     var slash = Client.UseSlashCommands();
-    slash.RegisterCommands<ModmailSlashCommands>();
-    slash.RegisterCommands<TicketSlashCommands>();
-    slash.RegisterCommands<TeamSlashCommands>();
-    slash.RegisterCommands<BlacklistSlashCommands>();
-    slash.RegisterCommands<TicketTypeSlashCommands>();
+    
+    slash.RegisterCommands(assembly);
+
+
+    //Commands
+    var commands = Client.UseCommandsNext(new CommandsNextConfiguration() {
+      StringPrefixes = [
+        BotConfig.This.BotPrefix
+      ],
+      EnableDms = false,
+      CaseSensitive = false
+    });
+
+    
+    commands.RegisterCommands(assembly);
   }
 
   public static ModmailBot This {
@@ -156,7 +169,7 @@ public class ModmailBot
 
 
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
-    foreach (var guild in Client.Guilds) {
+    foreach (var guild in Client.Guilds)
       try {
         var member = await guild.Value.GetMemberAsync(userId, false);
         if (member == null) continue;
@@ -166,7 +179,6 @@ public class ModmailBot
       catch (Exception ex) {
         Log.Error(ex, "Failed to get member from guild {GuildId} for user {UserId}", guild.Key, userId);
       }
-    }
 
     return null;
   }
@@ -203,9 +215,7 @@ public class ModmailBot
     async Task<DiscordChannel> _get() {
       var guild = await GetMainGuildAsync();
       var option = await GuildOption.GetAsync();
-      if (option is null) {
-        throw new ServerIsNotSetupException();
-      }
+      if (option is null) throw new ServerIsNotSetupException();
 
       var logChannel = guild.GetChannel(option.LogChannelId);
 

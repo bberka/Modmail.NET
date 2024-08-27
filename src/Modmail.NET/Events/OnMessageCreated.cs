@@ -48,12 +48,10 @@ public static class OnMessageCreated
       }
 
       var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
-      if (activeTicket is not null) {
+      if (activeTicket is not null)
         await activeTicket.ProcessUserSentMessageAsync(message, channel);
-      }
-      else {
+      else
         await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
-      }
 
       Log.Information(logMessage, channel.Id, userId, message.Content);
     }

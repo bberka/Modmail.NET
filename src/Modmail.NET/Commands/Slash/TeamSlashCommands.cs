@@ -9,13 +9,13 @@ using Modmail.NET.Extensions;
 using Modmail.NET.Providers;
 using Serilog;
 
-namespace Modmail.NET.Commands;
+namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
 [SlashCommandGroup("team", "Team management commands.")]
-[RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
-[UpdateUserInformation]
-[RequireMainServer]
+[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
+[UpdateUserInformationForSlash]
+[RequireMainServerForSlashCommand]
 public class TeamSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]

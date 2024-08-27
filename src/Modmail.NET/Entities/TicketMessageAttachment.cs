@@ -12,15 +12,17 @@ public class TicketMessageAttachment
 
   [MaxLength(DbLength.URL)]
   public string ProxyUrl { get; set; }
+
   public byte[]? Content { get; set; }
 
   public int? Height { get; set; }
   public int? Width { get; set; }
-  
+
   [MaxLength(DbLength.FILE_NAME)]
   public string FileName { get; set; }
+
   public int FileSize { get; set; }
-  
+
   [MaxLength(DbLength.MEDIA_TYPE)]
   public string MediaType { get; set; }
 

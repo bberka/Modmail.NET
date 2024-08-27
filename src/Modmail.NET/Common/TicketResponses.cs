@@ -36,9 +36,7 @@ public static class TicketResponses
                                        );
 
     var sb = new StringBuilder();
-    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) {
-      sb.AppendLine(permissionInfo.GetMention());
-    }
+    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) sb.AppendLine(permissionInfo.GetMention());
 
     messageBuilder.WithContent(sb.ToString());
     return messageBuilder;
@@ -97,9 +95,7 @@ public static class TicketResponses
                 .WithUserAsAuthor(message.Author)
                 .AddAttachment(message.Attachments);
 
-    if (anonymous) {
-      embed.WithFooter(LangKeys.THIS_MESSAGE_SENT_ANONYMOUSLY.GetTranslation());
-    }
+    if (anonymous) embed.WithFooter(LangKeys.THIS_MESSAGE_SENT_ANONYMOUSLY.GetTranslation());
 
     return embed;
   }
@@ -117,9 +113,7 @@ public static class TicketResponses
       .AddEmbed(embed);
     if (permissions is not null) {
       var sb = new StringBuilder();
-      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) {
-        sb.AppendLine(permissionInfo.GetMention());
-      }
+      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) sb.AppendLine(permissionInfo.GetMention());
 
       msgBuilder.WithContent(sb.ToString());
     }

@@ -70,14 +70,16 @@ If you wish to use it be aware of potential errors
 - Getting feedback from user after ticket is closed
 - Ticket type system, users can select ticket types to select what the ticket is about
 - Moderators can talk with each other in ticket channel with by starting messages with bot prefix
-
+- Web UI for managing tickets and seeing transcript information (coming soon)
 
 # Installation
-1. Install .NET 6
+1. Install .NET 8 SDK
 2. Download project build and publish for your desired platform or download build from github
 3. Visit Discord Developer Portal and create a new application
 4. Configure appsettings.json
 5. Run the app
+
+*It is recommended to run this on IIS*
 
 # Multiple Servers Usage
 Before trying to use the bot on multiple servers you must now about the limitations;
@@ -110,15 +112,9 @@ Requires TeamPermissionLevel.Admin or higher
 
 Only available for main server id in configuration
 
-### `/modmail setup`
+### `modmail setup`
 
-- **Description**: Setup the modmail bot.
-- **Parameters**:
-  - `sensitive-logging`: Whether to log modmail messages.
-  - `take-feedback`: Whether to take feedback after closing tickets.
-  - `greeting-message`: The greeting message.
-  - `closing-message`: The closing message.
-  - `ticket-timeout-hours`: The number of hours before a ticket is automatically closed. (Optional, default is 72 hours)
+- **Description**: Setup the modmail bot. This command should be run in the main server. Only bot owner can run this command.
 
 ### `/modmail configure`
 
@@ -279,51 +275,74 @@ This set of commands allows moderators or higher-level users to manage the black
     - `user`: The user to check.
 - **Usage**: `/blacklist status [user]`
 
-### `/blacklist view`
 
-- **Description**: View all blacklisted users.
-- **Usage**: `/blacklist view`
+[//]: # (## Ticket Type Group Slash Commands)
 
+[//]: # (Requires TeamPermissionLevel.Admin or higher)
 
+[//]: # ()
+[//]: # (### `/ticket-type create`)
 
-## Ticket Type Group Slash Commands
-Requires TeamPermissionLevel.Admin or higher
+[//]: # ()
+[//]: # (- **Description**: Create a new ticket type.)
 
-### `/ticket-type create`
+[//]: # (- **Parameters**:)
 
-- **Description**: Create a new ticket type.
-- **Parameters**:
-  - `name`: The name of the ticket type.
-  - `embed-message-title`: The title of the embed message.
-  - `embed-message-content`: The content of the embed message.
-  - `emoji`: The emoji used for this ticket type.
-  - `description` (optional): The description of the ticket type.
-  - `order` (optional): The order of the ticket type. Default is 0.
-- **Usage**: `/ticket-type create [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`
+[//]: # (  - `name`: The name of the ticket type.)
 
-### `/ticket-type update`
+[//]: # (  - `embed-message-title`: The title of the embed message.)
 
-- **Description**: Update existing ticket type.
-- **Parameters**:
-  - `name`: The name of the ticket type. (Auto-completed)
-  - `embed-message-title`: The title of the embed message.
-  - `embed-message-content`: The content of the embed message.
-  - `emoji`: The emoji used for this ticket type.
-  - `description` (optional): The description of the ticket type.
-  - `order` (optional): The order of the ticket type. Default is 0.
-- **Usage**: `/ticket-type update [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`
+[//]: # (  - `embed-message-content`: The content of the embed message.)
 
-### `/ticket-type delete`
+[//]: # (  - `emoji`: The emoji used for this ticket type.)
 
-- **Description**: Delete a ticket type.
-- **Parameters**:
-  - `name`: The name of the ticket type. (Auto-completed)
-- **Usage**: `/ticket-type delete [name]`
+[//]: # (  - `description` &#40;optional&#41;: The description of the ticket type.)
 
-### `/ticket-type list`
+[//]: # (  - `order` &#40;optional&#41;: The order of the ticket type. Default is 0.)
 
-- **Description**: List all ticket types.
-- **Usage**: `/ticket-type list`
+[//]: # (- **Usage**: `/ticket-type create [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`)
+
+[//]: # ()
+[//]: # (### `/ticket-type update`)
+
+[//]: # ()
+[//]: # (- **Description**: Update existing ticket type.)
+
+[//]: # (- **Parameters**:)
+
+[//]: # (  - `name`: The name of the ticket type. &#40;Auto-completed&#41;)
+
+[//]: # (  - `embed-message-title`: The title of the embed message.)
+
+[//]: # (  - `embed-message-content`: The content of the embed message.)
+
+[//]: # (  - `emoji`: The emoji used for this ticket type.)
+
+[//]: # (  - `description` &#40;optional&#41;: The description of the ticket type.)
+
+[//]: # (  - `order` &#40;optional&#41;: The order of the ticket type. Default is 0.)
+
+[//]: # (- **Usage**: `/ticket-type update [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`)
+
+[//]: # ()
+[//]: # (### `/ticket-type delete`)
+
+[//]: # ()
+[//]: # (- **Description**: Delete a ticket type.)
+
+[//]: # (- **Parameters**:)
+
+[//]: # (  - `name`: The name of the ticket type. &#40;Auto-completed&#41;)
+
+[//]: # (- **Usage**: `/ticket-type delete [name]`)
+
+[//]: # ()
+[//]: # (### `/ticket-type list`)
+
+[//]: # ()
+[//]: # (- **Description**: List all ticket types.)
+
+[//]: # (- **Usage**: `/ticket-type list`)
 
 # Contributing
 Create a pull request by using semantic commits and proper explanation

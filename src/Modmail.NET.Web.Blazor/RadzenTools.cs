@@ -7,9 +7,7 @@ namespace Modmail.NET.Web.Blazor;
 public static class RadzenTools
 {
   public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs? args = null) {
-    if (args is null) {
-      return queryable;
-    }
+    if (args is null) return queryable;
 
     // if (args.Filter is not null) {
     // }
@@ -24,12 +22,11 @@ public static class RadzenTools
 
     foreach (var sort in args.Sorts) {
       var sortField = sort.Property;
-      if (string.IsNullOrEmpty(sort.Property)) {
-        continue;
-      }
+      if (string.IsNullOrEmpty(sort.Property)) continue;
       var sortDir = sort.SortOrder;
       queryable = queryable.OrderBy(sortField + (sortDir == SortOrder.Ascending
-                                                   ? "" : " descending"));
+                                                   ? ""
+                                                   : " descending"));
     }
 
 

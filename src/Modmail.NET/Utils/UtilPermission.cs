@@ -63,6 +63,7 @@ public static class UtilPermission
 
       overwrites.Add(rolePerm);
     }
+
     return overwrites;
   }
 }

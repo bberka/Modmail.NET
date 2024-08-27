@@ -8,7 +8,7 @@ public sealed class TicketNoteConfiguration : IEntityTypeConfiguration<TicketNot
 {
   public void Configure(EntityTypeBuilder<TicketNote> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
 

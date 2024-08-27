@@ -24,15 +24,15 @@ public static class ExtEmbed
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder) {
     var guildInfo = ModmailBot.This.GetMainGuildAsync().GetAwaiter().GetResult();
-    return builder.WithFooter(guildInfo.Name, iconUrl: guildInfo.IconUrl);
+    return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
   }
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, GuildOption guildInfo) {
-    return builder.WithFooter(guildInfo.Name, iconUrl: guildInfo.IconUrl);
+    return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
   }
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, DiscordGuild guildInfo) {
-    return builder.WithFooter(guildInfo.Name, iconUrl: guildInfo.IconUrl);
+    return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
   }
 
   public static DiscordEmbedBuilder WithUserAsAuthor(this DiscordEmbedBuilder builder, DiscordUser user) {

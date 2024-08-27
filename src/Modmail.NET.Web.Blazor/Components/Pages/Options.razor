@@ -4,6 +4,7 @@
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 @rendermode InteractiveServer
+
 @code {
 
   private GuildOption? _guildOption;
@@ -14,8 +15,6 @@
       NavigationManager.NavigateTo("/setup");
       return;
     }
-
-
   }
 
 
@@ -43,91 +42,91 @@
 }
 
 <div class="container">
-  
-<RadzenRow>
-  <RadzenColumn Size="12" SizeMD="6" SizeLG="5">
-    <RadzenRow>
-      <RadzenColumn Size="12">
-        <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
-          Options
-        </RadzenText>
-        @* <hr class="my-4"/> *@
-      </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow RowGap="4" class="rz-mt-5">
-      @if (_guildOption is null) {
-        <Loading></Loading>
-      }
-      else {
-        <RadzenCard class="rz-shadow-7">
-          <RadzenTemplateForm TItem="GuildOption" Data=@_guildOption Submit=@SubmitAsync>
 
-            <RadzenRow class="rz-my-4">
-              <RadzenSwitch @bind-Value=@_guildOption.IsEnabled/>
-              <small class="text-secondary">
-                Enable bot ticket syetem.
-              </small>
-            </RadzenRow>
+  <RadzenRow>
+    <RadzenColumn Size="12" SizeMD="6" SizeLG="5">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Options
+          </RadzenText>
+          @* <hr class="my-4"/> *@
+        </RadzenColumn>
+      </RadzenRow>
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        @if (_guildOption is null) {
+          <Loading></Loading>
+        }
+        else {
+          <RadzenCard class="rz-shadow-7">
+            <RadzenTemplateForm TItem="GuildOption" Data=@_guildOption Submit=@SubmitAsync>
 
-            <RadzenRow class="rz-my-4">
-              <RadzenSwitch @bind-Value=@_guildOption.IsSensitiveLogging/>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch @bind-Value=@_guildOption.IsEnabled/>
+                <small class="text-secondary">
+                  Enable bot ticket syetem.
+                </small>
+              </RadzenRow>
 
-              <small class="text-secondary">
-                Enable sensitive data logging, such as message content.
-              </small>
-            </RadzenRow>
-            <RadzenRow class="rz-my-4">
-              <RadzenSwitch @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
-              <small class="text-secondary">
-                Enable taking feedback from user after closing a ticket.
-              </small>
-            </RadzenRow>
-            <RadzenRow class="rz-my-4">
-              <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Filled">
-                <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
-              </RadzenFormField>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch @bind-Value=@_guildOption.IsSensitiveLogging/>
 
-            </RadzenRow>
-            <RadzenRow>
-              <small class="text-secondary">
-                The time to wait in hours before a inactive ticket is automatically closed.
-              </small>
-            </RadzenRow>
+                <small class="text-secondary">
+                  Enable sensitive data logging, such as message content.
+                </small>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
+                <small class="text-secondary">
+                  Enable taking feedback from user after closing a ticket.
+                </small>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Filled">
+                  <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
+                </RadzenFormField>
 
-
-            <RadzenRow class="rz-my-4">
-              <RadzenFormField Text="Greeting Message" Variant="Variant.Filled">
-                <RadzenTextArea @bind-Value="@_guildOption.GreetingMessage" oninput="event.target.style.height = Math.max(event.target.clientHeight, event.target.scrollHeight) + 'px';" Style="min-height: 230px;min-width: 400px;max-width:  800px; white-space: pre-wrap;" aria-label="Auto-resize"/>
-              </RadzenFormField>
-
-            </RadzenRow>
-            <RadzenRow>
-              <small class="text-secondary">
-                Bot's greeting message when a user opens a ticket.
-              </small>
-            </RadzenRow>
-            <RadzenRow class="rz-my-4">
-              <RadzenFormField Text="Closing Message" Variant="Variant.Filled">
-                <RadzenTextArea @bind-Value="@_guildOption.ClosingMessage" oninput="event.target.style.height = Math.max(event.target.clientHeight, event.target.scrollHeight) + 'px';" Style="min-height: 230px; min-width: 400px; max-width:  800px; white-space: pre-wrap;" aria-label="Auto-resize"/>
-              </RadzenFormField>
-
-            </RadzenRow>
-            <RadzenRow>
-              <small class="text-secondary">
-                Bot's closing message when a user closes a ticket.
-              </small>
-            </RadzenRow>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  The time to wait in hours before a inactive ticket is automatically closed.
+                </small>
+              </RadzenRow>
 
 
-            <RadzenRow class="rz-my-4">
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField Text="Greeting Message" Variant="Variant.Filled">
+                  <RadzenTextArea @bind-Value="@_guildOption.GreetingMessage" oninput="event.target.style.height = Math.max(event.target.clientHeight, event.target.scrollHeight) + 'px';" Style="min-height: 230px;min-width: 400px;max-width:  800px; white-space: pre-wrap;" aria-label="Auto-resize"/>
+                </RadzenFormField>
 
-              <RadzenButton  ButtonType="ButtonType.Submit" Text="Save Changes" Icon="check_circle" ButtonStyle="ButtonStyle.Success"/>
-            </RadzenRow>
-          </RadzenTemplateForm>
-        </RadzenCard>
-      }
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Bot's greeting message when a user opens a ticket.
+                </small>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField Text="Closing Message" Variant="Variant.Filled">
+                  <RadzenTextArea @bind-Value="@_guildOption.ClosingMessage" oninput="event.target.style.height = Math.max(event.target.clientHeight, event.target.scrollHeight) + 'px';" Style="min-height: 230px; min-width: 400px; max-width:  800px; white-space: pre-wrap;" aria-label="Auto-resize"/>
+                </RadzenFormField>
 
-    </RadzenRow>
-  </RadzenColumn>
-</RadzenRow>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Bot's closing message when a user closes a ticket.
+                </small>
+              </RadzenRow>
+
+
+              <RadzenRow class="rz-my-4">
+
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" Icon="check_circle" ButtonStyle="ButtonStyle.Success"/>
+              </RadzenRow>
+            </RadzenTemplateForm>
+          </RadzenCard>
+        }
+
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
 </div>

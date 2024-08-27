@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Modmail.NET\Modmail.NET.csproj" />
+    <ProjectReference Include="..\Modmail.NET\Modmail.NET.csproj"/>
   </ItemGroup>
 
 </Project>

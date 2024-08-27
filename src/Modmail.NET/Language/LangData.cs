@@ -13,28 +13,21 @@ public class LangData
   private LangData() {
     var currentDir = Directory.GetCurrentDirectory();
     var langDir = Path.Combine(currentDir, "Language", "Data");
-    if (!Directory.Exists(langDir)) {
+    if (!Directory.Exists(langDir))
       throw new DirectoryNotFoundException("Language data directory not found! Please make sure you have the correct directory structure. Expected directory : " + langDir);
-    }
 
     var files = Directory.GetFiles(langDir, "*.json");
-    if (files.Length == 0) {
-      throw new FileNotFoundException("No language files found in the directory! Please make sure you have the correct directory structure. Expected directory : " + langDir);
-    }
+    if (files.Length == 0) throw new FileNotFoundException("No language files found in the directory! Please make sure you have the correct directory structure. Expected directory : " + langDir);
 
     var culture = new CultureInfo("en-US");
     var dict = new Dictionary<string, IReadOnlyDictionary<LangKeys, string>>();
     foreach (var file in files) {
       var lang = Path.GetFileNameWithoutExtension(file);
       var data = File.ReadAllText(file);
-      if (string.IsNullOrEmpty(data)) {
-        throw new JsonException("Failed to read language data for language : " + lang);
-      }
+      if (string.IsNullOrEmpty(data)) throw new JsonException("Failed to read language data for language : " + lang);
 
       var langData = JsonConvert.DeserializeObject<Dictionary<LangKeys, string>>(data);
-      if (langData == null) {
-        throw new JsonException("Failed to deserialize language data for language : " + lang);
-      }
+      if (langData == null) throw new JsonException("Failed to deserialize language data for language : " + lang);
 
       var processLangData = new Dictionary<LangKeys, string>();
       foreach (var kp in langData) {
@@ -65,15 +58,13 @@ public class LangData
 
   public static LangData This {
     get {
-      _instance ??= new();
+      _instance ??= new LangData();
       return _instance;
     }
   }
 
   private IReadOnlyDictionary<LangKeys, string> GetLanguage(string lang) {
-    if (!_languages.ContainsKey(lang)) {
-      throw new KeyNotFoundException("Language not found : " + lang);
-    }
+    if (!_languages.ContainsKey(lang)) throw new KeyNotFoundException("Language not found : " + lang);
 
     return _languages[lang];
   }
@@ -84,23 +75,18 @@ public class LangData
 
   public string GetTranslation(LangKeys key, params object[] args) {
     var lang = GetLanguage();
-    if (lang.Contains('-')) {
-      lang = lang.Split('-')[0];
-    }
+    if (lang.Contains('-')) lang = lang.Split('-')[0];
 
     var language = GetLanguage(lang);
-    if (!language.ContainsKey(key)) {
-      throw new KeyNotFoundException("Translation not found for key : " + key);
-    }
+    if (!language.ContainsKey(key)) throw new KeyNotFoundException("Translation not found for key : " + key);
 
     //try parse args to enum LangKeys and if exists replace with translation
 
     var newArgs = new List<object>();
-    foreach (var arg in args) {
+    foreach (var arg in args)
       newArgs.Add(Enum.TryParse<LangKeys>(arg.ToString(), out var newArg)
                     ? GetTranslation(newArg)
                     : arg);
-    }
 
     return string.Format(language[key], newArgs);
   }

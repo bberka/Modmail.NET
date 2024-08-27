@@ -8,12 +8,12 @@ using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Serilog;
 
-namespace Modmail.NET.Commands;
+namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
 [SlashCommandGroup("blacklist", "Blacklist management commands.")]
-[RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
-[UpdateUserInformation]
+[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Moderator)]
+[UpdateUserInformationForSlash]
 public class BlacklistSlashCommands : ApplicationCommandModule
 {
   [SlashCommand("add", "Add a user to the blacklist.")]

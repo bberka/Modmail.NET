@@ -319,21 +319,13 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
                 .AddField(LangKeys.TEAM_NAME.GetTranslation(), teamName, false);
-    if (oldPermissionLevel != teamPermissionLevel) {
-      embed.AddField(LangKeys.PERMISSION_LEVEL_UPDATED.GetTranslation(), $"{oldPermissionLevel} -> {teamPermissionLevel}", true);
-    }
+    if (oldPermissionLevel != teamPermissionLevel) embed.AddField(LangKeys.PERMISSION_LEVEL_UPDATED.GetTranslation(), $"{oldPermissionLevel} -> {teamPermissionLevel}", true);
 
-    if (oldPingOnNewTicket != teamPingOnNewTicket) {
-      embed.AddField(LangKeys.PING_ON_NEW_TICKET_UPDATED.GetTranslation(), $"{oldPingOnNewTicket} -> {teamPingOnNewTicket}", true);
-    }
+    if (oldPingOnNewTicket != teamPingOnNewTicket) embed.AddField(LangKeys.PING_ON_NEW_TICKET_UPDATED.GetTranslation(), $"{oldPingOnNewTicket} -> {teamPingOnNewTicket}", true);
 
-    if (oldPingOnNewMessage != teamPingOnNewMessage) {
-      embed.AddField(LangKeys.PING_ON_NEW_MESSAGE_UPDATED.GetTranslation(), $"{oldPingOnNewMessage} -> {teamPingOnNewMessage}", true);
-    }
+    if (oldPingOnNewMessage != teamPingOnNewMessage) embed.AddField(LangKeys.PING_ON_NEW_MESSAGE_UPDATED.GetTranslation(), $"{oldPingOnNewMessage} -> {teamPingOnNewMessage}", true);
 
-    if (oldIsEnabled != teamIsEnabled) {
-      embed.AddField(LangKeys.IS_ENABLED_UPDATED.GetTranslation(), $"{oldIsEnabled} -> {teamIsEnabled}", true);
-    }
+    if (oldIsEnabled != teamIsEnabled) embed.AddField(LangKeys.IS_ENABLED_UPDATED.GetTranslation(), $"{oldIsEnabled} -> {teamIsEnabled}", true);
 
     return embed;
   }

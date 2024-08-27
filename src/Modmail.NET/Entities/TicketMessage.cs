@@ -10,9 +10,10 @@ public class TicketMessage
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public ulong SenderUserId { get; set; }
-  
+
   [MaxLength(DbLength.MESSAGE)]
   public string MessageContent { get; set; }
+
   public ulong MessageDiscordId { get; set; }
   public Guid TicketId { get; set; }
 
@@ -40,7 +41,7 @@ public class TicketMessage
       TicketId = ticketId,
       Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = DateTime.UtcNow
     };
   }
 
@@ -54,7 +55,7 @@ public class TicketMessage
       TicketId = ticketId,
       Attachments = discordAttachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = messageId,
-      RegisterDateUtc = UtilDate.GetNow(),
+      RegisterDateUtc = UtilDate.GetNow()
     };
   }
 }

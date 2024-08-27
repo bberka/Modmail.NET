@@ -13,21 +13,18 @@ public static class AutoStartMgr
     if (BotConfig.This.AddToAutoStart == false) return;
     var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     var isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-    if (isWindows) {
+    if (isWindows)
       //windows automatic .exe start on startup register
       SaveAutoStartWindows();
-    }
-    else if (isLinux) {
+    else if (isLinux)
       SaveAutoStartLinux();
-    }
-    else {
+    else
       Log.Error("Failed to add application to autostart, unsupported OS");
-    }
   }
 
   private static void SaveAutoStartWindows() {
     try {
-      using RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+      using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
       if (key != null) {
         var appName = Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location);
         key.SetValue(appName, System.Reflection.Assembly.GetEntryAssembly().Location);

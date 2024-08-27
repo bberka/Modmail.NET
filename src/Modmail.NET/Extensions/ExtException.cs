@@ -18,25 +18,19 @@ public static class ExtException
   }
 
   public static DiscordWebhookBuilder ToWebhookResponse(this Exception exception) {
-    if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Webhooks.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
-    }
+    if (BotConfig.This.Environment == EnvironmentType.Development) return Webhooks.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
 
     return Webhooks.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
 
   public static DiscordEmbedBuilder ToEmbedResponse(this Exception exception) {
-    if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Embeds.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
-    }
+    if (BotConfig.This.Environment == EnvironmentType.Development) return Embeds.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
 
     return Embeds.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
 
   public static DiscordInteractionResponseBuilder ToInteractionResponse(this Exception exception) {
-    if (BotConfig.This.Environment == EnvironmentType.Development) {
-      return Interactions.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
-    }
+    if (BotConfig.This.Environment == EnvironmentType.Development) return Interactions.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
 
     return Interactions.Error(LangData.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
   }
