@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Models;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Entities;
 

@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Modmail.NET.Web.Shared\Modmail.NET.Web.Shared.csproj" />
+    <ProjectReference Include="..\Modmail.NET\Modmail.NET.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Language\Data\en.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Components\Layout\Shared\Scripts.razor" />
+    <AdditionalFiles Include="Components\Layout\Shared\Styles.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Radzen.Blazor" Version="5.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Logs\Log_20240820.json" />
+    <_ContentIncludedByDefault Remove="Logs\Log_20240821.json" />
+    <_ContentIncludedByDefault Remove="Logs\Log_20240822.json" />
+    <_ContentIncludedByDefault Remove="Logs\Log_20240825.json" />
+    <_ContentIncludedByDefault Remove="Logs\Log_20240826.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Logs\**" />
+  </ItemGroup>
+
+</Project>

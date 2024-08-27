@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using DSharpPlus.Entities;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Utils;
 

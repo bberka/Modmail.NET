@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Entities;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Database;
 

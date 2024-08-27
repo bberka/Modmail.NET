@@ -1,6 +1,4 @@
-﻿using Modmail.NET.Language;
-
-namespace Modmail.NET.Exceptions;
+﻿namespace Modmail.NET.Exceptions;
 
 public class InvalidMessageIdException : BotExceptionBase
 {

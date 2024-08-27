@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Aspects;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
@@ -64,22 +62,26 @@ public sealed class DiscordUserInfo
 
   public string GetMention() => $"<@{Id}>";
 
-  [CacheAspect(CacheSeconds = 10)]
   public static async Task<DiscordUserInfo> GetAsync(ulong userId) {
-    if (userId == 0) throw new InvalidUserIdException();
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    var result = await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
-    if (result is not null)
-      return result;
-    var discordUser = await ModmailBot.This.Client.GetUserAsync(userId);
+    var key = SimpleCacher.CreateKey(nameof(DiscordUserInfo), nameof(GetAsync), userId);
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10));
 
-    if (discordUser is not null) {
-      result = new DiscordUserInfo(discordUser);
-      await result.AddOrUpdateAsync();
-      return result;
+    async Task<DiscordUserInfo> _get() {
+      if (userId == 0) throw new InvalidUserIdException();
+      await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      var result = await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
+      if (result is not null)
+        return result;
+      var discordUser = await ModmailBot.This.Client.GetUserAsync(userId);
+
+      if (discordUser is not null) {
+        result = new DiscordUserInfo(discordUser);
+        await result.AddOrUpdateAsync();
+        return result;
+      }
+
+      throw new NotFoundWithException(LangKeys.USER, userId);
     }
-
-    throw new NotFoundWithException(LangKeys.USER, userId);
   }
 
   public async Task RemoveAsync() {

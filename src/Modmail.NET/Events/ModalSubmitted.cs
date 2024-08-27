@@ -11,7 +11,7 @@ namespace Modmail.NET.Events;
 
 public static class ModalSubmitted
 {
-  [PerformanceLoggerAspect(ThresholdMs = 3000)]
+  [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
     const string logMessage = $"[{nameof(ModalSubmitted)}]{nameof(Handle)}({{CustomId}},{{InteractionId}})";
     await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,

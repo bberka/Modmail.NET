@@ -1,6 +1,4 @@
-﻿using Modmail.NET.Static;
-
-namespace Modmail.NET.Models;
+﻿namespace Modmail.NET.Models;
 
 public record PermissionInfo(TeamPermissionLevel PermissionLevel, ulong Key, TeamMemberDataType Type, bool PingOnNewTicket, bool PingOnNewMessage)
 {

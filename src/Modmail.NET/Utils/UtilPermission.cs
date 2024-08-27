@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using Modmail.NET.Models;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Utils;
 

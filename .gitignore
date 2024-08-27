@@ -7,6 +7,13 @@ riderModule.iml
 /.env
 # Ignore appsettings.json
 appsettings.json
+appsettings.Development.json
+appsettings.*.json
+Logs/Log_*.json
+Log_*.json
+/Logs/Log_*.json
+/Log_*.json
+
 
 # Exclude appsettings.example.json from being ignored
 !appsettings.example.json

@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Aspects;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Utils;
@@ -15,12 +13,13 @@ public class GuildOption
 
   [MaxLength(DbLength.NAME)]
   public string Name { get; set; } = "Modmail";
-  
+
   [MaxLength(DbLength.URL)]
   public string IconUrl { get; set; } = "";
 
   [MaxLength(DbLength.URL)]
   public string? BannerUrl { get; set; }
+
   public ulong LogChannelId { get; set; }
 
   public ulong CategoryId { get; set; }
@@ -31,6 +30,7 @@ public class GuildOption
 
   public bool IsSensitiveLogging { get; set; } = true;
 
+  [Range(Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS, Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS)]
   public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
   [MaxLength(DbLength.BOT_MESSAGE)]
@@ -51,27 +51,38 @@ public class GuildOption
   public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
 
 
-  [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 60)]
   public static async Task<GuildOption> GetAsync() {
-    var result = await GetNullableAsync();
-    if (result is null) {
-      throw new ServerIsNotSetupException();
-    }
+    var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60));
 
-    return result;
+    async Task<GuildOption> _get() {
+      var result = await GetNullableAsync();
+      if (result is null) {
+        throw new ServerIsNotSetupException();
+      }
+
+      return result;
+    }
   }
 
-  [CacheAspect(DoNotCacheIfNull = true, CacheSeconds = 10)]
   public static async Task<GuildOption?> GetNullableAsync() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
+    var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetNullableAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(1));
+
+    async Task<GuildOption?> _get() {
+      var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
+    }
   }
 
   public async Task UpdateAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
     this.UpdateDateUtc = DateTime.UtcNow;
     dbContext.GuildOptions.Update(this);
-    await dbContext.SaveChangesAsync();
+    var affected = await dbContext.SaveChangesAsync();
+    if (affected == 0) {
+      throw new Exception("Failed to update guild option");
+    }
   }
 
   public static async Task<ulong> GetLogChannelIdAsync(ulong guildId) {

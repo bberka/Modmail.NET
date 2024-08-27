@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Modmail.NET.Aspects;
 using Modmail.NET.Attributes;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
@@ -11,7 +10,7 @@ using Serilog;
 
 namespace Modmail.NET.Commands;
 
-[PerformanceLoggerAspect(ThresholdMs = 3000)]
+[PerformanceLoggerAspect]
 [SlashCommandGroup("modmail", "Modmail management commands.")]
 [RequirePermissionLevelOrHigher(TeamPermissionLevel.Admin)]
 [UpdateUserInformation]

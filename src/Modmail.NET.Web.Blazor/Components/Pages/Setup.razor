@@ -1,0 +1,23 @@
+﻿@page "/setup"
+@inject NavigationManager NavigationManager
+
+
+@code {
+
+  protected override async Task OnInitializedAsync() {
+    if (await GuildOption.Any() == true) {
+      NavigationManager.NavigateTo("/");
+    }
+  }
+
+
+}
+
+<div class="row">
+  <h1>Setup</h1>
+  <p class="text-secondary">
+    You must setup the bot before you can use the dashboard.
+  </p>
+</div>
+
+<hr class="my-2"/>

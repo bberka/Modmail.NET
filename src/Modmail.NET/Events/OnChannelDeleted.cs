@@ -11,7 +11,7 @@ namespace Modmail.NET.Events;
 
 public static class OnChannelDeleted
 {
-  [PerformanceLoggerAspect(ThresholdMs = 3000)]
+  [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, ChannelDeleteEventArgs args) {
     const string logMessage = $"[{nameof(OnChannelDeleted)}]{nameof(Handle)}({{ChannelId}})";
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(args.Channel.Topic);

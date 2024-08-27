@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Modmail.NET.Static;
 using Serilog.Events;
 
 namespace Modmail.NET;

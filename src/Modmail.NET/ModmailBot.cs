@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Aspects;
 using Modmail.NET.Commands;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -22,6 +21,7 @@ public class ModmailBot
 {
   private static ModmailBot? _instance;
 
+  public bool Connected { get; private set; }
 
   private ModmailBot() {
     _ = BotConfig.This; // Initialize the environment container
@@ -116,6 +116,7 @@ public class ModmailBot
     // Start the bot
 
     await Client.ConnectAsync();
+    Connected = true;
 
     await SetupDatabase();
 
@@ -128,11 +129,16 @@ public class ModmailBot
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
     await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
-    await Task.Delay(-1);
   }
 
-  private async Task StopAsync() {
+  public async Task StopAsync() {
     await Client.DisconnectAsync();
+    Connected = false;
+  }
+
+  public async Task RestartAsync() {
+    await StopAsync();
+    await StartAsync();
   }
 
 
@@ -165,41 +171,50 @@ public class ModmailBot
     return null;
   }
 
-  [CacheAspect(CacheSeconds = 60)]
   public async Task<DiscordGuild> GetMainGuildAsync() {
-    var guildId = BotConfig.This.MainServerId;
-    var guild = await Client.GetGuildAsync(guildId);
-    if (guild == null) {
-      Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new NotFoundException(LangKeys.MAIN_GUILD);
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetMainGuildAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(300));
+
+
+    async Task<DiscordGuild> _get() {
+      var guildId = BotConfig.This.MainServerId;
+      var guild = await Client.GetGuildAsync(guildId);
+      if (guild == null) {
+        Log.Error("Main guild not found: {GuildId}", guildId);
+        throw new NotFoundException(LangKeys.MAIN_GUILD);
+      }
+
+      var guildOption = await GuildOption.GetAsync();
+
+      guildOption.Name = guild.Name;
+      guildOption.IconUrl = guild.IconUrl;
+      guildOption.BannerUrl = guild.BannerUrl;
+      await guildOption.UpdateAsync();
+      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
+
+      return guild;
     }
-
-    var guildOption = await GuildOption.GetAsync();
-
-    guildOption.Name = guild.Name;
-    guildOption.IconUrl = guild.IconUrl;
-    guildOption.BannerUrl = guild.BannerUrl;
-    await guildOption.UpdateAsync();
-    await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
-
-    return guild;
   }
 
-  [CacheAspect(CacheSeconds = 300)]
   public async Task<DiscordChannel> GetLogChannelAsync() {
-    var guild = await GetMainGuildAsync();
-    var option = await GuildOption.GetAsync();
-    if (option is null) {
-      throw new ServerIsNotSetupException();
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetLogChannelAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60));
+
+    async Task<DiscordChannel> _get() {
+      var guild = await GetMainGuildAsync();
+      var option = await GuildOption.GetAsync();
+      if (option is null) {
+        throw new ServerIsNotSetupException();
+      }
+
+      var logChannel = guild.GetChannel(option.LogChannelId);
+
+      if (logChannel is null) {
+        logChannel = await option.ProcessCreateLogChannel(guild);
+        Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
+      }
+
+      return logChannel;
     }
-
-    var logChannel = guild.GetChannel(option.LogChannelId);
-
-    if (logChannel is null) {
-      logChannel = await option.ProcessCreateLogChannel(guild);
-      Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
-    }
-
-    return logChannel;
   }
 }

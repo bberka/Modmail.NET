@@ -1,0 +1,81 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+<RadzenComponents @rendermode="RenderMode.InteractiveServer"></RadzenComponents>
+
+<RadzenLayout>
+  <RadzenHeader >
+    <RadzenRow>
+      <RadzenColumn Size="5">
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Normal" AlignItems="AlignItems.Center" Gap="0">
+          <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)"/>
+          <RadzenLabel Text="Modmail.NET"/>
+        </RadzenStack>
+      </RadzenColumn>
+      <RadzenColumn Size="7">
+        <RadzenStack Wrap="FlexWrap.NoWrap" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center" Gap="0">
+          <RadzenLink Text="Github" Path="/api/link/github" class="rz-mx-2 rz-mx-lg-4 rz-mt-3"></RadzenLink>
+        </RadzenStack>
+      </RadzenColumn>
+    </RadzenRow>
+
+
+  </RadzenHeader>
+  <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+    <RadzenPanelMenu>
+      <RadzenPanelMenuItem Text="Home" Icon="home" Path="/"/>
+      <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
+      <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
+      <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
+      <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
+    </RadzenPanelMenu>
+    @* <div class="rz-p-4"> *@
+    @*   Sidebar *@
+    @* </div> *@
+  </RadzenSidebar>
+  <RadzenBody class="rz-m-4">
+      @Body
+  </RadzenBody>
+  <RadzenFooter>
+    Modmail.NET &copy; 2024
+  </RadzenFooter>
+</RadzenLayout>
+
+@* *@
+@* <RadzenDialog @rendermode="InteractiveServer"></RadzenDialog> *@
+@* <RadzenNotification @rendermode="InteractiveServer"></RadzenNotification> *@
+
+
+<div id="blazor-error-ui" class="rz-background-color-base-800">
+  <RadzenCard class="rz-shadow-7 max-w-400px rz-mx-auto rz-mt-5">
+    <RadzenText TextStyle="TextStyle.DisplayH3" class="rz-color-danger fw-bold">
+      ERROR 500
+    </RadzenText>
+    <RadzenText TextStyle="TextStyle.DisplayH4" class="rz-color-danger rz-my-5">
+      An unhandled error has occurred
+    </RadzenText>
+    <RadzenButton class="reload" ButtonType="ButtonType.Button">
+      <RadzenIcon Icon="refresh"/>
+      Refresh
+    </RadzenButton>
+    <RadzenButton ButtonType="ButtonType.Button" Click="GoHome">
+      <RadzenIcon Icon="home"/>
+      Go Home
+    </RadzenButton>
+  </RadzenCard>
+  <div class="my-5 text-center text-danger h1">
+
+    @* <RadzenButton class="dismiss" ButtonType="ButtonType.Button"> *@
+    @*   <RadzenIcon Icon="close" /> *@
+    @* </RadzenButton> *@
+  </div>
+</div>
+
+@code {
+
+  bool sidebarExpanded = true;
+
+  void GoHome() {
+    NavigationManager.NavigateTo("/",true);
+  }
+
+}

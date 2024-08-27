@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Manager;
@@ -25,13 +24,14 @@ public sealed class Ticket
   public ulong InitialMessageId { get; set; }
   public ulong BotTicketCreatedMessageInDmId { get; set; }
   public TicketPriority Priority { get; set; }
-  
+
   [MaxLength(DbLength.REASON)]
   public string? CloseReason { get; set; }
+
   public bool IsForcedClosed { get; set; } = false;
 
   public int? FeedbackStar { get; set; }
-  
+
   [MaxLength(DbLength.FEEDBACK_MESSAGE)]
   public string? FeedbackMessage { get; set; }
 
@@ -68,6 +68,12 @@ public sealed class Ticket
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
     if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
+  }
+
+  public static async Task<List<Ticket>> GetAllTickets(int page = 1, int pageSize = 25) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.Tickets
+                                .ToListAsync();
   }
 
   public static async Task<Ticket?> GetActiveTicketNullableAsync(ulong userId) {
