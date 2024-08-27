@@ -18,7 +18,7 @@
   }
 
 
-  private async Task SubmitAsync(object? o = null) {
+  private async Task SubmitAsync() {
     try {
       if (_guildOption is null) {
         throw new InvalidOperationException("Guild option is null");
@@ -82,9 +82,9 @@
                 </small>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/>
+                <RadzenSwitch Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/>
                 <small class="text-secondary">
-                  Show a confirmation dialog when a moderator closes a ticket
+                  Show a confirmation dialog when a moderator closes a ticket (Not implemented)
                 </small>
               </RadzenRow>
               <RadzenRow class="rz-my-4">

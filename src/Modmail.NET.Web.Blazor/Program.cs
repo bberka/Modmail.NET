@@ -11,6 +11,7 @@ builder.Services.AddRazorComponents()
        .AddInteractiveServerComponents();
 
 builder.Services.AddHostedService<ModmailHostedService>();
+builder.Services.AddDbContextFactory<ModmailDbContext>();
 builder.Services.AddDbContext<ModmailDbContext>();
 
 builder.Services.AddRadzenCookieThemeService(options => {

@@ -27,7 +27,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       await DiscordUserInfo.AddOrUpdateAsync(user);
-      await TicketBlacklist.ProcessAddUserToBlacklist(ctx.User.Id, user.Id, reason);
+      await TicketBlacklist.ProcessAddUserToBlacklist( user.Id, reason,ctx.User.Id);
       await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,

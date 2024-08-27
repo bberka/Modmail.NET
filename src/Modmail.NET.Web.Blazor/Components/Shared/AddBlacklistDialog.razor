@@ -1,0 +1,87 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Language
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject  NotificationService NotificationService
+
+@code {
+
+  [Parameter]
+  public DialogService DialogService { get; set; }
+
+  private List<DiscordUserInfo> _users = new();
+
+  private ulong? selectedUserId;
+
+  private string? reason;
+
+  protected override async Task OnInitializedAsync() {
+    await base.OnInitializedAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+    _users = await dbContext.DiscordUserInfos
+                            .OrderBy(x => x.Username)
+                            .Where(x => x.Id != ModmailBot.This.Client.CurrentUser.Id && BotConfig.This.OwnerUsers.Contains(x.Id))
+                            .ToListAsync();
+  }
+
+  private async Task SubmitAsync() {
+    if (selectedUserId is null) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+      return;
+    }
+
+    var dialogResult = await DialogService.Confirm("Are you sure you want to block this user?",
+                                                   options: new ConfirmOptions() {
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No",
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true,
+                                                   });
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
+      try {
+        await TicketBlacklist.ProcessAddUserToBlacklist(selectedUserId.Value, reason);
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
+        Log.Information(logMessage,
+                        selectedUserId.Value,
+                        reason);
+      }
+      catch (BotExceptionBase ex) {
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", ex.Message);
+        Log.Warning(logMessage,
+                    selectedUserId.Value,
+                    reason);
+      }
+      catch (Exception ex) {
+        NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        Log.Fatal(logMessage,
+                  selectedUserId.Value,
+                  reason);
+      }
+    }
+  }
+
+  // private sealed record AddBlackListModel(ulong UserId);
+
+}
+
+
+<RadzenRow>
+  <RadzenColumn>
+    <RadzenRow class="">
+      <p>
+        Blocking user will force close active tickets if user has any.
+      </p>
+    </RadzenRow>
+    <RadzenRow class="">
+      <RadzenDropDown Style="width: 100%; max-width: 300px;" TValue="ulong?" @bind-Value="selectedUserId" Placeholder="Select user" AllowFiltering="true"
+                      Data="@(_users)" TextProperty="@nameof(DiscordUserInfo.Username)" ValueProperty="@nameof(DiscordUserInfo.Id)"/>
+    </RadzenRow>
+    <RadzenRow class="rz-mt-6">
+      <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Text="Block User" Click="SubmitAsync"/>
+    </RadzenRow>
+
+
+  </RadzenColumn>
+</RadzenRow>

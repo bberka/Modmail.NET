@@ -56,8 +56,12 @@ public class TicketBlacklist
     await dbContext.SaveChangesAsync();
   }
 
-  public static async Task ProcessAddUserToBlacklist(ulong modId, ulong userId, string reason) {
+  public static async Task ProcessAddUserToBlacklist(ulong userId, string? reason = null, ulong modId = 0) {
     // var option = await GuildOption.GetAsync();
+
+    if (modId == 0) {
+      modId = ModmailBot.This.Client.CurrentUser.Id; //TODO: Get author from web or set owner user id
+    }
 
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
@@ -68,6 +72,9 @@ public class TicketBlacklist
     var activeBlock = await IsBlacklistedAsync(userId);
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
+    if (string.IsNullOrEmpty(reason)) {
+      reason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
+    }
 
     var blackList = new TicketBlacklist() {
       Id = Guid.NewGuid(),
