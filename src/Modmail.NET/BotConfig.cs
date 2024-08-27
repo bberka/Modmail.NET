@@ -16,15 +16,13 @@ public class BotConfig
     BotToken = _configManager["BOT_TOKEN"] ?? throw new Exception("BOT_TOKEN is not set.");
     BotClientId = _configManager["BOT_CLIENT_ID"] ?? throw new Exception("BOT_CLIENT_ID is not set.");
     BotClientSecret = _configManager["BOT_CLIENT_SECRET"] ?? throw new Exception("BOT_CLIENT_SECRET is not set.");
-    BotPrefix = _configManager["BOT_PREFIX"] ?? "!";
+    BotPrefix = _configManager["BOT_PREFIX"] ?? "!!";
     MainServerId = ulong.Parse(_configManager["MAIN_SERVER_ID"] ?? "0");
     OwnerUsers = _configManager["OWNER_USERS"]?.Split(',').Select(ulong.Parse).ToArray() ?? Array.Empty<ulong>();
     DbConnectionString = _configManager["DB_CONNECTION_STRING"] ?? throw new Exception("DB_CONNECTION_STRING is not set.");
     LogLevel = Enum.Parse<LogEventLevel>(_configManager["LOG_LEVEL"] ?? "Information", true);
     LogSinkToFile = bool.Parse(_configManager["LOG_SINK_TO_FILE"] ?? "true");
     LogSinkToConsole = bool.Parse(_configManager["LOG_SINK_TO_CONSOLE"] ?? "true");
-    AddToAutoStart = bool.Parse(_configManager["ADD_TO_AUTOSTART"] ?? "false");
-    UseLocalTime = bool.Parse(_configManager["USE_LOCAL_TIME"] ?? "false");
     EncryptionKey = _configManager["ENCRYPTION_KEY"] ?? throw new Exception("ENCRYPTION_KEY is not set.");
     DefaultLanguage = _configManager["DEFAULT_LANGUAGE"] ?? "en";
   }
@@ -73,12 +71,6 @@ public class BotConfig
 
   //Name: LOG_SINK_TO_CONSOLE
   public bool LogSinkToConsole { get; set; }
-
-  //Name: ADD_TO_AUTOSTART
-  public bool AddToAutoStart { get; set; }
-
-  //Name: USE_LOCAL_TIME
-  public bool UseLocalTime { get; set; }
 
   //Name: DEFAULT_LANGUAGE
   public string DefaultLanguage { get; set; }

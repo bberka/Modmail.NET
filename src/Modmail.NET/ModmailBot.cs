@@ -49,8 +49,6 @@ public class ModmailBot
 
 
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    AutoStartMgr.HandleAutomaticAppStart();
-
     //Define the client
     Client = new DiscordClient(new DiscordConfiguration {
       Token = BotConfig.This.BotToken,
