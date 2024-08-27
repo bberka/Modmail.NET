@@ -68,7 +68,7 @@ namespace Modmail.NET.Common
     }
 
     // Get or set an item in the cache
-    public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> func, TimeSpan expiration) {
+    public async Task<T?> GetOrSetAsync<T>(string key, Func<Task<T>> func, TimeSpan expiration) {
       if (_cache.TryGetValue(key, out var cacheItem)) {
         if (!cacheItem.IsExpired) {
           return (T)cacheItem.Value;
@@ -79,7 +79,8 @@ namespace Modmail.NET.Common
 
       var result = await func();
       if (result is null) {
-        throw new ArgumentNullException(nameof(result), "Value cannot be null.");
+        return result;
+        // throw new ArgumentNullException(nameof(result), "Value cannot be null.");
       }
 
       Add(key, result, expiration);

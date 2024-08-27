@@ -53,7 +53,7 @@ public class GuildOption
 
   public static async Task<GuildOption> GetAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
 
     async Task<GuildOption> _get() {
       var result = await GetNullableAsync();

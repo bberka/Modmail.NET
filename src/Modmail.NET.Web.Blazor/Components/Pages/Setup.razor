@@ -1,5 +1,7 @@
 ﻿@page "/setup"
+@using Modmail.NET.Web.Blazor.Components.Layout
 @inject NavigationManager NavigationManager
+@layout EmptyLayout
 
 
 @code {
@@ -18,6 +20,8 @@
   <p class="text-secondary">
     You must setup the bot before you can use the dashboard.
   </p>
+  <p class="text-secondary">
+    You can setup bot using bot commands through discord.
+  </p>
 </div>
 
-<hr class="my-2"/>
