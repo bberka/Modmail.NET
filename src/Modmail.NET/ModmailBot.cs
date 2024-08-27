@@ -128,6 +128,7 @@ public class ModmailBot
   public async Task StartAsync() {
     // Start the bot
 
+    Log.Information("Starting bot");
     await Client.ConnectAsync();
     Connected = true;
 
@@ -145,11 +146,13 @@ public class ModmailBot
   }
 
   public async Task StopAsync() {
+    Log.Information("Stopping bot");
     await Client.DisconnectAsync();
     Connected = false;
   }
 
   public async Task RestartAsync() {
+    Log.Information("Restarting bot");
     await StopAsync();
     await StartAsync();
   }

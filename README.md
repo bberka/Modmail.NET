@@ -243,7 +243,6 @@ This set of commands allows moderators or higher-level users to manage the black
 - **Description**: Add a user to the blacklist.
 - **Parameters**:
     - `user`: The user to blacklist.
-    - `[notify-user]`: Whether to notify the user about the blacklist. Default is `True`.
     - `[reason]`: The reason for blacklisting. Default is "No reason provided."
 - **Usage**: `/blacklist add [user] [notify-user] [reason]`
 
@@ -252,7 +251,6 @@ This set of commands allows moderators or higher-level users to manage the black
 - **Description**: Remove a user from the blacklist.
 - **Parameters**:
     - `user`: The user to remove from the blacklist.
-    - `[notify-user]`: Whether to notify the user about the removal. Default is `True`.
 - **Usage**: `/blacklist remove [user] [notify-user]`
 
 ### `/blacklist status`

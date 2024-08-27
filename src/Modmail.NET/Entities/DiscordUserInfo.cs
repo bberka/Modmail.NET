@@ -67,7 +67,7 @@ public sealed class DiscordUserInfo
 
   public static async Task<DiscordUserInfo> GetAsync(ulong userId) {
     var key = SimpleCacher.CreateKey(nameof(DiscordUserInfo), nameof(GetAsync), userId);
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
 
     async Task<DiscordUserInfo> _get() {
       if (userId == 0) throw new InvalidUserIdException();

@@ -4,6 +4,7 @@
 
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
+@inject  NotificationService NotificationService
 
 @code {
 
@@ -35,53 +36,47 @@
 
   private async Task StartBotAsync() {
     var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
-                                                   "Start Bot",
-                                                   new ConfirmOptions() {
+                                                   options: new ConfirmOptions() {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No"
                                                    });
-    if (dialogResult != true) {
-      return;
+    if (dialogResult == true) {
+      await ModmailBot.This.StartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
     }
-
-    await ModmailBot.This.StartAsync();
-    StateHasChanged();
   }
 
   private async Task StopBotAsync() {
     var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
-                                                   "Stop Bot",
-                                                   new ConfirmOptions() {
+                                                   options: new ConfirmOptions() {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No"
                                                    });
-    if (dialogResult != true) {
-      return;
+    if (dialogResult == true) {
+      await ModmailBot.This.StopAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
     }
-
-    await ModmailBot.This.StopAsync();
-    StateHasChanged();
   }
 
   private async Task RestartBotAsync() {
     var dialogResult = await DialogService.Confirm("Are you sure you want to restart the bot?",
-                                                   "Restart Bot",
-                                                   new ConfirmOptions() {
+                                                   options: new ConfirmOptions() {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No"
                                                    });
-    if (dialogResult != true) {
-      return;
+    if (dialogResult == true) {
+      await ModmailBot.This.RestartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
     }
-
-    await ModmailBot.This.RestartAsync();
-    StateHasChanged();
   }
 
 }

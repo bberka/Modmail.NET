@@ -1,7 +1,10 @@
 ﻿@page "/blacklist"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Serilog
 @inject ModmailDbContext DbContext
+@inject DialogService DialogService
+@inject  NotificationService NotificationService
 
 @code {
 
@@ -46,7 +49,50 @@
 
   private int count = 0;
 
+  private async Task RemoveBlockAsync(TicketBlacklist blacklist) {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to remove this user from the blacklist?",
+                                                   options: new ConfirmOptions() {
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No",
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true,
+                                                   });
+
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(Blacklist)}]{nameof(RemoveBlockAsync)}{{UserId}})";
+      try {
+        await blacklist.ProcessRemoveUserFromBlacklist(blacklist.DiscordUserId);
+        Log.Information(logMessage,
+                        blacklist.DiscordUserId);
+        NotificationService.Notify(NotificationSeverity.Success,
+                                   "User removed from blacklist");
+        data = DbContext.TicketBlacklists
+                        .Include(x => x.DiscordUser)
+                        .OrderByDescending(x => x.RegisterDateUtc)
+                        .AsQueryable()
+                        .Skip(0)
+                        .Take(10)
+                        .AsQueryable();
+      }
+      catch (BotExceptionBase ex) {
+        Log.Warning(ex,
+                    logMessage,
+                    blacklist.DiscordUserId);
+        NotificationService.Notify(NotificationSeverity.Error,
+                                   ex.Message);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex,
+                  logMessage,
+                  blacklist.DiscordUserId);
+        NotificationService.Notify(NotificationSeverity.Error,
+                                   "Exception occurred, please check logs");
+      }
+    }
+  }
+
 }
+
 
 <div class="container-xl rz-mx-auto">
   <RadzenRow>
@@ -74,8 +120,7 @@
                             Data="@data" TItem="TicketBlacklist" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <Columns>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.Id)" Filterable="false" Title="ID" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.RegisterDateUtc)" Filterable="false" Title="Register Date UTC" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketBlacklist.Id)" Filterable="false" Title="ID" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Title="User Avatar" Frozen="false" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
@@ -90,8 +135,16 @@
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.RegisterDateUtc)" Filterable="true" Title="Register Date UTC" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketBlacklist.Reason)" Filterable="true" Title="Reason" Frozen="true" Width="120px" TextAlign="TextAlign.Center"/>
 
-              
+                <RadzenDataGridColumn Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+                  <Template Context="data">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveBlockAsync(data))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                  </Template>
+                </RadzenDataGridColumn>
+
               </Columns>
             </RadzenDataGrid>
           </RadzenCard>

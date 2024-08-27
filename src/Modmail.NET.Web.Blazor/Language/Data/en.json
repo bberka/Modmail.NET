@@ -24,7 +24,6 @@
   "MESSAGE_SENT_BY_USER": "Message Sent by User",
   "NOTE_ADDED": "Note Added",
   "FEEDBACK": "Feedback",
-  "FEEDBACK_DESCRIPTION": "Please rate the answers you receive. This helps us improve our moderation team.",
   "FEEDBACK_RECEIVED": "Feedback Received",
   "STAR": "Star",
   "ANONYMOUS_TOGGLED": "Anonymous Toggled",
@@ -182,5 +181,8 @@
   "CHANNEL": "Channel",
   "MEMBER": "Member",
   "NO_X_FOUND": "No {0} found",
-  "TICKET_TIMEOUT_HOURS": "Ticket Timeout Hours"
+  "TICKET_TIMEOUT_HOURS": "Ticket Timeout Hours",
+  "FEEDBACK_DESCRIPTION": "Please rate the answers you receive. This helps us improve our moderation team.",
+  "GREETING_MESSAGE_DESCRIPTION": "Welcome to the modmail system! Please describe your issue and a moderator will be with you shortly.",
+  "CLOSING_MESSAGE_DESCRIPTION": "Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again."
 }
