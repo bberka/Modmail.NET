@@ -16,8 +16,6 @@ Bot creates tickets and users message with the bot directly instead of sending m
 - [Commands](#commands)
   - [Modmail Group Slash Commands](#modmail-group-slash-commands)
     - [`/modmail setup`](#modmail-setup)
-    - [`/modmail configure`](#modmail-configure)
-    - [`/modmail get-settings`](#modmail-get-settings)
   - [Ticket Group Slash Commands](#ticket-group-slash-commands)
     - [`/ticket close`](#ticket-close)
     - [`/ticket set-priority`](#ticket-set-priority)
@@ -25,26 +23,10 @@ Bot creates tickets and users message with the bot directly instead of sending m
     - [`/ticket toggle-anonymous`](#ticket-toggle-anonymous)
     - [`/ticket set-type`](#ticket-set-type)
     - [`/ticket get-type`](#ticket-get-type)
-  - [Team Group Slash Commands](#team-group-slash-commands)
-    - [`/team list`](#team-list)
-    - [`/team create`](#team-create)
-    - [`/team update`](#team-update)
-    - [`/team remove`](#team-remove)
-    - [`/team add-user`](#team-add-user)
-    - [`/team remove-user`](#team-remove-user)
-    - [`/team add-role`](#team-add-role)
-    - [`/team remove-role`](#team-remove-role)
-    - [`/team rename`](#team-rename)
   - [Blacklist Group Slash Commands](#blacklist-group-slash-commands)
     - [`/blacklist add`](#blacklist-add)
     - [`/blacklist remove`](#blacklist-remove)
     - [`/blacklist status`](#blacklist-status)
-    - [`/blacklist view`](#blacklist-view)
-  - [Ticket Type Group Slash Commands](#ticket-type-group-slash-commands)
-    - [`/ticket-type create`](#ticket-type-create)
-    - [`/ticket-type update`](#ticket-type-update)
-    - [`/ticket-type delete`](#ticket-type-delete)
-    - [`/ticket-type list`](#ticket-type-list)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 
@@ -109,13 +91,13 @@ Parameter types with '*' are required
 
 Default prefix is '!!'
 
-## Modmail Group Slash Commands 
+## Modmail Group Commands 
 Requires TeamPermissionLevel.Admin or higher
 
 Only available for main server id in configuration
 ### `modmail setup`
 - **Description**: Setup the modmail bot. 
-- **Usage**: `/modmail setup`
+- **Usage**: `!!modmail setup`
 - **Note**: This command should be run in the main server. Only bot owner can run this command. This command will create the necessary channels and roles for the modmail bot.
 
 ## Ticket Group Slash Commands 
@@ -161,78 +143,6 @@ This set of commands allows moderators or higher-level users to manage tickets i
 - **Usage**: `/ticket-type get`
 
 
-## Team Group Slash Commands
-Requires TeamPermissionLevel.Admin or higher
-
-Only available in main server id set in configuration
-
-This set of commands allows admins or higher-level users to manage teams in the Discord server.
-### `/team list`
-
-- **Description**: List all teams.
-
-### `/team create`
-
-- **Description**: Create a new team.
-- **Parameters**:
-  - `teamName`: The name of the team.
-  - `permissionLevel`: The permission level for the team.
-  - `ping-on-new-ticket`: (Optional) Whether to ping on a new ticket. Default is `false`.
-  - `ping-on-ticket-message`: (Optional) Whether to ping on a ticket message. Default is `false`.
-
-### `/team update`
-
-- **Description**: Update an existing team.
-- **Parameters**:
-  - `teamName`: The name of the team.
-  - `is-enabled`: Whether the team is enabled.
-  - `permissionLevel`: (Optional) The permission level for the team.
-  - `ping-on-new-ticket`: (Optional) Whether to ping on a new ticket.
-  - `ping-on-ticket-message`: (Optional) Whether to ping on a ticket message.
-
-
-### `/team remove`
-
-- **Description**: Remove a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-
-### `/team add-user`
-
-- **Description**: Add a user to a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-  - `member`: Member to add to the team.
-
-### `/team remove-user`
-
-- **Description**: Remove a user from a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-  - `member`: Member to remove from the team.
-
-### `/team add-role`
-
-- **Description**: Adds a role to a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-  - `role`: Role to add to the team.
-
-### `/team remove-role`
-
-- **Description**: Removes a role from a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-  - `role`: Role to remove from the team.
-
-### `/team rename`
-
-- **Description**: Rename a team.
-- **Parameters**:
-  - `teamName`: Team name. (Auto-completed)
-  - `newName`: New team name.
-
-
 ## Blacklist Group Slash Commands
 Requires TeamPermissionLevel.Moderator or higher
 
@@ -259,75 +169,6 @@ This set of commands allows moderators or higher-level users to manage the black
 - **Parameters**:
     - `user`: The user to check.
 - **Usage**: `/blacklist status [user]`
-
-
-[//]: # (## Ticket Type Group Slash Commands)
-
-[//]: # (Requires TeamPermissionLevel.Admin or higher)
-
-[//]: # ()
-[//]: # (### `/ticket-type create`)
-
-[//]: # ()
-[//]: # (- **Description**: Create a new ticket type.)
-
-[//]: # (- **Parameters**:)
-
-[//]: # (  - `name`: The name of the ticket type.)
-
-[//]: # (  - `embed-message-title`: The title of the embed message.)
-
-[//]: # (  - `embed-message-content`: The content of the embed message.)
-
-[//]: # (  - `emoji`: The emoji used for this ticket type.)
-
-[//]: # (  - `description` &#40;optional&#41;: The description of the ticket type.)
-
-[//]: # (  - `order` &#40;optional&#41;: The order of the ticket type. Default is 0.)
-
-[//]: # (- **Usage**: `/ticket-type create [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`)
-
-[//]: # ()
-[//]: # (### `/ticket-type update`)
-
-[//]: # ()
-[//]: # (- **Description**: Update existing ticket type.)
-
-[//]: # (- **Parameters**:)
-
-[//]: # (  - `name`: The name of the ticket type. &#40;Auto-completed&#41;)
-
-[//]: # (  - `embed-message-title`: The title of the embed message.)
-
-[//]: # (  - `embed-message-content`: The content of the embed message.)
-
-[//]: # (  - `emoji`: The emoji used for this ticket type.)
-
-[//]: # (  - `description` &#40;optional&#41;: The description of the ticket type.)
-
-[//]: # (  - `order` &#40;optional&#41;: The order of the ticket type. Default is 0.)
-
-[//]: # (- **Usage**: `/ticket-type update [name] [embed-message-title] [embed-message-content] [emoji] [description] [order]`)
-
-[//]: # ()
-[//]: # (### `/ticket-type delete`)
-
-[//]: # ()
-[//]: # (- **Description**: Delete a ticket type.)
-
-[//]: # (- **Parameters**:)
-
-[//]: # (  - `name`: The name of the ticket type. &#40;Auto-completed&#41;)
-
-[//]: # (- **Usage**: `/ticket-type delete [name]`)
-
-[//]: # ()
-[//]: # (### `/ticket-type list`)
-
-[//]: # ()
-[//]: # (- **Description**: List all ticket types.)
-
-[//]: # (- **Usage**: `/ticket-type list`)
 
 # Contributing
 Create a pull request by using semantic commits and proper explanation
