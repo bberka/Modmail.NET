@@ -107,29 +107,16 @@ Ticket channels will created in main server
 # Commands
 Parameter types with '*' are required
 
+Default prefix is '!!'
+
 ## Modmail Group Slash Commands 
 Requires TeamPermissionLevel.Admin or higher
 
 Only available for main server id in configuration
-
 ### `modmail setup`
-
-- **Description**: Setup the modmail bot. This command should be run in the main server. Only bot owner can run this command.
-
-### `/modmail configure`
-
-- **Description**: Configure the modmail bot.
-- **Parameters**:
-  - `sensitive-logging`: Whether to log modmail messages. (Optional)
-  - `take-feedback`: Whether to take feedback after closing tickets. (Optional)
-  - `greeting-message`: The greeting message. (Optional)
-  - `closing-message`: The closing message. (Optional)
-  - `ticket-timeout-hours`: The number of hours before a ticket is automatically closed. (Optional)
-
-### `/modmail get-settings`
-
-- **Description**: Get the modmail bot settings.
-
+- **Description**: Setup the modmail bot. 
+- **Usage**: `/modmail setup`
+- **Note**: This command should be run in the main server. Only bot owner can run this command. This command will create the necessary channels and roles for the modmail bot.
 
 ## Ticket Group Slash Commands 
 Requires TeamPermissionLevel.Moderator or higher
