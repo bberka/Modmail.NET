@@ -12,9 +12,5 @@ public sealed class TicketTypeConfiguration : IEntityTypeConfiguration<TicketTyp
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
     
-    builder.HasMany<Ticket>()
-           .WithOne()
-           .HasForeignKey(x => x.TicketTypeId)
-           .OnDelete(DeleteBehavior.Restrict);
   }
 }

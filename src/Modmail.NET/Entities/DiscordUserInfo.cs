@@ -59,6 +59,7 @@ public sealed class DiscordUserInfo
   public TicketBlacklist? Blacklist { get; set; }
   public List<Ticket> OpenedTickets { get; set; }
   public List<Ticket> ClosedTickets { get; set; }
+  public List<Ticket> AssignedTickets { get; set; }
 
   public string GetMention() => $"<@{Id}>";
 

@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Modmail.NET.Migrations
 {
+    /// <inheritdoc />
     public partial class Initial : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -14,9 +16,9 @@ namespace Modmail.NET.Migrations
                 columns: table => new
                 {
                     GuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IconUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BannerUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    IconUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
+                    BannerUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
                     LogChannelId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     CategoryId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
@@ -24,8 +26,8 @@ namespace Modmail.NET.Migrations
                     UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsSensitiveLogging = table.Column<bool>(type: "bit", nullable: false),
                     TicketTimeoutHours = table.Column<long>(type: "bigint", nullable: false),
-                    GreetingMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ClosingMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GreetingMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ClosingMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     TakeFeedbackAfterClosing = table.Column<bool>(type: "bit", nullable: false),
                     ShowConfirmationWhenClosingTickets = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -41,13 +43,13 @@ namespace Modmail.NET.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Emoji = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Key = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Emoji = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Order = table.Column<int>(type: "int", nullable: false),
-                    EmbedMessageTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EmbedMessageContent = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    EmbedMessageTitle = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    EmbedMessageContent = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,7 +64,7 @@ namespace Modmail.NET.Migrations
                     PermissionLevel = table.Column<int>(type: "int", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
                     PingOnNewTicket = table.Column<bool>(type: "bit", nullable: false),
                     PingOnNewMessage = table.Column<bool>(type: "bit", nullable: false),
@@ -107,11 +109,11 @@ namespace Modmail.NET.Migrations
                     Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BannerUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Locale = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Username = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    AvatarUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    BannerUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    Locale = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     TicketBlacklistId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -125,7 +127,7 @@ namespace Modmail.NET.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Reason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     DiscordUserId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     GuildOptionGuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: true)
                 },
@@ -160,13 +162,12 @@ namespace Modmail.NET.Migrations
                     InitialMessageId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     BotTicketCreatedMessageInDmId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     Priority = table.Column<int>(type: "int", nullable: false),
-                    CloseReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CloseReason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     IsForcedClosed = table.Column<bool>(type: "bit", nullable: false),
                     FeedbackStar = table.Column<int>(type: "int", nullable: true),
-                    FeedbackMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FeedbackMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Anonymous = table.Column<bool>(type: "bit", nullable: false),
                     TicketTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    TicketTypeId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     GuildOptionGuildId = table.Column<decimal>(type: "decimal(20,0)", nullable: true)
                 },
                 constraints: table =>
@@ -195,11 +196,6 @@ namespace Modmail.NET.Migrations
                         principalTable: "TicketTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Tickets_TicketTypes_TicketTypeId1",
-                        column: x => x.TicketTypeId1,
-                        principalTable: "TicketTypes",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -209,7 +205,7 @@ namespace Modmail.NET.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SenderUserId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    MessageContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MessageContent = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
                     MessageDiscordId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -236,7 +232,7 @@ namespace Modmail.NET.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DiscordUserId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
                 },
@@ -256,14 +252,14 @@ namespace Modmail.NET.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProxyUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
+                    ProxyUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: false),
                     Content = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     Height = table.Column<int>(type: "int", nullable: true),
                     Width = table.Column<int>(type: "int", nullable: true),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     FileSize = table.Column<int>(type: "int", nullable: false),
-                    MediaType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MediaType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TicketMessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -343,11 +339,6 @@ namespace Modmail.NET.Migrations
                 table: "Tickets",
                 column: "TicketTypeId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_TicketTypeId1",
-                table: "Tickets",
-                column: "TicketTypeId1");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_DiscordUserInfos_TicketBlacklists_TicketBlacklistId",
                 table: "DiscordUserInfos",
@@ -356,6 +347,7 @@ namespace Modmail.NET.Migrations
                 principalColumn: "Id");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

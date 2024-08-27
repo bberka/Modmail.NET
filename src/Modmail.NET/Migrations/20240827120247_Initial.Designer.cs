@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -11,16 +12,18 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240827120247_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.28")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Modmail.NET.Entities.DiscordUserInfo", b =>
                 {
@@ -201,9 +204,6 @@ namespace Modmail.NET.Migrations
                     b.Property<bool>("Anonymous")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("AssignedUserId")
-                        .HasColumnType("decimal(20,0)");
-
                     b.Property<decimal>("BotTicketCreatedMessageInDmId")
                         .HasColumnType("decimal(20,0)");
 
@@ -255,8 +255,6 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedUserId");
 
                     b.HasIndex("CloserUserId");
 
@@ -482,11 +480,6 @@ namespace Modmail.NET.Migrations
 
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>
                 {
-                    b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "AssignedUser")
-                        .WithMany("AssignedTickets")
-                        .HasForeignKey("AssignedUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Modmail.NET.Entities.DiscordUserInfo", "CloserUser")
                         .WithMany("ClosedTickets")
                         .HasForeignKey("CloserUserId")
@@ -506,8 +499,6 @@ namespace Modmail.NET.Migrations
                         .WithMany()
                         .HasForeignKey("TicketTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AssignedUser");
 
                     b.Navigation("CloserUser");
 
@@ -564,8 +555,6 @@ namespace Modmail.NET.Migrations
 
             modelBuilder.Entity("Modmail.NET.Entities.DiscordUserInfo", b =>
                 {
-                    b.Navigation("AssignedTickets");
-
                     b.Navigation("ClosedTickets");
 
                     b.Navigation("OpenedTickets");

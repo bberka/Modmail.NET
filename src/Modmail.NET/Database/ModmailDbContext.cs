@@ -3,12 +3,12 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database;
 
-public class ModmailDbContext : DbContext
+public sealed class ModmailDbContext : DbContext
 {
+  public ModmailDbContext() : base() { }
   public DbSet<Ticket> Tickets { get; set; }
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
   public DbSet<TicketMessage> TicketMessages { get; set; }
-
   public DbSet<GuildOption> GuildOptions { get; set; }
   public DbSet<GuildTeam> GuildTeams { get; set; }
   public DbSet<GuildTeamMember> GuildTeamMembers { get; set; }
@@ -19,48 +19,9 @@ public class ModmailDbContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     optionsBuilder.UseSqlServer(BotConfig.This.DbConnectionString);
-
-     
-    
-    
-    // switch (BotConfig.This.DbType) {
-    //   case DbType.Sqlite:
-    //     optionsBuilder.UseSqlite(BotConfig.This.DbConnectionString);
-    //     break;
-    //   case DbType.Postgres:
-    //     optionsBuilder.UseNpgsql(BotConfig.This.DbConnectionString);
-    //     break;
-    //   case DbType.MsSql:
-    //     break;
-    //   case DbType.MySql:
-    //     optionsBuilder.UseMySql(BotConfig.This.DbConnectionString, ServerVersion.AutoDetect(BotConfig.This.DbConnectionString));
-    //     break;
-    //   default:
-    //     throw new ArgumentOutOfRangeException();
-    // }
   }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
-    // apply config from assembly
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
-    
-    // modelBuilder.Entity<Ticket>()
-    //             .Navigation(x => x.GuildOption)
-    //             .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.TicketType)
-                .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.OpenerUser)
-                .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.CloserUser)
-                .AutoInclude();
-    modelBuilder.Entity<GuildTeam>()
-                .Navigation(x => x.GuildTeamMembers)
-                .AutoInclude();
   }
 }

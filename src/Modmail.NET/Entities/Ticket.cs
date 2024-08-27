@@ -18,6 +18,7 @@ public sealed class Ticket
   public DateTime? ClosedDateUtc { get; set; }
   public ulong OpenerUserId { get; set; } //FK
   public ulong? CloserUserId { get; set; } //FK
+  public ulong? AssignedUserId { get; set; } //FK
 
   public ulong PrivateMessageChannelId { get; set; }
   public ulong ModMessageChannelId { get; set; }
@@ -44,6 +45,7 @@ public sealed class Ticket
 
   public DiscordUserInfo OpenerUser { get; set; }
   public DiscordUserInfo? CloserUser { get; set; }
+  public DiscordUserInfo? AssignedUser { get; set; }
   public TicketType? TicketType { get; set; }
   public List<TicketMessage> Messages { get; set; }
 

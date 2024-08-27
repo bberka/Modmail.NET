@@ -12,5 +12,6 @@ public sealed class TicketDto
   public bool Anonymous { get; set; }
   public DiscordUserInfo OpenerUser { get; set; }
   public DiscordUserInfo? CloserUser { get; set; }
+  public DiscordUserInfo? AssignedUser { get; set; }
   public TicketType? TicketType { get; set; }
 }
