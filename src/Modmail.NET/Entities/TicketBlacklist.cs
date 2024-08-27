@@ -15,6 +15,9 @@ public class TicketBlacklist
   public string? Reason { get; set; }
 
   public ulong DiscordUserId { get; set; }
+  
+  public DiscordUserInfo DiscordUser { get; set; }
+
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
     if (userId == 0) throw new InvalidUserIdException();
