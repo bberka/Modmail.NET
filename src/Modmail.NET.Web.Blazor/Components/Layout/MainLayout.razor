@@ -57,10 +57,13 @@
       <RadzenIcon Icon="refresh"/>
       Refresh
     </RadzenButton>
-    <RadzenButton ButtonType="ButtonType.Button" Click="GoHome">
-      <RadzenIcon Icon="home"/>
-      Go Home
-    </RadzenButton>
+    <a href="/">
+      <RadzenButton ButtonType="ButtonType.Button">
+        <RadzenIcon Icon="home"/>
+        Go Home
+
+      </RadzenButton>
+    </a>
   </RadzenCard>
   <div class="my-5 text-center text-danger h1">
 
@@ -74,8 +77,5 @@
 
   bool sidebarExpanded = true;
 
-  void GoHome() {
-    NavigationManager.NavigateTo("/", true);
-  }
 
 }
