@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Metran;
 
 namespace Modmail.NET.Common;
 
@@ -27,11 +28,13 @@ public sealed class SimpleCacher
   }
 
   // Add an item to the cache with expiration
-  public void Add<T>(string key, T value, TimeSpan expiration) {
+  public void Set<T>(string key, T value, TimeSpan expiration) {
     if (value is null) throw new ArgumentNullException(nameof(value), "Value cannot be null.");
 
     var cacheItem = new CacheItem(value, expiration);
-    if (!_cache.TryAdd(key, cacheItem)) throw new ArgumentException("Key already exists in the cache.");
+    if (!_cache.TryAdd(key, cacheItem)) {
+      _cache[key] = cacheItem;
+    }
   }
 
   // Retrieve an item from the cache
@@ -72,7 +75,7 @@ public sealed class SimpleCacher
     var result = await func();
     if (result is null) return result;
     // throw new ArgumentNullException(nameof(result), "Value cannot be null.");
-    Add(key, result, expiration);
+    Set(key, result, expiration);
     return result;
   }
 
@@ -84,7 +87,7 @@ public sealed class SimpleCacher
     }
 
     var result = func().GetAwaiter().GetResult();
-    Add(key, result, expiration);
+    Set(key, result, expiration);
     return result;
   }
 
