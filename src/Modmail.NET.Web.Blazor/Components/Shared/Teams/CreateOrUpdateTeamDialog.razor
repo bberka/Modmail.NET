@@ -18,6 +18,7 @@
   private bool pingOnNewTicket = false;
   private bool pingOnTicketMessage = false;
   private string? teamName;
+  private bool isEnabled = true;
 
   private bool isUpdate => Team is not null;
 
@@ -38,6 +39,7 @@
                  : null;
     pingOnNewTicket = isUpdate && Team!.PingOnNewTicket;
     pingOnTicketMessage = isUpdate && (Team?.PingOnNewMessage ?? false);
+    isEnabled = isUpdate && Team!.IsEnabled;
   }
 
   private async Task SubmitAsync() {
@@ -66,6 +68,7 @@
           Team.PermissionLevel = permissionLevel.Value;
           Team.PingOnNewTicket = pingOnNewTicket;
           Team.PingOnNewMessage = pingOnTicketMessage;
+          Team.IsEnabled = isEnabled;
           await Team.UpdateAsync();
           Log.Information(logMessage, teamName, permissionLevel);
           notificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
@@ -96,11 +99,22 @@
 
 <RadzenRow>
   <RadzenColumn>
+    @if (isUpdate) {
+      <RadzenRow class="rz-my-4">
+        <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
+        <RadzenLabel Component="isEnabled">
+          Is Enabled
+        </RadzenLabel>
+      </RadzenRow>
+    }
+
+
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
         <RadzenTextBox Name="team-name" @bind-Value="@teamName"/>
       </RadzenFormField>
     </RadzenRow>
+
     <RadzenRow class="rz-my-4">
       <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
     </RadzenRow>
