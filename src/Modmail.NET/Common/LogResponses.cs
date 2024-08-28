@@ -84,7 +84,7 @@ public static class LogResponses
                    .WithDescription(ticket.FeedbackMessage)
                    .WithCustomTimestamp()
                    .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
-                   .AddField(LangKeys.USER.GetTranslation(), ticket.OpenerUser.GetMention(), true) //not sure needed
+                   .AddField(LangKeys.USER.GetTranslation(), ticket.OpenerUser!.GetMention(), true) //not sure needed
                    .AddField(LangKeys.STAR.GetTranslation(), ticket.FeedbackStar.ToString(), true)
                    .WithColor(Colors.FeedbackColor)
                    .WithUserAsAuthor(ticket.OpenerUser);
@@ -110,11 +110,14 @@ public static class LogResponses
                              : LangKeys.ANONYMOUS_MOD_OFF.GetTranslation())
                 .WithColor(Colors.AnonymousToggledColor)
                 .WithCustomTimestamp()
-                .WithUserAsAuthor(ticket.OpenerUser)
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithDescription(ticket.Anonymous
                                    ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
                                    : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
+    if (ticket.OpenerUser is not null) {
+      embed.WithUserAsAuthor(ticket.OpenerUser);
+    }
+
     return embed;
   }
 
@@ -122,10 +125,13 @@ public static class LogResponses
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
                 .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
-                .WithUserAsAuthor(ticket.OpenerUser)
                 .WithCustomTimestamp()
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithColor(Colors.TicketTypeChangedColor);
+    if (ticket.OpenerUser is not null) {
+      embed.WithUserAsAuthor(ticket.OpenerUser);
+    }
+
     return embed;
   }
 
@@ -147,13 +153,15 @@ public static class LogResponses
                 // .WithDescription("Ticket has been closed.")
                 .WithCustomTimestamp()
                 .WithTitle(LangKeys.TICKET_CLOSED.GetTranslation())
-                .WithUserAsAuthor(ticket.CloserUser)
                 .WithColor(Colors.TicketClosedColor)
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
-                .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUser.GetMention(), true)
-                .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUser.GetMention(), true)
-                .AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason, true)
-      ;
+                .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUser!.GetMention(), true)
+                .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUser!.GetMention(), true)
+                .AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason, true);
+    if (ticket.OpenerUser is not null) {
+      embed.WithUserAsAuthor(ticket.CloserUser);
+    }
+
     return embed;
   }
 

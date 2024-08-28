@@ -47,7 +47,7 @@ public static class RadzenTools
 
   public static void NotifyException<T>(this T exception, NotificationService service, bool showExceptionMessage = false) where T : Exception {
     if (exception is BotExceptionBase botException) {
-      service.Notify(NotificationSeverity.Warning, "Failed", botException.Message);
+      service.Notify(NotificationSeverity.Warning, "Failed", botException.TitleMessage);
       return;
     }
 

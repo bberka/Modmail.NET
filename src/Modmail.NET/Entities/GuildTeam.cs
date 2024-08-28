@@ -106,9 +106,10 @@ public sealed class GuildTeam
       Key = memberId,
       RegisterDateUtc = DateTime.UtcNow
     };
-    GuildTeamMembers.Add(memberEntity);
-    await UpdateAsync();
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
 
+    dbContext.GuildTeamMembers.Add(memberEntity);
+    await dbContext.SaveChangesAsync();
 
     var userInfo = await DiscordUserInfo.GetAsync(memberId);
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
@@ -116,12 +117,14 @@ public sealed class GuildTeam
   }
 
   public async Task ProcessRemoveTeamMember(ulong memberId) {
-    var memberEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == memberId);
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var memberEntity = await dbContext.GuildTeamMembers
+                                    .FirstOrDefaultAsync(x => x.Key == memberId);
     if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
 
-    GuildTeamMembers.Remove(memberEntity);
-    await UpdateAsync();
-
+    dbContext.GuildTeamMembers.Remove(memberEntity);
+    await dbContext.SaveChangesAsync();
+    
     var userInfo = await DiscordUserInfo.GetAsync(memberId);
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
@@ -137,20 +140,21 @@ public sealed class GuildTeam
       Key = role.Id,
       RegisterDateUtc = DateTime.UtcNow
     };
-    GuildTeamMembers.Add(roleEntity);
-    await UpdateAsync();
 
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    dbContext.GuildTeamMembers.Add(roleEntity);
+    await dbContext.SaveChangesAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
   }
 
   public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
-    var roleEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var roleEntity = dbContext.GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
     if (roleEntity is null) throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
 
-    GuildTeamMembers.Remove(roleEntity);
-    await UpdateAsync();
-
+    dbContext.GuildTeamMembers.Remove(roleEntity);
+    await dbContext.SaveChangesAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(role, Name));
   }

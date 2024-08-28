@@ -59,10 +59,15 @@ public static class TicketResponses
                               : LangKeys.ANONYMOUS_MOD_OFF.GetTranslation())
                  .WithColor(Colors.AnonymousToggledColor)
                  .WithCustomTimestamp()
-                 .WithUserAsAuthor(ticket.OpenerUser)
                  .WithDescription(ticket.Anonymous
                                     ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
                                     : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
+    
+    if (ticket.OpenerUser is not null) {
+      embed2.WithUserAsAuthor(ticket.OpenerUser);
+    }
+
+    
     return embed2;
   }
 

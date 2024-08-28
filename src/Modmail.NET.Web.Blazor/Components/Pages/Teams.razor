@@ -129,7 +129,7 @@
   private async Task ShowAddUserDialog(GuildTeam guildTeam) {
     var dialog = await dialogService.OpenAsync("Add User to Team",
                                                ds =>
-                                                 @<AddUserToTeamDialog></AddUserToTeamDialog>,
+                                                 @<AddUserToTeamDialog GuildTeam="guildTeam"></AddUserToTeamDialog>,
                                                new DialogOptions() {
                                                  Width = "450px",
                                                });
@@ -141,7 +141,7 @@
   private async Task ShowAddRoleDialog(GuildTeam guildTeam) {
     var dialog = await dialogService.OpenAsync("Add Role to Team",
                                                ds =>
-                                                 @<AddRoleToTeamDialog></AddRoleToTeamDialog>,
+                                                 @<AddRoleToTeamDialog GuildTeam="guildTeam"></AddRoleToTeamDialog>,
                                                new DialogOptions() {
                                                  Width = "450px",
                                                });
