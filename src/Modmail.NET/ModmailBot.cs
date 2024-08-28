@@ -96,7 +96,7 @@ public class ModmailBot
     //Slash commands
     var assembly = typeof(ModmailBot).Assembly;
     var slash = Client.UseSlashCommands();
-    
+
     slash.RegisterCommands(assembly);
 
 
@@ -109,7 +109,7 @@ public class ModmailBot
       CaseSensitive = false
     });
 
-    
+
     commands.RegisterCommands(assembly);
   }
 
@@ -134,9 +134,10 @@ public class ModmailBot
 
 
     //Service initialization
-    _ = TicketTimeoutMgr.This;
-    _ = TicketTypeSelectionTimeoutMgr.This;
-
+    _ = TicketTimeoutTimer.This;
+    _ = TicketTypeSelectionTimeoutTimer.This;
+    _ = DiscordUserInfoSyncTimer.This;
+    
     await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
