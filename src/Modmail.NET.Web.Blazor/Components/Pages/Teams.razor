@@ -9,6 +9,8 @@
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject DialogService dialogService
 @inject  NotificationService notificationService
+@inject TooltipService tooltipService
+
 
 @code {
 
@@ -125,6 +127,18 @@
     }
   }
 
+  private async Task ShowAddUserDialog(GuildTeam guildTeam) {
+    throw new NotImplementedException();
+  }
+
+  private async Task ShowAddRoleDialog(GuildTeam guildTeam) {
+    throw new NotImplementedException();
+  }
+
+  private async Task ShowDetailsDialog(GuildTeam guildTeam) {
+    throw new NotImplementedException();
+  }
+
 }
 
 
@@ -168,9 +182,55 @@
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.UpdateDateUtc)" Filterable="true" Title="Update Date UTC" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions">
                   <Template Context="data">
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="edit" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await ShowEditDialog(data))" @onclick:stopPropagation="true">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="info"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowDetailsDialog(data))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Details", new TooltipOptions() { Style = "background: var(--rz-primary);" }))"
+                                  @onclick:stopPropagation="true">
                     </RadzenButton>
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveAsync(data))" @onclick:stopPropagation="true">
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="person_add"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowAddUserDialog(data))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Add User", new TooltipOptions() { Style = "background: var(--rz-success);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="group_add"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowAddRoleDialog(data))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Add Role", new TooltipOptions() { Style = "background: var(--rz-success);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Info"
+                                  Icon="edit"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowEditDialog(data))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Edit Team", new TooltipOptions() { Style = "background: var(--rz-info);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Icon="delete"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Delete Team", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
+                                  Click="@(async () => await RemoveAsync(data))"
+                                  @onclick:stopPropagation="true">
                     </RadzenButton>
                   </Template>
                 </RadzenDataGridColumn>
