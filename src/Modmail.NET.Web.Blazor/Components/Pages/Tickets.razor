@@ -110,8 +110,6 @@
     }
   }
 
-  void ShowTooltip(ElementReference elementReference, string text, TooltipOptions? options = null) => tooltipService.Open(elementReference, text, options);
-
 }
 
 <div class="rz-mx-auto">
@@ -194,7 +192,7 @@
                         Size="ButtonSize.Medium"
                         class="rz-my-1 rz-ms-1"
                         Click="@(async () => await ForceCloseAsync(data))"
-                        MouseEnter="@(args => ShowTooltip(args, "Force Close Ticket", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
+                        MouseEnter="@(args => tooltipService.Open(args, "Force Close Ticket", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }
@@ -207,7 +205,7 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
 
-                      MouseEnter="@(args => ShowTooltip(args, "Show Messages"))"
+                      MouseEnter="@(args => tooltipService.Open(args, "Show Messages"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
 
@@ -219,7 +217,7 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
 
-                      MouseEnter="@(args => ShowTooltip(args, "Add Note"))"
+                      MouseEnter="@(args => tooltipService.Open(args, "Add Note"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
                   </Template>
