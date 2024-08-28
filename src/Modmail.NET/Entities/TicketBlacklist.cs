@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
-public class TicketBlacklist
+public sealed class TicketBlacklist
 {
   public Guid Id { get; set; }
 
@@ -16,7 +16,7 @@ public class TicketBlacklist
 
   public ulong DiscordUserId { get; set; }
 
-  public DiscordUserInfo DiscordUser { get; set; }
+  public DiscordUserInfo? DiscordUser { get; set; }
 
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {

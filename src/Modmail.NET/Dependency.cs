@@ -17,13 +17,17 @@ public class MmKernel : NinjectModule
 
 public static class ServiceLocator
 {
-  private static IKernel _kernel;
+  private static IKernel? _kernel;
 
   public static void Initialize(IKernel kernel) {
     _kernel = kernel;
   }
 
   public static T Get<T>() {
+    if (_kernel is null) {
+      throw new InvalidOperationException("Kernel is not initialized");
+    }
+    
     return _kernel.Get<T>();
   }
 }

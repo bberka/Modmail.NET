@@ -187,7 +187,7 @@ public class ModmailBot
 
   public async Task<DiscordGuild> GetMainGuildAsync() {
     var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetMainGuildAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(300));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(300)) ?? await _get();
 
 
     async Task<DiscordGuild> _get() {
@@ -209,10 +209,10 @@ public class ModmailBot
       return guild;
     }
   }
-
+  
   public async Task<DiscordChannel> GetLogChannelAsync() {
     var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetLogChannelAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
 
     async Task<DiscordChannel> _get() {
       var guild = await GetMainGuildAsync();

@@ -39,7 +39,7 @@ public sealed class DiscordUserInfo
   public DateTime? UpdateDateUtc { get; set; }
 
   [MaxLength(DbLength.NAME)]
-  public string Username { get; set; }
+  public required string Username { get; set; }
 
   [MaxLength(DbLength.URL)]
   public string? AvatarUrl { get; set; }
@@ -52,9 +52,10 @@ public sealed class DiscordUserInfo
 
   [MaxLength(DbLength.LOCALE)]
   public string? Locale { get; set; }
-  public List<Ticket> OpenedTickets { get; set; }
-  public List<Ticket> ClosedTickets { get; set; }
-  public List<Ticket> AssignedTickets { get; set; }
+
+  public List<Ticket> OpenedTickets { get; set; } = [];
+  public List<Ticket> ClosedTickets { get; set; } = [];
+  public List<Ticket> AssignedTickets { get; set; } = [];
 
   public string GetMention() {
     return $"<@{Id}>";
@@ -73,7 +74,9 @@ public sealed class DiscordUserInfo
       var discordUser = await ModmailBot.This.Client.GetUserAsync(userId);
 
       if (discordUser is not null) {
-        result = new DiscordUserInfo(discordUser);
+        result = new DiscordUserInfo(discordUser) {
+          Username = discordUser.GetUsername(),
+        };
         await result.AddOrUpdateAsync();
         return result;
       }
@@ -90,7 +93,9 @@ public sealed class DiscordUserInfo
 
   public static async Task AddOrUpdateAsync(DiscordUser? user) {
     if (user is null) return;
-    await new DiscordUserInfo(user).AddOrUpdateAsync();
+    await new DiscordUserInfo(user) {
+      Username = user.GetUsername(),
+    }.AddOrUpdateAsync();
   }
 
   private async Task AddOrUpdateAsync() {

@@ -6,17 +6,17 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
-public class TicketType
+public sealed class TicketType
 {
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? UpdateDateUtc { get; set; }
 
   [MaxLength(DbLength.KEY_STRING)]
-  public string Key { get; set; }
+  public required string Key { get; set; }
 
   [MaxLength(DbLength.NAME)]
-  public string Name { get; set; }
+  public required string Name { get; set; }
 
   [MaxLength(DbLength.EMOJI)]
   public string? Emoji { get; set; }
@@ -27,10 +27,10 @@ public class TicketType
   public int Order { get; set; }
 
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public string EmbedMessageTitle { get; set; }
+  public required string EmbedMessageTitle { get; set; }
 
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public string EmbedMessageContent { get; set; }
+  public required string EmbedMessageContent { get; set; }
 
 
   private async Task UpdateAsync() {

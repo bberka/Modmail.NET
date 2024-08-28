@@ -149,14 +149,14 @@
                 <RadzenDataGridColumn Title="User Avatar" Sortable="false" Filterable="false" Width="120px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@data.DiscordUser.AvatarUrl" AlternateText=""/>
+                      <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@data.DiscordUser!.AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="OpenerUser.Username" Title="User"Sortable="true" Filterable="true" Width="100px" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenText Text="@data.DiscordUser.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
+                      <RadzenText Text="@data.DiscordUser!.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>

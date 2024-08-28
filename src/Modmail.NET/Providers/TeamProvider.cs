@@ -8,7 +8,7 @@ public class TeamProvider : IAutocompleteProvider
 {
   public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx) {
     var key = SimpleCacher.CreateKey(nameof(TeamProvider), nameof(Provider));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
 
     async Task<IEnumerable<DiscordAutoCompleteChoice>> _get() {
       var teamsDbList = await GuildTeam.GetAllAsync();

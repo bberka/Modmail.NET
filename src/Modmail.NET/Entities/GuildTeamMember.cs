@@ -4,7 +4,7 @@ using Modmail.NET.Models;
 
 namespace Modmail.NET.Entities;
 
-public class GuildTeamMember
+public sealed class GuildTeamMember
 {
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
@@ -12,7 +12,7 @@ public class GuildTeamMember
   public ulong Key { get; set; }
   public TeamMemberDataType Type { get; set; }
   public Guid GuildTeamId { get; set; }
-  public virtual GuildTeam GuildTeam { get; set; }
+  public GuildTeam? GuildTeam { get; set; }
 
   public static async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, List<ulong> roleIdList) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();

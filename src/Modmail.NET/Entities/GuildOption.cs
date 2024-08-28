@@ -7,7 +7,7 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Entities;
 
-public class GuildOption
+public sealed class GuildOption
 {
   public ulong GuildId { get; set; }
 

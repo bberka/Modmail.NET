@@ -14,14 +14,14 @@ public sealed class GuildTeam
   public DateTime? UpdateDateUtc { get; set; }
 
   [MaxLength(DbLength.NAME)]
-  public string Name { get; set; }
+  public required string Name { get; set; }
 
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
 
   //FK
-  public List<GuildTeamMember> GuildTeamMembers { get; set; }
+  public List<GuildTeamMember>? GuildTeamMembers { get; set; }
 
   public static async Task<List<GuildTeam>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();

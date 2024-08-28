@@ -5,7 +5,6 @@ namespace Modmail.NET.Database;
 
 public sealed class ModmailDbContext : DbContext
 {
-  public ModmailDbContext() : base() { }
   public DbSet<Ticket> Tickets { get; set; }
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
   public DbSet<TicketMessage> TicketMessages { get; set; }

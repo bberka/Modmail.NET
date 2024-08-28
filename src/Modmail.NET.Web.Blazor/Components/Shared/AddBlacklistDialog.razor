@@ -5,11 +5,9 @@
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject  NotificationService notificationService
+@inject DialogService dialogService
 
 @code {
-
-  [Parameter]
-  public DialogService DialogService { get; set; }
 
   private List<DiscordUserInfo> _users = new();
 
@@ -21,7 +19,6 @@
     await base.OnInitializedAsync();
     var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-    var ownerUsers = BotConfig.This.OwnerUsers;
     _users = await dbContext.DiscordUserInfos
                             .GroupJoin(dbContext.TicketBlacklists,
                                        user => user.Id,
@@ -44,7 +41,7 @@
       return;
     }
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to block this user?",
+    var dialogResult = await dialogService.Confirm("Are you sure you want to block this user?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -59,7 +56,7 @@
         Log.Information(logMessage,
                         selectedUserId.Value,
                         reason);
-        DialogService.Close(true);
+        dialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
         ex.NotifyException(notificationService);

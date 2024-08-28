@@ -43,13 +43,12 @@ public sealed class Ticket
 
   //FK
 
-  public DiscordUserInfo OpenerUser { get; set; }
+  public DiscordUserInfo? OpenerUser { get; set; }
   public DiscordUserInfo? CloserUser { get; set; }
   public DiscordUserInfo? AssignedUser { get; set; }
   public TicketType? TicketType { get; set; }
-  public List<TicketMessage> Messages { get; set; }
-
-  public List<TicketNote> TicketNotes { get; set; }
+  public List<TicketMessage>? Messages { get; set; }
+  public List<TicketNote>? TicketNotes { get; set; }
 
   public async Task AddAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();

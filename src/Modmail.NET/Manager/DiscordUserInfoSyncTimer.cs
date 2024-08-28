@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Extensions;
 using Serilog;
 
 namespace Modmail.NET.Manager;
@@ -35,7 +36,9 @@ public sealed class DiscordUserInfoSyncTimer
       var guild = await ModmailBot.This.GetMainGuildAsync();
       var members = await guild.GetAllMembersAsync();
       var allDbUsers = await DiscordUserInfo.GetAllAsync();
-      var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x)).ToList();
+      var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x) {
+        Username = x.GetUsername(),
+      }).ToList();
 
       var updateList = new List<DiscordUserInfo>();
       foreach (var dbUser in allDbUsers) {
