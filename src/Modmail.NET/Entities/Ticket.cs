@@ -315,7 +315,7 @@ public sealed class Ticket
                                                                                                            ticketTypes,
                                                                                                            ticketId));
 
-    TicketTypeSelectionTimeoutMgr.This.AddMessage(ticketCreatedMessage);
+    TicketTypeSelectionTimeoutTimer.This.AddMessage(ticketCreatedMessage);
     var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
 
     ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
@@ -483,7 +483,7 @@ public sealed class Ticket
             x.AddEmbeds(privateMessageWithComponent.Embeds);
           });
 
-          TicketTypeSelectionTimeoutMgr.This.RemoveMessage(privateMessageWithComponent.Id);
+          TicketTypeSelectionTimeoutTimer.This.RemoveMessage(privateMessageWithComponent.Id);
         }
       }
     }
