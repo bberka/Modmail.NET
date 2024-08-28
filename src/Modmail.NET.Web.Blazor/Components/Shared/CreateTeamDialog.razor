@@ -12,6 +12,12 @@
 
   private List<DiscordUserInfo> _users = new();
 
+  [Parameter]
+  public bool IsUpdate { get; set; } = false;
+  
+  [Parameter]
+  public GuildTeam? Team { get; set; }
+  
   private TeamPermissionLevel? permissionLevel;
   private bool pingOnNewTicket = false;
   private bool pingOnTicketMessage = false;
@@ -71,14 +77,6 @@
 
 <RadzenRow>
   <RadzenColumn>
-    @* <RadzenRow class=""> *@
-    @*   $1$ <p> #1# *@
-    @*   $1$    #1# *@
-    @*   $1$ </p> #1# *@
-    @*   $1$ <p> #1# *@
-    @*   $1$   You can only see users that are interacted with the bot. #1# *@
-    @*   $1$ </p> #1# *@
-    @* </RadzenRow> *@
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
         <RadzenTextBox Name="team-name" @bind-Value="@teamName" />

@@ -6,7 +6,7 @@
 @using Modmail.NET.Utils
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Serilog
-@inject ModmailDbContext dbContext
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject TooltipService tooltipService
 @inject DialogService dialogService
 @inject  NotificationService notificationService
@@ -25,7 +25,10 @@
     isLoading = false;
   }
 
-  private void reloadData() {
+  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+    await ShowLoading();
+
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
     var query = dbContext.Tickets
                          .Include(x => x.OpenerUser)
                          .Include(x => x.CloserUser)
@@ -34,35 +37,28 @@
                          .ProjectToDto()
                          .AsQueryable();
 
-    count = query.Count();
+    if (args is not null) {
+      query = query.ApplyDataGridFilter(args);
+    }
 
-    data = query.Skip(0).Take(10).AsQueryable();
-    
+    count = await query.CountAsync();
+
+    data = args is not null
+             ? query.ApplyPagination(args)
+             : query.Skip(0).Take(10).AsQueryable();
+
     StateHasChanged();
   }
-
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
 
-    await ShowLoading();
-    
-    reloadData();
-
+    await reloadDataAsync();
   }
 
 
-  private void LoadDataAsync(LoadDataArgs args) {
-    var query = dbContext.Tickets
-                         .Include(x => x.OpenerUser)
-                         .Include(x => x.CloserUser)
-                         .Include(x => x.TicketType)
-                         .OrderByDescending(x => x.RegisterDateUtc)
-                         .ProjectToDto()
-                         .AsQueryable();
-    query = query.ApplyDataGridFilter(args);
-    count = query.Count();
-    data = query.ApplyPagination(args);
+  private async Task LoadDataAsync(LoadDataArgs args) {
+    await reloadDataAsync(args);
   }
 
   private int count = 0;
@@ -80,8 +76,8 @@
     @*                                                     Height = "200px", *@
     @*                                                   } *@
     @*                                                   ); *@
-    
-                                                     
+
+
     @* ChildContent = value => *@
     @*   @<div> *@
     @*     <RadzenLabel Text="Reason" class="rz-mb-2"></RadzenLabel> *@
@@ -100,8 +96,8 @@
         await ticket.ProcessCloseTicketAsync(0, forceCloseReason);
         Log.Information(logMessage, forceCloseReason);
         notificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
-        
-        reloadData();
+
+        await reloadDataAsync();
       }
       catch (BotExceptionBase ex) {
         ex.NotifyException(notificationService);
@@ -144,8 +140,8 @@
                             Data="@data" TItem="TicketDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID"  TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false"  TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@data.OpenerUser.AvatarUrl" AlternateText=""/>
@@ -167,7 +163,7 @@
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true"  TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenText Text="@data.CloserUser?.Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
@@ -175,10 +171,10 @@
                   </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)" Title="Register Date UTC" />
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)" Title="Last Message Date UTC" />
+                <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)" Title="Register Date UTC"/>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)" Title="Last Message Date UTC"/>
                 <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)" Title="Close Date UTC"/>
-                <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason" />
+                <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason"/>
                 <RadzenDataGridColumn Title="Ticket Type" Sortable="true" Filterable="true" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">

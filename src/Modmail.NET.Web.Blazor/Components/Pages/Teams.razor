@@ -6,8 +6,8 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Modmail.NET.Web.Blazor.Components.Shared
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> DbContextFactory
-@inject DialogService DialogService
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject DialogService dialogService
 @inject  NotificationService notificationService
 
 @code {
@@ -24,39 +24,45 @@
     isLoading = false;
   }
 
+  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+    await ShowLoading();
+
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var query = dbContext.GuildTeams
+                         .OrderByDescending(x => x.RegisterDateUtc)
+                         .AsQueryable();
+
+    if (args is not null) {
+      query = query.ApplyDataGridFilter(args);
+    }
+
+    count = await query.CountAsync();
+
+
+    data = args is not null
+             ? query.ApplyPagination(args)
+             : query.Skip(0).Take(10).AsQueryable();
+
+    StateHasChanged();
+  }
+
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
 
-    await ShowLoading();
-
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
-    var query = dbContext.GuildTeams
-                         .OrderByDescending(x => x.RegisterDateUtc)
-                         .AsQueryable();
-
-    count = query.Count();
-
-    data = query.Skip(0).Take(10).AsQueryable();
+    await reloadDataAsync();
   }
 
 
   private async Task LoadDataAsync(LoadDataArgs args) {
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    await reloadDataAsync(args);
 
-    var query = dbContext.GuildTeams
-                         .OrderByDescending(x => x.RegisterDateUtc)
-                         .AsQueryable();
-
-    query = query.ApplyDataGridFilter(args);
-    count = query.Count();
-    data = query.ApplyPagination(args);
   }
 
   private int count = 0;
 
   private async Task RemoveAsync(GuildTeam team) {
-    var dialogResult = await DialogService.Confirm("Are you sure you want to delete this team ?",
+    var dialogResult = await dialogService.Confirm("Are you sure you want to delete this team ?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -74,13 +80,7 @@
         notificationService.Notify(NotificationSeverity.Success,
                                    "Team deleted successfully");
 
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
-        data = dbContext.GuildTeams
-                        .OrderByDescending(x => x.RegisterDateUtc)
-                        .AsQueryable()
-                        .Skip(0)
-                        .Take(10)
-                        .AsQueryable();
+        await reloadDataAsync();
       }
       catch (BotExceptionBase ex) {
         Log.Warning(ex,
@@ -98,26 +98,32 @@
   }
 
   private async Task ShowAddDialog() {
-    var dialog = await DialogService.OpenAsync("Create Team",
-                                  ds =>
-                                    @<div>
-                                      <CreateTeamDialog DialogService="@ds"></CreateTeamDialog>
-                                    </div>,
-                                  new DialogOptions() {
-                                    Width = "450px",
-                                  });
+    var dialog = await dialogService.OpenAsync("Create Team",
+                                               ds =>
+                                                 @<div>
+                                                   <CreateTeamDialog DialogService="@ds"></CreateTeamDialog>
+                                                 </div>,
+                                               new DialogOptions() {
+                                                 Width = "450px",
+                                               });
     if (dialog is true) {
-      await ShowLoading();
-      var dbContext = await DbContextFactory.CreateDbContextAsync();
-      data = dbContext.GuildTeams
-                      .OrderByDescending(x => x.RegisterDateUtc)
-                      .AsQueryable()
-                      .Skip(0)
-                      .Take(10)
-                      .AsQueryable();
+      await reloadDataAsync();
     }
   }
 
+  private async Task ShowEditDialog(GuildTeam team) {
+    var dialog = await dialogService.OpenAsync("Edit Team",
+                                               ds =>
+                                                 @<div>
+                                                   <CreateTeamDialog IsUpdate="true" Team="team" DialogService="@ds"></CreateTeamDialog>
+                                                 </div>,
+                                               new DialogOptions() {
+                                                 Width = "450px",
+                                               });
+    if (dialog is true) {
+      await reloadDataAsync();
+    }
+  }
 
 }
 
@@ -160,7 +166,7 @@
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.PermissionLevel)" Filterable="true" Title="Permission Level" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.RegisterDateUtc)" Filterable="true" Title="Register Date UTC" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.UpdateDateUtc)" Filterable="true" Title="Update Date UTC" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions" >
+                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions">
                   <Template Context="data">
                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveAsync(data))" @onclick:stopPropagation="true">
                     </RadzenButton>
