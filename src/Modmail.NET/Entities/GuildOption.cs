@@ -42,10 +42,10 @@ public sealed class GuildOption
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
 
     async Task<GuildOption> _get() {
-      var result = await GetNullableAsync();
-      if (result is null) throw new ServerIsNotSetupException();
-
-      return result;
+      var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      var option = await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
+      if (option is null) throw new ServerIsNotSetupException();
+      return option;
     }
   }
 
