@@ -3,6 +3,7 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Modmail.NET.Web.Blazor.Components.Shared
 @using Serilog
+@using Modmail.NET.Web.Blazor.Components.Shared.Blacklist
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject DialogService dialogService
 @inject  NotificationService notificationService
@@ -133,7 +134,7 @@
             <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync" AllowColumnPicking="true" AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
-                            Data="@data" TItem="TicketBlacklist" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            Data="@data" TItem="TicketBlacklist" ColumnWidth="180px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <HeaderTemplate>
                 <RadzenRow>

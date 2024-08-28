@@ -135,7 +135,7 @@
             <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync" AllowColumnPicking="true" AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
-                            Data="@data" TItem="TicketDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            Data="@data" TItem="TicketDto" ColumnWidth="180px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID" TextAlign="TextAlign.Center"/>

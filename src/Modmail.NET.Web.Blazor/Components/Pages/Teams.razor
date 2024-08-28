@@ -6,6 +6,7 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Modmail.NET.Web.Blazor.Components.Shared
 @using Serilog
+@using Modmail.NET.Web.Blazor.Components.Shared.Teams
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject DialogService dialogService
 @inject  NotificationService notificationService
@@ -116,9 +117,7 @@
   private async Task ShowEditDialog(GuildTeam team) {
     var dialog = await dialogService.OpenAsync("Edit Team",
                                                ds =>
-                                                 @<div>
-                                                   <CreateOrUpdateTeamDialog Team="team"></CreateOrUpdateTeamDialog>
-                                                 </div>,
+                                                 @<CreateOrUpdateTeamDialog Team="team"></CreateOrUpdateTeamDialog>,
                                                new DialogOptions() {
                                                  Width = "450px",
                                                });
@@ -128,15 +127,39 @@
   }
 
   private async Task ShowAddUserDialog(GuildTeam guildTeam) {
-    throw new NotImplementedException();
+    var dialog = await dialogService.OpenAsync("Add User to Team",
+                                               ds =>
+                                                 @<AddUserToTeamDialog></AddUserToTeamDialog>,
+                                               new DialogOptions() {
+                                                 Width = "450px",
+                                               });
+    if (dialog is true) {
+      await reloadDataAsync();
+    }
   }
 
   private async Task ShowAddRoleDialog(GuildTeam guildTeam) {
-    throw new NotImplementedException();
+    var dialog = await dialogService.OpenAsync("Add Role to Team",
+                                               ds =>
+                                                 @<AddRoleToTeamDialog></AddRoleToTeamDialog>,
+                                               new DialogOptions() {
+                                                 Width = "450px",
+                                               });
+    if (dialog is true) {
+      await reloadDataAsync();
+    }
   }
 
   private async Task ShowDetailsDialog(GuildTeam guildTeam) {
-    throw new NotImplementedException();
+    var dialog = await dialogService.OpenAsync("Team Details",
+                                               ds =>
+                                                 @<TeamDetailsDialog Team="guildTeam"></TeamDetailsDialog>,
+                                               new DialogOptions() {
+                                              
+                                               });
+    if (dialog is true) {
+      await reloadDataAsync();
+    }
   }
 
 }
@@ -162,7 +185,7 @@
             <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync" AllowColumnPicking="true" AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
-                            Data="@data" TItem="GuildTeam" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            Data="@data" TItem="GuildTeam" ColumnWidth="150px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
               <HeaderTemplate>
                 <RadzenRow>
@@ -176,10 +199,12 @@
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(GuildTeam.Id)" Filterable="false" Title="ID" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.Name)" Filterable="true" Title="Name" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.IsEnabled)" Filterable="true" Title="Enabled" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.IsEnabled)" Width="90px" Filterable="true" Title="Enabled" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.PermissionLevel)" Filterable="true" Title="Permission Level" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.RegisterDateUtc)" Filterable="true" Title="Register Date UTC" TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.UpdateDateUtc)" Filterable="true" Title="Update Date UTC" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.RegisterDateUtc)" Width="120px" Filterable="true" Title="Register Date UTC" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.UpdateDateUtc)" Width="120px" Filterable="true" Title="Update Date UTC" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.PingOnNewTicket)" Width="120px" Filterable="true" Title="Ping On New Ticket" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(GuildTeam.PingOnNewMessage)" Width="120px" Filterable="true" Title="Ping On New Message" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions">
                   <Template Context="data">
                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
