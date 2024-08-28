@@ -96,7 +96,7 @@
   private async Task ShowAddDialogAsync() {
      var result = await dialogService.OpenAsync("Block User", ds =>
                                      @<div>
-                                        <AddBlacklistDialog DialogService="@ds"></AddBlacklistDialog>
+                                        <AddBlacklistDialog></AddBlacklistDialog>
                                      </div>,
                                    new DialogOptions() {
                                      Width = "400px",
