@@ -1,7 +1,8 @@
 ﻿@page "/options"
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Serilog
 @inject NavigationManager NavigationManager
-@inject NotificationService NotificationService
+@inject NotificationService notificationService
 @inject DialogService DialogService
 @rendermode InteractiveServer
 
@@ -19,6 +20,7 @@
 
 
   private async Task SubmitAsync() {
+    const string logMessage = $"[{nameof(Options)}]{nameof(SubmitAsync)}";
     try {
       if (_guildOption is null) {
         throw new InvalidOperationException("Guild option is null");
@@ -29,10 +31,15 @@
       data.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
       data.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       await data.UpdateAsync();
-      NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
+      notificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
-    catch (Exception e) {
-      NotificationService.Notify(NotificationSeverity.Error, "Error", e.Message);
+    catch (BotExceptionBase ex) {
+      ex.NotifyException(notificationService);
+      Log.Warning(ex, logMessage);
+    }
+    catch (Exception ex) {
+      ex.NotifyException(notificationService);
+      Log.Warning(ex, logMessage);
     }
   }
 
@@ -99,7 +106,7 @@
                 </small>
               </RadzenRow>
 
-            
+
               @* <RadzenRow class="rz-my-4"> *@
               @*   <RadzenFormField Text="Greeting Message" Variant="Variant.Filled"> *@
               @*     <RadzenTextArea @bind-Value="@_guildOption.GreetingMessage" oninput="event.target.style.height = Math.max(event.target.clientHeight, event.target.scrollHeight) + 'px';" Style="min-height: 230px;min-width: 400px;max-width:  800px; white-space: pre-wrap;" aria-label="Auto-resize"/> *@

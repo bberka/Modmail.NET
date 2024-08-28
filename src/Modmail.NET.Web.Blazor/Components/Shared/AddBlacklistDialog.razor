@@ -1,8 +1,10 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿@using System.Linq.Dynamic.Core
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Internal
 @using Modmail.NET.Language
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> DbContextFactory
-@inject  NotificationService NotificationService
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject  NotificationService notificationService
 
 @code {
 
@@ -17,17 +19,28 @@
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
 
+    var ownerUsers = BotConfig.This.OwnerUsers;
     _users = await dbContext.DiscordUserInfos
-                            .OrderBy(x => x.Username)
-                            .Where(x => x.Id != ModmailBot.This.Client.CurrentUser.Id && BotConfig.This.OwnerUsers.Contains(x.Id))
+                            .GroupJoin(dbContext.TicketBlacklists,
+                                       user => user.Id,
+                                       blacklist => blacklist.DiscordUserId,
+                                       (user, blacklists) => new { user, blacklists })
+                            .SelectMany(x => x.blacklists.DefaultIfEmpty(),
+                                        (x, blacklist) => new { x.user, blacklist })
+                            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
+                            .OrderBy(x => x.user.Username)
+                            .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
+                            .Where(x => BotConfig.This.OwnerUsers.All(y => y != x.user.Id)) // Exclude bot owner
+                            .Select(x => x.user)
                             .ToListAsync();
+    
   }
 
   private async Task SubmitAsync() {
     if (selectedUserId is null) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
@@ -42,19 +55,20 @@
       const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
       try {
         await TicketBlacklist.ProcessAddUserToBlacklist(selectedUserId.Value, reason);
-        NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
+        notificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
         Log.Information(logMessage,
                         selectedUserId.Value,
                         reason);
+        DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
-        NotificationService.Notify(NotificationSeverity.Warning, "Warning", ex.Message);
+        ex.NotifyException(notificationService);
         Log.Warning(logMessage,
                     selectedUserId.Value,
                     reason);
       }
       catch (Exception ex) {
-        NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        ex.NotifyException(notificationService);
         Log.Fatal(logMessage,
                   selectedUserId.Value,
                   reason);

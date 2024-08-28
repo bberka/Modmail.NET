@@ -11,12 +11,13 @@ using Serilog;
 
 namespace Modmail.NET.Commands.Slash;
 
-[PerformanceLoggerAspect]
-[SlashCommandGroup("team", "Team management commands.")]
-[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
-[UpdateUserInformationForSlash]
-[RequireMainServerForSlashCommand]
-public class TeamSlashCommands : ApplicationCommandModule
+// [PerformanceLoggerAspect]
+// [SlashCommandGroup("team", "Team management commands.")]
+// [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
+// [UpdateUserInformationForSlash]
+// [RequireMainServerForSlashCommand]
+public class TeamSlashCommands 
+  // : ApplicationCommandModule
 {
   [SlashCommand("list", "List all teams.")]
   public async Task ListTeams(InteractionContext ctx) {

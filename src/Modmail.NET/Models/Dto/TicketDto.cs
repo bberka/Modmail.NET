@@ -14,4 +14,5 @@ public sealed class TicketDto
   public DiscordUserInfo? CloserUser { get; set; }
   public DiscordUserInfo? AssignedUser { get; set; }
   public TicketType? TicketType { get; set; }
+  public string? CloseReason { get; set; }
 }

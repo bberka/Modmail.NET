@@ -52,11 +52,6 @@ public sealed class DiscordUserInfo
 
   [MaxLength(DbLength.LOCALE)]
   public string? Locale { get; set; }
-
-  public Guid? TicketBlacklistId { get; set; }
-
-  //FK  
-  public TicketBlacklist? Blacklist { get; set; }
   public List<Ticket> OpenedTickets { get; set; }
   public List<Ticket> ClosedTickets { get; set; }
   public List<Ticket> AssignedTickets { get; set; }

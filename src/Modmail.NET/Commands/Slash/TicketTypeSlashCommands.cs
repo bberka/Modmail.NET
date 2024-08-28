@@ -11,12 +11,13 @@ using Serilog;
 
 namespace Modmail.NET.Commands.Slash;
 
-[PerformanceLoggerAspect]
-[SlashCommandGroup("ticket-type", "Commands for managing ticket types")]
-[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
-[UpdateUserInformationForSlash]
-[RequireMainServerForSlashCommand]
-public class TicketTypeSlashCommands : ApplicationCommandModule
+// [PerformanceLoggerAspect]
+// [SlashCommandGroup("ticket-type", "Commands for managing ticket types")]
+// [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Admin)]
+// [UpdateUserInformationForSlash]
+// [RequireMainServerForSlashCommand]
+public class TicketTypeSlashCommands
+  // : ApplicationCommandModule
 {
   [SlashCommand("create", "Create a new ticket type")]
   public async Task CreateTicketType(InteractionContext ctx,

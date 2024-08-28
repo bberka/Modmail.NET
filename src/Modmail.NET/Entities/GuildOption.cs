@@ -37,12 +37,6 @@ public class GuildOption
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
 
-  public virtual List<GuildTeam> GuildTeams { get; set; }
-
-  public virtual List<Ticket> Tickets { get; set; }
-  public virtual List<TicketBlacklist> TicketBlacklists { get; set; }
-
-
   public static async Task<GuildOption> GetAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();

@@ -2,8 +2,8 @@
 @using Modmail.NET.Language
 @using Modmail.NET.Static
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> DbContextFactory
-@inject  NotificationService NotificationService
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject  NotificationService notificationService
 
 @code {
 
@@ -19,7 +19,7 @@
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
 
     _users = await dbContext.DiscordUserInfos
                             .OrderBy(x => x.Username)
@@ -29,12 +29,12 @@
 
   private async Task SubmitAsync() {
     if (string.IsNullOrEmpty(teamName)) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
       return;
     }
 
     if (permissionLevel is null) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
       return;
     }
 
@@ -50,16 +50,16 @@
       try {
         await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage);
         Log.Information(logMessage, teamName, permissionLevel);
-        NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
+        notificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
         DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
         Log.Warning(ex, logMessage, teamName, permissionLevel);
-        NotificationService.Notify(NotificationSeverity.Warning, "Warning", ex.Message);
+        ex.NotifyException(notificationService);
       }
       catch (Exception ex) {
         Log.Fatal(ex, logMessage, teamName, permissionLevel);
-        NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        ex.NotifyException(notificationService);
       }
     }
   }

@@ -1,5 +1,6 @@
 ﻿using Radzen;
 using System.Linq.Dynamic.Core;
+using Modmail.NET.Exceptions;
 
 
 namespace Modmail.NET.Web.Blazor;
@@ -42,5 +43,14 @@ public static class RadzenTools
   public static IQueryable<T> ApplyPagination<T>(this IQueryable<T> queryable, int page, int pageSize) {
     var skip = Math.Max(0, page - 1) * pageSize;
     return queryable.Skip(skip).Take(pageSize);
+  }
+
+  public static void NotifyException<T>(this T exception, NotificationService service, bool showExceptionMessage = false) where T : Exception {
+    if (exception is BotExceptionBase botException) {
+      service.Notify(NotificationSeverity.Warning, "Failed", botException.Message);
+      return;
+    }
+
+    service.Notify(NotificationSeverity.Error, "Error", "An exception occurred, please check logs.");
   }
 }

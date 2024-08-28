@@ -111,12 +111,13 @@ public sealed class Ticket
     return ticket;
   }
 
-  public async Task ProcessCloseTicketAsync(ulong closerUserId,
+  public async Task ProcessCloseTicketAsync(ulong closerUserId = 0,
                                             string? closeReason = null,
                                             DiscordChannel? modChatChannel = null,
                                             bool dontSendFeedbackMessage = false) {
     ArgumentNullException.ThrowIfNull(OpenerUser);
-    if (closerUserId == 0) throw new InvalidUserIdException();
+    
+    if (closerUserId == 0) closerUserId = ModmailBot.This.Client.CurrentUser.Id;
     if (string.IsNullOrEmpty(closeReason)) closeReason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
     CloserUser = await DiscordUserInfo.GetAsync(closerUserId);

@@ -3,9 +3,9 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Modmail.NET.Web.Blazor.Components.Shared
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> DbContextFactory
-@inject DialogService DialogService
-@inject  NotificationService NotificationService
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject DialogService dialogService
+@inject  NotificationService notificationService
 
 @code {
 
@@ -27,7 +27,7 @@
 
     await ShowLoading();
 
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
     var query = dbContext.TicketBlacklists
                          .Include(x => x.DiscordUser)
                          .OrderByDescending(x => x.RegisterDateUtc)
@@ -41,7 +41,7 @@
 
   private async Task LoadDataAsync(LoadDataArgs args) {
     
-    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
      
     var query = dbContext.TicketBlacklists
                          .Include(x => x.DiscordUser)
@@ -55,7 +55,7 @@
   private int count = 0;
 
   private async Task RemoveAsync(TicketBlacklist blacklist) {
-    var dialogResult = await DialogService.Confirm("Are you sure you want to remove this user from the blacklist?",
+    var dialogResult = await dialogService.Confirm("Are you sure you want to remove this user from the blacklist?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -69,10 +69,10 @@
         await blacklist.ProcessRemoveUserFromBlacklist(blacklist.DiscordUserId);
         Log.Information(logMessage,
                         blacklist.DiscordUserId);
-        NotificationService.Notify(NotificationSeverity.Success,
+        notificationService.Notify(NotificationSeverity.Success,
                                    "User removed from blacklist");
         
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
         data = dbContext.TicketBlacklists
                         .Include(x => x.DiscordUser)
                         .OrderByDescending(x => x.RegisterDateUtc)
@@ -85,21 +85,19 @@
         Log.Warning(ex,
                     logMessage,
                     blacklist.DiscordUserId);
-        NotificationService.Notify(NotificationSeverity.Error,
-                                   ex.Message);
+        ex.NotifyException(notificationService);
       }
       catch (Exception ex) {
         Log.Fatal(ex,
                   logMessage,
                   blacklist.DiscordUserId);
-        NotificationService.Notify(NotificationSeverity.Error,
-                                   "Exception occurred, please check logs");
+        ex.NotifyException(notificationService);
       }
     }
   }
 
   private async Task ShowAddDialogAsync() {
-     var result = await DialogService.OpenAsync("Block User", ds =>
+     var result = await dialogService.OpenAsync("Block User", ds =>
                                      @<div>
                                         <AddBlacklistDialog DialogService="@ds"></AddBlacklistDialog>
                                      </div>,
@@ -108,7 +106,7 @@
                                    });
      if (result is true) {
         await ShowLoading();
-        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
         var query = dbContext.TicketBlacklists
                           .Include(x => x.DiscordUser)
                           .OrderByDescending(x => x.RegisterDateUtc)
@@ -122,7 +120,7 @@
 }
 
 
-<div class="container-xl rz-mx-auto">
+<div class="rz-mx-auto">
   <RadzenRow>
     <RadzenColumn Size="12">
       <RadzenRow>

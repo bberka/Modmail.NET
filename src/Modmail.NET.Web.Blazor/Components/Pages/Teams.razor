@@ -8,7 +8,7 @@
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject DialogService DialogService
-@inject  NotificationService NotificationService
+@inject  NotificationService notificationService
 
 @code {
 
@@ -71,7 +71,7 @@
         await team.ProcessRemoveTeamAsync();
         Log.Information(logMessage,
                         team.Name);
-        NotificationService.Notify(NotificationSeverity.Success,
+        notificationService.Notify(NotificationSeverity.Success,
                                    "Team deleted successfully");
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -86,15 +86,13 @@
         Log.Warning(ex,
                     logMessage,
                     team.Name);
-        NotificationService.Notify(NotificationSeverity.Error,
-                                   ex.Message);
+        ex.NotifyException(notificationService);
       }
       catch (Exception ex) {
         Log.Fatal(ex,
                   logMessage,
                   team.Name);
-        NotificationService.Notify(NotificationSeverity.Error,
-                                   "Exception occurred, please check logs");
+        ex.NotifyException(notificationService);
       }
     }
   }
@@ -124,7 +122,7 @@
 }
 
 
-<div class="container-xl rz-mx-auto">
+<div class="rz-mx-auto">
   <RadzenRow>
     <RadzenColumn Size="12">
       <RadzenRow>
