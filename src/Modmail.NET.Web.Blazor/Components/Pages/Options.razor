@@ -63,29 +63,30 @@
             <RadzenTemplateForm TItem="GuildOption" Data=@_guildOption Submit=@SubmitAsync>
 
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch @bind-Value=@_guildOption.IsEnabled/>
-                <small class="text-secondary">
+                <RadzenSwitch Name="IsEnabled" @bind-Value=@_guildOption.IsEnabled/>
+                <RadzenLabel Component="IsEnabled">
                   Enable bot ticket system
-                </small>
+                </RadzenLabel>
               </RadzenRow>
 
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch @bind-Value=@_guildOption.IsSensitiveLogging/>
-                <small class="text-secondary">
+                <RadzenSwitch Name="IsSensitiveLogging" @bind-Value=@_guildOption.IsSensitiveLogging/>
+                <RadzenLabel Component="IsSensitiveLogging">
                   Enable sensitive data logging, such as message content
-                </small>
+                </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
-                <small class="text-secondary">
+                <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
+                <RadzenLabel Component="TakeFeedbackAfterClosing">
                   Enable taking feedback from user after closing a ticket
-                </small>
+                </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/>
-                <small class="text-secondary">
+                <RadzenSwitch Name="ShowConfirmationWhenClosingTickets" Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/>
+                <RadzenLabel Component="ShowConfirmationWhenClosingTickets">
                   Show a confirmation dialog when a moderator closes a ticket (Not implemented)
-                </small>
+
+                </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Filled">

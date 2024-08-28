@@ -70,12 +70,12 @@
 <RadzenRow>
   <RadzenColumn>
     <RadzenRow class="rz-my-4">
-      <p>
+      <RadzenAlert AllowClose="false" Size="AlertSize.Small" AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter">
         Blocking user will force close active tickets if user has any.
-      </p>
-      <p>
+      </RadzenAlert>
+      <RadzenAlert AllowClose="false" Size="AlertSize.Small" AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
         You can only see users that are interacted with the bot.
-      </p>
+      </RadzenAlert>
     </RadzenRow>
     <RadzenRow class="rz-my-4">
       <RadzenDropDown Style="width: 100%; max-width: 300px;" TValue="ulong?" @bind-Value="selectedUserId" Placeholder="Select user" AllowFiltering="true"

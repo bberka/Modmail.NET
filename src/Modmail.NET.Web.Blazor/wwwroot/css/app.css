@@ -171,44 +171,33 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+ 
 }
 
 .container-xl {
     max-width: 1640px;
     margin: 0 auto;
     padding: 0 15px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
 }
 
 .container-md {
     max-width: 992px;
     margin: 0 auto;
     padding: 0 15px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+
 }
 
 .container-sm {
     max-width: 768px;
     margin: 0 auto;
     padding: 0 15px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+
 }
 
 .container-fluid {
     width: 100%;
     padding: 0 15px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+
 }
 
 .fw-bold {
