@@ -5,20 +5,20 @@ using Timer = System.Threading.Timer;
 
 namespace Modmail.NET.Manager;
 
-public sealed class TicketTypeSelectionTimeoutMgr
+public sealed class TicketTypeSelectionTimeoutTimer
 {
-  private static TicketTypeSelectionTimeoutMgr? _instance;
+  private static TicketTypeSelectionTimeoutTimer? _instance;
 
-  private TicketTypeSelectionTimeoutMgr() {
+  private TicketTypeSelectionTimeoutTimer() {
     Messages = new ConcurrentDictionary<DiscordMessage, DateTime>();
     // Repeat every 1 seconds
     Timer = new Timer(TimerElapsed, null, 0, 1000);
-    Log.Information("{ServiceName} initialized", nameof(TicketTypeSelectionTimeoutMgr));
+    Log.Information("{ServiceName} initialized", nameof(TicketTypeSelectionTimeoutTimer));
   }
 
-  public static TicketTypeSelectionTimeoutMgr This {
+  public static TicketTypeSelectionTimeoutTimer This {
     get {
-      _instance ??= new TicketTypeSelectionTimeoutMgr();
+      _instance ??= new TicketTypeSelectionTimeoutTimer();
       return _instance;
     }
   }
