@@ -229,4 +229,16 @@ public class ModmailBot
       return logChannel;
     }
   }
+  
+  
+  public async Task<List<DiscordRole>> GetRoles() {
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetRoles));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
+      async Task<List<DiscordRole>> _get() {
+      var guild = await GetMainGuildAsync();
+      var rolesDict = guild.Roles;
+      var roles = rolesDict.Values.ToList();
+      return roles;
+    }
+  }
 }
