@@ -12,7 +12,7 @@
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
 
-  private List<DiscordUserInfo> _users = new();
+  private List<DiscordUserInfo>? _users;
 
   private ulong selectedUserId = 0;
 
@@ -22,26 +22,24 @@
                                  .Where(x => x.GuildTeamId == GuildTeam.Id && x.Type == TeamMemberDataType.UserId)
                                  .Select(x => x.Key)
                                  .ToList();
-    
+
     // var blackListedUserIds = dbContext.TicketBlacklists
     //                                 .Select(x => x.DiscordUserId)
     //                                 .ToList();
-    
-    _users = await dbContext.DiscordUserInfos
-                               .GroupJoin(dbContext.TicketBlacklists,
-                                          user => user.Id,
-                                          blacklist => blacklist.DiscordUserId,
-                                          (user, blacklists) => new { user, blacklists })
-                               .SelectMany(x => x.blacklists.DefaultIfEmpty(),
-                                           (x, blacklist) => new { x.user, blacklist })
-                               .Where(x => x.blacklist == null) // Only take users that are not in blacklist
-                               .OrderBy(x => x.user.Username)
-                               .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
-                                .Where(x => teamMemberIds.All(y => y != x.user.Id)) // Exclude team members
-                               .Select(x => x.user)
-                               .ToListAsync();
 
-     
+    _users = await dbContext.DiscordUserInfos
+                            .GroupJoin(dbContext.TicketBlacklists,
+                                       user => user.Id,
+                                       blacklist => blacklist.DiscordUserId,
+                                       (user, blacklists) => new { user, blacklists })
+                            .SelectMany(x => x.blacklists.DefaultIfEmpty(),
+                                        (x, blacklist) => new { x.user, blacklist })
+                            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
+                            .OrderBy(x => x.user.Username)
+                            .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
+                            .Where(x => teamMemberIds.All(y => y != x.user.Id)) // Exclude team members
+                            .Select(x => x.user)
+                            .ToListAsync();
   }
 
   private async Task SubmitAsync(MouseEventArgs obj) {
@@ -69,22 +67,26 @@
 
 }
 
-
-<RadzenRow>
-  <RadzenColumn>
-    <RadzenRow class="rz-my-4">
-      <RadzenDropDown Style="user-select: none"
-                      Name="user-dropdown"
-                      Data="@_users" class="w-100"
-                      TextProperty="@nameof(DiscordUserInfo.Username)"
-                      ValueProperty="@nameof(DiscordUserInfo.Id)"
-                      TValue="ulong"
-                      @bind-Value="selectedUserId"
-                      Placeholder="Select User"
-                      AllowFiltering="true"/>
-    </RadzenRow>
-    <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Add" Click="SubmitAsync"/>
-    </RadzenRow>
-  </RadzenColumn>
-</RadzenRow>
+@if (_users == null) {
+  <Loading></Loading>
+}
+else {
+  <RadzenRow>
+    <RadzenColumn>
+      <RadzenRow class="rz-my-4">
+        <RadzenDropDown Style="user-select: none"
+                        Name="user-dropdown"
+                        Data="@_users" class="w-100"
+                        TextProperty="@nameof(DiscordUserInfo.Username)"
+                        ValueProperty="@nameof(DiscordUserInfo.Id)"
+                        TValue="ulong"
+                        @bind-Value="selectedUserId"
+                        Placeholder="Select User"
+                        AllowFiltering="true"/>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Add" Click="SubmitAsync"/>
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+}

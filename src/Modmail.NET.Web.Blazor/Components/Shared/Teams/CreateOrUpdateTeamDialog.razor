@@ -9,7 +9,7 @@
 @code {
 
 
-  private List<DiscordUserInfo> _users = new();
+  private List<DiscordUserInfo>? _users;
 
   [Parameter]
   public GuildTeam? Team { get; set; }
@@ -97,42 +97,47 @@
 }
 
 
-<RadzenRow>
-  <RadzenColumn>
-    @if (isUpdate) {
+@if (_users is null) {
+  <Loading></Loading>
+}
+else {
+  <RadzenRow>
+    <RadzenColumn>
+      @if (isUpdate) {
+        <RadzenRow class="rz-my-4">
+          <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
+          <RadzenLabel Component="isEnabled">
+            Is Enabled
+          </RadzenLabel>
+        </RadzenRow>
+      }
+
+
       <RadzenRow class="rz-my-4">
-        <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
-        <RadzenLabel Component="isEnabled">
-          Is Enabled
+        <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
+          <RadzenTextBox Name="team-name" @bind-Value="@teamName"/>
+        </RadzenFormField>
+      </RadzenRow>
+
+      <RadzenRow class="rz-my-4">
+        <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@pingOnNewTicket/>
+        <RadzenLabel Component="pingOnNewTicket">
+          Ping on new ticket
         </RadzenLabel>
       </RadzenRow>
-    }
+      <RadzenRow class="rz-my-4">
+        <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@pingOnTicketMessage/>
+        <RadzenLabel Component="pingOnTicketMessage">
+          Ping on ticket message
+        </RadzenLabel>
 
-
-    <RadzenRow class="rz-my-4">
-      <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
-        <RadzenTextBox Name="team-name" @bind-Value="@teamName"/>
-      </RadzenFormField>
-    </RadzenRow>
-
-    <RadzenRow class="rz-my-4">
-      <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
-    </RadzenRow>
-    <RadzenRow class="rz-my-4">
-      <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@pingOnNewTicket/>
-      <RadzenLabel Component="pingOnNewTicket">
-        Ping on new ticket
-      </RadzenLabel>
-    </RadzenRow>
-    <RadzenRow class="rz-my-4">
-      <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@pingOnTicketMessage/>
-      <RadzenLabel Component="pingOnTicketMessage">
-        Ping on ticket message
-      </RadzenLabel>
-
-    </RadzenRow>
-    <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update Team" : "Create Team")" Click="SubmitAsync"/>
-    </RadzenRow>
-  </RadzenColumn>
-</RadzenRow>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update Team" : "Create Team")" Click="SubmitAsync"/>
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+}

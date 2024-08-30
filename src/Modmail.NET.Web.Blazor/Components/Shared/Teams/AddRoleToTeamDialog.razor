@@ -8,12 +8,12 @@
 @inject DialogService dialogService
 
 @code {
-  private List<DiscordRole> _roles = new();
+  private List<DiscordRole>? _roles;
   private ulong selectedRoleId = 0;
 
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
-  
+
   protected override async Task OnInitializedAsync() {
     var dbContext = await dbContextFactory.CreateDbContextAsync();
     var teamMemberIds = dbContext.GuildTeamMembers
@@ -22,9 +22,8 @@
                                  .ToList();
     _roles = (await ModmailBot.This.GetRoles())
              .Where(x => x.Name != "@everyone")
-              .Where(x => teamMemberIds.All(y => y != x.Id)) // Exclude team members
+             .Where(x => teamMemberIds.All(y => y != x.Id)) // Exclude team members
              .ToList();
-     
   }
 
   private async Task SubmitAsync() {
@@ -36,7 +35,12 @@
     const string logMessage = $"[{nameof(AddRoleToTeamDialog)}]{nameof(SubmitAsync)}({{RoleId}})";
 
     try {
-      var role = _roles.First(x => x.Id == selectedRoleId);
+      var role = _roles?.First(x => x.Id == selectedRoleId);
+      if (role is null) {
+        notificationService.Notify(NotificationSeverity.Warning, "Warning", "Role not found.");
+        return;
+      }
+
       await GuildTeam.ProcessAddRoleToTeam(role);
       Log.Information(logMessage, selectedRoleId);
       notificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
@@ -52,21 +56,27 @@
   }
 
 }
-<RadzenRow>
-  <RadzenColumn>
-    <RadzenRow class="rz-my-4">
-      <RadzenDropDown Style="user-select: none"
-                      Name="user-dropdown"
-                      Data="@_roles" class="w-100"
-                      TextProperty="@nameof(DiscordRole.Name)"
-                      ValueProperty="@nameof(DiscordRole.Id)"
-                      TValue="ulong"
-                      @bind-Value="selectedRoleId"
-                      Placeholder="Select Role"
-                      AllowFiltering="true"/>
-    </RadzenRow>
-    <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Add" Click="SubmitAsync"/>
-    </RadzenRow>
-  </RadzenColumn>
-</RadzenRow>
+
+@if (_roles is null) {
+  <Loading></Loading>
+}
+else {
+  <RadzenRow>
+    <RadzenColumn>
+      <RadzenRow class="rz-my-4">
+        <RadzenDropDown Style="user-select: none"
+                        Name="user-dropdown"
+                        Data="@_roles" class="w-100"
+                        TextProperty="@nameof(DiscordRole.Name)"
+                        ValueProperty="@nameof(DiscordRole.Id)"
+                        TValue="ulong"
+                        @bind-Value="selectedRoleId"
+                        Placeholder="Select Role"
+                        AllowFiltering="true"/>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Add" Click="SubmitAsync"/>
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+}
