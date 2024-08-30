@@ -16,7 +16,7 @@ public static class OnMessageCreated
 
   [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, MessageCreateEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args?.Author);
+    await DiscordUserInfo.AddOrUpdateAsync(args.Author);
     if (args.Message.Author.IsBot) return;
     if (args.Message.IsTTS) return;
     if (args.Channel.IsPrivate) await HandlePrivateTicketMessageAsync(sender, args.Message, args.Channel, args.Author);

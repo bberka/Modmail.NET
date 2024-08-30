@@ -18,7 +18,7 @@ public static class ModalSubmitted
                                                new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(LangData.This.GetTranslation(LangKeys.THANK_YOU_FOR_FEEDBACK)));
 
     try {
-      await DiscordUserInfo.AddOrUpdateAsync(args?.Interaction?.User);
+      await DiscordUserInfo.AddOrUpdateAsync(args.Interaction.User);
 
       // var interaction = args.Interaction;
       var id = args.Interaction.Data.CustomId;
