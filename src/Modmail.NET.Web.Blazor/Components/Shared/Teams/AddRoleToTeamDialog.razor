@@ -44,6 +44,7 @@
       await GuildTeam.ProcessAddRoleToTeam(role);
       Log.Information(logMessage, selectedRoleId);
       notificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
+      dialogService.Close(true);
     }
     catch (BotExceptionBase ex) {
       Log.Warning(logMessage, selectedRoleId);

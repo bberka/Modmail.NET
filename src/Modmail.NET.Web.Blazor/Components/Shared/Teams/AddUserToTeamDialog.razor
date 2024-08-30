@@ -54,6 +54,7 @@
       await GuildTeam.ProcessAddTeamMemberAsync(selectedUserId);
       Log.Information(logMessage, selectedUserId);
       notificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");
+      dialogService.Close(true);
     }
     catch (BotExceptionBase ex) {
       Log.Warning(logMessage, selectedUserId);

@@ -260,12 +260,12 @@ public static class LogResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder TeamRoleRemoved(DiscordRole role, string name) {
+  public static DiscordEmbedBuilder TeamRoleRemoved(ulong roleId, string name) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TEAM_ROLE_REMOVED.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.ROLE.GetTranslation(), role.Mention, true)
+                .AddField(LangKeys.ROLE.GetTranslation(), $"<@&{roleId}>", true)
                 .AddField(LangKeys.TEAM_NAME.GetTranslation(), name, true);
     return embed;
   }

@@ -116,18 +116,21 @@ public sealed class GuildTeam
     await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, Name));
   }
 
-  public async Task ProcessRemoveTeamMember(ulong memberId) {
+  public async Task ProcessRemoveTeamMember(ulong teamMemberKey, TeamMemberDataType type) {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var memberEntity = await dbContext.GuildTeamMembers
-                                    .FirstOrDefaultAsync(x => x.Key == memberId);
+                                      .FirstOrDefaultAsync(x => x.Key == teamMemberKey && x.Type == type);
     if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
-
     dbContext.GuildTeamMembers.Remove(memberEntity);
     await dbContext.SaveChangesAsync();
-    
-    var userInfo = await DiscordUserInfo.GetAsync(memberId);
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+    if (type == TeamMemberDataType.UserId) {
+      var userInfo = await DiscordUserInfo.GetAsync(teamMemberKey);
+      await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
+    }
+    else {
+      await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(teamMemberKey, Name));
+    }
   }
 
   public async Task ProcessAddRoleToTeam(DiscordRole role) {
@@ -146,17 +149,6 @@ public sealed class GuildTeam
     await dbContext.SaveChangesAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
-  }
-
-  public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    var roleEntity = dbContext.GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
-    if (roleEntity is null) throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
-
-    dbContext.GuildTeamMembers.Remove(roleEntity);
-    await dbContext.SaveChangesAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(role, Name));
   }
 
   public async Task ProcessRenameAsync(string newName) {

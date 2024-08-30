@@ -1,6 +1,154 @@
-﻿<h3>TeamDetailsDialog</h3>
+﻿@using DSharpPlus.Entities
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Extensions
+@using Modmail.NET.Language
+@using Serilog
+@using Modmail.NET.Static
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject TooltipService tooltipService
+@inject NotificationService notificationService
 
 @code {
+
   [Parameter]
   public required GuildTeam Team { get; set; }
+
+  private List<DiscordUserInfo>? _members;
+  private List<DiscordRole>? _roles;
+
+  protected override async Task OnInitializedAsync() {
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+    await reloadDataAsync();
+    _members = await dbContext.DiscordUserInfos.ToListAsync();
+    _roles = await ModmailBot.This.GetRoles();
+  }
+
+  bool isLoading = false;
+  private int count;
+  private List<GuildTeamMember>? data;
+
+  async Task ShowLoading() {
+    isLoading = true;
+
+    await Task.Yield();
+
+    isLoading = false;
+  }
+
+  private async Task LoadDataAsync(LoadDataArgs obj) {
+    await reloadDataAsync(obj);
+  }
+
+  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+    await ShowLoading();
+
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var query = dbContext.GuildTeamMembers
+                         .Where(x => x.GuildTeamId == Team.Id)
+                         .OrderByDescending(x => x.RegisterDateUtc)
+                         .AsQueryable();
+
+
+
+    count = await query.CountAsync();
+
+    if (args is not null) {
+      query = query.ApplyDataGridFilter(args);
+    }
+
+    data = args is not null
+             ? await query.ApplyPagination(args).ToListAsync()
+             : await query.Skip(0).Take(5).ToListAsync();
+
+    StateHasChanged();
+  }
+
+
+  private async Task RemoveAsync(GuildTeamMember guildTeamMember) {
+    const string logMessage = $"[{nameof(TeamDetailsDialog)}]{nameof(RemoveAsync)}({{@Member}})";
+    try {
+      await Team.ProcessRemoveTeamMember(guildTeamMember.Key, guildTeamMember.Type);
+      Log.Information(logMessage, guildTeamMember);
+      notificationService.Notify(NotificationSeverity.Success, "Success", "Team member removed");
+      await reloadDataAsync();
+    }
+    catch (BotExceptionBase ex) {
+      Log.Warning(ex, logMessage, guildTeamMember);
+      ex.NotifyException(notificationService);
+    }
+    catch (Exception ex) {
+      Log.Fatal(ex, logMessage, guildTeamMember);
+      ex.NotifyException(notificationService);
+    }
+  }
+
+}
+
+@if (data is null || _roles is null || _members is null) {
+  <Loading></Loading>
+}
+else {
+  <RadzenRow>
+    <RadzenColumn>
+      @if (data.Count == 0) {
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">Team has no members</RadzenText>
+      }
+      <RadzenDataList Count="@count"
+                      LoadData="LoadDataAsync"
+                      PageSize="5"
+                      AllowPaging="true"
+                      PagerPosition="PagerPosition.Bottom"
+                      PagerAlwaysVisible="false"
+                      IsLoading=@isLoading
+                      WrapItems="true"
+                      Data="@data"
+                      TItem="GuildTeamMember"
+                      PagerHorizontalAlign="HorizontalAlign.Center"
+
+                      ShowPagingSummary="true">
+        <Template Context="member">
+          <RadzenCard Variant="Variant.Outlined" class="rz-p-0" Style="width: 100%; overflow: hidden;">
+            <RadzenRow Gap="0">
+              <RadzenColumn Size="12" SizeLG="3" class="rz-p-4 product-title">
+                @if (member.Type == TeamMemberDataType.UserId) {
+                  <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.Key)?.Username ?? $"Id:{member.Key}")</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2">User</RadzenText>
+                  </RadzenColumn>
+                }
+                else {
+                  <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">@(_roles.FirstOrDefault(x => x.Id == member.Key)?.Name ?? $"Id:{member.Key}")</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2">Role</RadzenText>
+                  </RadzenColumn>
+                }
+              </RadzenColumn>
+              <RadzenColumn Size="12" SizeLG="7" class="rz-p-4">
+                <RadzenRow Gap="0">
+                  <RadzenColumn Size="12">
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-mb-0">Register Date UTC</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2">@(member.RegisterDateUtc)</RadzenText>
+                  </RadzenColumn>
+                </RadzenRow>
+              </RadzenColumn>
+              <RadzenColumn Size="12" SizeLG="2" class="rz-p-4">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                              Icon="delete"
+                              Variant="Variant.Flat"
+                              Shade="Shade.Lighter"
+                              Size="ButtonSize.Medium"
+                              class="rz-my-1 rz-ms-1"
+                              MouseEnter="@(args => tooltipService.Open(args, $"Remove {(member.Type == TeamMemberDataType.UserId ? "user" : "role")} from team", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
+                              Click="@(async () => await RemoveAsync(member))"
+                              @onclick:stopPropagation="true">
+                </RadzenButton>
+              </RadzenColumn>
+            </RadzenRow>
+          </RadzenCard>
+        </Template>
+      </RadzenDataList>
+
+    </RadzenColumn>
+  </RadzenRow>
 }
