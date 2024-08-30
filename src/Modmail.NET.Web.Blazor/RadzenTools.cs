@@ -21,13 +21,15 @@ public static class RadzenTools
     //   
     // }
 
-    foreach (var sort in args.Sorts) {
-      var sortField = sort.Property;
-      if (string.IsNullOrEmpty(sort.Property)) continue;
-      var sortDir = sort.SortOrder;
-      queryable = queryable.OrderBy(sortField + (sortDir == SortOrder.Ascending
-                                                   ? ""
-                                                   : " descending"));
+    if (args.Sorts is not null) {
+      foreach (var sort in args.Sorts) {
+        var sortField = sort.Property;
+        if (string.IsNullOrEmpty(sort.Property)) continue;
+        var sortDir = sort.SortOrder;
+        queryable = queryable.OrderBy(sortField + (sortDir == SortOrder.Ascending
+                                                     ? ""
+                                                     : " descending"));
+      }
     }
 
 
