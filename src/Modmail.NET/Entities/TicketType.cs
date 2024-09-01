@@ -10,7 +10,9 @@ public sealed class TicketType
 {
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
-  public DateTime? UpdateDateUtc { get; set; }
+  public DateTime? UpdateDateUtc { get; set; }  
+
+  public bool IsEnabled { get; set; }
 
   [MaxLength(DbLength.KEY_STRING)]
   public required string Key { get; set; }
@@ -31,6 +33,7 @@ public sealed class TicketType
 
   [MaxLength(DbLength.BOT_MESSAGE)]
   public required string EmbedMessageContent { get; set; }
+
 
 
   private async Task UpdateAsync() {
