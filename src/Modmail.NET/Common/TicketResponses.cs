@@ -62,22 +62,28 @@ public static class TicketResponses
                  .WithDescription(ticket.Anonymous
                                     ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
                                     : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
-    
+
     if (ticket.OpenerUser is not null) {
       embed2.WithUserAsAuthor(ticket.OpenerUser);
     }
 
-    
+
     return embed2;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType? ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
-                .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
                 .WithUserAsAuthor(user)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
+    if (ticketType is not null) {
+      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+    }
+    else {
+      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+    }
+
     return embed;
   }
 

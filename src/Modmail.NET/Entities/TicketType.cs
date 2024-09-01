@@ -57,6 +57,12 @@ public sealed class TicketType
 
     return result;
   }
+  
+  public static async Task<TicketType?> GetNullableAsync(string keyOrName) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
+    return result;
+  }
 
   public static async Task<bool> ExistsAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -139,6 +145,16 @@ public sealed class TicketType
   }
 
   public async Task ProcessRemoveAsync() {
+    var anyActiveTickets = await Ticket.AnyActiveTicketsByTypeAsync(this);
+    if (anyActiveTickets) {
+      throw new CanNotDeleteTicketTypeWhenActiveTicketsException();
+    }
+    
+    var allTicketsByType = await Ticket.GetAllByTypeAsync(this);
+    foreach (var ticket in allTicketsByType) {
+      ticket.TicketTypeId = null;
+    }
+    await Ticket.UpdateRangeAsync(allTicketsByType);
     await RemoveAsync();
     var logChannel = await ModmailBot.This.GetLogChannelAsync();
     await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));

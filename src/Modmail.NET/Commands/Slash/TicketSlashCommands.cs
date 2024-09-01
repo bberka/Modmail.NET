@@ -120,7 +120,7 @@ public class TicketSlashCommands : ApplicationCommandModule
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       var ticket = await Ticket.GetActiveTicketAsync(ticketId);
-      await ticket.ProcessChangeTicketTypeAsync(ctx.User.Id, type, ctx.Channel);
+      await ticket.ProcessChangeTicketTypeAsync(type, ctx.Channel,userId: ctx.User.Id);
       await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_TYPE_CHANGED.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, type);
     }

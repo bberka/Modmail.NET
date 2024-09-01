@@ -3,8 +3,10 @@
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Extensions
 @using Modmail.NET.Language
+@using Modmail.NET.Static
 @using Modmail.NET.Utils
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject TooltipService tooltipService
@@ -37,6 +39,19 @@
                          .ProjectToDto()
                          .AsQueryable();
 
+    switch (filterTicketType) {
+      case TicketFilterType.All:
+        break;
+      case TicketFilterType.Active:
+        query = query.Where(x => !x.ClosedDateUtc.HasValue);
+        break;
+      case TicketFilterType.Closed:
+        query = query.Where(x => x.ClosedDateUtc.HasValue);
+        break;
+      default:
+        throw new ArgumentOutOfRangeException();
+    }
+    
     if (args is not null) {
       query = query.ApplyDataGridFilter(args);
     }
@@ -109,7 +124,7 @@
       }
     }
   }
-
+  private TicketFilterType filterTicketType = TicketFilterType.All;
 }
 
 <div class="rz-mx-auto">
@@ -137,6 +152,17 @@
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
                             Data="@data" TItem="TicketDto" ColumnWidth="180px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
                             IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
+              <HeaderTemplate>
+                <RadzenDropDown Style="user-select: none" 
+                                Name="filter-ticket-type"
+                                @bind-Value="@filterTicketType" 
+                                Data="Enum.GetValues<TicketFilterType>()" 
+                                Change="() => reloadDataAsync()"
+                                class="w-100"
+                                TValue="TicketFilterType" 
+                                Placeholder="Filter Tickets" 
+                                AllowFiltering="false"/>
+              </HeaderTemplate>
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">

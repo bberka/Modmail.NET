@@ -22,14 +22,21 @@ public static class UserResponses
     return feedbackDone;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(TicketType ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(TicketType? ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
-                .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
-    if (!string.IsNullOrEmpty(ticketType.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
+    if (!string.IsNullOrEmpty(ticketType?.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
       embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
+
+    if (ticketType is not null) {
+      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+    }
+    else {
+      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+    }
+
     return embed;
   }
 
@@ -110,7 +117,7 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor);
     var greetingMessage = LangKeys.GREETING_MESSAGE_DESCRIPTION.GetTranslation();
-    if (!string.IsNullOrEmpty(greetingMessage)) 
+    if (!string.IsNullOrEmpty(greetingMessage))
       embed.WithDescription(greetingMessage);
 
     var builder = new DiscordMessageBuilder()

@@ -115,7 +115,7 @@ public sealed class Ticket
                                             DiscordChannel? modChatChannel = null,
                                             bool dontSendFeedbackMessage = false) {
     ArgumentNullException.ThrowIfNull(OpenerUser);
-    
+
     if (closerUserId == 0) closerUserId = ModmailBot.This.Client.CurrentUser.Id;
     if (string.IsNullOrEmpty(closeReason)) closeReason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
@@ -442,21 +442,25 @@ public sealed class Ticket
     await logChannel.SendMessageAsync(LogResponses.AnonymousToggled(this));
   }
 
-  public async Task ProcessChangeTicketTypeAsync(ulong userId,
-                                                 string type,
+  public async Task ProcessChangeTicketTypeAsync(string type,
                                                  DiscordChannel? ticketChannel = null,
                                                  DiscordChannel? privateChannel = null,
-                                                 DiscordMessage? privateMessageWithComponent = null) {
+                                                 DiscordMessage? privateMessageWithComponent = null,
+                                                 ulong userId = 0) {
     if (OpenerUser is null) throw new InvalidOperationException("OpenerUserInfo is null");
-    if (userId == 0) throw new InvalidOperationException("UserId is 0");
+    if (userId == 0) userId = ModmailBot.This.Client.CurrentUser.Id;
     if (ClosedDateUtc.HasValue)
       //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
       throw new TicketAlreadyClosedException();
 
-    var ticketType = await TicketType.GetAsync(type);
-    if (ticketType is null) throw new InvalidOperationException("TicketType is null");
+    var ticketType = await TicketType.GetNullableAsync(type);
+    if (ticketType is null) {
+      TicketTypeId = null;
+    }
+    else {
+      TicketTypeId = ticketType.Id;
+    }
 
-    TicketTypeId = ticketType.Id;
     await UpdateAsync();
 
 
@@ -512,5 +516,25 @@ public sealed class Ticket
                                  .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)
                                  .ToListAsync();
     return tickets;
+  }
+
+  public static async Task<List<Ticket>> GetAllByTypeAsync(TicketType ticketType) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var tickets = await dbContext.Tickets
+                                 .Where(x => x.TicketTypeId == ticketType.Id)
+                                 .ToListAsync();
+    return tickets;
+  }
+
+  public static async Task<bool> AnyActiveTicketsByTypeAsync(TicketType ticketType) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return await dbContext.Tickets
+                          .AnyAsync(x => x.TicketTypeId == ticketType.Id && !x.ClosedDateUtc.HasValue);
+  }
+
+  public static async Task UpdateRangeAsync(List<Ticket> allTicketsByType) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    dbContext.Tickets.UpdateRange(allTicketsByType);
+    await dbContext.SaveChangesAsync();
   }
 }

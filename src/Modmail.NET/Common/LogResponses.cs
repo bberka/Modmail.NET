@@ -121,15 +121,21 @@ public static class LogResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(Ticket ticket, TicketType ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(Ticket ticket, TicketType? ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
-                .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
                 .WithCustomTimestamp()
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithColor(Colors.TicketTypeChangedColor);
     if (ticket.OpenerUser is not null) {
       embed.WithUserAsAuthor(ticket.OpenerUser);
+    }
+
+    if (ticketType is not null) {
+      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+    }
+    else {
+      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
     }
 
     return embed;
