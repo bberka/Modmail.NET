@@ -31,13 +31,10 @@
 
   protected override void OnInitialized() {
     base.OnInitialized();
+    var theme = HttpContext.Request.Cookies[WebSharedConstants.THEME_COOKIE_NAME];
 
-    if (HttpContext != null) {
-      var theme = HttpContext.Request.Cookies[WebSharedConstants.THEME_COOKIE_NAME];
-
-      if (!string.IsNullOrEmpty(theme)) {
-        themeService.SetTheme(theme, false);
-      }
+    if (!string.IsNullOrEmpty(theme)) {
+      themeService.SetTheme(theme, false);
     }
   }
 

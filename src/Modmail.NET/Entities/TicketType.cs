@@ -10,9 +10,9 @@ public sealed class TicketType
 {
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
-  public DateTime? UpdateDateUtc { get; set; }  
+  public DateTime? UpdateDateUtc { get; set; }
 
-  public bool IsEnabled { get; set; }
+  public bool IsEnabled { get; set; } = true;
 
   [MaxLength(DbLength.KEY_STRING)]
   public required string Key { get; set; }
@@ -29,11 +29,10 @@ public sealed class TicketType
   public int Order { get; set; }
 
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public required string EmbedMessageTitle { get; set; }
+  public string? EmbedMessageTitle { get; set; }
 
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public required string EmbedMessageContent { get; set; }
-
+  public string? EmbedMessageContent { get; set; }
 
 
   private async Task UpdateAsync() {
@@ -60,7 +59,7 @@ public sealed class TicketType
 
     return result;
   }
-  
+
   public static async Task<TicketType?> GetNullableAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
@@ -95,7 +94,7 @@ public sealed class TicketType
 
   public static async Task<TicketType> ProcessCreateTicketTypeAsync(
     string name,
-    DiscordEmoji? emoji,
+    string? emoji,
     string? description,
     long order,
     string embedMessageTitle,
@@ -119,47 +118,39 @@ public sealed class TicketType
       EmbedMessageContent = embedMessageContent
     };
     await ticketType.AddAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
+    //Don't await this task
+    _ = Task.Run(async () => {
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
+    });
     return ticketType;
   }
 
-  public async Task ProcessUpdateTicketTypeAsync(string name,
-                                                 DiscordEmoji? emoji,
-                                                 string? description,
-                                                 long order,
-                                                 string embedMessageTitle,
-                                                 string embedMessageContent) {
-    if (emoji != null)
-      Emoji = emoji;
-    if (description != null)
-      Description = description;
-    if (order != 0)
-      Order = (int)order;
-    if (string.IsNullOrEmpty(embedMessageTitle))
-      EmbedMessageTitle = embedMessageTitle;
-    if (string.IsNullOrEmpty(embedMessageContent))
-      EmbedMessageContent = embedMessageContent;
-
+  public async Task ProcessUpdateTicketTypeAsync() {
     await UpdateAsync();
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+    _ = Task.Run(async () => {
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+    });
   }
 
   public async Task ProcessRemoveAsync() {
-    var anyActiveTickets = await Ticket.AnyActiveTicketsByTypeAsync(this);
-    if (anyActiveTickets) {
-      throw new CanNotDeleteTicketTypeWhenActiveTicketsException();
-    }
-    
+    // var anyActiveTickets = await Ticket.AnyActiveTicketsByTypeAsync(this);
+    // if (anyActiveTickets) {
+    //   throw new CanNotDeleteTicketTypeWhenActiveTicketsException();
+    // }
+
     var allTicketsByType = await Ticket.GetAllByTypeAsync(this);
     foreach (var ticket in allTicketsByType) {
       ticket.TicketTypeId = null;
+      ticket.TicketType = null;
     }
+
     await Ticket.UpdateRangeAsync(allTicketsByType);
     await RemoveAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+    _ = Task.Run(async () => {
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+    });
   }
 }

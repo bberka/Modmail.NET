@@ -17,7 +17,7 @@ public class RequirePermissionLevelOrHigherForCommandAttribute : CheckBaseAttrib
     var isOwner = BotConfig.This.OwnerUsers.Contains(ctx.User.Id);
     if (isOwner) return true;
 
-    var guild = ctx.Guild;
+    var guild = ctx.Guild.Id == BotConfig.This.MainServerId ? ctx.Guild : null;
     if (guild == null) {
       await ctx.RespondAsync(Embeds.Error(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation()));
       return false;

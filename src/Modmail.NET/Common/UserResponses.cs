@@ -126,7 +126,13 @@ public static class UserResponses
     if (ticketTypes.Count > 0) {
       var selectBox = new DiscordSelectComponent(UtilInteraction.BuildKey("ticket_type", ticketId.ToString()),
                                                  LangKeys.PLEASE_SELECT_A_TICKET_TYPE.GetTranslation(),
-                                                 ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name, x.Key.ToString(), x.Description, false, new DiscordComponentEmoji(x.Emoji)))
+                                                 ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name,
+                                                                                                          x.Key.ToString(),
+                                                                                                          x.Description,
+                                                                                                          false,
+                                                                                                          !string.IsNullOrWhiteSpace(x.Emoji)
+                                                                                                            ? new DiscordComponentEmoji(x.Emoji)
+                                                                                                            : null))
                                                             .ToList());
       builder.AddComponents(selectBox);
     }

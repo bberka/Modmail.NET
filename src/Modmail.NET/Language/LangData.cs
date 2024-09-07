@@ -78,19 +78,22 @@ public class LangData
     if (lang.Contains('-')) lang = lang.Split('-')[0];
 
     var language = GetLanguage(lang);
-    if (!language.ContainsKey(key))
-      return string.Empty;
+    if (!language.TryGetValue(key, out var translation))
+      return key.ToString();
     // throw new KeyNotFoundException("Translation not found for key : " + key);
 
     //try parse args to enum LangKeys and if exists replace with translation
 
+    if (args.Length == 0) {
+      return translation;
+    }
     var newArgs = new List<object>();
     foreach (var arg in args)
       newArgs.Add(Enum.TryParse<LangKeys>(arg.ToString(), out var newArg)
                     ? GetTranslation(newArg)
                     : arg);
 
-    return string.Format(language[key], newArgs);
+    return string.Format(translation, newArgs);
   }
 
   // private string GetTranslation(string lang, LangKeys key, IReadOnlyDictionary<string, string> args) {

@@ -19,7 +19,7 @@ public class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAtt
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);
     if (isAdmin) return true;
 
-    var guild = ctx.Guild;
+    var guild = ctx.Guild is not null && ctx.Guild.Id == BotConfig.This.MainServerId ? ctx.Guild : null;
     if (guild is null) {
       await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                                                 Interactions.Error(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation()).AsEphemeral());

@@ -64,12 +64,7 @@
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
       try {
         if (isUpdate && Team is not null) {
-          Team.Name = teamName;
-          Team.PermissionLevel = permissionLevel.Value;
-          Team.PingOnNewTicket = pingOnNewTicket;
-          Team.PingOnNewMessage = pingOnTicketMessage;
-          Team.IsEnabled = isEnabled;
-          await Team.UpdateAsync();
+          await Team.ProcessUpdateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage, isEnabled);
           Log.Information(logMessage, teamName, permissionLevel);
           notificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
           dialogService.Close(true);

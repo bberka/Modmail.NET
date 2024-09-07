@@ -122,7 +122,6 @@ public sealed class Ticket
     CloserUser = await DiscordUserInfo.GetAsync(closerUserId);
     ArgumentNullException.ThrowIfNull(CloserUser);
 
-    modChatChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
 
     var guildOption = await GuildOption.GetAsync();
 
@@ -135,19 +134,22 @@ public sealed class Ticket
 
     await UpdateAsync();
 
-    await modChatChannel.DeleteAsync(LangData.This.GetTranslation(LangKeys.TICKET_CLOSED));
+    _ = Task.Run(async () => {
+      modChatChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      //Don't await this task
+      await modChatChannel.DeleteAsync(LangData.This.GetTranslation(LangKeys.TICKET_CLOSED));
+      var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
+      if (pmChannel != null) {
+        await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(this, guildOption));
+        if (guildOption.TakeFeedbackAfterClosing && !dontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(this, guildOption));
+      }
+      else {
+        Log.Warning("Private messageContent channel not found {TicketId} {ChannelId}", Id, PrivateMessageChannelId);
+      }
 
-    var pmChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
-    if (pmChannel != null) {
-      await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(this, guildOption));
-      if (guildOption.TakeFeedbackAfterClosing && !dontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(this, guildOption));
-    }
-    else {
-      Log.Warning("Private messageContent channel not found {TicketId} {ChannelId}", Id, PrivateMessageChannelId);
-    }
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketClosed(this));
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketClosed(this));
+    });
   }
 
   public async Task ProcessChangePriorityAsync(ulong modUserId,
@@ -157,59 +159,50 @@ public sealed class Ticket
     if (modUserId == 0) throw new InvalidUserIdException();
     if (ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
 
-    var guildOption = await GuildOption.GetAsync();
-
-    var modUser = await DiscordUserInfo.GetAsync(modUserId);
-    if (modUser is null) throw new InvalidOperationException("ModUser is null");
-
     var oldPriority = Priority;
     Priority = newPriority;
 
     await UpdateAsync();
 
-    // var modUser = await ModmailBot.This.Client.GetUserAsync(modUserId);
-    // if (modUser is null) throw new InvalidOperationException("ModUser is null");
+    _ = Task.Run(async () => {
+      //Don't await this task
+      // var modUser = await ModmailBot.This.Client.GetUserAsync(modUserId);
+      // if (modUser is null) throw new InvalidOperationException("ModUser is null");
 
-    var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
-    if (privateChannel is not null) {
-      await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, this, oldPriority, newPriority));
-    }
-    else {
-      //TODO: Handle private messageContent privateChannel not found
-    }
+      var guildOption = await GuildOption.GetAsync();
 
+      var modUser = await DiscordUserInfo.GetAsync(modUserId);
+      if (modUser is null) throw new InvalidOperationException("ModUser is null");
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    if (logChannel is not null) {
-      await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
-    }
-    else {
-      //TODO: Handle log privateChannel not found
-    }
-
-    ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (ticketChannel is not null) {
-      var newChName = "";
-      switch (newPriority) {
-        case TicketPriority.Normal:
-          newChName = Const.NORMAL_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
-          break;
-        case TicketPriority.High:
-          newChName = Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
-          break;
-        case TicketPriority.Low:
-          newChName = Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim());
-          break;
+      var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
+      if (privateChannel is not null) {
+        await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, this, oldPriority, newPriority));
+      }
+      else {
+        //TODO: Handle private messageContent privateChannel not found
       }
 
-      await ticketChannel.ModifyAsync(x => { x.Name = newChName; });
+
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
+      ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (ticketChannel is not null) {
+        var newChName = newPriority switch {
+          TicketPriority.Normal => Const.NORMAL_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim()),
+          TicketPriority.High => Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim()),
+          TicketPriority.Low => Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, OpenerUser.Username.Trim()),
+          _ => ""
+        };
+
+        await ticketChannel.ModifyAsync(x => { x.Name = newChName; });
 
 
-      await ticketChannel.SendMessageAsync(TicketResponses.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
-    }
-    else {
-      //TODO: Handle ticket privateChannel not found
-    }
+        await ticketChannel.SendMessageAsync(TicketResponses.TicketPriorityChanged(modUser, this, oldPriority, newPriority));
+      }
+      else {
+        //TODO: Handle ticket privateChannel not found
+      }
+    });
   }
 
 
@@ -222,33 +215,37 @@ public sealed class Ticket
 
     var guildOption = await GuildOption.GetAsync();
 
-    var user = message.Author;
-
-    privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
-    if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, PrivateMessageChannelId);
 
     LastMessageDateUtc = DateTime.UtcNow;
     await UpdateAsync();
 
-
-    var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (mailChannel is not null) {
-      var permissions = await GuildTeamMember.GetPermissionInfoAsync();
-      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message, permissions));
-    }
-    else {
-      //TODO: Handle mail privateChannel not found
-    }
-
     var ticketMessage = TicketMessage.MapFrom(Id, message);
     await ticketMessage.AddAsync();
 
-    await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
 
-    if (guildOption.IsSensitiveLogging) {
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, Id));
-    }
+    _ = Task.Run(async () => {
+      var user = message.Author;
+
+      privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
+      if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, PrivateMessageChannelId);
+
+      var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (mailChannel is not null) {
+        var permissions = await GuildTeamMember.GetPermissionInfoAsync();
+        await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message, permissions));
+      }
+      else {
+        //TODO: Handle mail privateChannel not found
+      }
+
+      if (guildOption.IsSensitiveLogging) {
+        await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
+
+        //Don't await this task
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, Id));
+      }
+    });
   }
 
   public static async Task ProcessCreateNewTicketAsync(DiscordUser user, DiscordChannel privateChannel, DiscordMessage message) {
@@ -276,8 +273,7 @@ public sealed class Ticket
 
 
     var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
-    await mailChannel.SendMessageAsync(newTicketMessageBuilder);
-    await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message));
+
 
     var ticketMessage = TicketMessage.MapFrom(ticketId, message);
 
@@ -308,22 +304,34 @@ public sealed class Ticket
     await ticket.AddAsync();
 
     var ticketTypes = await TicketType.GetAllAsync();
-
+    
     var ticketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.YouHaveCreatedNewTicket(guild,
                                                                                                            guildOption,
                                                                                                            ticketTypes,
                                                                                                            ticketId));
 
     TicketTypeSelectionTimeoutTimer.This.AddMessage(ticketCreatedMessage);
+    
+
     var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
 
     ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
     await ticket.UpdateAsync();
 
-    var newTicketCreatedLog = LogResponses.NewTicketCreated(message, mailChannel, ticket.Id);
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(newTicketCreatedLog);
-    if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, ticket.Id));
+
+    _ = Task.Run(async () => {
+      await mailChannel.SendMessageAsync(newTicketMessageBuilder);
+      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message));
+      
+
+      
+      //Don't await this task
+      var newTicketCreatedLog = LogResponses.NewTicketCreated(message, mailChannel, ticket.Id);
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(newTicketCreatedLog);
+      if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, ticket.Id));
+    });
+    
   }
 
   public async Task ProcessModSendMessageAsync(DiscordUser modUser,
@@ -335,36 +343,39 @@ public sealed class Ticket
     ArgumentNullException.ThrowIfNull(channel);
     ArgumentNullException.ThrowIfNull(guild);
 
-    var guildOption = await GuildOption.GetAsync();
-    var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
-    if (privateChannel is not null) {
-      var embed = UserResponses.MessageReceived(message, Anonymous);
-      await privateChannel.SendMessageAsync(embed);
-    }
-
-    var ticketChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (ticketChannel is not null) {
-      var embed2 = TicketResponses.MessageSent(message, Anonymous);
-      await ticketChannel.SendMessageAsync(embed2);
-      await message.DeleteAsync();
-    }
-
 
     LastMessageDateUtc = DateTime.UtcNow;
     await UpdateAsync();
+    
+    var guildOption = await GuildOption.GetAsync();
+    _ = Task.Run(async () => {
+      var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
+      if (privateChannel is not null) {
+        var embed = UserResponses.MessageReceived(message, Anonymous);
+        await privateChannel.SendMessageAsync(embed);
+      }
+
+      var ticketChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (ticketChannel is not null) {
+        var embed2 = TicketResponses.MessageSent(message, Anonymous);
+        await ticketChannel.SendMessageAsync(embed2);
+        await message.DeleteAsync();
+      }
+
+      if (guildOption.IsSensitiveLogging) {
+        //Don't await this task
+
+        var ticketMessage = TicketMessage.MapFrom(Id, message);
+        await ticketMessage.AddAsync();
 
 
-    if (guildOption.IsSensitiveLogging) {
-      var ticketMessage = TicketMessage.MapFrom(Id, message);
-      await ticketMessage.AddAsync();
-
-
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      var embed3 = LogResponses.MessageSentByMod(message,
-                                                 Id,
-                                                 Anonymous);
-      await logChannel.SendMessageAsync(embed3);
-    }
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        var embed3 = LogResponses.MessageSentByMod(message,
+                                                   Id,
+                                                   Anonymous);
+        await logChannel.SendMessageAsync(embed3);
+      }
+    });
   }
 
   public async Task ProcessAddFeedbackAsync(int starCount, string textInput, DiscordMessage feedbackMessage) {
@@ -384,13 +395,15 @@ public sealed class Ticket
     FeedbackMessage = textInput;
     await UpdateAsync();
 
-    var mainGuild = await ModmailBot.This.GetMainGuildAsync();
+    // var mainGuild = await ModmailBot.This.GetMainGuildAsync();
+    
+    _ = Task.Run(async () => {
+      //Don't await this task
+      await feedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(this)); });
 
-
-    await feedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(this)); });
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.FeedbackReceived(this));
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.FeedbackReceived(this));
+    });
   }
 
   public async Task ProcessAddNoteAsync(ulong userId, string note) {
@@ -407,19 +420,23 @@ public sealed class Ticket
     await dbContext.TicketNotes.AddAsync(noteEntity);
     await dbContext.SaveChangesAsync();
 
-    var user = await DiscordUserInfo.GetAsync(userId);
+    _ = Task.Run(async () => {
+      //Don't await this task
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.NoteAdded(this, noteEntity, user));
+      var user = await DiscordUserInfo.GetAsync(userId);
+
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.NoteAdded(this, noteEntity, user));
 
 
-    var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (mailChannel is not null) {
-      await mailChannel.SendMessageAsync(TicketResponses.NoteAdded(noteEntity, user));
-    }
-    else {
-      //TODO: Handle mail channel not found
-    }
+      var mailChannel = await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (mailChannel is not null) {
+        await mailChannel.SendMessageAsync(TicketResponses.NoteAdded(noteEntity, user));
+      }
+      else {
+        //TODO: Handle mail channel not found
+      }
+    });
   }
 
   public async Task ProcessToggleAnonymousAsync(DiscordChannel? ticketChannel = null) {
@@ -429,17 +446,20 @@ public sealed class Ticket
     Anonymous = !Anonymous;
     await UpdateAsync();
 
+    _ = Task.Run(async () => {
+      //Don't await this task
 
-    ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (ticketChannel is not null) {
-      await ticketChannel.SendMessageAsync(TicketResponses.AnonymousToggled(this));
-    }
-    else {
-      //TODO: Handle mail channel not found
-    }
+      ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (ticketChannel is not null) {
+        await ticketChannel.SendMessageAsync(TicketResponses.AnonymousToggled(this));
+      }
+      else {
+        //TODO: Handle mail channel not found
+      }
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.AnonymousToggled(this));
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.AnonymousToggled(this));
+    });
   }
 
   public async Task ProcessChangeTicketTypeAsync(string type,
@@ -463,39 +483,42 @@ public sealed class Ticket
 
     await UpdateAsync();
 
+    await Task.Run(async () => {
+      //Don't await this task
+      var userInfo = await DiscordUserInfo.GetAsync(userId);
+      ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
+      if (ticketChannel is not null) {
+        await ticketChannel.SendMessageAsync(TicketResponses.TicketTypeChanged(userInfo, ticketType));
+      }
+      else {
+        //TODO: Handle mail channel not found
+      }
 
-    var userInfo = await DiscordUserInfo.GetAsync(userId);
-    ticketChannel ??= await ModmailBot.This.Client.GetChannelAsync(ModMessageChannelId);
-    if (ticketChannel is not null) {
-      await ticketChannel.SendMessageAsync(TicketResponses.TicketTypeChanged(userInfo, ticketType));
-    }
-    else {
-      //TODO: Handle mail channel not found
-    }
+      var privateChannelId = PrivateMessageChannelId;
+      privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(privateChannelId);
+      if (privateChannel is not null) {
+        await privateChannel.SendMessageAsync(UserResponses.TicketTypeChanged(ticketType));
+        if (BotTicketCreatedMessageInDmId != 0) {
+          privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
+          if (privateMessageWithComponent is not null) {
+            //remove components from private messageContent
+            await privateMessageWithComponent.ModifyAsync(x => {
+              x.ClearComponents();
+              x.AddEmbeds(privateMessageWithComponent.Embeds);
+            });
 
-    var privateChannelId = PrivateMessageChannelId;
-    privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(privateChannelId);
-    if (privateChannel is not null) {
-      await privateChannel.SendMessageAsync(UserResponses.TicketTypeChanged(ticketType));
-      if (BotTicketCreatedMessageInDmId != 0) {
-        privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
-        if (privateMessageWithComponent is not null) {
-          //remove components from private messageContent
-          await privateMessageWithComponent.ModifyAsync(x => {
-            x.ClearComponents();
-            x.AddEmbeds(privateMessageWithComponent.Embeds);
-          });
-
-          TicketTypeSelectionTimeoutTimer.This.RemoveMessage(privateMessageWithComponent.Id);
+            TicketTypeSelectionTimeoutTimer.This.RemoveMessage(privateMessageWithComponent.Id);
+          }
         }
       }
-    }
-    else {
-      //TODO: Handle private channel not found
-    }
+      else {
+        //TODO: Handle private channel not found
+      }
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeChanged(this, ticketType));
+
+      var logChannel = await ModmailBot.This.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketTypeChanged(this, ticketType));
+    });
   }
 
   public static async Task<List<Ticket>> GetActiveTicketsAsync() {
