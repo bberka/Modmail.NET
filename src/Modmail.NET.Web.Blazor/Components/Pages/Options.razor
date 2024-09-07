@@ -83,6 +83,12 @@
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="IsEnabled" @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
+                <RadzenLabel Component="IsEnabled">
+                  Enable logging to log channel
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
                   Enable taking feedback from user after closing a ticket

@@ -33,6 +33,7 @@ public sealed class GuildOption
   [Range(Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS, Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS)]
   public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
+  public bool IsEnableDiscordChannelLogging { get; set; } = true;
   public bool TakeFeedbackAfterClosing { get; set; }
 
   //TODO: Implement ShowConfirmationWhenClosingTickets
@@ -118,8 +119,12 @@ public sealed class GuildOption
 
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await guildOption.ProcessCreateLogChannel(guild);
-      await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
+
+
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await guildOption.ProcessCreateLogChannel(guild);
+        await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
+      }
     });
   }
 

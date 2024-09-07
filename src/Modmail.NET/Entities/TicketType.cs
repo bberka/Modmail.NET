@@ -128,16 +128,23 @@ public sealed class TicketType
     await ticketType.AddAsync();
     //Don't await this task
     _ = Task.Run(async () => {
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
+      }
     });
   }
 
   public async Task ProcessUpdateTicketTypeAsync() {
     await UpdateAsync();
+
     _ = Task.Run(async () => {
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+      }
     });
   }
 
@@ -156,8 +163,11 @@ public sealed class TicketType
     await Ticket.UpdateRangeAsync(allTicketsByType);
     await RemoveAsync();
     _ = Task.Run(async () => {
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+      }
     });
   }
 }

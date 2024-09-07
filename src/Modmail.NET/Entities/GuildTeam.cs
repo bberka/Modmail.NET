@@ -83,8 +83,11 @@ public sealed class GuildTeam
 
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
+      }
     });
   }
 
@@ -97,8 +100,11 @@ public sealed class GuildTeam
     await RemoveAsync();
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamRemoved(Name));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRemoved(Name));
+      }
     });
   }
 
@@ -120,8 +126,11 @@ public sealed class GuildTeam
     _ = Task.Run(async () => {
       //Don't await this task
       var userInfo = await DiscordUserInfo.GetAsync(memberId);
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, Name));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, Name));
+      }
     });
   }
 
@@ -134,13 +143,16 @@ public sealed class GuildTeam
     await dbContext.SaveChangesAsync();
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      if (type == TeamMemberDataType.UserId) {
-        var userInfo = await DiscordUserInfo.GetAsync(teamMemberKey);
-        await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
-      }
-      else {
-        await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(teamMemberKey, Name));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        if (type == TeamMemberDataType.UserId) {
+          var userInfo = await DiscordUserInfo.GetAsync(teamMemberKey);
+          await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
+        }
+        else {
+          await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(teamMemberKey, Name));
+        }
       }
     });
   }
@@ -161,8 +173,11 @@ public sealed class GuildTeam
     await dbContext.SaveChangesAsync();
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
+      }
     });
   }
 
@@ -173,8 +188,11 @@ public sealed class GuildTeam
 
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, newName));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, newName));
+      }
     });
   }
 
@@ -206,16 +224,19 @@ public sealed class GuildTeam
 
     _ = Task.Run(async () => {
       //Don't await this task
-      var logChannel = await ModmailBot.This.GetLogChannelAsync();
-      await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
-                                                                 oldPingOnNewTicket,
-                                                                 oldPingOnNewMessage,
-                                                                 oldIsEnabled,
-                                                                 team.PermissionLevel,
-                                                                 team.PingOnNewTicket,
-                                                                 team.PingOnNewMessage,
-                                                                 team.IsEnabled,
-                                                                 team.Name));
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
+                                                                   oldPingOnNewTicket,
+                                                                   oldPingOnNewMessage,
+                                                                   oldIsEnabled,
+                                                                   team.PermissionLevel,
+                                                                   team.PingOnNewTicket,
+                                                                   team.PingOnNewMessage,
+                                                                   team.IsEnabled,
+                                                                   team.Name));
+      }
     });
   }
 }
