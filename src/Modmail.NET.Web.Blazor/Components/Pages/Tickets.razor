@@ -100,7 +100,7 @@
     @*     <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
     @*   </div> *@
     //TODO: Add reason textbox with custom component dialog
-    var dialogResult = await dialogService.Confirm("Are you sure you want to force close this ticket?",
+    var dialogResult = await dialogService.Confirm("Are you sure you want to force close this ticket ? This action is not recommended and can not be undone.",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No"
@@ -140,6 +140,19 @@
                                                });
   }
 
+  
+  private async Task ShowNotes(TicketDto ticketDto) {
+    var dialog = await dialogService.OpenAsync("Ticket Notes",
+                                               ds =>
+                                                 @<TicketNotes TicketId="ticketDto.Id"></TicketNotes>,
+                                               new DialogOptions() {
+                                                 Width = "900px",
+                                                 CloseDialogOnEsc = true,
+                                                 CloseDialogOnOverlayClick = true,
+                                              
+                                                
+                                               });
+  }
   private async Task ShowAddNoteDialog(TicketDto ticketDto) {
     throw new NotImplementedException();
   }
@@ -250,11 +263,20 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
                       Click="@(async () => await ShowMessages(data))"
-
                       MouseEnter="@(args => tooltipService.Open(args, "Show Messages"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
-
+                    <RadzenButton
+                      ButtonStyle="ButtonStyle.Info"
+                      Icon="description"
+                      Variant="Variant.Flat"
+                      Shade="Shade.Lighter"
+                      Size="ButtonSize.Medium"
+                      class="rz-my-1 rz-ms-1"
+                      Click="@(async () => await ShowNotes(data))"
+                      MouseEnter="@(args => tooltipService.Open(args, "Show Notes"))"
+                      @onclick:stopPropagation="true">
+                    </RadzenButton>
                     @* <RadzenButton *@
                     @*   ButtonStyle="ButtonStyle.Success" *@
                     @*   Icon="add_notes" *@
