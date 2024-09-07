@@ -127,4 +127,9 @@ public sealed class DiscordUserInfo
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.DiscordUserInfos.ToListAsync();
   }
+  
+  public static async Task<Dictionary<ulong,DiscordUserInfo>> GetAllDictionaryAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return (await dbContext.DiscordUserInfos.ToListAsync()).ToDictionary(x => x.Id, x => x);
+  }
 }

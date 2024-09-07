@@ -8,6 +8,7 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Modmail.NET.Web.Blazor.Static
 @using Serilog
+@using Modmail.NET.Web.Blazor.Components.Shared.Tickets
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject TooltipService tooltipService
 @inject DialogService dialogService
@@ -125,6 +126,24 @@
     }
   }
   private TicketFilterType filterTicketType = TicketFilterType.All;
+
+  private async Task ShowMessages(TicketDto ticketDto) {
+    var dialog = await dialogService.OpenAsync("Ticket Messages",
+                                               ds =>
+                                                 @<TicketMessages TicketId="ticketDto.Id"></TicketMessages>,
+                                               new DialogOptions() {
+                                              Width = "900px",
+                                              CloseDialogOnEsc = true,
+                                              CloseDialogOnOverlayClick = true,
+                                              
+                                                
+                                               });
+  }
+
+  private async Task ShowAddNoteDialog(TicketDto ticketDto) {
+    throw new NotImplementedException();
+  }
+
 }
 
 <div class="rz-mx-auto">
@@ -230,21 +249,23 @@
                       Shade="Shade.Lighter"
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
+                      Click="@(async () => await ShowMessages(data))"
 
                       MouseEnter="@(args => tooltipService.Open(args, "Show Messages"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
 
-                    <RadzenButton
-                      ButtonStyle="ButtonStyle.Success"
-                      Icon="add_notes"
-                      Variant="Variant.Flat"
-                      Shade="Shade.Lighter"
-                      Size="ButtonSize.Medium"
-                      class="rz-my-1 rz-ms-1"
-                      MouseEnter="@(args => tooltipService.Open(args, "Add Note", new TooltipOptions() { Style = "background: var(--rz-success);" }))"
-                      @onclick:stopPropagation="true">
-                    </RadzenButton>
+                    @* <RadzenButton *@
+                    @*   ButtonStyle="ButtonStyle.Success" *@
+                    @*   Icon="add_notes" *@
+                    @*   Variant="Variant.Flat" *@
+                    @*   Shade="Shade.Lighter" *@
+                    @*   Size="ButtonSize.Medium" *@
+                    @*   class="rz-my-1 rz-ms-1" *@
+                    @*   Click="@(async () => await ShowAddNoteDialog(data))" *@
+                    @*   MouseEnter="@(args => tooltipService.Open(args, "Add Note", new TooltipOptions() { Style = "background: var(--rz-success);" }))" *@
+                    @*   @onclick:stopPropagation="true"> *@
+                    @* </RadzenButton> *@
                   </Template>
                 </RadzenDataGridColumn>
               </Columns>
