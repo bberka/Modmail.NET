@@ -29,6 +29,7 @@
       var data = await GuildOption.GetAsync();
       data.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
       data.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
+      data.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
       data.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       await data.UpdateAsync();
       notificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
