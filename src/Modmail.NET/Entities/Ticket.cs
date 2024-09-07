@@ -303,15 +303,15 @@ public sealed class Ticket
 
     await ticket.AddAsync();
 
-    var ticketTypes = await TicketType.GetAllAsync();
-    
+    var ticketTypes = await TicketType.GetAllActiveAsync();
+
     var ticketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.YouHaveCreatedNewTicket(guild,
                                                                                                            guildOption,
                                                                                                            ticketTypes,
                                                                                                            ticketId));
 
     TicketTypeSelectionTimeoutTimer.This.AddMessage(ticketCreatedMessage);
-    
+
 
     var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
 
@@ -322,16 +322,14 @@ public sealed class Ticket
     _ = Task.Run(async () => {
       await mailChannel.SendMessageAsync(newTicketMessageBuilder);
       await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(message));
-      
 
-      
+
       //Don't await this task
       var newTicketCreatedLog = LogResponses.NewTicketCreated(message, mailChannel, ticket.Id);
       var logChannel = await ModmailBot.This.GetLogChannelAsync();
       await logChannel.SendMessageAsync(newTicketCreatedLog);
       if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(message, ticket.Id));
     });
-    
   }
 
   public async Task ProcessModSendMessageAsync(DiscordUser modUser,
@@ -346,7 +344,7 @@ public sealed class Ticket
 
     LastMessageDateUtc = DateTime.UtcNow;
     await UpdateAsync();
-    
+
     var guildOption = await GuildOption.GetAsync();
     _ = Task.Run(async () => {
       var privateChannel = await ModmailBot.This.Client.GetChannelAsync(PrivateMessageChannelId);
@@ -396,7 +394,7 @@ public sealed class Ticket
     await UpdateAsync();
 
     // var mainGuild = await ModmailBot.This.GetMainGuildAsync();
-    
+
     _ = Task.Run(async () => {
       //Don't await this task
       await feedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(this)); });

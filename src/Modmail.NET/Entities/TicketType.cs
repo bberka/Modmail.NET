@@ -77,6 +77,15 @@ public sealed class TicketType
     return result;
   }
 
+  public static async Task<List<TicketType>> GetAllActiveAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var result = await dbContext.TicketTypes
+                                .Where(x => x.IsEnabled)
+                                .ToListAsync();
+    return result;
+  }
+
+
   private async Task RemoveAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
     dbContext.TicketTypes.Remove(this);
