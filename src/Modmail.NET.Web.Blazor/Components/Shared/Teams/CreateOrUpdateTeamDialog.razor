@@ -1,0 +1,138 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Language
+@using Modmail.NET.Static
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject  NotificationService notificationService
+@inject  DialogService dialogService
+
+@code {
+
+
+  private List<DiscordUserInfo>? _users;
+
+  [Parameter]
+  public GuildTeam? Team { get; set; }
+
+  private TeamPermissionLevel? permissionLevel;
+  private bool pingOnNewTicket = false;
+  private bool pingOnTicketMessage = false;
+  private string? teamName;
+  private bool isEnabled = true;
+
+  private bool isUpdate => Team is not null;
+
+  protected override async Task OnInitializedAsync() {
+    await base.OnInitializedAsync();
+    var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+    _users = await dbContext.DiscordUserInfos
+                            .OrderBy(x => x.Username)
+                            .Where(x => x.Id != ModmailBot.This.Client.CurrentUser.Id && BotConfig.This.OwnerUsers.Contains(x.Id))
+                            .ToListAsync();
+
+    permissionLevel = isUpdate
+                        ? Team!.PermissionLevel
+                        : null;
+    teamName = isUpdate
+                 ? Team?.Name
+                 : null;
+    pingOnNewTicket = isUpdate && Team!.PingOnNewTicket;
+    pingOnTicketMessage = isUpdate && (Team?.PingOnNewMessage ?? false);
+    isEnabled = isUpdate && Team!.IsEnabled;
+  }
+
+  private async Task SubmitAsync() {
+    if (string.IsNullOrEmpty(teamName)) {
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
+      return;
+    }
+
+    if (permissionLevel is null) {
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
+      return;
+    }
+
+    var dialogResult = await dialogService.Confirm("Are you sure you want to create new team ?",
+                                                   options: new ConfirmOptions() {
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No",
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true,
+                                                   });
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
+      try {
+        if (isUpdate && Team is not null) {
+          await Team.ProcessUpdateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage, isEnabled);
+          Log.Information(logMessage, teamName, permissionLevel);
+          notificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
+          dialogService.Close(true);
+        }
+        else {
+          await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage);
+          Log.Information(logMessage, teamName, permissionLevel);
+          notificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
+          dialogService.Close(true);
+        }
+      }
+      catch (BotExceptionBase ex) {
+        Log.Warning(ex, logMessage, teamName, permissionLevel);
+        ex.NotifyException(notificationService);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex, logMessage, teamName, permissionLevel);
+        ex.NotifyException(notificationService);
+      }
+    }
+  }
+
+  // private sealed record AddBlackListModel(ulong UserId);
+
+}
+
+
+@if (_users is null) {
+  <Loading></Loading>
+}
+else {
+  <RadzenRow>
+    <RadzenColumn>
+      @if (isUpdate) {
+        <RadzenRow class="rz-my-4">
+          <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
+          <RadzenLabel Component="isEnabled">
+            Is Enabled
+          </RadzenLabel>
+        </RadzenRow>
+      }
+
+
+      <RadzenRow class="rz-my-4">
+        <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Filled">
+          <RadzenTextBox Name="team-name" @bind-Value="@teamName"/>
+        </RadzenFormField>
+      </RadzenRow>
+
+      <RadzenRow class="rz-my-4">
+        <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@pingOnNewTicket/>
+        <RadzenLabel Component="pingOnNewTicket">
+          Ping on new ticket
+        </RadzenLabel>
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@pingOnTicketMessage/>
+        <RadzenLabel Component="pingOnTicketMessage">
+          Ping on ticket message
+        </RadzenLabel>
+
+      </RadzenRow>
+      <RadzenRow class="rz-my-4">
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update" : "Create")" Click="SubmitAsync"/>
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+}

@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using Modmail.NET.Common;
 
 namespace Modmail.NET.Exceptions;
 

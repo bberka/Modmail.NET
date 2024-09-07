@@ -22,9 +22,22 @@ public sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
            .HasForeignKey(x => x.CloserUserId)
            .OnDelete(DeleteBehavior.Restrict);
 
+    builder.HasOne(x => x.AssignedUser)
+           .WithMany(x => x.AssignedTickets)
+           .HasForeignKey(x => x.AssignedUserId)
+           .OnDelete(DeleteBehavior.Restrict);
+
     builder.HasOne(x => x.TicketType)
            .WithMany()
            .HasForeignKey(x => x.TicketTypeId)
            .OnDelete(DeleteBehavior.Restrict);
+
+    builder.Navigation(x => x.TicketType)
+           .AutoInclude();
+
+    builder.Navigation(x => x.OpenerUser)
+           .AutoInclude();
+    builder.Navigation(x => x.CloserUser)
+           .AutoInclude();
   }
 }

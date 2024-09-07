@@ -11,14 +11,14 @@ namespace Modmail.NET.Events;
 
 public static class ModalSubmitted
 {
-  [PerformanceLoggerAspect(ThresholdMs = 3000)]
+  [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, ModalSubmitEventArgs args) {
     const string logMessage = $"[{nameof(ModalSubmitted)}]{nameof(Handle)}({{CustomId}},{{InteractionId}})";
     await args.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                                                new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(LangData.This.GetTranslation(LangKeys.THANK_YOU_FOR_FEEDBACK)));
 
     try {
-      await DiscordUserInfo.AddOrUpdateAsync(args?.Interaction?.User);
+      await DiscordUserInfo.AddOrUpdateAsync(args.Interaction.User);
 
       // var interaction = args.Interaction;
       var id = args.Interaction.Data.CustomId;

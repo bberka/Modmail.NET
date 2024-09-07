@@ -8,9 +8,8 @@ public sealed class GuildTeamMemberConfiguration : IEntityTypeConfiguration<Guil
 {
   public void Configure(EntityTypeBuilder<GuildTeamMember> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
-    
   }
 }

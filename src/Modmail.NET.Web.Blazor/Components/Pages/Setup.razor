@@ -1,0 +1,26 @@
+﻿@page "/setup"
+@using Modmail.NET.Web.Blazor.Components.Layout
+@inject NavigationManager NavigationManager
+@layout EmptyLayout
+
+
+@code {
+
+  protected override async Task OnInitializedAsync() {
+    if (await GuildOption.Any() == true) {
+      NavigationManager.NavigateTo("/");
+    }
+  }
+
+
+}
+
+<div class="row">
+  <h1>Setup</h1>
+  <p class="text-secondary">
+    You must setup the bot before you can use the dashboard.
+  </p>
+  <p class="text-secondary">
+    You can setup bot using bot commands through discord.
+  </p>
+</div>

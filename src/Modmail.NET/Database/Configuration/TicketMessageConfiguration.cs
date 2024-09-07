@@ -8,15 +8,15 @@ public sealed class TicketMessageConfiguration : IEntityTypeConfiguration<Ticket
 {
   public void Configure(EntityTypeBuilder<TicketMessage> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
-    
+
     builder.HasOne<DiscordUserInfo>()
            .WithMany()
            .HasForeignKey(x => x.SenderUserId)
            .OnDelete(DeleteBehavior.Restrict);
-    
+
     builder.HasOne<Ticket>()
            .WithMany(x => x.Messages)
            .HasForeignKey(x => x.TicketId)

@@ -1,9 +1,10 @@
-﻿using DSharpPlus;
+﻿using System.Reflection;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Aspects;
 using Modmail.NET.Commands;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -22,6 +23,7 @@ public class ModmailBot
 {
   private static ModmailBot? _instance;
 
+  public bool Connected { get; private set; }
 
   private ModmailBot() {
     _ = BotConfig.This; // Initialize the environment container
@@ -47,8 +49,6 @@ public class ModmailBot
 
 
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    AutoStartMgr.HandleAutomaticAppStart();
-
     //Define the client
     Client = new DiscordClient(new DiscordConfiguration {
       Token = BotConfig.This.BotToken,
@@ -94,12 +94,23 @@ public class ModmailBot
 
 
     //Slash commands
+    var assembly = typeof(ModmailBot).Assembly;
     var slash = Client.UseSlashCommands();
-    slash.RegisterCommands<ModmailSlashCommands>();
-    slash.RegisterCommands<TicketSlashCommands>();
-    slash.RegisterCommands<TeamSlashCommands>();
-    slash.RegisterCommands<BlacklistSlashCommands>();
-    slash.RegisterCommands<TicketTypeSlashCommands>();
+
+    slash.RegisterCommands(assembly);
+
+
+    //Commands
+    var commands = Client.UseCommandsNext(new CommandsNextConfiguration() {
+      StringPrefixes = [
+        BotConfig.This.BotPrefix
+      ],
+      EnableDms = false,
+      CaseSensitive = false
+    });
+
+
+    commands.RegisterCommands(assembly);
   }
 
   public static ModmailBot This {
@@ -115,24 +126,34 @@ public class ModmailBot
   public async Task StartAsync() {
     // Start the bot
 
+    Log.Information("Starting bot");
     await Client.ConnectAsync();
+    Connected = true;
 
     await SetupDatabase();
 
 
     //Service initialization
-    _ = TicketTimeoutMgr.This;
-    _ = TicketTypeSelectionTimeoutMgr.This;
-
+    _ = TicketTimeoutTimer.This;
+    _ = TicketTypeSelectionTimeoutTimer.This;
+    _ = DiscordUserInfoSyncTimer.This;
+    
     await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
     await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
-    await Task.Delay(-1);
   }
 
-  private async Task StopAsync() {
+  public async Task StopAsync() {
+    Log.Information("Stopping bot");
     await Client.DisconnectAsync();
+    Connected = false;
+  }
+
+  public async Task RestartAsync() {
+    Log.Information("Restarting bot");
+    await StopAsync();
+    await StartAsync();
   }
 
 
@@ -150,7 +171,7 @@ public class ModmailBot
 
 
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
-    foreach (var guild in Client.Guilds) {
+    foreach (var guild in Client.Guilds)
       try {
         var member = await guild.Value.GetMemberAsync(userId, false);
         if (member == null) continue;
@@ -160,46 +181,64 @@ public class ModmailBot
       catch (Exception ex) {
         Log.Error(ex, "Failed to get member from guild {GuildId} for user {UserId}", guild.Key, userId);
       }
-    }
 
     return null;
   }
 
-  [CacheAspect(CacheSeconds = 60)]
   public async Task<DiscordGuild> GetMainGuildAsync() {
-    var guildId = BotConfig.This.MainServerId;
-    var guild = await Client.GetGuildAsync(guildId);
-    if (guild == null) {
-      Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new NotFoundException(LangKeys.MAIN_GUILD);
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetMainGuildAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(300)) ?? await _get();
+
+
+    async Task<DiscordGuild> _get() {
+      var guildId = BotConfig.This.MainServerId;
+      var guild = await Client.GetGuildAsync(guildId);
+      if (guild == null) {
+        Log.Error("Main guild not found: {GuildId}", guildId);
+        throw new NotFoundException(LangKeys.MAIN_GUILD);
+      }
+
+      var guildOption = await GuildOption.GetAsync();
+
+      guildOption.Name = guild.Name;
+      guildOption.IconUrl = guild.IconUrl;
+      guildOption.BannerUrl = guild.BannerUrl;
+      await guildOption.UpdateAsync();
+      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
+
+      return guild;
     }
-
-    var guildOption = await GuildOption.GetAsync();
-
-    guildOption.Name = guild.Name;
-    guildOption.IconUrl = guild.IconUrl;
-    guildOption.BannerUrl = guild.BannerUrl;
-    await guildOption.UpdateAsync();
-    await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
-
-    return guild;
   }
-
-  [CacheAspect(CacheSeconds = 300)]
+  
   public async Task<DiscordChannel> GetLogChannelAsync() {
-    var guild = await GetMainGuildAsync();
-    var option = await GuildOption.GetAsync();
-    if (option is null) {
-      throw new ServerIsNotSetupException();
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetLogChannelAsync));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
+
+    async Task<DiscordChannel> _get() {
+      var guild = await GetMainGuildAsync();
+      var option = await GuildOption.GetAsync();
+      if (option is null) throw new ServerIsNotSetupException();
+
+      var logChannel = guild.GetChannel(option.LogChannelId);
+
+      if (logChannel is null) {
+        logChannel = await option.ProcessCreateLogChannel(guild);
+        Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
+      }
+
+      return logChannel;
     }
-
-    var logChannel = guild.GetChannel(option.LogChannelId);
-
-    if (logChannel is null) {
-      logChannel = await option.ProcessCreateLogChannel(guild);
-      Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
+  }
+  
+  
+  public async Task<List<DiscordRole>> GetRoles() {
+    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetRoles));
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
+      async Task<List<DiscordRole>> _get() {
+      var guild = await GetMainGuildAsync();
+      var rolesDict = guild.Roles;
+      var roles = rolesDict.Values.ToList();
+      return roles;
     }
-
-    return logChannel;
   }
 }

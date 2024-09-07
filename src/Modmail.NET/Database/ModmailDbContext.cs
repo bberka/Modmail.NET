@@ -1,67 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Entities;
-using Modmail.NET.Static;
 
 namespace Modmail.NET.Database;
 
-public class ModmailDbContext : DbContext
+public sealed class ModmailDbContext : DbContext
 {
-  public DbSet<Ticket> Tickets { get; set; }
-  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; }
-  public DbSet<TicketMessage> TicketMessages { get; set; }
-
-  public DbSet<GuildOption> GuildOptions { get; set; }
-  public DbSet<GuildTeam> GuildTeams { get; set; }
-  public DbSet<GuildTeamMember> GuildTeamMembers { get; set; }
-  public DbSet<TicketNote> TicketNotes { get; set; }
-  public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; }
-  public DbSet<TicketBlacklist> TicketBlacklists { get; set; }
-  public DbSet<TicketType> TicketTypes { get; set; }
+  public DbSet<Ticket> Tickets { get; set; }= null!;
+  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; } = null!;
+  public DbSet<TicketMessage> TicketMessages { get; set; }= null!;
+  public DbSet<GuildOption> GuildOptions { get; set; }= null!;
+  public DbSet<GuildTeam> GuildTeams { get; set; }= null!;
+  public DbSet<GuildTeamMember> GuildTeamMembers { get; set; }= null!;
+  public DbSet<TicketNote> TicketNotes { get; set; }= null!;
+  public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; }= null!;
+  public DbSet<TicketBlacklist> TicketBlacklists { get; set; }= null!;
+  public DbSet<TicketType> TicketTypes { get; set; }= null!;
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
     optionsBuilder.UseSqlServer(BotConfig.This.DbConnectionString);
-
-     
-    
-    
-    // switch (BotConfig.This.DbType) {
-    //   case DbType.Sqlite:
-    //     optionsBuilder.UseSqlite(BotConfig.This.DbConnectionString);
-    //     break;
-    //   case DbType.Postgres:
-    //     optionsBuilder.UseNpgsql(BotConfig.This.DbConnectionString);
-    //     break;
-    //   case DbType.MsSql:
-    //     break;
-    //   case DbType.MySql:
-    //     optionsBuilder.UseMySql(BotConfig.This.DbConnectionString, ServerVersion.AutoDetect(BotConfig.This.DbConnectionString));
-    //     break;
-    //   default:
-    //     throw new ArgumentOutOfRangeException();
-    // }
   }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
-    // apply config from assembly
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
-    
-    // modelBuilder.Entity<Ticket>()
-    //             .Navigation(x => x.GuildOption)
-    //             .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.TicketType)
-                .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.OpenerUser)
-                .AutoInclude();
-
-    modelBuilder.Entity<Ticket>()
-                .Navigation(x => x.CloserUser)
-                .AutoInclude();
-    modelBuilder.Entity<GuildTeam>()
-                .Navigation(x => x.GuildTeamMembers)
-                .AutoInclude();
   }
 }

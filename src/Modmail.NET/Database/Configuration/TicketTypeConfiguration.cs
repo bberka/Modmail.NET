@@ -8,13 +8,8 @@ public sealed class TicketTypeConfiguration : IEntityTypeConfiguration<TicketTyp
 {
   public void Configure(EntityTypeBuilder<TicketType> builder) {
     builder.HasKey(x => x.Id);
-    
+
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
-    
-    builder.HasMany<Ticket>()
-           .WithOne()
-           .HasForeignKey(x => x.TicketTypeId)
-           .OnDelete(DeleteBehavior.Restrict);
   }
 }

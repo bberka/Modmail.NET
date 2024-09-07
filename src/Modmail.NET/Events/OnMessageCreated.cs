@@ -3,7 +3,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Metran;
 using Modmail.NET.Aspects;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Utils;
@@ -15,9 +14,9 @@ public static class OnMessageCreated
 {
   private static readonly MetranContainer<ulong> ProcessingUserMessageContainer = new();
 
-  [PerformanceLoggerAspect(ThresholdMs = 3000)]
+  [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, MessageCreateEventArgs args) {
-    await DiscordUserInfo.AddOrUpdateAsync(args?.Author);
+    await DiscordUserInfo.AddOrUpdateAsync(args.Author);
     if (args.Message.Author.IsBot) return;
     if (args.Message.IsTTS) return;
     if (args.Channel.IsPrivate) await HandlePrivateTicketMessageAsync(sender, args.Message, args.Channel, args.Author);
@@ -49,12 +48,10 @@ public static class OnMessageCreated
       }
 
       var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
-      if (activeTicket is not null) {
+      if (activeTicket is not null)
         await activeTicket.ProcessUserSentMessageAsync(message, channel);
-      }
-      else {
+      else
         await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
-      }
 
       Log.Information(logMessage, channel.Id, userId, message.Content);
     }

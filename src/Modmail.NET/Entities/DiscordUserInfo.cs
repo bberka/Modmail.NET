@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Aspects;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
@@ -41,7 +39,7 @@ public sealed class DiscordUserInfo
   public DateTime? UpdateDateUtc { get; set; }
 
   [MaxLength(DbLength.NAME)]
-  public string Username { get; set; }
+  public required string Username { get; set; }
 
   [MaxLength(DbLength.URL)]
   public string? AvatarUrl { get; set; }
@@ -55,31 +53,36 @@ public sealed class DiscordUserInfo
   [MaxLength(DbLength.LOCALE)]
   public string? Locale { get; set; }
 
-  public Guid? TicketBlacklistId { get; set; }
+  public List<Ticket> OpenedTickets { get; set; } = [];
+  public List<Ticket> ClosedTickets { get; set; } = [];
+  public List<Ticket> AssignedTickets { get; set; } = [];
 
-  //FK  
-  public TicketBlacklist? Blacklist { get; set; }
-  public List<Ticket> OpenedTickets { get; set; }
-  public List<Ticket> ClosedTickets { get; set; }
+  public string GetMention() {
+    return $"<@{Id}>";
+  }
 
-  public string GetMention() => $"<@{Id}>";
-
-  [CacheAspect(CacheSeconds = 10)]
   public static async Task<DiscordUserInfo> GetAsync(ulong userId) {
-    if (userId == 0) throw new InvalidUserIdException();
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    var result = await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
-    if (result is not null)
-      return result;
-    var discordUser = await ModmailBot.This.Client.GetUserAsync(userId);
+    var key = SimpleCacher.CreateKey(nameof(DiscordUserInfo), nameof(GetAsync), userId);
+    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
 
-    if (discordUser is not null) {
-      result = new DiscordUserInfo(discordUser);
-      await result.AddOrUpdateAsync();
-      return result;
+    async Task<DiscordUserInfo> _get() {
+      if (userId == 0) throw new InvalidUserIdException();
+      await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      var result = await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
+      if (result is not null)
+        return result;
+      var discordUser = await ModmailBot.This.Client.GetUserAsync(userId);
+
+      if (discordUser is not null) {
+        result = new DiscordUserInfo(discordUser) {
+          Username = discordUser.GetUsername(),
+        };
+        await result.AddOrUpdateAsync();
+        return result;
+      }
+
+      throw new NotFoundWithException(LangKeys.USER, userId);
     }
-
-    throw new NotFoundWithException(LangKeys.USER, userId);
   }
 
   public async Task RemoveAsync() {
@@ -90,28 +93,30 @@ public sealed class DiscordUserInfo
 
   public static async Task AddOrUpdateAsync(DiscordUser? user) {
     if (user is null) return;
-    await new DiscordUserInfo(user).AddOrUpdateAsync();
+    await new DiscordUserInfo(user) {
+      Username = user.GetUsername(),
+    }.AddOrUpdateAsync();
   }
 
   private async Task AddOrUpdateAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
 
-    var dbData = await dbContext.DiscordUserInfos.FindAsync(this.Id);
+    var dbData = await dbContext.DiscordUserInfos.FindAsync(Id);
     if (dbData is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
       var lastUpdate = dbData.UpdateDateUtc ?? dbData.RegisterDateUtc;
       if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) return;
-      this.RegisterDateUtc = dbData.RegisterDateUtc;
+      RegisterDateUtc = dbData.RegisterDateUtc;
       dbData.UpdateDateUtc = DateTime.UtcNow;
-      dbData.Username = this.Username;
-      dbData.AvatarUrl = this.AvatarUrl;
-      dbData.BannerUrl = this.BannerUrl;
-      dbData.Email = this.Email;
-      dbData.Locale = this.Locale;
+      dbData.Username = Username;
+      dbData.AvatarUrl = AvatarUrl;
+      dbData.BannerUrl = BannerUrl;
+      dbData.Email = Email;
+      dbData.Locale = Locale;
       dbContext.DiscordUserInfos.Update(dbData);
     }
     else {
-      this.RegisterDateUtc = DateTime.UtcNow;
+      RegisterDateUtc = DateTime.UtcNow;
       await dbContext.DiscordUserInfos.AddAsync(this);
     }
 
@@ -121,5 +126,10 @@ public sealed class DiscordUserInfo
   public static async Task<List<DiscordUserInfo>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.DiscordUserInfos.ToListAsync();
+  }
+  
+  public static async Task<Dictionary<ulong,DiscordUserInfo>> GetAllDictionaryAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    return (await dbContext.DiscordUserInfos.ToListAsync()).ToDictionary(x => x.Id, x => x);
   }
 }

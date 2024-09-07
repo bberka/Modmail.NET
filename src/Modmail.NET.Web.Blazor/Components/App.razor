@@ -1,0 +1,41 @@
+﻿@using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Modmail.NET.Web.Shared
+@inject ThemeService themeService
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <base href="/"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <title>Modmail .NET</title>
+  <Styles></Styles>
+  <HeadOutlet @rendermode="InteractiveServer"/>
+  <RadzenTheme Theme="material-dark" @rendermode="InteractiveServer"/>
+</head>
+
+<body>
+<Routes @rendermode="InteractiveServer"/>
+<script src="_framework/blazor.web.js"></script>
+
+<Scripts></Scripts>
+</body>
+</html>
+
+
+@code {
+
+  [CascadingParameter]
+  public required HttpContext HttpContext { get; set; }
+
+  protected override void OnInitialized() {
+    base.OnInitialized();
+    var theme = HttpContext.Request.Cookies[WebSharedConstants.THEME_COOKIE_NAME];
+
+    if (!string.IsNullOrEmpty(theme)) {
+      themeService.SetTheme(theme, false);
+    }
+  }
+
+}

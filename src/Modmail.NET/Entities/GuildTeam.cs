@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 
@@ -13,15 +12,16 @@ public sealed class GuildTeam
   public TeamPermissionLevel PermissionLevel { get; set; }
   public DateTime RegisterDateUtc { get; set; }
   public DateTime? UpdateDateUtc { get; set; }
-  
+
   [MaxLength(DbLength.NAME)]
-  public string Name { get; set; }
+  public required string Name { get; set; }
+
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
 
   //FK
-  public List<GuildTeamMember> GuildTeamMembers { get; set; }
+  public List<GuildTeamMember>? GuildTeamMembers { get; set; }
 
   public static async Task<List<GuildTeam>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -29,9 +29,7 @@ public sealed class GuildTeam
                                 .Include(x => x.GuildTeamMembers)
                                 .ToListAsync();
 
-    if (result.Count == 0) {
-      throw new EmptyListResultException(LangKeys.TEAM);
-    }
+    if (result.Count == 0) throw new EmptyListResultException(LangKeys.TEAM);
 
     return result;
   }
@@ -67,10 +65,8 @@ public sealed class GuildTeam
                                                   TeamPermissionLevel permissionLevel,
                                                   bool pingOnNewTicket = false,
                                                   bool pingOnTicketMessage = false) {
-    var exists = await GuildTeam.Exists(teamName);
-    if (exists) {
-      throw new TeamAlreadyExistsException();
-    }
+    var exists = await Exists(teamName);
+    if (exists) throw new TeamAlreadyExistsException();
 
     var team = new GuildTeam {
       Name = teamName,
@@ -85,8 +81,14 @@ public sealed class GuildTeam
     };
     await team.AddAsync();
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
+      }
+    });
   }
 
   private static async Task<bool> Exists(string teamName) {
@@ -96,15 +98,19 @@ public sealed class GuildTeam
 
   public async Task ProcessRemoveTeamAsync() {
     await RemoveAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRemoved(Name));
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRemoved(Name));
+      }
+    });
   }
 
   public async Task ProcessAddTeamMemberAsync(ulong memberId) {
     var isUserAlreadyInTeam = await GuildTeamMember.IsUserInAnyTeamAsync(memberId);
-    if (isUserAlreadyInTeam) {
-      throw new MemberAlreadyInTeamException();
-    }
+    if (isUserAlreadyInTeam) throw new MemberAlreadyInTeamException();
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = Id,
@@ -112,34 +118,48 @@ public sealed class GuildTeam
       Key = memberId,
       RegisterDateUtc = DateTime.UtcNow
     };
-    GuildTeamMembers.Add(memberEntity);
-    await UpdateAsync();
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
 
+    dbContext.GuildTeamMembers.Add(memberEntity);
+    await dbContext.SaveChangesAsync();
 
-    var userInfo = await DiscordUserInfo.GetAsync(memberId);
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, Name));
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var userInfo = await DiscordUserInfo.GetAsync(memberId);
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, Name));
+      }
+    });
   }
 
-  public async Task ProcessRemoveTeamMember(ulong memberId) {
-    var memberEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == memberId);
-    if (memberEntity is null) {
-      throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
-    }
-
-    GuildTeamMembers.Remove(memberEntity);
-    await UpdateAsync();
-
-    var userInfo = await DiscordUserInfo.GetAsync(memberId);
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
+  public async Task ProcessRemoveTeamMember(ulong teamMemberKey, TeamMemberDataType type) {
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var memberEntity = await dbContext.GuildTeamMembers
+                                      .FirstOrDefaultAsync(x => x.Key == teamMemberKey && x.Type == type);
+    if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
+    dbContext.GuildTeamMembers.Remove(memberEntity);
+    await dbContext.SaveChangesAsync();
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        if (type == TeamMemberDataType.UserId) {
+          var userInfo = await DiscordUserInfo.GetAsync(teamMemberKey);
+          await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, Name));
+        }
+        else {
+          await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(teamMemberKey, Name));
+        }
+      }
+    });
   }
 
   public async Task ProcessAddRoleToTeam(DiscordRole role) {
     var isRoleAlreadyInTeam = await GuildTeamMember.IsRoleInAnyTeamAsync(role.Id);
-    if (isRoleAlreadyInTeam) {
-      throw new RoleAlreadyInTeamException();
-    }
+    if (isRoleAlreadyInTeam) throw new RoleAlreadyInTeamException();
 
     var roleEntity = new GuildTeamMember {
       GuildTeamId = Id,
@@ -147,24 +167,18 @@ public sealed class GuildTeam
       Key = role.Id,
       RegisterDateUtc = DateTime.UtcNow
     };
-    GuildTeamMembers.Add(roleEntity);
-    await UpdateAsync();
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
-  }
-
-  public async Task ProcessRemoveRoleFromTeam(DiscordRole role) {
-    var roleEntity = GuildTeamMembers.FirstOrDefault(x => x.Key == role.Id);
-    if (roleEntity is null) {
-      throw new NotFoundInException(LangKeys.ROLE, LangKeys.TEAM);
-    }
-
-    GuildTeamMembers.Remove(roleEntity);
-    await UpdateAsync();
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(role, Name));
+    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    dbContext.GuildTeamMembers.Add(roleEntity);
+    await dbContext.SaveChangesAsync();
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(role, Name));
+      }
+    });
   }
 
   public async Task ProcessRenameAsync(string newName) {
@@ -172,12 +186,17 @@ public sealed class GuildTeam
     Name = newName;
     await UpdateAsync();
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, newName));
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, newName));
+      }
+    });
   }
 
-  public async Task ProcessUpdateTeamAsync(ulong guildId,
-                                           string teamName,
+  public async Task ProcessUpdateTeamAsync(string teamName,
                                            TeamPermissionLevel? permissionLevel,
                                            bool? pingOnNewTicket,
                                            bool? pingOnTicketMessage,
@@ -189,40 +208,35 @@ public sealed class GuildTeam
 
     var anyChanges = permissionLevel.HasValue || pingOnNewTicket.HasValue || pingOnTicketMessage.HasValue;
 
-    if (!anyChanges) {
-      return;
-    }
+    if (!anyChanges) return;
 
     var team = await GetByNameAsync(teamName);
-    if (permissionLevel.HasValue) {
-      team.PermissionLevel = permissionLevel.Value;
-    }
+    if (permissionLevel.HasValue) team.PermissionLevel = permissionLevel.Value;
 
-    if (pingOnNewTicket.HasValue) {
-      team.PingOnNewTicket = pingOnNewTicket.Value;
-    }
+    if (pingOnNewTicket.HasValue) team.PingOnNewTicket = pingOnNewTicket.Value;
 
-    if (pingOnTicketMessage.HasValue) {
-      team.PingOnNewMessage = pingOnTicketMessage.Value;
-    }
+    if (pingOnTicketMessage.HasValue) team.PingOnNewMessage = pingOnTicketMessage.Value;
 
-    if (isEnabled.HasValue) {
-      team.IsEnabled = isEnabled.Value;
-    }
+    if (isEnabled.HasValue) team.IsEnabled = isEnabled.Value;
 
     team.UpdateDateUtc = DateTime.UtcNow;
     await team.UpdateAsync();
 
-
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
-                                                               oldPingOnNewTicket,
-                                                               oldPingOnNewMessage,
-                                                               oldIsEnabled,
-                                                               team.PermissionLevel,
-                                                               team.PingOnNewTicket,
-                                                               team.PingOnNewMessage,
-                                                               team.IsEnabled,
-                                                               team.Name));
+    _ = Task.Run(async () => {
+      //Don't await this task
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
+                                                                   oldPingOnNewTicket,
+                                                                   oldPingOnNewMessage,
+                                                                   oldIsEnabled,
+                                                                   team.PermissionLevel,
+                                                                   team.PingOnNewTicket,
+                                                                   team.PingOnNewMessage,
+                                                                   team.IsEnabled,
+                                                                   team.Name));
+      }
+    });
   }
 }

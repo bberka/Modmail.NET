@@ -1,36 +1,38 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Entities;
 
-public class TicketType
+public sealed class TicketType
 {
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? UpdateDateUtc { get; set; }
-  
+
+  public bool IsEnabled { get; set; } = true;
+
   [MaxLength(DbLength.KEY_STRING)]
-  public string Key { get; set; }
-  
+  public required string Key { get; set; }
+
   [MaxLength(DbLength.NAME)]
-  public string Name { get; set; }
-  
+  public required string Name { get; set; }
+
   [MaxLength(DbLength.EMOJI)]
   public string? Emoji { get; set; }
-  
+
   [MaxLength(DbLength.DESCRIPTION)]
-  public string? Description { get; set; }
+  public string Description { get; set; } = string.Empty;
+
   public int Order { get; set; }
-  
+
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public string EmbedMessageTitle { get; set; }
-  
+  public string? EmbedMessageTitle { get; set; }
+
   [MaxLength(DbLength.BOT_MESSAGE)]
-  public string EmbedMessageContent { get; set; }
+  public string? EmbedMessageContent { get; set; }
 
 
   private async Task UpdateAsync() {
@@ -53,10 +55,14 @@ public class TicketType
   public static async Task<TicketType> GetAsync(string keyOrName) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
-    if (result is null) {
-      throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
-    }
+    if (result is null) throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
 
+    return result;
+  }
+
+  public static async Task<TicketType?> GetNullableAsync(string keyOrName) {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
     return result;
   }
 
@@ -70,6 +76,15 @@ public class TicketType
     var result = await dbContext.TicketTypes.ToListAsync();
     return result;
   }
+
+  public static async Task<List<TicketType>> GetAllActiveAsync() {
+    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var result = await dbContext.TicketTypes
+                                .Where(x => x.IsEnabled)
+                                .ToListAsync();
+    return result;
+  }
+
 
   private async Task RemoveAsync() {
     var dbContext = ServiceLocator.Get<ModmailDbContext>();
@@ -86,21 +101,16 @@ public class TicketType
     return result;
   }
 
-  public static async Task<TicketType> ProcessCreateTicketTypeAsync(
-    string name,
-    DiscordEmoji? emoji,
-    string? description,
-    long order,
-    string embedMessageTitle,
-    string embedMessageContent) {
-    if (string.IsNullOrEmpty(name)) {
-      throw new InvalidNameException(name);
-    }
+  public static async Task ProcessCreateTicketTypeAsync(string name,
+                                                        string? emoji,
+                                                        string description,
+                                                        long order,
+                                                        string? embedMessageTitle,
+                                                        string? embedMessageContent) {
+    if (string.IsNullOrEmpty(name)) throw new InvalidNameException(name);
 
     var exists = await ExistsAsync(name);
-    if (exists) {
-      throw new TicketTypeAlreadyExistsException(name);
-    }
+    if (exists) throw new TicketTypeAlreadyExistsException(name);
 
     var id = Guid.NewGuid();
     var idClean = id.ToString().Replace("-", "");
@@ -113,40 +123,51 @@ public class TicketType
       Order = (int)order,
       RegisterDateUtc = DateTime.UtcNow,
       EmbedMessageTitle = embedMessageTitle,
-      EmbedMessageContent = embedMessageContent,
+      EmbedMessageContent = embedMessageContent
     };
     await ticketType.AddAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
-    return ticketType;
+    //Don't await this task
+    _ = Task.Run(async () => {
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
+      }
+    });
   }
 
-  public async Task ProcessUpdateTicketTypeAsync(string name,
-                                                 DiscordEmoji? emoji,
-                                                 string? description,
-                                                 long order,
-                                                 string embedMessageTitle,
-                                                 string embedMessageContent) {
-    if (emoji != null)
-      Emoji = emoji;
-    if (description != null)
-      Description = description;
-    if (order != 0)
-      Order = (int)order;
-    if (string.IsNullOrEmpty(embedMessageTitle))
-      EmbedMessageTitle = embedMessageTitle;
-    if (string.IsNullOrEmpty(embedMessageContent))
-      EmbedMessageContent = embedMessageContent;
-
+  public async Task ProcessUpdateTicketTypeAsync() {
     await UpdateAsync();
 
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+    _ = Task.Run(async () => {
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeUpdated(this));
+      }
+    });
   }
 
   public async Task ProcessRemoveAsync() {
+    // var anyActiveTickets = await Ticket.AnyActiveTicketsByTypeAsync(this);
+    // if (anyActiveTickets) {
+    //   throw new CanNotDeleteTicketTypeWhenActiveTicketsException();
+    // }
+
+    var allTicketsByType = await Ticket.GetAllByTypeAsync(this);
+    foreach (var ticket in allTicketsByType) {
+      ticket.TicketTypeId = null;
+      ticket.TicketType = null;
+    }
+
+    await Ticket.UpdateRangeAsync(allTicketsByType);
     await RemoveAsync();
-    var logChannel = await ModmailBot.This.GetLogChannelAsync();
-    await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+    _ = Task.Run(async () => {
+      var guildOption = await GuildOption.GetAsync();
+      if (guildOption.IsEnableDiscordChannelLogging) {
+        var logChannel = await ModmailBot.This.GetLogChannelAsync();
+        await logChannel.SendMessageAsync(LogResponses.TicketTypeDeleted(this));
+      }
+    });
   }
 }

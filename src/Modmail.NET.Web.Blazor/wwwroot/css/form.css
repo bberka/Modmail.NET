@@ -1,0 +1,9 @@
+.validation-message {
+    color: #dc3545 !important;
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.invalid {
+    border-color: #dc3545 !important;
+}

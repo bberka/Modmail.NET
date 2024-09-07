@@ -22,14 +22,21 @@ public static class UserResponses
     return feedbackDone;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(TicketType ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(TicketType? ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
-                .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
-    if (!string.IsNullOrEmpty(ticketType.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
+    if (!string.IsNullOrEmpty(ticketType?.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
       embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
+
+    if (ticketType is not null) {
+      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+    }
+    else {
+      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+    }
+
     return embed;
   }
 
@@ -41,12 +48,11 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketClosedColor);
 
-    if (!string.IsNullOrEmpty(guildOption.ClosingMessage))
-      embed.WithDescription(guildOption.ClosingMessage);
+    var closingMessage = LangKeys.CLOSING_MESSAGE_DESCRIPTION.GetTranslation();
 
-    if (!string.IsNullOrEmpty(ticket.CloseReason)) {
-      embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
-    }
+    if (!string.IsNullOrEmpty(closingMessage)) embed.WithDescription(closingMessage);
+
+    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
 
     return embed;
   }
@@ -96,9 +102,7 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.ErrorColor);
 
-    if (!string.IsNullOrEmpty(reason)) {
-      embed.AddField(LangKeys.REASON.GetTranslation(), reason);
-    }
+    if (!string.IsNullOrEmpty(reason)) embed.AddField(LangKeys.REASON.GetTranslation(), reason);
 
     return embed;
   }
@@ -112,8 +116,9 @@ public static class UserResponses
                 .WithFooter(guild.Name, guild.IconUrl)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor);
-    if (!string.IsNullOrEmpty(option.GreetingMessage))
-      embed.WithDescription(option.GreetingMessage);
+    var greetingMessage = LangKeys.GREETING_MESSAGE_DESCRIPTION.GetTranslation();
+    if (!string.IsNullOrEmpty(greetingMessage))
+      embed.WithDescription(greetingMessage);
 
     var builder = new DiscordMessageBuilder()
       .AddEmbed(embed);
@@ -121,7 +126,13 @@ public static class UserResponses
     if (ticketTypes.Count > 0) {
       var selectBox = new DiscordSelectComponent(UtilInteraction.BuildKey("ticket_type", ticketId.ToString()),
                                                  LangKeys.PLEASE_SELECT_A_TICKET_TYPE.GetTranslation(),
-                                                 ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name, x.Key.ToString(), x.Description, false, new DiscordComponentEmoji(x.Emoji)))
+                                                 ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name,
+                                                                                                          x.Key.ToString(),
+                                                                                                          x.Description,
+                                                                                                          false,
+                                                                                                          !string.IsNullOrWhiteSpace(x.Emoji)
+                                                                                                            ? new DiscordComponentEmoji(x.Emoji)
+                                                                                                            : null))
                                                             .ToList());
       builder.AddComponents(selectBox);
     }
@@ -159,9 +170,7 @@ public static class UserResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.MessageReceivedColor)
                 .AddAttachment(message.Attachments);
-    if (!anonymous) {
-      embed.WithUserAsAuthor(message.Author);
-    }
+    if (!anonymous) embed.WithUserAsAuthor(message.Author);
 
     return embed;
   }

@@ -36,9 +36,7 @@ public static class TicketResponses
                                        );
 
     var sb = new StringBuilder();
-    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) {
-      sb.AppendLine(permissionInfo.GetMention());
-    }
+    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) sb.AppendLine(permissionInfo.GetMention());
 
     messageBuilder.WithContent(sb.ToString());
     return messageBuilder;
@@ -61,20 +59,31 @@ public static class TicketResponses
                               : LangKeys.ANONYMOUS_MOD_OFF.GetTranslation())
                  .WithColor(Colors.AnonymousToggledColor)
                  .WithCustomTimestamp()
-                 .WithUserAsAuthor(ticket.OpenerUser)
                  .WithDescription(ticket.Anonymous
                                     ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
                                     : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
+
+    if (ticket.OpenerUser is not null) {
+      embed2.WithUserAsAuthor(ticket.OpenerUser);
+    }
+
+
     return embed2;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType? ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
-                .WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name))
                 .WithUserAsAuthor(user)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
+    if (ticketType is not null) {
+      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+    }
+    else {
+      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+    }
+
     return embed;
   }
 
@@ -97,9 +106,7 @@ public static class TicketResponses
                 .WithUserAsAuthor(message.Author)
                 .AddAttachment(message.Attachments);
 
-    if (anonymous) {
-      embed.WithFooter(LangKeys.THIS_MESSAGE_SENT_ANONYMOUSLY.GetTranslation());
-    }
+    if (anonymous) embed.WithFooter(LangKeys.THIS_MESSAGE_SENT_ANONYMOUSLY.GetTranslation());
 
     return embed;
   }
@@ -117,9 +124,7 @@ public static class TicketResponses
       .AddEmbed(embed);
     if (permissions is not null) {
       var sb = new StringBuilder();
-      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) {
-        sb.AppendLine(permissionInfo.GetMention());
-      }
+      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) sb.AppendLine(permissionInfo.GetMention());
 
       msgBuilder.WithContent(sb.ToString());
     }

@@ -6,7 +6,9 @@ namespace Modmail.NET.Events;
 
 public class OnReady
 {
-  public static async Task Handle(DiscordClient sender, ReadyEventArgs args) {
+  public static  Task Handle(DiscordClient sender, ReadyEventArgs args) {
     Log.Information("Client is ready to process events");
+    return  Task.CompletedTask;
+
   }
 }

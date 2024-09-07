@@ -14,10 +14,11 @@ public sealed class TicketBlacklistConfiguration : IEntityTypeConfiguration<Tick
 
     builder.HasIndex(x => x.DiscordUserId)
            .IsUnique();
+
+    builder.HasOne(x => x.DiscordUser)
+           .WithMany()
+           .HasForeignKey(x => x.DiscordUserId)
+           .OnDelete(DeleteBehavior.Restrict);
     
-     builder.HasOne<DiscordUserInfo>()
-            .WithOne()
-            .HasForeignKey(nameof(TicketBlacklist), nameof(TicketBlacklist.DiscordUserId))
-            .OnDelete(DeleteBehavior.Cascade);
   }
 }

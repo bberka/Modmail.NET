@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
 using Modmail.NET.Aspects;
-using Modmail.NET.Common;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Utils;
@@ -11,7 +10,7 @@ namespace Modmail.NET.Events;
 
 public static class ComponentInteractionCreated
 {
-  [PerformanceLoggerAspect(ThresholdMs = 3000)]
+  [PerformanceLoggerAspect]
   public static async Task Handle(DiscordClient sender, ComponentInteractionCreateEventArgs args) {
     const string logMessage = $"[{nameof(ComponentInteractionCreated)}]{nameof(Handle)}({{CustomId}},{{UserId}},{{ChannelId}},{{InteractionId}},{{MessageId}})";
     try {
@@ -47,12 +46,10 @@ public static class ComponentInteractionCreated
           var ticketIdParam = parameters[0];
           var ticketId = Guid.Parse(ticketIdParam);
           var selectedTypeKey = args.Values.FirstOrDefault();
-          if (string.IsNullOrEmpty(selectedTypeKey)) {
-            break;
-          }
+          if (string.IsNullOrEmpty(selectedTypeKey)) break;
 
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
-          await ticket.ProcessChangeTicketTypeAsync(args.User.Id, selectedTypeKey, null, args.Channel, args.Message);
+          await ticket.ProcessChangeTicketTypeAsync(selectedTypeKey, null, args.Channel, args.Message,userId: args.User.Id);
           Log.Information(logMessage,
                           args.Interaction?.Data?.CustomId,
                           args.User?.Id,
