@@ -24,7 +24,7 @@ public sealed class TicketType
   public string? Emoji { get; set; }
 
   [MaxLength(DbLength.DESCRIPTION)]
-  public string? Description { get; set; }
+  public string Description { get; set; } = string.Empty;
 
   public int Order { get; set; }
 
@@ -92,13 +92,12 @@ public sealed class TicketType
     return result;
   }
 
-  public static async Task<TicketType> ProcessCreateTicketTypeAsync(
-    string name,
-    string? emoji,
-    string? description,
-    long order,
-    string embedMessageTitle,
-    string embedMessageContent) {
+  public static async Task ProcessCreateTicketTypeAsync(string name,
+                                                        string? emoji,
+                                                        string description,
+                                                        long order,
+                                                        string? embedMessageTitle,
+                                                        string? embedMessageContent) {
     if (string.IsNullOrEmpty(name)) throw new InvalidNameException(name);
 
     var exists = await ExistsAsync(name);
@@ -123,7 +122,6 @@ public sealed class TicketType
       var logChannel = await ModmailBot.This.GetLogChannelAsync();
       await logChannel.SendMessageAsync(LogResponses.TicketTypeCreated(ticketType));
     });
-    return ticketType;
   }
 
   public async Task ProcessUpdateTicketTypeAsync() {

@@ -11,7 +11,7 @@
   bool isUpdate => TicketType != null;
   string name = "";
   string? emoji = "";
-  string? description = "";
+  string description = "";
   int order = 0;
   bool isEnabled = true;
   string? embedMessageTitle = null;
@@ -27,6 +27,7 @@
       embedMessageTitle = TicketType.EmbedMessageTitle;
       embedMessageContent = TicketType.EmbedMessageContent;
     }
+
     return base.OnInitializedAsync();
   }
 
@@ -35,12 +36,9 @@
       notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
       return;
     }
-    if (string.IsNullOrEmpty(embedMessageTitle)) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a embed message title.");
-      return;
-    } 
-    if (string.IsNullOrEmpty(embedMessageContent)) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a embed content title.");
+
+    if (string.IsNullOrEmpty(description)) {
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a description.");
       return;
     }
 
@@ -68,7 +66,12 @@
           dialogService.Close(true);
         }
         else {
-          await Entities.TicketType.ProcessCreateTicketTypeAsync(name,emoji,description,order,embedMessageTitle,embedMessageContent);
+          await Entities.TicketType.ProcessCreateTicketTypeAsync(name,
+                                                                 emoji,
+                                                                 description,
+                                                                 order,
+                                                                 embedMessageTitle,
+                                                                 embedMessageContent);
           Log.Information(logMessage, name);
           notificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
           dialogService.Close(true);
@@ -79,12 +82,13 @@
         ex.NotifyException(notificationService);
       }
       catch (Exception ex) {
-        Log.Fatal(ex, logMessage,name);
+        Log.Fatal(ex, logMessage, name);
         ex.NotifyException(notificationService);
       }
     }
-    }
   }
+
+}
 
 
 <RadzenRow>
@@ -135,9 +139,8 @@
         <RadzenTextBox Name="embedMessageContent" @bind-Value="@embedMessageContent"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
-    
 
-    
+
     <RadzenRow class="rz-my-4">
       <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update" : "Create")" Click="SubmitAsync"/>
     </RadzenRow>
