@@ -39,15 +39,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Radzen.Blazor" Version="5.1.1"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Logs\Log_20240820.json"/>
-    <_ContentIncludedByDefault Remove="Logs\Log_20240821.json"/>
-    <_ContentIncludedByDefault Remove="Logs\Log_20240822.json"/>
-    <_ContentIncludedByDefault Remove="Logs\Log_20240825.json"/>
-    <_ContentIncludedByDefault Remove="Logs\Log_20240826.json"/>
+    <PackageReference Include="Radzen.Blazor" Version="5.1.10" />
   </ItemGroup>
 
   <ItemGroup>
