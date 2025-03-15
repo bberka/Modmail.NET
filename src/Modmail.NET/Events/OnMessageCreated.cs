@@ -32,15 +32,16 @@ public static class OnMessageCreated
       return;
 
     const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandlePrivateTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
-    try {
-      //keeps other threads for same user locked until this one is done
-      using var metran = ProcessingUserMessageContainer.BeginTransaction(userId, 50, 100); // 100ms * 50 = 5 seconds
-      if (metran is null) {
-        //VERY UNLIKELY TO HAPPEN
-        await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
-        return;
-      }
 
+    //keeps other threads for same user locked until this one is done
+    var notProcessing = ProcessingUserMessageContainer.TryAddTransaction(userId, out var transaction); // 100ms * 50 = 5 seconds
+    if (!notProcessing) {
+      //VERY UNLIKELY TO HAPPEN
+      await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
+      return;
+    }
+
+    try {
       var activeBlock = await TicketBlacklist.IsBlacklistedAsync(userId);
       if (activeBlock) {
         await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
@@ -61,6 +62,9 @@ public static class OnMessageCreated
     catch (Exception ex) {
       Log.Error(ex, logMessage, channel.Id, userId, message.Content);
     }
+    finally {
+      transaction.Dispose();
+    }
   }
 
   internal static async Task HandleGuildTicketMessageAsync(DiscordClient sender,
@@ -69,16 +73,17 @@ public static class OnMessageCreated
                                                            DiscordUser modUser,
                                                            DiscordGuild guild) {
     const string logMessage = $"[{nameof(OnMessageCreated)}]{nameof(HandleGuildTicketMessageAsync)}({{ChannelId}},{{AuthorId}},{{MessageContent}})";
+    
+    if (message.Content.StartsWith(BotConfig.This.BotPrefix))
+      return;
+
+    var notProcessing = ProcessingUserMessageContainer.TryAddTransaction(message.Author.Id, out var transaction); // 100ms * 50 = 5 seconds
+    if (!notProcessing) {
+      await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
+      return;
+    }
+
     try {
-      if (message.Content.StartsWith(BotConfig.This.BotPrefix))
-        return;
-
-      using var metran = ProcessingUserMessageContainer.BeginTransaction(message.Author.Id, 50, 100); // 100ms * 50 = 5 seconds
-      if (metran is null) {
-        await channel.SendMessageAsync(Embeds.Error(LangData.This.GetTranslation(LangKeys.SYSTEM_IS_BUSY), LangData.This.GetTranslation(LangKeys.YOUR_MESSAGE_COULD_NOT_BE_PROCESSED)));
-        return;
-      }
-
       var id = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
       if (id == Guid.Empty) return;
 
@@ -92,6 +97,9 @@ public static class OnMessageCreated
     }
     catch (Exception ex) {
       Log.Error(ex, logMessage, channel.Id, modUser.Id, message.Content);
+    }
+    finally {
+      transaction.Dispose();
     }
   }
 }
