@@ -51,8 +51,4 @@
     <Content Remove="Logs\**"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Language\" />
-  </ItemGroup>
-
 </Project>
