@@ -12,16 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="appsettings.example.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="appsettings.Development.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Remove="Logs\**"/>
-  </ItemGroup>
-
-  <ItemGroup>
     <AdditionalFiles Include="Components\Layout\Shared\Scripts.razor"/>
     <AdditionalFiles Include="Components\Layout\Shared\Styles.razor"/>
   </ItemGroup>
