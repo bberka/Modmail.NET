@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Queues
 @using Modmail.NET.Web.Shared.Models
 
 @inject NavigationManager navigationManager
@@ -185,6 +186,17 @@
             </RadzenText>
             <p>
               Ticket Types
+            </p>
+          </RadzenCard>
+        </RadzenColumn>   
+        
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(TicketMessageQueue.This.GetChannelCount())
+            </RadzenText>
+            <p>
+              Processing Message Queues 
             </p>
           </RadzenCard>
         </RadzenColumn>
