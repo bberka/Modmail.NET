@@ -185,6 +185,6 @@
   "FEEDBACK_DESCRIPTION": "Please rate the answers you receive. This helps us improve our moderation team.",
   "GREETING_MESSAGE_DESCRIPTION": "Welcome to the modmail system! Please describe your issue and a moderator will be with you shortly.",
   "CLOSING_MESSAGE_DESCRIPTION": "Your ticket has been closed. If you have any further questions, feel free to open a new ticket by messaging me again.",
-  "TICKET_TYPE_REMOVED" : "Ticket Type Removed",
-  "CAN_NOT_DELETE_TICKET_TYPE_WHEN_ACTIVE_TICKETS" : "Can not delete ticket type when there are active tickets with this type"
+  "TICKET_TYPE_REMOVED": "Ticket Type Removed",
+  "CAN_NOT_DELETE_TICKET_TYPE_WHEN_ACTIVE_TICKETS": "Can not delete ticket type when there are active tickets with this type"
 }

@@ -1,18 +1,14 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace Modmail.NET.Abstract;
 
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-
 public abstract class BaseQueue<TKey, TValue> where TKey : notnull
 {
-  private readonly ConcurrentDictionary<TKey, Channel<TValue>> _queues = new();
-  private readonly ConcurrentDictionary<TKey, DateTime> _lastActiveTime = new();
   private readonly TimeSpan _idleTimeout;
+  private readonly ConcurrentDictionary<TKey, DateTime> _lastActiveTime = new();
+  private readonly ConcurrentDictionary<TKey, Channel<TValue>> _queues = new();
 
   protected BaseQueue(TimeSpan idleTimeout) {
     _idleTimeout = idleTimeout;
@@ -29,6 +25,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
       _ = ProcessQueue(key, channel);
       _ = ProcessTimeouts(key, channel);
     }
+
     await channel.Writer.WriteAsync(message);
   }
 
@@ -63,5 +60,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
 
   protected abstract Task HandleMessageAsync(TKey key, TValue message);
 
-  public int GetChannelCount() => _queues.Count;
+  public int GetChannelCount() {
+    return _queues.Count;
+  }
 }

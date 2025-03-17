@@ -59,23 +59,17 @@ public sealed class TicketBlacklist
   public static async Task ProcessAddUserToBlacklist(ulong userId, string? reason = null, ulong modId = 0) {
     // var option = await GuildOption.GetAsync();
 
-    if (modId == 0) {
-      modId = ModmailBot.This.Client.CurrentUser.Id; //TODO: Get author from web or set owner user id
-    }
+    if (modId == 0) modId = ModmailBot.This.Client.CurrentUser.Id; //TODO: Get author from web or set owner user id
 
     var activeTicket = await Ticket.GetActiveTicketNullableAsync(userId);
-    if (activeTicket is not null) {
-      await activeTicket.ProcessCloseTicketAsync(userId, LangData.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST), dontSendFeedbackMessage: true);
-    }
+    if (activeTicket is not null) await activeTicket.ProcessCloseTicketAsync(userId, LangData.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST), dontSendFeedbackMessage: true);
 
     var activeBlock = await IsBlacklistedAsync(userId);
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
-    if (string.IsNullOrEmpty(reason)) {
-      reason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
-    }
+    if (string.IsNullOrEmpty(reason)) reason = LangData.This.GetTranslation(LangKeys.NO_REASON_PROVIDED);
 
-    var blackList = new TicketBlacklist() {
+    var blackList = new TicketBlacklist {
       Id = Guid.NewGuid(),
       Reason = reason,
       DiscordUserId = userId,
@@ -105,9 +99,7 @@ public sealed class TicketBlacklist
 
   public async Task ProcessRemoveUserFromBlacklist(ulong userId, ulong authorUserId = 0) {
     await RemoveAsync();
-    if (authorUserId == 0) {
-      authorUserId = ModmailBot.This.Client.CurrentUser.Id; //TODO: Get author from web or set owner user id
-    }
+    if (authorUserId == 0) authorUserId = ModmailBot.This.Client.CurrentUser.Id; //TODO: Get author from web or set owner user id
 
     _ = Task.Run(async () => {
       //Don't await this task

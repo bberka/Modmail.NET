@@ -5,7 +5,7 @@
 
 @inject NavigationManager navigationManager
 @inject DialogService dialogService
-@inject  NotificationService notificationService
+@inject NotificationService notificationService
 
 @code {
 
@@ -37,7 +37,7 @@
 
   private async Task StartBotAsync() {
     var dialogResult = await dialogService.Confirm("Are you sure you want to start the bot?",
-                                                   options: new ConfirmOptions() {
+                                                   options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
@@ -52,7 +52,7 @@
 
   private async Task StopBotAsync() {
     var dialogResult = await dialogService.Confirm("Are you sure you want to stop the bot?",
-                                                   options: new ConfirmOptions() {
+                                                   options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
@@ -67,7 +67,7 @@
 
   private async Task RestartBotAsync() {
     var dialogResult = await dialogService.Confirm("Are you sure you want to restart the bot?",
-                                                   options: new ConfirmOptions() {
+                                                   options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
                                                      OkButtonText = "Yes",
@@ -188,15 +188,15 @@
               Ticket Types
             </p>
           </RadzenCard>
-        </RadzenColumn>   
-        
+        </RadzenColumn>
+
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
               @(TicketMessageQueue.This.GetChannelCount())
             </RadzenText>
             <p>
-              Processing Message Queues 
+              Processing Message Queues
             </p>
           </RadzenCard>
         </RadzenColumn>

@@ -9,52 +9,48 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectInjector" Version="2.8.2" />
+    <PackageReference Include="AspectInjector" Version="2.8.2"/>
     <PackageReference Include="CSharpVitamins.ShortGuid" Version="2.0.0"/>
-    <PackageReference Include="DSharpPlus" Version="4.5.0" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.0" />
-    <PackageReference Include="Metran" Version="2.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.3" />
+    <PackageReference Include="DSharpPlus" Version="4.5.0"/>
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0"/>
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0"/>
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.0"/>
+    <PackageReference Include="Metran" Version="2.0.0"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.3"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3"/>
     <PackageReference Include="Ninject" Version="3.3.6"/>
-    <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
-    <PackageReference Include="Serilog" Version="4.2.0" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
-    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="SnowflakeIDGenerator" Version="1.5.2024.337" />
-    <PackageReference Include="System.Runtime.Caching" Version="9.0.3" />
+    <PackageReference Include="Riok.Mapperly" Version="4.1.1"/>
+    <PackageReference Include="Serilog" Version="4.2.0"/>
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0"/>
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0"/>
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0"/>
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
+    <PackageReference Include="SnowflakeIDGenerator" Version="1.5.2024.337"/>
+    <PackageReference Include="System.Runtime.Caching" Version="9.0.3"/>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
+    <Content Update="appsettings.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-
-
-
-  <ItemGroup>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="appsettings.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

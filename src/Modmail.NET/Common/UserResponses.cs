@@ -7,7 +7,7 @@ using Modmail.NET.Utils;
 namespace Modmail.NET.Common;
 
 /// <summary>
-/// Contains the messages bot to send to user
+///   Contains the messages bot to send to user
 /// </summary>
 public static class UserResponses
 {
@@ -30,12 +30,10 @@ public static class UserResponses
     if (!string.IsNullOrEmpty(ticketType?.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
       embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
 
-    if (ticketType is not null) {
+    if (ticketType is not null)
       embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
-    }
-    else {
+    else
       embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
-    }
 
     return embed;
   }

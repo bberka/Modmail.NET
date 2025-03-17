@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;

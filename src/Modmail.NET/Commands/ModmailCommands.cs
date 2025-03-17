@@ -3,14 +3,12 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using Modmail.NET.Aspects;
 using Modmail.NET.Attributes;
-using Modmail.NET.Commands.Slash;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Serilog;
 
 namespace Modmail.NET.Commands;
-
 
 [PerformanceLoggerAspect]
 [RequireGuild]
@@ -20,7 +18,6 @@ namespace Modmail.NET.Commands;
 [RequirePermissions(Permissions.Administrator)]
 public sealed class ModmailCommands : BaseCommandModule
 {
-
   [Command("setup")]
   [Description("Setup the modmail bot, can only be used by the bot owner and administrator.")]
   [GroupCommand]
@@ -46,7 +43,4 @@ public sealed class ModmailCommands : BaseCommandModule
                 ctx.User.Id);
     }
   }
- 
-  
-  
 }

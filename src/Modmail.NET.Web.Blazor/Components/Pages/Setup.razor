@@ -7,7 +7,7 @@
 @code {
 
   protected override async Task OnInitializedAsync() {
-    if (await GuildOption.Any() == true) {
+    if (await GuildOption.Any()) {
       NavigationManager.NavigateTo("/");
     }
   }

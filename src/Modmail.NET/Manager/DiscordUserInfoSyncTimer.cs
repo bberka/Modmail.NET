@@ -1,6 +1,4 @@
-﻿using DSharpPlus.Entities;
-using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Database;
+﻿using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
@@ -37,23 +35,19 @@ public sealed class DiscordUserInfoSyncTimer
       var members = await guild.GetAllMembersAsync();
       var allDbUsers = await DiscordUserInfo.GetAllAsync();
       var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x) {
-        Username = x.GetUsername(),
+        Username = x.GetUsername()
       }).ToList();
 
       var updateList = new List<DiscordUserInfo>();
       foreach (var dbUser in allDbUsers) {
         var discordUser = convertedDiscordUsers.FirstOrDefault(x => x.Id == dbUser.Id);
-        if (discordUser is null) {
-          continue;
-        }
+        if (discordUser is null) continue;
         var isAllSame = dbUser.AvatarUrl == discordUser.AvatarUrl &&
                         dbUser.Username == discordUser.Username &&
                         dbUser.BannerUrl == discordUser.BannerUrl &&
                         dbUser.Email == discordUser.Email &&
                         dbUser.Locale == discordUser.Locale;
-        if (isAllSame) {
-          continue;
-        }
+        if (isAllSame) continue;
         dbUser.AvatarUrl = discordUser.AvatarUrl;
         dbUser.Username = discordUser.Username;
         dbUser.BannerUrl = discordUser.BannerUrl;

@@ -1,5 +1,4 @@
 ﻿@using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Web.Blazor.Static
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 
 @code {
@@ -56,8 +55,7 @@
   private async Task LoadDataAsync(LoadDataArgs args) {
     await reloadDataAsync(args);
   }
-  
-  
+
 
 }
 
@@ -70,27 +68,37 @@
         }
         else {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
-            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="false" AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.SimpleWithMenu"
-                            AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
+            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="false"
+                            AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false"
+                            FilterMode="FilterMode.SimpleWithMenu"
+                            AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
-                            Data="@_data" TItem="TicketMessage" ColumnWidth="180px" LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading" Filter="@ShowLoading">
+                            Data="@_data" TItem="TicketMessage" ColumnWidth="180px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
+                            Filter="@ShowLoading">
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketMessage.Id)" Filterable="false" Title="ID" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketMessage.Id)" Filterable="false" Title="ID"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Property="@nameof(TicketMessage.RegisterDateUtc)" Title="Register Date UTC"/>
                 <RadzenDataGridColumn Property="@nameof(TicketMessage.MessageContent)" Title="Message Content"/>
 
-                <RadzenDataGridColumn Title="From User Avatar" Sortable="false" Filterable="false" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="From User Avatar" Sortable="false" Filterable="false"
+                                      TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px" Path="@_users[data.SenderUserId].AvatarUrl" AlternateText=""/>
+                      <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px"
+                                   Path="@_users[data.SenderUserId].AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="From Username" Sortable="true" Filterable="true" TextAlign="TextAlign.Center">
+                <RadzenDataGridColumn Title="From Username" Sortable="true" Filterable="true"
+                                      TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenText Text="@_users[data.SenderUserId].Username" TextAlign="TextAlign.Center" class="fw-bold"></RadzenText>
+                      <RadzenText Text="@_users[data.SenderUserId].Username" TextAlign="TextAlign.Center"
+                                  class="fw-bold"></RadzenText>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
