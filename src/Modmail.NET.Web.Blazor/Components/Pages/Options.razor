@@ -95,12 +95,12 @@
                   Enable taking feedback from user after closing a ticket
                 </RadzenLabel>
               </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="ShowConfirmationWhenClosingTickets" Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/>
-                <RadzenLabel Component="ShowConfirmationWhenClosingTickets">
-                  Show a confirmation dialog when a moderator closes a ticket (Not implemented)
-                </RadzenLabel>
-              </RadzenRow>
+              @* <RadzenRow class="rz-my-4"> *@
+              @*   <RadzenSwitch Name="ShowConfirmationWhenClosingTickets" Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/> *@
+              @*   <RadzenLabel Component="ShowConfirmationWhenClosingTickets"> *@
+              @*     Show a confirmation dialog when a moderator closes a ticket (Not implemented) *@
+              @*   </RadzenLabel> *@
+              @* </RadzenRow> *@
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Filled">
                   <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
