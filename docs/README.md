@@ -184,6 +184,11 @@ and more...
 - Write tests
 - Ability to disable admin commands for bot. (This can be done since web ui is implemented)
 - Check and show message when an invalid emoji is provided to Ticket Type or convert it to a emoji selector
+- Check attack handling methods and let bot create a preview of images instead of connecting links
+- Implement a message queue per user to handle messages sent to bot. 
+
+# Known Bugs
+- When user spams messages or sends messages really fast. Messages is not handled by send order. There is no queue. Also this causes system busy message when user first creating ticket with first message. 
 
 # Contributing
 Create a pull request by using semantic commits and proper explanation
