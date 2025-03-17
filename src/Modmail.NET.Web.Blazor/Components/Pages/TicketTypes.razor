@@ -203,7 +203,7 @@
                                   Size="ButtonSize.Medium"
                                   class="rz-my-1 rz-ms-1"
                                   Click="@(async () => await ShowEditDialog(data))"
-                                  MouseEnter="@(args => tooltipService.Open(args, "Edit Team", new TooltipOptions() { Style = "background: var(--rz-info);" }))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Edit Ticket Type", new TooltipOptions() { Style = "background: var(--rz-info);" }))"
                                   @onclick:stopPropagation="true">
                     </RadzenButton>
                     <RadzenButton ButtonStyle="ButtonStyle.Danger"
@@ -212,7 +212,7 @@
                                   Shade="Shade.Lighter"
                                   Size="ButtonSize.Medium"
                                   class="rz-my-1 rz-ms-1"
-                                  MouseEnter="@(args => tooltipService.Open(args, "Delete Team", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Delete Ticket Type", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
                                   Click="@(async () => await RemoveAsync(data))"
                                   @onclick:stopPropagation="true">
                     </RadzenButton>
