@@ -75,7 +75,7 @@ public sealed class DiscordUserInfo
 
       if (discordUser is not null) {
         result = new DiscordUserInfo(discordUser) {
-          Username = discordUser.GetUsername(),
+          Username = discordUser.GetUsername()
         };
         await result.AddOrUpdateAsync();
         return result;
@@ -94,7 +94,7 @@ public sealed class DiscordUserInfo
   public static async Task AddOrUpdateAsync(DiscordUser? user) {
     if (user is null) return;
     await new DiscordUserInfo(user) {
-      Username = user.GetUsername(),
+      Username = user.GetUsername()
     }.AddOrUpdateAsync();
   }
 
@@ -127,8 +127,8 @@ public sealed class DiscordUserInfo
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return await dbContext.DiscordUserInfos.ToListAsync();
   }
-  
-  public static async Task<Dictionary<ulong,DiscordUserInfo>> GetAllDictionaryAsync() {
+
+  public static async Task<Dictionary<ulong, DiscordUserInfo>> GetAllDictionaryAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
     return (await dbContext.DiscordUserInfos.ToListAsync()).ToDictionary(x => x.Id, x => x);
   }

@@ -171,7 +171,6 @@ and more...
 - A public and private authenticated API
 - Encrypt message information and other sensitive information
 - Ability to enable confirmation dialog when closing tickets
-- Ability to change Anonymous messaging on GuildOption to allow default behavior
 - Language file support for multiple languages, getting or asking user about language they want to interact with
 - Editing embeds and colors and language file via Web UI
 - Improve ticket type system, assign tickets to teams automatically
@@ -183,7 +182,6 @@ and more...
 - Improve and/or add filters to web ui pages
 - Write tests
 - Ability to disable admin commands for bot. (This can be done since web ui is implemented)
-- Check and show message when an invalid emoji is provided to Ticket Type or convert it to a emoji selector
 - Check attachment handling methods and let bot create a preview of images instead of connecting links
 
 # Contributing

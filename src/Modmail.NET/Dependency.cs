@@ -24,10 +24,8 @@ public static class ServiceLocator
   }
 
   public static T Get<T>() {
-    if (_kernel is null) {
-      throw new InvalidOperationException("Kernel is not initialized");
-    }
-    
+    if (_kernel is null) throw new InvalidOperationException("Kernel is not initialized");
+
     return _kernel.Get<T>();
   }
 }

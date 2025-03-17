@@ -19,6 +19,5 @@ public sealed class TicketBlacklistConfiguration : IEntityTypeConfiguration<Tick
            .WithMany()
            .HasForeignKey(x => x.DiscordUserId)
            .OnDelete(DeleteBehavior.Restrict);
-    
   }
 }

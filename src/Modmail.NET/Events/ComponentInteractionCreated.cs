@@ -49,7 +49,7 @@ public static class ComponentInteractionCreated
           if (string.IsNullOrEmpty(selectedTypeKey)) break;
 
           var ticket = await Ticket.GetActiveTicketAsync(ticketId);
-          await ticket.ProcessChangeTicketTypeAsync(selectedTypeKey, null, args.Channel, args.Message,userId: args.User.Id);
+          await ticket.ProcessChangeTicketTypeAsync(selectedTypeKey, null, args.Channel, args.Message, args.User.Id);
           Log.Information(logMessage,
                           args.Interaction?.Data?.CustomId,
                           args.User?.Id,

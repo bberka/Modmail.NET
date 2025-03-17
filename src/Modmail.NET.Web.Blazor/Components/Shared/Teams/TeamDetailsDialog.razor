@@ -1,9 +1,7 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Extensions
-@using Modmail.NET.Language
-@using Serilog
 @using Modmail.NET.Static
+@using Serilog
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject TooltipService tooltipService
 @inject NotificationService notificationService
@@ -50,7 +48,6 @@
                          .AsQueryable();
 
 
-
     count = await query.CountAsync();
 
     if (args is not null) {
@@ -92,7 +89,9 @@ else {
   <RadzenRow>
     <RadzenColumn>
       @if (data.Count == 0) {
-        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">Team has no members</RadzenText>
+        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">Team has no
+          members
+        </RadzenText>
       }
       <RadzenDataList Count="@count"
                       LoadData="LoadDataAsync"
@@ -113,13 +112,15 @@ else {
               <RadzenColumn Size="12" SizeLG="3" class="rz-p-4 product-title">
                 @if (member.Type == TeamMemberDataType.UserId) {
                   <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.Key)?.Username ?? $"Id:{member.Key}")</RadzenText>
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5"
+                                class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.Key)?.Username ?? $"Id:{member.Key}")</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body2">User</RadzenText>
                   </RadzenColumn>
                 }
                 else {
                   <RadzenColumn Size="12" SizeMD="6">
-                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">@(_roles.FirstOrDefault(x => x.Id == member.Key)?.Name ?? $"Id:{member.Key}")</RadzenText>
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5"
+                                class="rz-color-on-secondary-lighter">@(_roles.FirstOrDefault(x => x.Id == member.Key)?.Name ?? $"Id:{member.Key}")</RadzenText>
                     <RadzenText TextStyle="TextStyle.Body2">Role</RadzenText>
                   </RadzenColumn>
                 }
@@ -127,7 +128,8 @@ else {
               <RadzenColumn Size="12" SizeLG="7" class="rz-p-4">
                 <RadzenRow Gap="0">
                   <RadzenColumn Size="12">
-                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-mb-0">Register Date UTC</RadzenText>
+                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-mb-0">Register Date UTC
+                    </RadzenText>
                     <RadzenText TextStyle="TextStyle.Body2">@(member.RegisterDateUtc)</RadzenText>
                   </RadzenColumn>
                 </RadzenRow>
@@ -139,7 +141,7 @@ else {
                               Shade="Shade.Lighter"
                               Size="ButtonSize.Medium"
                               class="rz-my-1 rz-ms-1"
-                              MouseEnter="@(args => tooltipService.Open(args, $"Remove {(member.Type == TeamMemberDataType.UserId ? "user" : "role")} from team", new TooltipOptions() { Style = "background: var(--rz-danger);" }))"
+                              MouseEnter="@(args => tooltipService.Open(args, $"Remove {(member.Type == TeamMemberDataType.UserId ? "user" : "role")} from team", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                               Click="@(async () => await RemoveAsync(member))"
                               @onclick:stopPropagation="true">
                 </RadzenButton>

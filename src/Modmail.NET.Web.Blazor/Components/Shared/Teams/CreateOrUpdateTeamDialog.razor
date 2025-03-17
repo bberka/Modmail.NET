@@ -1,10 +1,9 @@
 ﻿@using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Language
 @using Modmail.NET.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject  NotificationService notificationService
-@inject  DialogService dialogService
+@inject NotificationService notificationService
+@inject DialogService dialogService
 
 @code {
 
@@ -54,11 +53,11 @@
     }
 
     var dialogResult = await dialogService.Confirm("Are you sure you want to create new team ?",
-                                                   options: new ConfirmOptions() {
+                                                   options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
                                                      CloseDialogOnOverlayClick = true,
-                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnEsc = true
                                                    });
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
@@ -115,7 +114,9 @@ else {
       </RadzenRow>
 
       <RadzenRow class="rz-my-4">
-        <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()" class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel" Placeholder="Select Permission Level" AllowFiltering="false"/>
+        <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()"
+                        class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel"
+                        Placeholder="Select Permission Level" AllowFiltering="false"/>
       </RadzenRow>
       <RadzenRow class="rz-my-4">
         <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@pingOnNewTicket/>
@@ -131,7 +132,10 @@ else {
 
       </RadzenRow>
       <RadzenRow class="rz-my-4">
-        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update" : "Create")" Click="SubmitAsync"/>
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate
+                                                                                                 ? "Update"
+                                                                                                 : "Create")"
+                      Click="SubmitAsync"/>
       </RadzenRow>
     </RadzenColumn>
   </RadzenRow>

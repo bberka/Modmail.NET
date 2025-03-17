@@ -17,16 +17,19 @@ public class RequirePermissionLevelOrHigherForCommandAttribute : CheckBaseAttrib
     var isOwner = BotConfig.This.OwnerUsers.Contains(ctx.User.Id);
     if (isOwner) return true;
 
-    var guild = ctx.Guild.Id == BotConfig.This.MainServerId ? ctx.Guild : null;
+    var guild = ctx.Guild.Id == BotConfig.This.MainServerId
+                  ? ctx.Guild
+                  : null;
     if (guild == null) {
       await ctx.RespondAsync(Embeds.Error(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation()));
       return false;
     }
 
     if (ctx.Member is null) {
-      await ctx.RespondAsync(Embeds.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()));//TODO: Add another message
+      await ctx.RespondAsync(Embeds.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation())); //TODO: Add another message
       return false;
     }
+
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);
     if (isAdmin) return true;
 
@@ -36,6 +39,7 @@ public class RequirePermissionLevelOrHigherForCommandAttribute : CheckBaseAttrib
       await ctx.RespondAsync(Embeds.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()));
       return false;
     }
+
     var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)_teamPermissionLevel;
     if (permLevelInt < expectedLevelInt) {

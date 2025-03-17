@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using Modmail.NET.Utils;
 using Newtonsoft.Json;
 
@@ -8,7 +7,7 @@ namespace Modmail.NET.Language;
 public class LangData
 {
   private static LangData? _instance;
-  private IReadOnlyDictionary<string, IReadOnlyDictionary<LangKeys, string>> _languages;
+  private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<LangKeys, string>> _languages;
 
   private LangData() {
     var currentDir = Directory.GetCurrentDirectory();
@@ -63,7 +62,7 @@ public class LangData
   }
 
   private IReadOnlyDictionary<LangKeys, string> GetLanguage(string lang) {
-    if (!_languages.TryGetValue(lang, out var language)) 
+    if (!_languages.TryGetValue(lang, out var language))
       throw new KeyNotFoundException("Language not found : " + lang);
 
     return language;
@@ -84,9 +83,7 @@ public class LangData
 
     //try parse args to enum LangKeys and if exists replace with translation
 
-    if (args.Length == 0) {
-      return translation;
-    }
+    if (args.Length == 0) return translation;
     var newArgs = new List<object>();
     foreach (var arg in args)
       newArgs.Add(Enum.TryParse<LangKeys>(arg.ToString(), out var newArg)

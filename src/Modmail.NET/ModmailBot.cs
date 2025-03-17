@@ -1,11 +1,11 @@
-﻿using System.Reflection;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Commands;
+using Modmail.NET.Commands.Slash;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Events;
@@ -22,8 +22,6 @@ namespace Modmail.NET;
 public class ModmailBot
 {
   private static ModmailBot? _instance;
-
-  public bool Connected { get; private set; }
 
   private ModmailBot() {
     _ = BotConfig.This; // Initialize the environment container
@@ -91,27 +89,9 @@ public class ModmailBot
     Client.MessageDeleted += OnMessageDeleted.Handle;
     Client.MessageUpdated += OnMessageUpdated.Handle;
     Client.ThreadCreated += OnThreadCreated.Handle;
-
-
-    //Slash commands
-    var assembly = typeof(ModmailBot).Assembly;
-    var slash = Client.UseSlashCommands();
-
-    slash.RegisterCommands(assembly);
-
-
-    //Commands
-    var commands = Client.UseCommandsNext(new CommandsNextConfiguration() {
-      StringPrefixes = [
-        BotConfig.This.BotPrefix
-      ],
-      EnableDms = false,
-      CaseSensitive = false
-    });
-
-
-    commands.RegisterCommands(assembly);
   }
+
+  public bool Connected { get; private set; }
 
   public static ModmailBot This {
     get {
@@ -120,24 +100,47 @@ public class ModmailBot
     }
   }
 
-  public DiscordClient Client { get; private set; }
+  public DiscordClient Client { get; }
   // public ServiceProvider Services { get; private set; }
 
   public async Task StartAsync() {
     // Start the bot
 
+    await SetupDatabase();
+
+    var option = await GuildOption.GetAsync();
+
+
+    //Slash commands
+    var slash = Client.UseSlashCommands();
+
+    if (!option.DisableBlacklistSlashCommands) slash.RegisterCommands<BlacklistSlashCommands>();
+
+    if (!option.DisableTicketSlashCommands) slash.RegisterCommands<TicketSlashCommands>();
+
+    //Commands
+    var commands = Client.UseCommandsNext(new CommandsNextConfiguration {
+      StringPrefixes = [
+        BotConfig.This.BotPrefix
+      ],
+      EnableDms = false,
+      CaseSensitive = false
+    });
+
+
+    commands.RegisterCommands<ModmailCommands>();
+
+
     Log.Information("Starting bot");
     await Client.ConnectAsync();
     Connected = true;
-
-    await SetupDatabase();
 
 
     //Service initialization
     _ = TicketTimeoutTimer.This;
     _ = TicketTypeSelectionTimeoutTimer.This;
     _ = DiscordUserInfoSyncTimer.This;
-    
+
     await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
@@ -173,7 +176,7 @@ public class ModmailBot
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
     foreach (var guild in Client.Guilds)
       try {
-        var member = await guild.Value.GetMemberAsync(userId, false);
+        var member = await guild.Value.GetMemberAsync(userId);
         if (member == null) continue;
         await DiscordUserInfo.AddOrUpdateAsync(member);
         return member;
@@ -209,7 +212,7 @@ public class ModmailBot
       return guild;
     }
   }
-  
+
   public async Task<DiscordChannel> GetLogChannelAsync() {
     var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetLogChannelAsync));
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
@@ -229,12 +232,13 @@ public class ModmailBot
       return logChannel;
     }
   }
-  
-  
+
+
   public async Task<List<DiscordRole>> GetRoles() {
     var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetRoles));
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
-      async Task<List<DiscordRole>> _get() {
+
+    async Task<List<DiscordRole>> _get() {
       var guild = await GetMainGuildAsync();
       var rolesDict = guild.Roles;
       var roles = rolesDict.Values.ToList();

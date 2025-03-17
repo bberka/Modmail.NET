@@ -5,7 +5,7 @@ using Modmail.NET.Extensions;
 namespace Modmail.NET.Common;
 
 /// <summary>
-///  Contains the embed messages bot to send to log channel
+///   Contains the embed messages bot to send to log channel
 /// </summary>
 public static class LogResponses
 {
@@ -17,8 +17,8 @@ public static class LogResponses
                 .WithUserAsAuthor(initialMessage.Author)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticketId.ToString().ToUpper(), false)
-                .AddField(LangKeys.USER.GetTranslation(), initialMessage.Author.Mention, false)
+                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticketId.ToString().ToUpper())
+                .AddField(LangKeys.USER.GetTranslation(), initialMessage.Author.Mention)
       ;
     return embed;
   }
@@ -83,7 +83,7 @@ public static class LogResponses
                    .WithTitle(LangKeys.FEEDBACK_RECEIVED.GetTranslation())
                    .WithDescription(ticket.FeedbackMessage)
                    .WithCustomTimestamp()
-                   .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
+                   .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                    .AddField(LangKeys.USER.GetTranslation(), ticket.OpenerUser!.GetMention(), true) //not sure needed
                    .AddField(LangKeys.STAR.GetTranslation(), ticket.FeedbackStar.ToString(), true)
                    .WithColor(Colors.FeedbackColor)
@@ -114,9 +114,7 @@ public static class LogResponses
                 .WithDescription(ticket.Anonymous
                                    ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
                                    : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
-    if (ticket.OpenerUser is not null) {
-      embed.WithUserAsAuthor(ticket.OpenerUser);
-    }
+    if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.OpenerUser);
 
     return embed;
   }
@@ -127,16 +125,12 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .WithColor(Colors.TicketTypeChangedColor);
-    if (ticket.OpenerUser is not null) {
-      embed.WithUserAsAuthor(ticket.OpenerUser);
-    }
+    if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.OpenerUser);
 
-    if (ticketType is not null) {
+    if (ticketType is not null)
       embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
-    }
-    else {
+    else
       embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
-    }
 
     return embed;
   }
@@ -160,13 +154,11 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .WithTitle(LangKeys.TICKET_CLOSED.GetTranslation())
                 .WithColor(Colors.TicketClosedColor)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper(), false)
+                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
                 .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUser!.GetMention(), true)
                 .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUser!.GetMention(), true)
                 .AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason, true);
-    if (ticket.OpenerUser is not null) {
-      embed.WithUserAsAuthor(ticket.CloserUser);
-    }
+    if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
 
     return embed;
   }
@@ -179,9 +171,9 @@ public static class LogResponses
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
                 .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA(), false)
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA())
       ;
     return embed;
   }
@@ -194,9 +186,9 @@ public static class LogResponses
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
                 .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA(), false);
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA());
     return embed;
   }
 
@@ -208,9 +200,9 @@ public static class LogResponses
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
                 .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA(), false)
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA(), false);
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA());
 
     return embed;
   }
@@ -291,13 +283,13 @@ public static class LogResponses
                 .WithTitle(LangKeys.SETUP_COMPLETE.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.GUILD_ID.GetTranslation(), guildOption.GuildId.ToString(), false)
+                .AddField(LangKeys.GUILD_ID.GetTranslation(), guildOption.GuildId.ToString())
                 .AddField(LangKeys.GUILD_NAME.GetTranslation(), guildOption.Name, true)
                 .AddField(LangKeys.CATEGORY_ID.GetTranslation(), guildOption.CategoryId.ToString(), true)
                 .AddField(LangKeys.LOG_CHANNEL_ID.GetTranslation(), guildOption.LogChannelId.ToString(), true)
                 .AddField(LangKeys.SENSITIVE_LOGGING.GetTranslation(), guildOption.IsSensitiveLogging.ToString(), true)
                 .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
-                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString(), false);
+                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString());
     return embed;
   }
 
@@ -306,11 +298,11 @@ public static class LogResponses
                 .WithTitle(LangKeys.CONFIGURATION_UPDATED.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.GUILD_ID.GetTranslation(), guildOption.GuildId.ToString(), false)
+                .AddField(LangKeys.GUILD_ID.GetTranslation(), guildOption.GuildId.ToString())
                 .AddField(LangKeys.GUILD_NAME.GetTranslation(), guildOption.Name, true)
                 .AddField(LangKeys.SENSITIVE_LOGGING.GetTranslation(), guildOption.IsSensitiveLogging.ToString(), true)
                 .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
-                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString(), false);
+                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString());
     // .AddField(LangKeys.CLOSING_MESSAGE.GetTranslation(), guildOption.ClosingMessage, false);
     return embed;
   }
@@ -328,7 +320,7 @@ public static class LogResponses
                 .WithTitle(LangKeys.TEAM_UPDATED.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.TEAM_NAME.GetTranslation(), teamName, false);
+                .AddField(LangKeys.TEAM_NAME.GetTranslation(), teamName);
     if (oldPermissionLevel != teamPermissionLevel) embed.AddField(LangKeys.PERMISSION_LEVEL_UPDATED.GetTranslation(), $"{oldPermissionLevel} -> {teamPermissionLevel}", true);
 
     if (oldPingOnNewTicket != teamPingOnNewTicket) embed.AddField(LangKeys.PING_ON_NEW_TICKET_UPDATED.GetTranslation(), $"{oldPingOnNewTicket} -> {teamPingOnNewTicket}", true);

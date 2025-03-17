@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Metran;
 
 namespace Modmail.NET.Common;
 
@@ -14,27 +13,12 @@ public sealed class SimpleCacher
 
   public static SimpleCacher Instance => _instance.Value;
 
-  private class CacheItem
-  {
-    public object Value { get; }
-    public DateTime Expiration { get; }
-
-    public CacheItem(object value, TimeSpan expiration) {
-      Value = value;
-      Expiration = DateTime.UtcNow.Add(expiration);
-    }
-
-    public bool IsExpired => DateTime.UtcNow > Expiration;
-  }
-
   // Add an item to the cache with expiration
   public void Set<T>(string key, T value, TimeSpan expiration) {
     if (value is null) throw new ArgumentNullException(nameof(value), "Value cannot be null.");
 
     var cacheItem = new CacheItem(value, expiration);
-    if (!_cache.TryAdd(key, cacheItem)) {
-      _cache[key] = cacheItem;
-    }
+    if (!_cache.TryAdd(key, cacheItem)) _cache[key] = cacheItem;
   }
 
   // Retrieve an item from the cache
@@ -94,5 +78,18 @@ public sealed class SimpleCacher
   // Create a unique key for caching based on method and parameters
   public static string CreateKey(string classKey, string methodKey, object? parameters = null) {
     return $"{classKey}.{methodKey}({parameters})";
+  }
+
+  private class CacheItem
+  {
+    public CacheItem(object value, TimeSpan expiration) {
+      Value = value;
+      Expiration = DateTime.UtcNow.Add(expiration);
+    }
+
+    public object Value { get; }
+    public DateTime Expiration { get; }
+
+    public bool IsExpired => DateTime.UtcNow > Expiration;
   }
 }

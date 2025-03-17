@@ -15,8 +15,8 @@ public sealed class GuildTeamMember
 
   public static async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, List<ulong> roleIdList) {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
-    
-    
+
+
     var teamMember = await dbContext.GuildTeamMembers
                                     .Include(x => x.GuildTeam)
                                     .Where(x => (x.Type == TeamMemberDataType.RoleId && roleIdList.Contains(x.Key)) || (x.Key == userId && x.Type == TeamMemberDataType.UserId))

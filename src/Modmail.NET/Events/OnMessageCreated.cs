@@ -1,14 +1,9 @@
 ﻿using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Metran;
-using Modmail.NET.Aspects;
 using Modmail.NET.Entities;
-using Modmail.NET.Exceptions;
 using Modmail.NET.Models.Dto;
 using Modmail.NET.Queues;
-using Modmail.NET.Utils;
-using Serilog;
 
 namespace Modmail.NET.Events;
 

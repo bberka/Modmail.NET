@@ -13,8 +13,8 @@ namespace Modmail.NET.Queues;
 public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 {
   private static TicketMessageQueue? _instance;
-  public static TicketMessageQueue This => _instance ??= new TicketMessageQueue();
   private TicketMessageQueue() : base(TimeSpan.FromMinutes(15)) { }
+  public static TicketMessageQueue This => _instance ??= new TicketMessageQueue();
 
   protected override async Task HandleMessageAsync(ulong userId, DiscordTicketMessageDto dto) {
     if (dto.Args.Channel.IsPrivate)

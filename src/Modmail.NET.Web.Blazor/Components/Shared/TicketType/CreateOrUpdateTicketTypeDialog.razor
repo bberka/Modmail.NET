@@ -58,11 +58,11 @@
 
 
     var dialogResult = await dialogService.Confirm("Are you sure you want to create new ticket type ?",
-                                                   options: new ConfirmOptions() {
+                                                   options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
                                                      CloseDialogOnOverlayClick = true,
-                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnEsc = true
                                                    });
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialog)}]{nameof(SubmitAsync)}({{Name}})";

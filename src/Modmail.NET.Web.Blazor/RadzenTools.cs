@@ -1,7 +1,5 @@
-﻿using Radzen;
-using System.Linq.Dynamic.Core;
-using Modmail.NET.Exceptions;
-
+﻿using Modmail.NET.Exceptions;
+using Radzen;
 
 namespace Modmail.NET.Web.Blazor;
 
@@ -21,7 +19,7 @@ public static class RadzenTools
     //   
     // }
 
-    if (args.Sorts is not null) {
+    if (args.Sorts is not null)
       foreach (var sort in args.Sorts) {
         var sortField = sort.Property;
         if (string.IsNullOrEmpty(sort.Property)) continue;
@@ -30,7 +28,6 @@ public static class RadzenTools
                                                      ? ""
                                                      : " descending"));
       }
-    }
 
 
     return queryable;
