@@ -17,10 +17,10 @@ namespace Modmail.NET.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.28")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Modmail.NET.Entities.DiscordUserInfo", b =>
                 {
@@ -63,6 +63,9 @@ namespace Modmail.NET.Migrations
                 {
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
+
+                    b.Property<bool>("AlwaysAnonymous")
+                        .HasColumnType("bit");
 
                     b.Property<string>("BannerUrl")
                         .HasMaxLength(4000)

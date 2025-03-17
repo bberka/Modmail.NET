@@ -38,6 +38,7 @@ public sealed class GuildOption
 
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
+  public bool AlwaysAnonymous { get; set; } = false;
 
   public static async Task<GuildOption> GetAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));

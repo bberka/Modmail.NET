@@ -289,7 +289,7 @@ public sealed class Ticket
       Priority = TicketPriority.Normal,
       LastMessageDateUtc = DateTime.UtcNow,
       Id = ticketId,
-      Anonymous = false,
+      Anonymous = guildOption.AlwaysAnonymous,
       IsForcedClosed = false,
       CloseReason = null,
       FeedbackMessage = null,
