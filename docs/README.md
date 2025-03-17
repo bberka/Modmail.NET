@@ -182,7 +182,6 @@ and more...
 - Improve and/or add filters to web ui pages
 - Write tests
 - Ability to disable admin commands for bot. (This can be done since web ui is implemented)
-- Check and show message when an invalid emoji is provided to Ticket Type or convert it to a emoji selector
 - Check attachment handling methods and let bot create a preview of images instead of connecting links
 
 # Contributing
