@@ -1,5 +1,4 @@
 ﻿@page "/options"
-@using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @using Serilog
 @inject NavigationManager NavigationManager
 @inject NotificationService notificationService
@@ -14,7 +13,6 @@
     _guildOption = await GuildOption.GetNullableAsync();
     if (_guildOption is null) {
       NavigationManager.NavigateTo("/setup");
-      return;
     }
   }
 
@@ -32,6 +30,8 @@
       data.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
       data.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       data.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
+      data.DisableBlacklistSlashCommands = _guildOption.DisableBlacklistSlashCommands;
+      data.DisableTicketSlashCommands = _guildOption.DisableTicketSlashCommands;
       await data.UpdateAsync();
       notificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
@@ -85,7 +85,8 @@
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="IsEnableDiscordChannelLogging" @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
+                <RadzenSwitch Name="IsEnableDiscordChannelLogging"
+                              @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
                 <RadzenLabel Component="IsEnableDiscordChannelLogging">
                   Enable logging to log channel
                 </RadzenLabel>
@@ -99,7 +100,20 @@
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_guildOption.AlwaysAnonymous/>
                 <RadzenLabel Component="AlwaysAnonymous">
-                  Whether to change default behavior of anonymous messaging on ticket creation.
+                  Always create anonymous tickets
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="DisableTicketSlashCommands" @bind-Value=@_guildOption.DisableTicketSlashCommands/>
+                <RadzenLabel Component="DisableTicketSlashCommands">
+                  Disable all ticket group slash commands. (Requires bot restart)
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="DisableBlacklistSlashCommands"
+                              @bind-Value=@_guildOption.DisableBlacklistSlashCommands/>
+                <RadzenLabel Component="DisableBlacklistSlashCommands">
+                  Disable all blacklist group slash commands. (Requires bot restart)
                 </RadzenLabel>
               </RadzenRow>
               @* <RadzenRow class="rz-my-4"> *@
@@ -108,9 +122,9 @@
               @*     Show a confirmation dialog when a moderator closes a ticket (Not implemented) *@
               @*   </RadzenLabel> *@
               @* </RadzenRow> *@
-              
+
               <RadzenRow class="rz-my-4">
-                <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Filled">
+                <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
                   <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
                 </RadzenFormField>
               </RadzenRow>
@@ -145,7 +159,8 @@
               @* </RadzenRow> *@
 
               <RadzenRow class="rz-my-4">
-                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" Icon="check_circle" ButtonStyle="ButtonStyle.Success"/>
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" Icon="check_circle"
+                              ButtonStyle="ButtonStyle.Success"/>
               </RadzenRow>
             </RadzenTemplateForm>
           </RadzenCard>

@@ -74,6 +74,12 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("CategoryId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<bool>("DisableBlacklistSlashCommands")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("DisableTicketSlashCommands")
+                        .HasColumnType("bit");
+
                     b.Property<string>("IconUrl")
                         .IsRequired()
                         .HasMaxLength(4000)
