@@ -156,6 +156,17 @@ This set of commands allows moderators or higher-level users to manage the black
     - `user`: The user to check.
 - **Usage**: `/blacklist status [user]`
 
+# Web UI
+
+## Dashboard Page
+![Dashboard](img/dashboard.png )
+
+
+## Options Page
+![Options](img/options.png )
+
+and more...
+
 # Possible Features and TODOs
 - A public and private authenticated API
 - Encrypt message information and other sensitive information
