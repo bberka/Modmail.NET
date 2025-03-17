@@ -171,7 +171,6 @@ and more...
 - A public and private authenticated API
 - Encrypt message information and other sensitive information
 - Ability to enable confirmation dialog when closing tickets
-- Ability to change Anonymous messaging on GuildOption to allow default behavior
 - Language file support for multiple languages, getting or asking user about language they want to interact with
 - Editing embeds and colors and language file via Web UI
 - Improve ticket type system, assign tickets to teams automatically
