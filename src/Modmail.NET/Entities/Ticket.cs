@@ -19,7 +19,6 @@ public sealed class Ticket
   public ulong OpenerUserId { get; set; } //FK
   public ulong? CloserUserId { get; set; } //FK
   public ulong? AssignedUserId { get; set; } //FK
-
   public ulong PrivateMessageChannelId { get; set; }
   public ulong ModMessageChannelId { get; set; }
   public ulong InitialMessageId { get; set; }
@@ -506,14 +505,20 @@ public sealed class Ticket
       var privateChannelId = PrivateMessageChannelId;
       privateChannel ??= await ModmailBot.This.Client.GetChannelAsync(privateChannelId);
       if (privateChannel is not null) {
-        await privateChannel.SendMessageAsync(UserResponses.TicketTypeChanged(ticketType));
+        // await privateChannel.SendMessageAsync(UserResponses.TicketTypeChanged(ticketType));
         if (BotTicketCreatedMessageInDmId != 0) {
           privateMessageWithComponent ??= await privateChannel.GetMessageAsync(BotTicketCreatedMessageInDmId);
           if (privateMessageWithComponent is not null) {
-            //remove components from private messageContent
+            var newEmbed = new DiscordEmbedBuilder(privateMessageWithComponent.Embeds[0]);
+            if (ticketType is not null) {
+              var emoji = DiscordEmoji.FromUnicode(ModmailBot.This.Client, ticketType.Emoji); 
+              var typeName = ticketType.Name;
+              var str = $"{emoji} {typeName}";
+              newEmbed.AddField(LangKeys.TICKET_TYPE.GetTranslation(), str);
+            }
             await privateMessageWithComponent.ModifyAsync(x => {
               x.ClearComponents();
-              x.AddEmbeds(privateMessageWithComponent.Embeds);
+              x.AddEmbed(newEmbed);
             });
 
             TicketTypeSelectionTimeoutTimer.This.RemoveMessage(privateMessageWithComponent.Id);
