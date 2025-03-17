@@ -42,6 +42,21 @@
       return;
     }
 
+    var fromUnicode = DiscordEmoji.TryFromUnicode(emoji, out var unicodeEmoji);
+    var fromName = DiscordEmoji.TryFromName(ModmailBot.This.Client, emoji, out var nameEmoji);
+    var anySuccessEmojiParse = fromUnicode || fromName;
+    if (!anySuccessEmojiParse) {
+      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
+      return;
+    }
+
+    var emojiUnicode = fromUnicode
+                         ? unicodeEmoji.Name
+                         : fromName
+                           ? nameEmoji
+                           : emoji;
+
+
     var dialogResult = await dialogService.Confirm("Are you sure you want to create new ticket type ?",
                                                    options: new ConfirmOptions() {
                                                      OkButtonText = "Yes",
@@ -54,7 +69,7 @@
       try {
         if (isUpdate && TicketType is not null) {
           TicketType.Name = name;
-          TicketType.Emoji = emoji;
+          TicketType.Emoji = emojiUnicode;
           TicketType.Description = description;
           TicketType.Order = order;
           TicketType.EmbedMessageTitle = embedMessageTitle;
@@ -63,19 +78,19 @@
           await TicketType.ProcessUpdateTicketTypeAsync();
           Log.Information(logMessage, name);
           notificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
-          dialogService.Close(true);
         }
         else {
-          await Entities.TicketType.ProcessCreateTicketTypeAsync(name,
-                                                                 emoji,
-                                                                 description,
-                                                                 order,
-                                                                 embedMessageTitle,
-                                                                 embedMessageContent);
+          await TicketType.ProcessCreateTicketTypeAsync(name,
+                                                        emojiUnicode,
+                                                        description,
+                                                        order,
+                                                        embedMessageTitle,
+                                                        embedMessageContent);
           Log.Information(logMessage, name);
           notificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
-          dialogService.Close(true);
         }
+
+        dialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
         Log.Warning(ex, logMessage, name);
@@ -142,7 +157,10 @@
 
 
     <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate ? "Update" : "Create")" Click="SubmitAsync"/>
+      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate
+                                                                                               ? "Update"
+                                                                                               : "Create")"
+                    Click="SubmitAsync"/>
     </RadzenRow>
   </RadzenColumn>
 </RadzenRow>
