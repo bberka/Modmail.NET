@@ -7,7 +7,7 @@
 @inject IDbContextFactory<ModmailDbContext> dbContextFactory
 @inject DialogService dialogService
 @inject  NotificationService notificationService
-
+@inject TooltipService tooltipService
 @code {
 
   private IQueryable<TicketBlacklist>? data;
@@ -166,7 +166,11 @@
 
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Title="Actions"  >
                   <Template Context="data">
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(async () => await RemoveAsync(data))" @onclick:stopPropagation="true">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" 
+                                  Click="@(async () => await RemoveAsync(data))"
+                                  MouseEnter="@(args => tooltipService.Open(args, "Remove Blacklist"))"
+                                  
+                                  @onclick:stopPropagation="true">
                     </RadzenButton>
                   </Template>
                 </RadzenDataGridColumn>
