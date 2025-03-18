@@ -32,6 +32,7 @@
       data.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
       data.DisableBlacklistSlashCommands = _guildOption.DisableBlacklistSlashCommands;
       data.DisableTicketSlashCommands = _guildOption.DisableTicketSlashCommands;
+      data.AllowUsersToCloseTickets = _guildOption.AllowUsersToCloseTickets;
       await data.UpdateAsync();
       notificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
@@ -114,6 +115,13 @@
                               @bind-Value=@_guildOption.DisableBlacklistSlashCommands/>
                 <RadzenLabel Component="DisableBlacklistSlashCommands">
                   Disable all blacklist group slash commands. (Requires bot restart)
+                </RadzenLabel>
+              </RadzenRow>   
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="AllowUsersToCloseTickets"
+                              @bind-Value=@_guildOption.AllowUsersToCloseTickets/>
+                <RadzenLabel Component="AllowUsersToCloseTickets">
+                  Allow users to close tickets via command
                 </RadzenLabel>
               </RadzenRow>
               @* <RadzenRow class="rz-my-4"> *@

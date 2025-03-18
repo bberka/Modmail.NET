@@ -42,6 +42,9 @@ public sealed class GuildOption
   public bool DisableBlacklistSlashCommands { get; set; } = false;
   public bool DisableTicketSlashCommands { get; set; } = false;
 
+  public bool AllowUsersToCloseTickets { get; set; } = false;
+
+  
   public static async Task<GuildOption> GetAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
