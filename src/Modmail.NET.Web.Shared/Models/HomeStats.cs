@@ -6,4 +6,8 @@ public sealed record HomeStats(
   int TotalMessages,
   int Teams,
   int Blacklist,
-  int TicketTypes);
+  int TicketTypes,
+  int TeamMemberCount,
+  int TeamRoleCount,
+  int ProcessingQueueCount
+  );

@@ -21,7 +21,7 @@ public sealed class GuildTeam
   public bool PingOnNewMessage { get; set; }
 
   //FK
-  public List<GuildTeamMember>? GuildTeamMembers { get; set; }
+  public List<GuildTeamMember> GuildTeamMembers { get; set; } = [];
 
   public static async Task<List<GuildTeam>> GetAllAsync() {
     await using var dbContext = ServiceLocator.Get<ModmailDbContext>();

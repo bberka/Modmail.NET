@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Queues
+@using Modmail.NET.Static
 @using Modmail.NET.Web.Shared.Models
 
 @inject NavigationManager navigationManager
@@ -27,12 +28,18 @@
     var teams = await dbContext.GuildTeams.CountAsync();
     var blacklist = await dbContext.TicketBlacklists.CountAsync();
     var ticketTypes = await dbContext.TicketTypes.CountAsync();
+    var teamMemberData = await dbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
+    var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
+    var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
     Stats = new HomeStats(activeTickets,
                           closedTickets,
                           totalMessages,
                           teams,
                           blacklist,
-                          ticketTypes);
+                          ticketTypes,
+                          teamUserCount,
+                          teamRoleCount,
+                          TicketMessageQueue.This.GetChannelCount());
   }
 
   private async Task StartBotAsync() {
@@ -169,6 +176,32 @@
             </p>
           </RadzenCard>
         </RadzenColumn>
+
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TeamRoleCount.ToString() ?? "0")
+            </RadzenText>
+            <p>
+              Active Team Roles
+            </p>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TeamMemberCount.ToString() ?? "0")
+            </RadzenText>
+            <p>
+              Active Team Members
+            </p>
+          </RadzenCard>
+        </RadzenColumn>
+
+
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
@@ -193,13 +226,14 @@
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
-              @(TicketMessageQueue.This.GetChannelCount())
+              @(Stats?.ProcessingQueueCount.ToString() ?? "0")
             </RadzenText>
             <p>
               Processing Message Queues
             </p>
           </RadzenCard>
         </RadzenColumn>
+        
 
       </RadzenRow>
 
