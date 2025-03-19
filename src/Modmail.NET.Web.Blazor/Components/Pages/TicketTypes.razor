@@ -155,7 +155,9 @@
         else {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync" AllowColumnPicking="true"
-                            AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false"
+                            Density="Density.Default"
+                            
+                            AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
                             FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"

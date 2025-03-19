@@ -64,6 +64,9 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<bool>("AllowUsersToCloseTickets")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AlwaysAnonymous")
                         .HasColumnType("bit");
 

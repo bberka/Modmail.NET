@@ -172,7 +172,9 @@
         else {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync" AllowColumnPicking="true"
-                            AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false"
+                            Density="Density.Default"
+                            
+                            AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
                             FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
@@ -183,6 +185,7 @@
                             Filter="@ShowLoading">
               <HeaderTemplate>
                 <RadzenDropDown Style="user-select: none"
+                                Multiple="false"
                                 Name="filter-ticket-type"
                                 @bind-Value="@filterTicketType"
                                 Data="Enum.GetValues<TicketFilterType>()"
@@ -190,7 +193,7 @@
                                 class="w-100"
                                 TValue="TicketFilterType"
                                 Placeholder="Filter Tickets"
-                                AllowFiltering="false"/>
+                                AllowFiltering="true"/>
               </HeaderTemplate>
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID"
@@ -205,6 +208,7 @@
                   </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="OpenerUser.Username" Title="Opener User" Sortable="true"
+                                      SortProperty="@nameof(TicketDto.OpenerUser)"
                                       Filterable="true" TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
@@ -224,6 +228,7 @@
                   </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true"
+                                      Property="CloserUser.Username"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
@@ -239,6 +244,7 @@
                 <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)" Title="Close Date UTC"/>
                 <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason"/>
                 <RadzenDataGridColumn Title="Ticket Type" Sortable="true" Filterable="true"
+                                      Property="TicketType.Name"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
