@@ -24,7 +24,7 @@ public sealed class GuildTeam
   public List<GuildTeamMember> GuildTeamMembers { get; set; } = [];
 
   public static async Task<List<GuildTeam>> GetAllAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.GuildTeams
                                 .Include(x => x.GuildTeamMembers)
                                 .ToListAsync();
@@ -36,25 +36,25 @@ public sealed class GuildTeam
 
 
   public async Task AddAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.GuildTeams.AddAsync(this);
     await dbContext.SaveChangesAsync();
   }
 
   public async Task RemoveAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.GuildTeams.Remove(this);
     await dbContext.SaveChangesAsync();
   }
 
   public async Task UpdateAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.GuildTeams.Update(this);
     await dbContext.SaveChangesAsync();
   }
 
   public static async Task<GuildTeam> GetByNameAsync(string name) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.GuildTeams
                                 .FirstOrDefaultAsync(x => x.Name == name);
     if (result is null) throw new NotFoundWithException(LangKeys.TEAM, name);
@@ -92,7 +92,7 @@ public sealed class GuildTeam
   }
 
   private static async Task<bool> Exists(string teamName) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildTeams.AnyAsync(x => x.Name == teamName);
   }
 
@@ -118,7 +118,7 @@ public sealed class GuildTeam
       Key = memberId,
       RegisterDateUtc = DateTime.UtcNow
     };
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
 
     dbContext.GuildTeamMembers.Add(memberEntity);
     await dbContext.SaveChangesAsync();
@@ -135,7 +135,7 @@ public sealed class GuildTeam
   }
 
   public async Task ProcessRemoveTeamMember(ulong teamMemberKey, TeamMemberDataType type) {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     var memberEntity = await dbContext.GuildTeamMembers
                                       .FirstOrDefaultAsync(x => x.Key == teamMemberKey && x.Type == type);
     if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
@@ -168,7 +168,7 @@ public sealed class GuildTeam
       RegisterDateUtc = DateTime.UtcNow
     };
 
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     dbContext.GuildTeamMembers.Add(roleEntity);
     await dbContext.SaveChangesAsync();
     _ = Task.Run(async () => {

@@ -9,5 +9,8 @@ public sealed record HomeStats(
   int TicketTypes,
   int TeamMemberCount,
   int TeamRoleCount,
-  int ProcessingQueueCount
+  int ProcessingQueueCount,
+  double AvgResponseTimeMinutes,
+  double AvgTicketsOpenPerDay,
+  double AvgTicketsClosePerDay
   );

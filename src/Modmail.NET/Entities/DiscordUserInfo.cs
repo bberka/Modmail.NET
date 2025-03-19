@@ -67,7 +67,7 @@ public sealed class DiscordUserInfo
 
     async Task<DiscordUserInfo> _get() {
       if (userId == 0) throw new InvalidUserIdException();
-      await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      await using var dbContext = new ModmailDbContext();
       var result = await dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == userId);
       if (result is not null)
         return result;
@@ -86,7 +86,7 @@ public sealed class DiscordUserInfo
   }
 
   public async Task RemoveAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.DiscordUserInfos.Remove(this);
     await dbContext.SaveChangesAsync();
   }
@@ -99,7 +99,7 @@ public sealed class DiscordUserInfo
   }
 
   private async Task AddOrUpdateAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
 
     var dbData = await dbContext.DiscordUserInfos.FindAsync(Id);
     if (dbData is not null) {
@@ -124,12 +124,12 @@ public sealed class DiscordUserInfo
   }
 
   public static async Task<List<DiscordUserInfo>> GetAllAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.DiscordUserInfos.ToListAsync();
   }
 
   public static async Task<Dictionary<ulong, DiscordUserInfo>> GetAllDictionaryAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return (await dbContext.DiscordUserInfos.ToListAsync()).ToDictionary(x => x.Id, x => x);
   }
 }

@@ -21,13 +21,13 @@ public sealed class TicketMessage
   public List<TicketMessageAttachment>? Attachments { get; set; }
 
   public async Task AddAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.TicketMessages.AddAsync(this);
     await dbContext.SaveChangesAsync();
   }
 
   public async Task UpdateAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.TicketMessages.Update(this);
     await dbContext.SaveChangesAsync();
   }

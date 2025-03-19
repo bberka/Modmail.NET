@@ -35,24 +35,24 @@ public sealed class TicketType
 
 
   private async Task UpdateAsync() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     dbContext.TicketTypes.Update(this);
     await dbContext.SaveChangesAsync();
   }
 
   private async Task AddAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.TicketTypes.AddAsync(this);
     await dbContext.SaveChangesAsync();
   }
 
   public static async Task<TicketType?> GetByIdAsync(Guid id) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.TicketTypes.FindAsync(id);
   }
 
   public static async Task<TicketType> GetAsync(string keyOrName) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
     if (result is null) throw new NotFoundWithException(LangKeys.TICKET_TYPE, keyOrName);
 
@@ -60,24 +60,24 @@ public sealed class TicketType
   }
 
   public static async Task<TicketType?> GetNullableAsync(string keyOrName) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == keyOrName || x.Name == keyOrName);
     return result;
   }
 
   public static async Task<bool> ExistsAsync(string keyOrName) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.TicketTypes.AnyAsync(x => x.Name == keyOrName || x.Key == keyOrName);
   }
 
   public static async Task<List<TicketType>> GetAllAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketTypes.ToListAsync();
     return result;
   }
 
   public static async Task<List<TicketType>> GetAllActiveAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketTypes
                                 .Where(x => x.IsEnabled)
                                 .ToListAsync();
@@ -86,13 +86,13 @@ public sealed class TicketType
 
 
   private async Task RemoveAsync() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     dbContext.TicketTypes.Remove(this);
     await dbContext.SaveChangesAsync();
   }
 
   public static async Task<TicketType> GetByChannelIdAsync(ulong channelId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.Tickets.Where(x => x.ModMessageChannelId == channelId)
                                 .Select(x => x.TicketType)
                                 .FirstOrDefaultAsync();

@@ -14,7 +14,7 @@ public sealed class GuildTeamMember
   public GuildTeam? GuildTeam { get; set; }
 
   public static async Task<TeamPermissionLevel?> GetPermissionLevelAsync(ulong userId, List<ulong> roleIdList) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
 
 
     var teamMember = await dbContext.GuildTeamMembers
@@ -26,7 +26,7 @@ public sealed class GuildTeamMember
   }
 
   public static async Task<List<PermissionInfo>> GetPermissionInfoAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildTeamMembers
                           .Include(x => x.GuildTeam)
                           .Where(x => x.GuildTeam!.IsEnabled)
@@ -35,7 +35,7 @@ public sealed class GuildTeamMember
   }
 
   public static async Task<List<PermissionInfo>> GetPermissionInfoOrHigherAsync(TeamPermissionLevel levelOrHigher) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildTeamMembers
                           .Include(x => x.GuildTeam)
                           .Where(x => x.GuildTeam!.IsEnabled && x.GuildTeam.PermissionLevel >= levelOrHigher)
@@ -44,12 +44,12 @@ public sealed class GuildTeamMember
   }
 
   public static async Task<bool> IsUserInAnyTeamAsync(ulong memberId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildTeamMembers.AnyAsync(x => x.Key == memberId && x.Type == TeamMemberDataType.UserId);
   }
 
   public static async Task<bool> IsRoleInAnyTeamAsync(ulong roleId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildTeamMembers.AnyAsync(x => x.Key == roleId && x.Type == TeamMemberDataType.RoleId);
   }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Globalization
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Queues
 @using Modmail.NET.Static
@@ -31,6 +32,8 @@
     var teamMemberData = await dbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
     var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
     var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
+    var option = await GuildOption.GetAsync();
+                                         
     Stats = new HomeStats(activeTickets,
                           closedTickets,
                           totalMessages,
@@ -39,8 +42,13 @@
                           ticketTypes,
                           teamUserCount,
                           teamRoleCount,
-                          TicketMessageQueue.This.GetChannelCount());
+                          TicketMessageQueue.This.GetChannelCount(),
+                          option.AvgResponseTimeMinutes,
+                          option.AvgTicketsOpenPerDay,
+                          option.AvgTicketsClosePerDay
+                          );
   }
+
 
   private async Task StartBotAsync() {
     var dialogResult = await dialogService.Confirm("Are you sure you want to start the bot?",
@@ -51,7 +59,7 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.This.StartAsync();
+      await ModmailBot.StartAsync();
       StateHasChanged();
       notificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
     }
@@ -66,7 +74,7 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.This.StopAsync();
+      await ModmailBot.StopAsync();
       StateHasChanged();
       notificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
     }
@@ -81,7 +89,8 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.This.RestartAsync();
+      await ModmailBot.StopAsync();
+      await ModmailBot.StartAsync();
       StateHasChanged();
       notificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
     }
@@ -226,10 +235,43 @@
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
-              @(Stats?.ProcessingQueueCount.ToString() ?? "0")
+              @(Stats?.ProcessingQueueCount.ToString() ?? "0") users
             </RadzenText>
             <p>
               Processing Message Queues
+            </p>
+          </RadzenCard>
+        </RadzenColumn>  
+        
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.AvgResponseTimeMinutes.ToString("F") ?? "0") m
+            </RadzenText>
+            <p>
+              Average Response Time
+            </p>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.AvgTicketsOpenPerDay.ToString("F1") ?? "0") per day
+            </RadzenText>
+            <p>
+              Average Tickets Opened
+            </p>
+          </RadzenCard>
+        </RadzenColumn>  
+        
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.AvgTicketsClosePerDay.ToString("F1") ?? "0") per day
+            </RadzenText>
+            <p>
+              Average Tickets Closed
             </p>
           </RadzenCard>
         </RadzenColumn>

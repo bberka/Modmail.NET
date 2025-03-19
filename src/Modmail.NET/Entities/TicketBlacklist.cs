@@ -21,13 +21,13 @@ public sealed class TicketBlacklist
 
   public static async Task<bool> IsBlacklistedAsync(ulong userId) {
     if (userId == 0) throw new InvalidUserIdException();
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserId == userId);
   }
 
 
   public static async Task<List<TicketBlacklist>> GetAllAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketBlacklists.ToListAsync();
     if (result.Count == 0) throw new EmptyListResultException(LangKeys.BLACKLISTED_USERS);
 
@@ -37,7 +37,7 @@ public sealed class TicketBlacklist
   public static async Task<TicketBlacklist> GetAsync(ulong userId) {
     if (userId == 0) throw new InvalidUserIdException();
 
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var result = await dbContext.TicketBlacklists.FirstOrDefaultAsync(x => x.DiscordUserId == userId);
     if (result is null) throw new UserIsNotBlacklistedException();
 
@@ -45,13 +45,13 @@ public sealed class TicketBlacklist
   }
 
   public async Task AddAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.TicketBlacklists.AddAsync(this);
     await dbContext.SaveChangesAsync();
   }
 
   public async Task RemoveAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.TicketBlacklists.Remove(this);
     await dbContext.SaveChangesAsync();
   }

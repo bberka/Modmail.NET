@@ -70,6 +70,18 @@ namespace Modmail.NET.Migrations
                     b.Property<bool>("AlwaysAnonymous")
                         .HasColumnType("bit");
 
+                    b.Property<double>("AvgResponseTimeMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsClosePerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsOpenPerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
                     b.Property<string>("BannerUrl")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");

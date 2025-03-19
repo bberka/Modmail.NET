@@ -4,6 +4,7 @@ using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Jobs;
 using Modmail.NET.Manager;
 using Modmail.NET.Utils;
 
@@ -45,24 +46,24 @@ public sealed class Ticket
   public DiscordUserInfo? CloserUser { get; set; }
   public DiscordUserInfo? AssignedUser { get; set; }
   public TicketType? TicketType { get; set; }
-  public List<TicketMessage>? Messages { get; set; }
-  public List<TicketNote>? TicketNotes { get; set; }
+  public List<TicketMessage> Messages { get; set; } = [];
+  public List<TicketNote> TicketNotes { get; set; } = [];
 
   public async Task AddAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.Tickets.AddAsync(this);
     await dbContext.SaveChangesAsync();
   }
 
   public async Task UpdateAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.Tickets.Update(this);
     await dbContext.SaveChangesAsync();
   }
 
 
   public static async Task<Ticket> GetActiveTicketAsync(ulong userId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
     if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
@@ -70,40 +71,40 @@ public sealed class Ticket
   }
 
   public static async Task<List<Ticket>> GetAllTickets(int page = 1, int pageSize = 25) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.Tickets
                           .ToListAsync();
   }
 
   public static async Task<Ticket?> GetActiveTicketNullableAsync(ulong userId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets
                                 .FirstOrDefaultAsync(x => x.OpenerUserId == userId && !x.ClosedDateUtc.HasValue);
     return ticket;
   }
 
   public static async Task<Ticket?> GetActiveTicketNullableAsync(Guid id) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets.FindAsync(id);
     return ticket;
   }
 
   public static async Task<Ticket> GetActiveTicketAsync(Guid ticketId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticketId && !x.ClosedDateUtc.HasValue);
     if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
   }
 
   public static async Task<Ticket> GetAsync(Guid id) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == id);
     if (ticket is null) throw new NotFoundException(LangKeys.TICKET);
     return ticket;
   }
 
   public static async Task<Ticket?> GetNullableAsync(Guid id) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var ticket = await dbContext.Tickets.FindAsync(id);
     return ticket;
   }
@@ -303,7 +304,8 @@ public sealed class Ticket
                                                                                                            ticketTypes,
                                                                                                            ticketId));
 
-    TicketTypeSelectionTimeoutTimer.This.AddMessage(ticketCreatedMessage);
+    var ticketTypeSelectionTimeoutJob = ServiceLocator.Get<TicketTypeSelectionTimeoutJob>();
+    ticketTypeSelectionTimeoutJob.AddMessage(ticketCreatedMessage);
 
 
     var dmTicketCreatedMessage = await privateChannel.SendMessageAsync(UserResponses.MessageSent(message));
@@ -410,7 +412,7 @@ public sealed class Ticket
       DiscordUserId = userId,
       RegisterDateUtc = DateTime.UtcNow
     };
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     await dbContext.TicketNotes.AddAsync(noteEntity);
     await dbContext.SaveChangesAsync();
 
@@ -498,7 +500,8 @@ public sealed class Ticket
               x.AddEmbed(newEmbed);
             });
 
-            TicketTypeSelectionTimeoutTimer.This.RemoveMessage(privateMessageWithComponent.Id);
+            var ticketTypeSelectionTimeoutJob = ServiceLocator.Get<TicketTypeSelectionTimeoutJob>();
+            ticketTypeSelectionTimeoutJob.RemoveMessage(privateMessageWithComponent.Id);
           }
         }
 
@@ -512,7 +515,7 @@ public sealed class Ticket
   }
 
   public static async Task<List<Ticket>> GetActiveTicketsAsync() {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var tickets = await dbContext.Tickets
                                  .Where(x => !x.ClosedDateUtc.HasValue)
                                  .ToListAsync();
@@ -523,7 +526,7 @@ public sealed class Ticket
   public static async Task<List<Ticket>> GetTimeoutTicketsAsync(long timeoutHours) {
     if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
 
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var timeoutDate = DateTime.UtcNow.AddHours(-timeoutHours);
     var tickets = await dbContext.Tickets
                                  .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)
@@ -532,7 +535,7 @@ public sealed class Ticket
   }
 
   public static async Task<List<Ticket>> GetAllByTypeAsync(TicketType ticketType) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     var tickets = await dbContext.Tickets
                                  .Where(x => x.TicketTypeId == ticketType.Id)
                                  .ToListAsync();
@@ -540,13 +543,13 @@ public sealed class Ticket
   }
 
   public static async Task<bool> AnyActiveTicketsByTypeAsync(TicketType ticketType) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.Tickets
                           .AnyAsync(x => x.TicketTypeId == ticketType.Id && !x.ClosedDateUtc.HasValue);
   }
 
   public static async Task UpdateRangeAsync(List<Ticket> allTicketsByType) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     dbContext.Tickets.UpdateRange(allTicketsByType);
     await dbContext.SaveChangesAsync();
   }

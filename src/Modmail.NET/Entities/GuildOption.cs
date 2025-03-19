@@ -43,14 +43,23 @@ public sealed class GuildOption
   public bool DisableTicketSlashCommands { get; set; } = false;
 
   public bool AllowUsersToCloseTickets { get; set; } = false;
-
   
+  [Precision(2)]
+  public double AvgResponseTimeMinutes { get; set; }
+
+  [Precision(2)]
+  public double AvgTicketsClosePerDay { get; set; }
+  [Precision(2)]
+  public double AvgTicketsOpenPerDay { get; set; }
+  
+
+
   public static async Task<GuildOption> GetAsync() {
     var key = SimpleCacher.CreateKey(nameof(GuildOption), nameof(GetAsync));
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
 
     async Task<GuildOption> _get() {
-      var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      var dbContext = new ModmailDbContext();
       var option = await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
       if (option is null) throw new ServerIsNotSetupException();
       return option;
@@ -62,13 +71,13 @@ public sealed class GuildOption
     return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(2));
 
     async Task<GuildOption?> _get() {
-      var dbContext = ServiceLocator.Get<ModmailDbContext>();
+      var dbContext = new ModmailDbContext();
       return await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == BotConfig.This.MainServerId);
     }
   }
 
   public async Task UpdateAsync() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     UpdateDateUtc = DateTime.UtcNow;
     dbContext.GuildOptions.Update(this);
     var affected = await dbContext.SaveChangesAsync();
@@ -76,24 +85,24 @@ public sealed class GuildOption
   }
 
   public static async Task<ulong> GetLogChannelIdAsync(ulong guildId) {
-    await using var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    await using var dbContext = new ModmailDbContext();
     return await dbContext.GuildOptions.Where(x => x.GuildId == guildId).Select(x => x.LogChannelId).FirstOrDefaultAsync();
   }
 
   private async Task AddAsync() {
     await DeleteAllAsync();
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     dbContext.GuildOptions.Add(this);
     await dbContext.SaveChangesAsync();
   }
 
   public static async Task<bool> Any() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     return await dbContext.GuildOptions.AnyAsync();
   }
 
   private static async Task DeleteAllAsync() {
-    var dbContext = ServiceLocator.Get<ModmailDbContext>();
+    var dbContext = new ModmailDbContext();
     var options = await dbContext.GuildOptions.ToListAsync();
     dbContext.GuildOptions.RemoveRange(options);
     await dbContext.SaveChangesAsync();

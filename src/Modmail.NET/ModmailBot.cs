@@ -10,9 +10,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Events;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Manager;
 using Modmail.NET.Utils;
-using Ninject;
 using Serilog;
 using Serilog.Extensions.Logging;
 using NotFoundException = Modmail.NET.Exceptions.NotFoundException;
@@ -21,29 +19,17 @@ namespace Modmail.NET;
 
 public class ModmailBot
 {
+  private readonly BotConfig _config;
   private static ModmailBot? _instance;
 
-  private ModmailBot() {
-    _ = BotConfig.This; // Initialize the environment container
-    UtilLogConfig.Configure();
-    AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
-      var isDiscordException = args.ExceptionObject is DiscordException;
-      if (isDiscordException) {
-        var casted = (DiscordException)args.ExceptionObject;
-        Log.Error(casted, "Unhandled Discord exception {JsonMessage} {@Data}", casted.JsonMessage, casted.Data);
-      }
-      else {
-        Log.Error((Exception)args.ExceptionObject, "Unhandled exception");
-      }
-    };
+  public ModmailBot(BotConfig config) {
+    _config = config;
 
-    _ = LangData.This;
+
 
     if (BotConfig.This.Environment == EnvironmentType.Development)
       Log.Information("Running in development mode");
 
-    var kernel = new StandardKernel(new MmKernel());
-    ServiceLocator.Initialize(kernel);
 
 
     Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
@@ -89,35 +75,10 @@ public class ModmailBot
     Client.MessageDeleted += OnMessageDeleted.Handle;
     Client.MessageUpdated += OnMessageUpdated.Handle;
     Client.ThreadCreated += OnThreadCreated.Handle;
-  }
-
-  public bool Connected { get; private set; }
-
-  public static ModmailBot This {
-    get {
-      _instance ??= new ModmailBot();
-      return _instance;
-    }
-  }
-
-  public DiscordClient Client { get; }
-  // public ServiceProvider Services { get; private set; }
-
-  public async Task StartAsync() {
-    // Start the bot
-
-    await SetupDatabase();
-
-    var option = await GuildOption.GetAsync();
+    
 
 
-    //Slash commands
-    var slash = Client.UseSlashCommands();
-
-    if (!option.DisableBlacklistSlashCommands) slash.RegisterCommands<BlacklistSlashCommands>();
-
-    if (!option.DisableTicketSlashCommands) slash.RegisterCommands<TicketSlashCommands>();
-
+   
     //Commands
     var commands = Client.UseCommandsNext(new CommandsNextConfiguration {
       StringPrefixes = [
@@ -129,48 +90,48 @@ public class ModmailBot
 
 
     commands.RegisterCommands<ModmailCommands>();
+    
+  }
 
+  public bool Connected { get; private set; }
 
+  public static ModmailBot This {
+    get {
+      _instance ??= new ModmailBot(BotConfig.This);
+      return _instance;
+    }
+  }
+
+  public DiscordClient Client { get; }
+  // public ServiceProvider Services { get; private set; }
+
+  public static async Task StartAsync() {
     Log.Information("Starting bot");
-    await Client.ConnectAsync();
-    Connected = true;
+    var option = await GuildOption.GetAsync();
 
+    _ = This;//init
+    var slash = This.Client.UseSlashCommands();
 
-    //Service initialization
-    _ = TicketTimeoutTimer.This;
-    _ = TicketTypeSelectionTimeoutTimer.This;
-    _ = DiscordUserInfoSyncTimer.This;
+    if (!option.DisableBlacklistSlashCommands) slash.RegisterCommands<BlacklistSlashCommands>();
+
+    if (!option.DisableTicketSlashCommands) slash.RegisterCommands<TicketSlashCommands>();
+    await This.Client.ConnectAsync();
+    This.Connected = true;
 
     await Task.Delay(5);
 
-    await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
-    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
+    await This.Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
+    await DiscordUserInfo.AddOrUpdateAsync(This.Client.CurrentUser);
   }
 
-  public async Task StopAsync() {
+  public static async Task StopAsync() {
     Log.Information("Stopping bot");
-    await Client.DisconnectAsync();
-    Connected = false;
+    This.Connected = false;
+    await This.Client.DisconnectAsync();
+    This.Client.Dispose();
+    _instance = null;
   }
 
-  public async Task RestartAsync() {
-    Log.Information("Restarting bot");
-    await StopAsync();
-    await StartAsync();
-  }
-
-
-  public async Task SetupDatabase() {
-    await using var dbContext = new ModmailDbContext();
-    try {
-      await dbContext.Database.MigrateAsync();
-      Log.Information("Database migration completed!");
-    }
-    catch (Exception ex) {
-      Log.Error(ex, "Failed to setup server: Database migration failed");
-      throw;
-    }
-  }
 
 
   public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
