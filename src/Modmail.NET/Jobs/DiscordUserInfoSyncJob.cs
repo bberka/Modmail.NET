@@ -1,20 +1,33 @@
 ﻿using Hangfire;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Abstract;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
+using Modmail.NET.Features.UserInfo;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
 
 public sealed class DiscordUserInfoSyncJob : HangfireRecurringJobBase
 {
-  public DiscordUserInfoSyncJob() : base("DiscordUserInfoSyncJob", Cron.Hourly()) { }
+  private readonly IServiceScopeFactory _scopeFactory;
+
+  public DiscordUserInfoSyncJob(IServiceScopeFactory scopeFactory) : base("DiscordUserInfoSyncJob", Cron.Hourly()) {
+    _scopeFactory = scopeFactory;
+  }
 
 
   public override async Task Execute() {
-    var guild = await ModmailBot.This.GetMainGuildAsync();
+    var scope = _scopeFactory.CreateScope();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var guild = await bot.GetMainGuildAsync();
     var members = await guild.GetAllMembersAsync();
-    var allDbUsers = await DiscordUserInfo.GetAllAsync();
+    // var allDbUsers = await DiscordUserInfo.GetAllAsync();
+    var allDbUsers = await sender.Send(new GetDiscordUserInfoListQuery());
     var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x) {
       Username = x.GetUsername()
     }).ToList();
@@ -38,7 +51,6 @@ public sealed class DiscordUserInfoSyncJob : HangfireRecurringJobBase
       updateList.Add(dbUser);
     }
 
-    var dbContext = new ModmailDbContext();
     var addedUsers = convertedDiscordUsers.Where(x => allDbUsers.All(y => y.Id != x.Id)).ToList();
     dbContext.AddRange(addedUsers);
     dbContext.UpdateRange(updateList);

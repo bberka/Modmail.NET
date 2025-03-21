@@ -9,17 +9,14 @@ public static class RadzenTools
   public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs? args = null) {
     if (args is null) return queryable;
 
-    if (args.Filter is not null) {
-      queryable = queryable.Where(args.Filter);
-    }
-    
+    if (args.Filter is not null) queryable = queryable.Where(args.Filter);
+
     var firstSort = args.Sorts?.FirstOrDefault();
-    if (firstSort != null) {
+    if (firstSort != null)
       queryable =
         firstSort.SortOrder == SortOrder.Ascending
           ? queryable.OrderBy(x => firstSort.Property)
           : queryable.OrderByDescending(x => firstSort.Property);
-    }
 
 
     return queryable;

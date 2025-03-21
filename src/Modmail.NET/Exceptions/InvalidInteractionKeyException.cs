@@ -2,5 +2,5 @@
 
 public class InvalidInteractionKeyException : BotExceptionBase
 {
-  public InvalidInteractionKeyException() : base(LangData.This.GetTranslation(LangKeys.INVALID_INTERACTION_KEY)) { }
+  public InvalidInteractionKeyException() : base(LangProvider.This.GetTranslation(LangKeys.INVALID_INTERACTION_KEY)) { }
 }

@@ -1,9 +1,14 @@
 ﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject NotificationService notificationService
-@inject DialogService dialogService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
+@inject IOptions<BotConfig> Options
 
 @code {
 
@@ -13,46 +18,46 @@
   [Parameter]
   public GuildTeam? Team { get; set; }
 
-  private TeamPermissionLevel? permissionLevel;
-  private bool pingOnNewTicket = false;
-  private bool pingOnTicketMessage = false;
-  private string? teamName;
-  private bool isEnabled = true;
+  private TeamPermissionLevel? _permissionLevel;
+  private bool _pingOnNewTicket = false;
+  private bool _pingOnTicketMessage = false;
+  private string? _teamName;
+  private bool _isEnabled = true;
 
-  private bool isUpdate => Team is not null;
+  private bool IsUpdate => Team is not null;
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
 
     _users = await dbContext.DiscordUserInfos
                             .OrderBy(x => x.Username)
-                            .Where(x => x.Id != ModmailBot.This.Client.CurrentUser.Id && BotConfig.This.OwnerUsers.Contains(x.Id))
+                            .Where(x => x.Id != Bot.Client.CurrentUser.Id && Options.Value.OwnerUsers.Contains(x.Id))
                             .ToListAsync();
 
-    permissionLevel = isUpdate
-                        ? Team!.PermissionLevel
-                        : null;
-    teamName = isUpdate
-                 ? Team?.Name
-                 : null;
-    pingOnNewTicket = isUpdate && Team!.PingOnNewTicket;
-    pingOnTicketMessage = isUpdate && (Team?.PingOnNewMessage ?? false);
-    isEnabled = isUpdate && Team!.IsEnabled;
+    _permissionLevel = IsUpdate
+                         ? Team!.PermissionLevel
+                         : null;
+    _teamName = IsUpdate
+                  ? Team?.Name
+                  : null;
+    _pingOnNewTicket = IsUpdate && Team!.PingOnNewTicket;
+    _pingOnTicketMessage = IsUpdate && (Team?.PingOnNewMessage ?? false);
+    _isEnabled = IsUpdate && Team!.IsEnabled;
   }
 
   private async Task SubmitAsync() {
-    if (string.IsNullOrEmpty(teamName)) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
+    if (string.IsNullOrEmpty(_teamName)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a team name.");
       return;
     }
 
-    if (permissionLevel is null) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
+    if (_permissionLevel is null) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
       return;
     }
 
-    var dialogResult = await dialogService.Confirm("Are you sure you want to create new team ?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to create new team ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -62,26 +67,26 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
       try {
-        if (isUpdate && Team is not null) {
-          await Team.ProcessUpdateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage, isEnabled);
-          Log.Information(logMessage, teamName, permissionLevel);
-          notificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
-          dialogService.Close(true);
+        if (IsUpdate && Team is not null) {
+          await Sender.Send(new ProcessUpdateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled));
+          Log.Information(logMessage, _teamName, _permissionLevel);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
         }
         else {
-          await GuildTeam.ProcessCreateTeamAsync(teamName, permissionLevel.Value, pingOnNewTicket, pingOnTicketMessage);
-          Log.Information(logMessage, teamName, permissionLevel);
-          notificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
-          dialogService.Close(true);
+          await Sender.Send(new ProcessCreateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage));
+          Log.Information(logMessage, _teamName, _permissionLevel);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
         }
+
+        DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
-        Log.Warning(ex, logMessage, teamName, permissionLevel);
-        ex.NotifyException(notificationService);
+        Log.Warning(ex, logMessage, _teamName, _permissionLevel);
+        ex.NotifyException(NotificationService);
       }
       catch (Exception ex) {
-        Log.Fatal(ex, logMessage, teamName, permissionLevel);
-        ex.NotifyException(notificationService);
+        Log.Fatal(ex, logMessage, _teamName, _permissionLevel);
+        ex.NotifyException(NotificationService);
       }
     }
   }
@@ -97,9 +102,9 @@
 else {
   <RadzenRow>
     <RadzenColumn>
-      @if (isUpdate) {
+      @if (IsUpdate) {
         <RadzenRow class="rz-my-4">
-          <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
+          <RadzenSwitch Name="isEnabled" @bind-Value=@_isEnabled/>
           <RadzenLabel Component="isEnabled">
             Is Enabled
           </RadzenLabel>
@@ -109,30 +114,30 @@ else {
 
       <RadzenRow class="rz-my-4">
         <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Outlined">
-          <RadzenTextBox Name="team-name" @bind-Value="@teamName"/>
+          <RadzenTextBox Name="team-name" @bind-Value="@_teamName"/>
         </RadzenFormField>
       </RadzenRow>
 
       <RadzenRow class="rz-my-4">
         <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()"
-                        class="w-100" TValue="TeamPermissionLevel?" @bind-Value="permissionLevel"
+                        class="w-100" TValue="TeamPermissionLevel?" @bind-Value="_permissionLevel"
                         Placeholder="Select Permission Level" AllowFiltering="false"/>
       </RadzenRow>
       <RadzenRow class="rz-my-4">
-        <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@pingOnNewTicket/>
+        <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@_pingOnNewTicket/>
         <RadzenLabel Component="pingOnNewTicket">
           Ping on new ticket
         </RadzenLabel>
       </RadzenRow>
       <RadzenRow class="rz-my-4">
-        <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@pingOnTicketMessage/>
+        <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@_pingOnTicketMessage/>
         <RadzenLabel Component="pingOnTicketMessage">
           Ping on ticket message
         </RadzenLabel>
 
       </RadzenRow>
       <RadzenRow class="rz-my-4">
-        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate
+        <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
                                                                                                  ? "Update"
                                                                                                  : "Create")"
                       Click="SubmitAsync"/>

@@ -7,11 +7,12 @@ public sealed class ModmailHostedService : IHostedService
   public ModmailHostedService(ModmailBot modmailBot) {
     _modmailBot = modmailBot;
   }
+
   public async Task StartAsync(CancellationToken cancellationToken) {
-    await ModmailBot.StartAsync();
+    await _modmailBot.StartAsync();
   }
 
   public async Task StopAsync(CancellationToken cancellationToken) {
-    await ModmailBot.StopAsync();
+    await _modmailBot.StopAsync();
   }
 }

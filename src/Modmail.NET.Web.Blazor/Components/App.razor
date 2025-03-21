@@ -1,6 +1,6 @@
-﻿@using Modmail.NET.Web.Blazor.Components.Layout.Shared
-@using Modmail.NET.Web.Shared
-@inject ThemeService themeService
+﻿@using Modmail.NET.Static
+@using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@inject ThemeService ThemeService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,10 +31,10 @@
 
   protected override void OnInitialized() {
     base.OnInitialized();
-    var theme = HttpContext.Request.Cookies[WebSharedConstants.THEME_COOKIE_NAME];
+    var theme = HttpContext.Request.Cookies[Const.THEME_COOKIE_NAME];
 
     if (!string.IsNullOrEmpty(theme)) {
-      themeService.SetTheme(theme, false);
+      ThemeService.SetTheme(theme, false);
     }
   }
 

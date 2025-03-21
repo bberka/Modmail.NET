@@ -1,13 +1,16 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using Modmail.NET.Entities;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Attributes;
 
-public class UpdateUserInformationForCommandAttribute : CheckBaseAttribute
+public sealed class UpdateUserInformationForCommandAttribute : CheckBaseAttribute
 {
   public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help) {
-    await DiscordUserInfo.AddOrUpdateAsync(ctx?.User);
+    var sender = ctx.Services.GetRequiredService<ISender>();
+    await sender.Send(new UpdateDiscordUserCommand(ctx.User));
     return true;
   }
 }

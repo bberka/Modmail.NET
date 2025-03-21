@@ -1,52 +1,55 @@
 ﻿@using DSharpPlus.Entities
+@using Modmail.NET.Features.TicketType
 @using Serilog
-@inject DialogService dialogService
-@inject NotificationService notificationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject ISender Sender
 
 @code {
 
   [Parameter]
   public TicketType? TicketType { get; set; }
 
-  bool isUpdate => TicketType != null;
-  string name = "";
-  string? emoji = "";
-  string description = "";
-  int order = 0;
-  bool isEnabled = true;
-  string? embedMessageTitle = null;
-  string? embedMessageContent = null;
+  bool IsUpdate => TicketType != null;
+  string _name = "";
+  string? _emoji = "";
+  string _description = "";
+  int _order = 0;
+  bool _isEnabled = true;
+  string? _embedMessageTitle = null;
+  string? _embedMessageContent = null;
 
   protected override Task OnInitializedAsync() {
     if (TicketType is not null) {
-      name = TicketType.Name;
-      emoji = TicketType.Emoji;
-      description = TicketType.Description;
-      order = TicketType.Order;
-      isEnabled = TicketType.IsEnabled;
-      embedMessageTitle = TicketType.EmbedMessageTitle;
-      embedMessageContent = TicketType.EmbedMessageContent;
+      _name = TicketType.Name;
+      _emoji = TicketType.Emoji;
+      _description = TicketType.Description;
+      _order = TicketType.Order;
+      _isEnabled = TicketType.IsEnabled;
+      _embedMessageTitle = TicketType.EmbedMessageTitle;
+      _embedMessageContent = TicketType.EmbedMessageContent;
     }
 
     return base.OnInitializedAsync();
   }
 
   private async Task SubmitAsync() {
-    if (string.IsNullOrEmpty(name)) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
+    if (string.IsNullOrEmpty(_name)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
       return;
     }
 
-    if (string.IsNullOrEmpty(description)) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a description.");
+    if (string.IsNullOrEmpty(_description)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a description.");
       return;
     }
 
-    var fromUnicode = DiscordEmoji.TryFromUnicode(emoji, out var unicodeEmoji);
-    var fromName = DiscordEmoji.TryFromName(ModmailBot.This.Client, emoji, out var nameEmoji);
+    var fromUnicode = DiscordEmoji.TryFromUnicode(_emoji, out var unicodeEmoji);
+    var fromName = DiscordEmoji.TryFromName(Bot.Client, _emoji, out var nameEmoji);
     var anySuccessEmojiParse = fromUnicode || fromName;
     if (!anySuccessEmojiParse) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
       return;
     }
 
@@ -54,10 +57,10 @@
                          ? unicodeEmoji.Name
                          : fromName
                            ? nameEmoji
-                           : emoji;
+                           : _emoji;
 
 
-    var dialogResult = await dialogService.Confirm("Are you sure you want to create new ticket type ?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to create new ticket type ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -67,38 +70,38 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialog)}]{nameof(SubmitAsync)}({{Name}})";
       try {
-        if (isUpdate && TicketType is not null) {
-          TicketType.Name = name;
+        if (IsUpdate && TicketType is not null) {
+          TicketType.Name = _name;
           TicketType.Emoji = emojiUnicode;
-          TicketType.Description = description;
-          TicketType.Order = order;
-          TicketType.EmbedMessageTitle = embedMessageTitle;
-          TicketType.EmbedMessageContent = embedMessageContent;
-          TicketType.IsEnabled = isEnabled;
-          await TicketType.ProcessUpdateTicketTypeAsync();
-          Log.Information(logMessage, name);
-          notificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
+          TicketType.Description = _description;
+          TicketType.Order = _order;
+          TicketType.EmbedMessageTitle = _embedMessageTitle;
+          TicketType.EmbedMessageContent = _embedMessageContent;
+          TicketType.IsEnabled = _isEnabled;
+          await Sender.Send(new ProcessUpdateTicketTypeCommand(TicketType));
+          Log.Information(logMessage, _name);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
         }
         else {
-          await TicketType.ProcessCreateTicketTypeAsync(name,
-                                                        emojiUnicode,
-                                                        description,
-                                                        order,
-                                                        embedMessageTitle,
-                                                        embedMessageContent);
-          Log.Information(logMessage, name);
-          notificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
+          await Sender.Send(new ProcessCreateTicketTypeCommand(_name,
+                                                               emojiUnicode,
+                                                               _description,
+                                                               _order,
+                                                               _embedMessageTitle,
+                                                               _embedMessageContent));
+          Log.Information(logMessage, _name);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
         }
 
-        dialogService.Close(true);
+        DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
-        Log.Warning(ex, logMessage, name);
-        ex.NotifyException(notificationService);
+        Log.Warning(ex, logMessage, _name);
+        ex.NotifyException(NotificationService);
       }
       catch (Exception ex) {
-        Log.Fatal(ex, logMessage, name);
-        ex.NotifyException(notificationService);
+        Log.Fatal(ex, logMessage, _name);
+        ex.NotifyException(NotificationService);
       }
     }
   }
@@ -108,9 +111,9 @@
 
 <RadzenRow>
   <RadzenColumn>
-    @if (isUpdate) {
+    @if (IsUpdate) {
       <RadzenRow class="rz-my-4">
-        <RadzenSwitch Name="isEnabled" @bind-Value=@isEnabled/>
+        <RadzenSwitch Name="isEnabled" @bind-Value=@_isEnabled/>
         <RadzenLabel Component="isEnabled">
           Is Enabled
         </RadzenLabel>
@@ -120,44 +123,44 @@
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Name" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="name" @bind-Value="@name"/>
+        <RadzenTextBox Name="name" @bind-Value="@_name"/>
       </RadzenFormField>
     </RadzenRow>
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Emoji" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="Emoji" @bind-Value="@emoji"></RadzenTextBox>
+        <RadzenTextBox Name="Emoji" @bind-Value="@_emoji"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Description" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="Description" @bind-Value="@description"></RadzenTextBox>
+        <RadzenTextBox Name="Description" @bind-Value="@_description"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Order" class="w-100" Variant="Variant.Outlined">
-        <RadzenNumeric Name="Order" @bind-Value="@order"></RadzenNumeric>
+        <RadzenNumeric Name="Order" @bind-Value="@_order"></RadzenNumeric>
       </RadzenFormField>
     </RadzenRow>
 
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Embed Message Title" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="embedMessageTitle" @bind-Value="@embedMessageTitle"></RadzenTextBox>
+        <RadzenTextBox Name="embedMessageTitle" @bind-Value="@_embedMessageTitle"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Embed Message Content" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="embedMessageContent" @bind-Value="@embedMessageContent"></RadzenTextBox>
+        <RadzenTextBox Name="embedMessageContent" @bind-Value="@_embedMessageContent"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
 
 
     <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(isUpdate
+      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
                                                                                                ? "Update"
                                                                                                : "Create")"
                     Click="SubmitAsync"/>

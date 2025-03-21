@@ -1,10 +1,13 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject TooltipService tooltipService
-@inject NotificationService notificationService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject ISender Sender
 
 @code {
 
@@ -15,48 +18,48 @@
   private List<DiscordRole>? _roles;
 
   protected override async Task OnInitializedAsync() {
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-    await reloadDataAsync();
+    await ReloadDataAsync();
     _members = await dbContext.DiscordUserInfos.ToListAsync();
-    _roles = await ModmailBot.This.GetRoles();
+    _roles = await Bot.GetRoles();
   }
 
-  bool isLoading = false;
-  private int count;
-  private List<GuildTeamMember>? data;
+  bool _isLoading = false;
+  private int _count;
+  private List<GuildTeamMember>? _data;
 
   async Task ShowLoading() {
-    isLoading = true;
+    _isLoading = true;
 
     await Task.Yield();
 
-    isLoading = false;
+    _isLoading = false;
   }
 
   private async Task LoadDataAsync(LoadDataArgs obj) {
-    await reloadDataAsync(obj);
+    await ReloadDataAsync(obj);
   }
 
-  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     await ShowLoading();
 
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.GuildTeamMembers
                          .Where(x => x.GuildTeamId == Team.Id)
                          .OrderByDescending(x => x.RegisterDateUtc)
                          .AsQueryable();
 
 
-    count = await query.CountAsync();
+    _count = await query.CountAsync();
 
     if (args is not null) {
       query = query.ApplyDataGridFilter(args);
     }
 
-    data = args is not null
-             ? await query.ApplyPagination(args).ToListAsync()
-             : await query.Skip(0).Take(5).ToListAsync();
+    _data = args is not null
+              ? await query.ApplyPagination(args).ToListAsync()
+              : await query.Skip(0).Take(5).ToListAsync();
 
     StateHasChanged();
   }
@@ -65,43 +68,43 @@
   private async Task RemoveAsync(GuildTeamMember guildTeamMember) {
     const string logMessage = $"[{nameof(TeamDetailsDialog)}]{nameof(RemoveAsync)}({{@Member}})";
     try {
-      await Team.ProcessRemoveTeamMember(guildTeamMember.Key, guildTeamMember.Type);
+      await Sender.Send(new ProcessRemoveTeamMemberCommand(guildTeamMember.Key, guildTeamMember.Type));
       Log.Information(logMessage, guildTeamMember);
-      notificationService.Notify(NotificationSeverity.Success, "Success", "Team member removed");
-      await reloadDataAsync();
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "Team member removed");
+      await ReloadDataAsync();
     }
     catch (BotExceptionBase ex) {
       Log.Warning(ex, logMessage, guildTeamMember);
-      ex.NotifyException(notificationService);
+      ex.NotifyException(NotificationService);
     }
     catch (Exception ex) {
       Log.Fatal(ex, logMessage, guildTeamMember);
-      ex.NotifyException(notificationService);
+      ex.NotifyException(NotificationService);
     }
   }
 
 }
 
-@if (data is null || _roles is null || _members is null) {
+@if (_data is null || _roles is null || _members is null) {
   <Loading></Loading>
 }
 else {
   <RadzenRow>
     <RadzenColumn>
-      @if (data.Count == 0) {
+      @if (_data.Count == 0) {
         <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="rz-color-on-secondary-lighter">Team has no
           members
         </RadzenText>
       }
-      <RadzenDataList Count="@count"
+      <RadzenDataList Count="@_count"
                       LoadData="LoadDataAsync"
                       PageSize="5"
                       AllowPaging="true"
                       PagerPosition="PagerPosition.Bottom"
                       PagerAlwaysVisible="false"
-                      IsLoading=@isLoading
+                      IsLoading=@_isLoading
                       WrapItems="true"
-                      Data="@data"
+                      Data="@_data"
                       TItem="GuildTeamMember"
                       PagerHorizontalAlign="HorizontalAlign.Center"
 
@@ -141,7 +144,7 @@ else {
                               Shade="Shade.Lighter"
                               Size="ButtonSize.Medium"
                               class="rz-my-1 rz-ms-1"
-                              MouseEnter="@(args => tooltipService.Open(args, $"Remove {(member.Type == TeamMemberDataType.UserId ? "user" : "role")} from team", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                              MouseEnter="@(args => TooltipService.Open(args, $"Remove {(member.Type == TeamMemberDataType.UserId ? "user" : "role")} from team", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                               Click="@(async () => await RemoveAsync(member))"
                               @onclick:stopPropagation="true">
                 </RadzenButton>

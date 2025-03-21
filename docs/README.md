@@ -27,13 +27,15 @@ Bot creates tickets and users message with the bot directly instead of sending m
     - [`/blacklist add`](#blacklist-add)
     - [`/blacklist remove`](#blacklist-remove)
     - [`/blacklist status`](#blacklist-status)
+- [Web UI](#web-ui)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 
 # Warning
-This project is may not be ready for production needs more polishing.
+This project may come with bugs, missing features and problems.
 
-If you wish to use it be aware of potential errors
+We are using this as our main ticket system actively however it is not fully released.
 
 # Features
 - Open tickets by sending a private message to bot
@@ -160,6 +162,7 @@ This set of commands allows moderators or higher-level users to manage the black
 - **Usage**: `/blacklist status [user]`
 
 # Web UI
+Note that these pictures can be outdated. 
 
 ## Dashboard Page
 ![Dashboard](img/dashboard.png )
@@ -170,25 +173,47 @@ This set of commands allows moderators or higher-level users to manage the black
 
 and more...
 
-# Possible Features and TODOs
-- A public and private authenticated API
-- Encrypt message information and other sensitive information
-- Ability to enable confirmation dialog when closing tickets
-- Language file support for multiple languages, getting or asking user about language they want to interact with
-- Editing embeds and colors and language file via Web UI
-- Improve ticket type system, assign tickets to teams automatically
-- Ability to search through ticket messages
-- Ability to create public transcripts link that can be shared with user
-- Ability to show modals when user has selected ticket type and configurable through web ui
-- Internal or External authentication and role system for web ui. As well as ability to assign teams to access to web ui via discord auth.
-- Ability to continue ticket chat through web link (for user and admin) that will require discord authentication
-- Improve and/or add filters to web ui pages
-- Write tests
-- Ability to disable admin commands for bot. (This can be done since web ui is implemented)
-- Check attachment handling methods and let bot create a preview of images instead of connecting links
+# Roadmap
+- Implement option to enable confirmation dialog when closing tickets
+- Implement option to force user to select ticket type before creating the ticket
+- Authentication & Role System
+  - Internal and external auth system
+  - Basic auth with id password
+  - Discord third party link auth
+  - Ability to give access to web panel to teams
+- Language Resources
+  - Culture Resource file support for multiple languages
+  - Enabling culture select and auto detect for users and admins
+- API Endpoints
+  - Allowing external apps to query the bot information etc.
+- Encryption
+  - Encrypting messages and more for security
+- Editing Bot Messages
+  - Changing the colors and structure of embeds and bot messages
+- Ticket Assign and Claim system
+  - An admin can claim ticket responsibility 
+  - Higher role admin assing or change assignment of ticket responsibility to someone else 
+- Improved Ticket Type system
+  - Adding automatic assignment to certain ticket types to certain teams
+- Ticket Transcription
+  - View and create public link of ticket messages and attachments
+- Modals
+  - Option to show form modals to user after ticket type selection
+  - After user submits form the data should be stored to db and send to ticket channel
+- Web Panel Ticket System
+  - Ability to continue ticket chat through web link (for user and admin) that will require discord authentication
+- Improved Attachment Handling 
+  - Option to Save the user attachments to server or cloud
+  - This obviously requires users permissions 
+  - This feature might break Discord's ToS, if so can not implement this.
+- Mod Stats
+  - Ability to view and monitor mod activity and stats
+  - New page of mod stat details, average response times, activity, resolve time, total sent messages, graphs etc.
+- Change DB Provider
+  - MS SQL is not the best, moving towards something like PostgresQL or adding option to configure which db to use.
 
 # Contributing
-Create a pull request by using semantic commits and proper explanation
+Project is open to contributing if you willing to spend time fixing things or adding features. Much appreciated.
 
 # Disclaimer
 You are responsible for data safety of users and messages when you are using this bot.

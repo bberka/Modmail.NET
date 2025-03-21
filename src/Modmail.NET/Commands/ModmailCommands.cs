@@ -1,11 +1,12 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using MediatR;
 using Modmail.NET.Aspects;
 using Modmail.NET.Attributes;
-using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
+using Modmail.NET.Features.Guild;
 using Serilog;
 
 namespace Modmail.NET.Commands;
@@ -16,8 +17,15 @@ namespace Modmail.NET.Commands;
 [Group("modmail")]
 [RequireOwner]
 [RequirePermissions(Permissions.Administrator)]
+[ModuleLifespan(ModuleLifespan.Transient)]
 public sealed class ModmailCommands : BaseCommandModule
 {
+  private readonly ISender _sender;
+
+  public ModmailCommands(ISender sender) {
+    _sender = sender;
+  }
+
   [Command("setup")]
   [Description("Setup the modmail bot, can only be used by the bot owner and administrator.")]
   [GroupCommand]
@@ -25,7 +33,7 @@ public sealed class ModmailCommands : BaseCommandModule
     const string logMessage = $"[{nameof(ModmailCommands)}]{nameof(Setup)}({{ContextUserId}})";
 
     try {
-      await GuildOption.ProcessSetupAsync(ctx.Guild);
+      await _sender.Send(new ProcessGuildSetupCommand(ctx.Guild));
       await ctx.RespondAsync(Embeds.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id);

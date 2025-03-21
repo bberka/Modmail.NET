@@ -2,5 +2,5 @@
 
 public class UserAlreadyBlacklistedException : BotExceptionBase
 {
-  public UserAlreadyBlacklistedException() : base(LangData.This.GetTranslation(LangKeys.USER_ALREADY_BLACKLISTED)) { }
+  public UserAlreadyBlacklistedException() : base(LangProvider.This.GetTranslation(LangKeys.USER_ALREADY_BLACKLISTED)) { }
 }

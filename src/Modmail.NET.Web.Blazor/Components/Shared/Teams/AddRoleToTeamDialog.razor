@@ -1,57 +1,60 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject NotificationService notificationService
-@inject DialogService dialogService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
 
 @code {
   private List<DiscordRole>? _roles;
-  private ulong selectedRoleId = 0;
+  private ulong _selectedRoleId = 0;
 
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
 
   protected override async Task OnInitializedAsync() {
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var teamMemberIds = dbContext.GuildTeamMembers
                                  .Where(x => x.GuildTeamId == GuildTeam.Id && x.Type == TeamMemberDataType.RoleId)
                                  .Select(x => x.Key)
                                  .ToList();
-    _roles = (await ModmailBot.This.GetRoles())
+    _roles = (await Bot.GetRoles())
              .Where(x => x.Name != "@everyone")
              .Where(x => teamMemberIds.All(y => y != x.Id)) // Exclude team members
              .ToList();
   }
 
   private async Task SubmitAsync() {
-    if (selectedRoleId == 0) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+    if (_selectedRoleId == 0) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
     const string logMessage = $"[{nameof(AddRoleToTeamDialog)}]{nameof(SubmitAsync)}({{RoleId}})";
 
     try {
-      var role = _roles?.First(x => x.Id == selectedRoleId);
+      var role = _roles?.First(x => x.Id == _selectedRoleId);
       if (role is null) {
-        notificationService.Notify(NotificationSeverity.Warning, "Warning", "Role not found.");
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Role not found.");
         return;
       }
 
-      await GuildTeam.ProcessAddRoleToTeam(role);
-      Log.Information(logMessage, selectedRoleId);
-      notificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
-      dialogService.Close(true);
+      await Sender.Send(new ProcessAddRoleToTeamCommand(GuildTeam.Id, role));
+      Log.Information(logMessage, _selectedRoleId);
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
+      DialogService.Close(true);
     }
     catch (BotExceptionBase ex) {
-      Log.Warning(logMessage, selectedRoleId);
-      ex.NotifyException(notificationService);
+      Log.Warning(logMessage, _selectedRoleId);
+      ex.NotifyException(NotificationService);
     }
     catch (Exception ex) {
-      Log.Fatal(logMessage, selectedRoleId);
-      ex.NotifyException(notificationService);
+      Log.Fatal(logMessage, _selectedRoleId);
+      ex.NotifyException(NotificationService);
     }
   }
 
@@ -70,7 +73,7 @@ else {
                         TextProperty="@nameof(DiscordRole.Name)"
                         ValueProperty="@nameof(DiscordRole.Id)"
                         TValue="ulong"
-                        @bind-Value="selectedRoleId"
+                        @bind-Value="_selectedRoleId"
                         Placeholder="Select Role"
                         AllowFiltering="true"/>
       </RadzenRow>

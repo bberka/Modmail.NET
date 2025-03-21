@@ -4,7 +4,7 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Attributes;
 
-public class RequireTicketChannelForCommandAttribute : CheckBaseAttribute
+public sealed class RequireTicketChannelForCommandAttribute : CheckBaseAttribute
 {
   public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help) {
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
