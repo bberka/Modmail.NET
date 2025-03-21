@@ -167,12 +167,12 @@ public class ModmailEventHandlers
         var auditLogEntry = (await args.Guild.GetAuditLogsAsync(1, null, AuditLogActionType.ChannelDelete)).FirstOrDefault();
         var user = auditLogEntry?.UserResponsible ?? client.CurrentUser;
         await sender.Send(new UpdateDiscordUserCommand(user));
-        var ticket = await sender.Send(new GetTicketQuery(ticketId));
-
-        if (ticket.ClosedDateUtc.HasValue) return; // Ticket is already closed
-
-        await sender.Send(new ProcessCloseTicketCommand(ticketId, user.Id, langData.GetTranslation(LangKeys.CHANNEL_WAS_DELETED), args.Channel));
-        Log.Information(logMessage, args.Channel.Id);
+        var ticket = await sender.Send(new GetTicketQuery(ticketId,true));
+        if (ticket is not null) {
+          if (ticket.ClosedDateUtc.HasValue) return; // Ticket is already closed
+          await sender.Send(new ProcessCloseTicketCommand(ticketId, user.Id, langData.GetTranslation(LangKeys.CHANNEL_WAS_DELETED), args.Channel));
+          Log.Information(logMessage, args.Channel.Id);
+        }
       }
       catch (BotExceptionBase ex) {
         Log.Warning(ex, logMessage, args.Channel.Id);
