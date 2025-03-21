@@ -1,8 +1,11 @@
 using Hangfire;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Abstract;
 using Modmail.NET.Database;
-using Modmail.NET.Entities;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Guild;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
@@ -19,7 +22,8 @@ public sealed class AverageDataCalculatorJob : HangfireRecurringJobBase
     Log.Information("Starting Average Data Calculation...");
 
     var scope = _scopeFactory.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     const string sql = """
                        SELECT
@@ -36,37 +40,38 @@ public sealed class AverageDataCalculatorJob : HangfireRecurringJobBase
                         RegisterDateUtc ASC
                         ) AS adminMessage
                        """;
-    
-    var averageResponseTime = await context.Database.SqlQueryRaw<int>(sql).FirstOrDefaultAsync();
-    var option = await GuildOption.GetAsync();
 
-    if (averageResponseTime >= 0) {
-      option.AvgResponseTimeMinutes = averageResponseTime / 60d;
-    }
+    var averageResponseTime = await dbContext.Database.SqlQueryRaw<int>(sql).FirstOrDefaultAsync();
+    var option = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
 
-    var avgTicketsOpenPerDay = await context.Tickets
-                                        .GroupBy(x => x.RegisterDateUtc.Date)
-                                        .Select(x => new {
-                                          Date = x.Key,
-                                          Count = x.Count(),
-                                        })
-                                        .AverageAsync(x => x.Count);
+    if (averageResponseTime >= 0) option.AvgResponseTimeMinutes = averageResponseTime / 60d;
+
+    var avgTicketsOpenPerDay = await dbContext.Tickets
+                                              .GroupBy(x => x.RegisterDateUtc.Date)
+                                              .Select(x => new {
+                                                Date = x.Key,
+                                                Count = x.Count()
+                                              })
+                                              .AverageAsync(x => x.Count);
     option.AvgTicketsOpenPerDay = avgTicketsOpenPerDay;
 
 
-    var avgTicketsClosePerDay = await context.Tickets
-                                       .Where(x => !x.ClosedDateUtc.HasValue)
-                                       .GroupBy(x => x.RegisterDateUtc.Date)
-                                       .Select(x => new {
-                                         Date = x.Key,
-                                         Count = x.Count(),
-                                       })
-                                       .AverageAsync(x => x.Count);
+    var avgTicketsClosePerDay = await dbContext.Tickets
+                                               .Where(x => !x.ClosedDateUtc.HasValue)
+                                               .GroupBy(x => x.RegisterDateUtc.Date)
+                                               .Select(x => new {
+                                                 Date = x.Key,
+                                                 Count = x.Count()
+                                               })
+                                               .AverageAsync(x => x.Count);
 
     option.AvgTicketsClosePerDay = avgTicketsClosePerDay;
 
-    
-    await option.UpdateAsync();
+
+    dbContext.Update(option);
+    var affected = await dbContext.SaveChangesAsync();
+    if (affected == 0) throw new DbInternalException();
+
     Log.Information("Average Data Calculation finished");
   }
 }

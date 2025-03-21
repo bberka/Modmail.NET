@@ -1,11 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Version>1.1.2-beta</Version>
+    <Nullable>disable</Nullable>
     <Deterministic>false</Deterministic>
+    <LangVersion>13</LangVersion>
+    <Version>2.0.0-beta1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +16,10 @@
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.5.0"/>
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.5.0"/>
     <PackageReference Include="DSharpPlus.SlashCommands" Version="4.5.0"/>
-    <PackageReference Include="Hangfire.Core" Version="1.8.18" />
+    <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.2.2"/>
+    <PackageReference Include="FluentValidation" Version="11.11.0"/>
+    <PackageReference Include="Hangfire.Core" Version="1.8.18"/>
+    <PackageReference Include="MediatR" Version="12.4.1"/>
     <PackageReference Include="Metran" Version="2.0.0"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.3"/>
@@ -32,6 +36,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.3"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.3"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3"/>
+    <PackageReference Include="Polly" Version="8.5.2"/>
     <PackageReference Include="Riok.Mapperly" Version="4.1.1"/>
     <PackageReference Include="Serilog" Version="4.2.0"/>
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
@@ -72,6 +77,10 @@
     <None Include="Language\Data\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\TicketNote\Handlers\"/>
   </ItemGroup>
 
 </Project>

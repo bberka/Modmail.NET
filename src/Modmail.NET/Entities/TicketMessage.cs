@@ -1,36 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
-using Modmail.NET.Database;
+using Modmail.NET.Abstract;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Entities;
 
-public sealed class TicketMessage
+public sealed class TicketMessage : IHasRegisterDate,
+                                    IEntity
 {
   public Guid Id { get; set; }
-  public DateTime RegisterDateUtc { get; set; } = DateTime.UtcNow;
   public ulong SenderUserId { get; set; }
 
   [MaxLength(DbLength.MESSAGE)]
+  [Required]
   public required string MessageContent { get; set; }
 
   public ulong MessageDiscordId { get; set; }
   public Guid TicketId { get; set; }
 
   //FK
-  public List<TicketMessageAttachment>? Attachments { get; set; }
-
-  public async Task AddAsync() {
-    await using var dbContext = new ModmailDbContext();
-    await dbContext.TicketMessages.AddAsync(this);
-    await dbContext.SaveChangesAsync();
-  }
-
-  public async Task UpdateAsync() {
-    await using var dbContext = new ModmailDbContext();
-    dbContext.TicketMessages.Update(this);
-    await dbContext.SaveChangesAsync();
-  }
+  public List<TicketMessageAttachment> Attachments { get; set; }
+  public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message) {
     var id = Guid.NewGuid();
@@ -45,7 +35,7 @@ public sealed class TicketMessage
     };
   }
 
-  public static TicketMessage MapFrom(Guid ticketId, ulong authorId, ulong messageId, string messageContent, List<DiscordAttachment>? discordAttachments) {
+  public static TicketMessage MapFrom(Guid ticketId, ulong authorId, ulong messageId, string messageContent, List<DiscordAttachment> discordAttachments) {
     discordAttachments ??= new List<DiscordAttachment>();
     var id = Guid.NewGuid();
     return new TicketMessage {

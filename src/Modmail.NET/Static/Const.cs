@@ -19,5 +19,6 @@ public static class Const
   public const int DEFAULT_TICKET_TIMEOUT_HOURS = 72;
   public const int TICKET_TIMEOUT_MIN_ALLOWED_HOURS = 12;
   public const int TICKET_TIMEOUT_MAX_ALLOWED_HOURS = 168 * 2; // 2 weeks
-  public static readonly DiscordActivity DISCORD_ACTIVITY = new(LangData.This.GetTranslation(LangKeys.MODERATION_CONCERNS), ActivityType.ListeningTo);
+  public const string THEME_COOKIE_NAME = "Modmail.NET.Theme";
+  public static readonly DiscordActivity DISCORD_ACTIVITY = new(LangProvider.This.GetTranslation(LangKeys.MODERATION_CONCERNS), ActivityType.ListeningTo);
 }

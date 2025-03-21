@@ -1,31 +1,31 @@
-﻿@using System.Linq.Dynamic.Core
-@using System.Linq.Expressions
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+﻿@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.UserInfo
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject ISender Sender
 
 @code {
 
   [Parameter]
   public Guid TicketId { get; set; }
 
-  bool isLoading = false;
+  bool _isLoading = false;
 
   async Task ShowLoading() {
-    isLoading = true;
+    _isLoading = true;
 
     await Task.Yield();
 
-    isLoading = false;
+    _isLoading = false;
   }
 
   private IQueryable<TicketMessage>? _data;
   private Dictionary<ulong, DiscordUserInfo> _users = new();
   private int _count = 0;
 
-  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     await ShowLoading();
 
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.TicketMessages
                          .Include(x => x.Attachments)
                          .Where(x => x.TicketId == TicketId)
@@ -37,8 +37,7 @@
       query = query.ApplyDataGridFilter(args);
     }
 
- 
-    
+
     _count = await query.CountAsync();
 
     _data = args is not null
@@ -50,14 +49,13 @@
 
 
   protected override async Task OnInitializedAsync() {
-    _users = await DiscordUserInfo.GetAllDictionaryAsync();
-
-    await reloadDataAsync();
+    _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
+    await ReloadDataAsync();
   }
 
 
   private async Task LoadDataAsync(LoadDataArgs args) {
-    await reloadDataAsync(args);
+    await ReloadDataAsync(args);
   }
 
 
@@ -81,8 +79,8 @@
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
                             Data="@_data" TItem="TicketMessage" ColumnWidth="180px"
                             LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            
-                            IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
+
+                            IsLoading=@_isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
                             Filter="@ShowLoading">
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketMessage.Id)" Filterable="false" Title="ID"

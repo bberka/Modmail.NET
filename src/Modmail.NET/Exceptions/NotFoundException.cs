@@ -2,7 +2,7 @@
 
 public sealed class NotFoundException : BotExceptionBase
 {
-  public NotFoundException(LangKeys name) : base(LangData.This.GetTranslation(LangKeys.X_NOT_FOUND, name)) {
+  public NotFoundException(LangKeys name) : base(LangProvider.This.GetTranslation(LangKeys.X_NOT_FOUND, name)) {
     Name = name;
   }
 
@@ -11,7 +11,7 @@ public sealed class NotFoundException : BotExceptionBase
 
 public sealed class NotFoundWithException : BotExceptionBase
 {
-  public NotFoundWithException(LangKeys name, object id) : base(LangData.This.GetTranslation(LangKeys.X_NOT_FOUND, name, id)) {
+  public NotFoundWithException(LangKeys name, object id) : base(LangProvider.This.GetTranslation(LangKeys.X_NOT_FOUND, name, id)) {
     Name = name;
     Id = id;
   }
@@ -22,7 +22,7 @@ public sealed class NotFoundWithException : BotExceptionBase
 
 public sealed class NotFoundInException : BotExceptionBase
 {
-  public NotFoundInException(LangKeys name, LangKeys inName) : base(LangData.This.GetTranslation(LangKeys.X_NOT_FOUND_IN_Y, name, inName)) {
+  public NotFoundInException(LangKeys name, LangKeys inName) : base(LangProvider.This.GetTranslation(LangKeys.X_NOT_FOUND_IN_Y, name, inName)) {
     Name = name;
     InName = inName;
   }

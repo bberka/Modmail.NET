@@ -2,7 +2,7 @@
 
 public class TicketTypeAlreadyExistsException : BotExceptionBase
 {
-  public TicketTypeAlreadyExistsException(string name) : base(LangData.This.GetTranslation(LangKeys.TICKET_TYPE_ALREADY_EXISTS)) {
+  public TicketTypeAlreadyExistsException(string name) : base(LangProvider.This.GetTranslation(LangKeys.TICKET_TYPE_ALREADY_EXISTS)) {
     Name = name;
   }
 
