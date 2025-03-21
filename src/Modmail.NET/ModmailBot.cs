@@ -138,7 +138,8 @@ public class ModmailBot
       try {
         var member = await guild.Value.GetMemberAsync(userId);
         if (member == null) continue;
-        var sender = _serviceProvider.GetRequiredService<ISender>();
+        var scope = _serviceProvider.CreateScope();
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         await sender.Send(new UpdateDiscordUserCommand(member));
         return member;
       }
@@ -156,7 +157,9 @@ public class ModmailBot
     });
 
     async Task<DiscordGuild> Get(ICacheEntry cacheEntry) {
-      var config = _serviceProvider.GetRequiredService<IOptions<BotConfig>>();
+      var scope = _serviceProvider.CreateScope();
+
+      var config = scope.ServiceProvider.GetRequiredService<IOptions<BotConfig>>();
       var guildId = config.Value.MainServerId;
       var guild = await Client.GetGuildAsync(guildId);
       if (guild == null) {
@@ -164,7 +167,6 @@ public class ModmailBot
         throw new NotFoundException(LangKeys.MAIN_GUILD);
       }
 
-      var scope = _serviceProvider.CreateScope();
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
       var guildOption = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
 
@@ -189,8 +191,8 @@ public class ModmailBot
     });
 
     async Task<DiscordChannel> Get(ICacheEntry cacheEntry) {
-      var guild = await GetMainGuildAsync();
       var scope = _serviceProvider.CreateScope();
+      var guild = await GetMainGuildAsync();
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
       var option = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
