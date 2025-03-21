@@ -211,6 +211,11 @@ and more...
   - New page of mod stat details, average response times, activity, resolve time, total sent messages, graphs etc.
 - Change DB Provider
   - MS SQL is not the best, moving towards something like PostgresQL or adding option to configure which db to use.
+- Ticket Archive
+  - New filter type for tickets menu
+  - Archived tickets will not be visible by default however by filtering them you will still be able to see them
+  - Option to set a timeout for ticket archiving via background job. Options menu will have a TicketArchiveTimeoutDays value to be set for this.
+
 
 # Contributing
 Project is open to contributing if you willing to spend time fixing things or adding features. Much appreciated.
