@@ -13,6 +13,9 @@ Logs/Log_*.json
 Log_*.json
 /Logs/Log_*.json
 /Log_*.json
+/publish/
+log-*.json
+/logs/
 
 
 # Exclude appsettings.example.json from being ignored

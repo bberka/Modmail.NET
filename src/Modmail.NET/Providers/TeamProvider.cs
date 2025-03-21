@@ -1,17 +1,25 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Entities;
+using MediatR;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Providers;
 
-public class TeamProvider : IAutocompleteProvider
+public sealed class TeamProvider : IAutocompleteProvider
 {
   public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx) {
-    var key = SimpleCacher.CreateKey(nameof(TeamProvider), nameof(Provider));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
+    const string cacheKey = "TeamProvider.Provider.AutoComplete";
+    var cache = ctx.Services.GetRequiredService<IMemoryCache>();
+    return await cache.GetOrCreateAsync(cacheKey, Get, new MemoryCacheEntryOptions {
+      AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+    });
 
-    async Task<IEnumerable<DiscordAutoCompleteChoice>> _get() {
-      var teamsDbList = await GuildTeam.GetAllAsync();
+    async Task<IEnumerable<DiscordAutoCompleteChoice>> Get(ICacheEntry cacheEntry) {
+      var scope = ctx.Services.CreateScope();
+      var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+      var teamsDbList = await sender.Send(new GetTeamListQuery());
       var teams = teamsDbList.Select(x => new DiscordAutoCompleteChoice(x.Name, x.Name));
       return await Task.FromResult(teams.AsEnumerable());
     }

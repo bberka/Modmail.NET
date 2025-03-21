@@ -1,19 +1,32 @@
 ﻿using Hangfire;
-using Modmail.NET.Entities;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Abstract;
+using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Ticket;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
 
 public sealed class TicketTimeoutJob : HangfireRecurringJobBase
 {
-  public TicketTimeoutJob() : base("TicketTimeoutJob", Cron.Hourly()) { }
+  private readonly IServiceScopeFactory _scopeFactory;
+
+  public TicketTimeoutJob(IServiceScopeFactory scopeFactory) : base("TicketTimeoutJob", Cron.Hourly()) {
+    _scopeFactory = scopeFactory;
+  }
 
   public override async Task Execute() {
-    var guildOption = await GuildOption.GetAsync();
-    var tickets = await Ticket.GetTimeoutTicketsAsync(guildOption.TicketTimeoutHours);
+    var scope = _scopeFactory.CreateScope();
+
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
+
+    var guildOption = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
+    var tickets = await sender.Send(new GetTimedOutTicketListQuery(guildOption.TicketTimeoutHours));
     if (tickets.Count > 0)
       foreach (var ticket in tickets) {
-        await ticket.ProcessCloseTicketAsync(ModmailBot.This.Client.CurrentUser.Id, "Ticket timed out");
+        await sender.Send(new ProcessCloseTicketCommand(ticket.Id, bot.Client.CurrentUser.Id, "Ticket timed out"));
         Log.Information("Ticket {TicketId} has been closed due to timeout", ticket.Id);
       }
   }

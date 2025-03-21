@@ -1,10 +1,13 @@
 ﻿using DSharpPlus;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Entities;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Attributes;
 
-public class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAttribute
+public sealed class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAttribute
 {
   private readonly TeamPermissionLevel _teamPermissionLevel;
 
@@ -13,13 +16,14 @@ public class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAtt
   }
 
   public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx) {
-    var isOwner = BotConfig.This.OwnerUsers.Contains(ctx.User.Id);
+    var config = ctx.Services.GetRequiredService<IOptions<BotConfig>>().Value;
+    var isOwner = config.OwnerUsers.Contains(ctx.User.Id);
     if (isOwner) return true;
 
     var isAdmin = ctx.Member.Permissions.HasPermission(Permissions.Administrator);
     if (isAdmin) return true;
 
-    var guild = ctx.Guild is not null && ctx.Guild.Id == BotConfig.This.MainServerId
+    var guild = ctx.Guild is not null && ctx.Guild.Id == config.MainServerId
                   ? ctx.Guild
                   : null;
     if (guild is null) {
@@ -28,9 +32,11 @@ public class RequirePermissionLevelOrHigherForSlashAttribute : SlashCheckBaseAtt
       return false;
     }
 
+    var scope = ctx.Services.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     var roleIdList = ctx.Member.Roles.Select(x => x.Id).ToList();
-    var permLevel = await GuildTeamMember.GetPermissionLevelAsync(ctx.User.Id, roleIdList);
+    var permLevel = await sender.Send(new GetTeamPermissionLevelQuery(ctx.User.Id, roleIdList));
     if (permLevel is null) {
       await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                                                 Interactions.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()).AsEphemeral());

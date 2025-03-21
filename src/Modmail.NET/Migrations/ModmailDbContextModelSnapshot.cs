@@ -96,7 +96,6 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("IconUrl")
-                        .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
@@ -329,9 +328,6 @@ namespace Modmail.NET.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("Content")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("FileName")
                         .IsRequired()

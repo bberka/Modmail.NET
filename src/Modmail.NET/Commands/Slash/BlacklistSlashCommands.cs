@@ -1,11 +1,14 @@
 ﻿using DSharpPlus;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using MediatR;
 using Modmail.NET.Aspects;
 using Modmail.NET.Attributes;
-using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
+using Modmail.NET.Features.Blacklist;
+using Modmail.NET.Features.UserInfo;
 using Serilog;
 
 namespace Modmail.NET.Commands.Slash;
@@ -14,8 +17,15 @@ namespace Modmail.NET.Commands.Slash;
 [SlashCommandGroup("blacklist", "Blacklist management commands.")]
 [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Moderator)]
 [UpdateUserInformationForSlash]
+[ModuleLifespan(ModuleLifespan.Transient)]
 public class BlacklistSlashCommands : ApplicationCommandModule
 {
+  private readonly ISender _sender;
+
+  public BlacklistSlashCommands(ISender sender) {
+    _sender = sender;
+  }
+
   [SlashCommand("add", "Add a user to the blacklist.")]
   public async Task Add(InteractionContext ctx,
                         [Option("user", "The user to blacklist.")]
@@ -26,8 +36,8 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Add)}({{ContextUserId}},{{UserId}},{{Reason}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      await DiscordUserInfo.AddOrUpdateAsync(user);
-      await TicketBlacklist.ProcessAddUserToBlacklist(user.Id, reason, ctx.User.Id);
+      await _sender.Send(new UpdateDiscordUserCommand(user));
+      await _sender.Send(new ProcessAddUserToBlacklistCommand(user.Id, reason, ctx.User.Id));
       await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
@@ -60,9 +70,8 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Remove)}({{ContextUserId}},{{UserId}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      await DiscordUserInfo.AddOrUpdateAsync(user);
-      var ticketBlacklist = await TicketBlacklist.GetAsync(user.Id);
-      await ticketBlacklist.ProcessRemoveUserFromBlacklist(ctx.User.Id, user.Id);
+      await _sender.Send(new UpdateDiscordUserCommand(user));
+      await _sender.Send(new ProcessRemoveUserFromBlacklistCommand(ctx.User.Id, user.Id));
       Log.Information(logMessage,
                       ctx.User.Id,
                       user.Id);
@@ -91,7 +100,7 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Status)}({{ContextUserId}},{{UserId}})";
     await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var isBlocked = await TicketBlacklist.IsBlacklistedAsync(user.Id);
+      var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(user.Id));
       await ctx.EditResponseAsync(Webhooks.Info(LangKeys.USER_BLACKLIST_STATUS.GetTranslation(),
                                                 isBlocked
                                                   ? LangKeys.USER_IS_BLACKLISTED.GetTranslation()

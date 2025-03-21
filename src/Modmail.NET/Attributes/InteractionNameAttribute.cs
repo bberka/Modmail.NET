@@ -1,6 +1,6 @@
 ﻿namespace Modmail.NET.Attributes;
 
-public class InteractionNameAttribute : Attribute
+public sealed class InteractionNameAttribute : Attribute
 {
   public InteractionNameAttribute(string name, int paramCount) {
     Name = name;

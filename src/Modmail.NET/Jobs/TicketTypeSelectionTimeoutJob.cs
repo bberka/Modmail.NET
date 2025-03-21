@@ -1,12 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using DSharpPlus.Entities;
 using Hangfire;
+using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Jobs;
 
 public sealed class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
 {
-  public TicketTypeSelectionTimeoutJob() : base("TicketTypeSelectionTimeoutJob",Cron.Minutely()) {
+  public TicketTypeSelectionTimeoutJob() : base("TicketTypeSelectionTimeoutJob", Cron.Minutely()) {
     Messages = new ConcurrentDictionary<DiscordMessage, DateTime>();
   }
 
@@ -39,6 +40,7 @@ public sealed class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
         x.AddEmbeds(message.Key.Embeds);
       });
     }
+
     Messages = newDict;
   }
 }

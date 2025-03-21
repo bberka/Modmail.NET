@@ -69,7 +69,7 @@ public static class TicketResponses
     return embed2;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType? ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
                 .WithUserAsAuthor(user)
@@ -108,7 +108,7 @@ public static class TicketResponses
   }
 
 
-  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, List<PermissionInfo>? permissions = null) {
+  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, List<PermissionInfo> permissions = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()

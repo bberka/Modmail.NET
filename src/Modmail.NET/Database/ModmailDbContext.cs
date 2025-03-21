@@ -5,6 +5,8 @@ namespace Modmail.NET.Database;
 
 public sealed class ModmailDbContext : DbContext
 {
+  public ModmailDbContext() { }
+  public ModmailDbContext(DbContextOptions<ModmailDbContext> options) : base(options) { }
   public DbSet<Ticket> Tickets { get; set; } = null!;
   public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; } = null!;
   public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
@@ -15,10 +17,6 @@ public sealed class ModmailDbContext : DbContext
   public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; } = null!;
   public DbSet<TicketBlacklist> TicketBlacklists { get; set; } = null!;
   public DbSet<TicketType> TicketTypes { get; set; } = null!;
-
-  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    optionsBuilder.UseSqlServer(BotConfig.This.DbConnectionString);
-  }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);

@@ -1,57 +1,61 @@
 ﻿@page "/"
-@using System.Globalization
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Guild
 @using Modmail.NET.Queues
 @using Modmail.NET.Static
-@using Modmail.NET.Web.Shared.Models
 
-@inject NavigationManager navigationManager
-@inject DialogService dialogService
-@inject NotificationService notificationService
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ModmailDbContext DbContext
+@inject ISender Sender
+@inject ModmailBot Bot
+@inject TicketMessageQueue TicketMessageQueue
 
 @code {
 
-  private HomeStats? Stats { get; set; }
+  private HomeStatDto? Stats { get; set; }
 
   protected override async Task OnInitializedAsync() {
-    var dbContext = new ModmailDbContext();
-    if (await GuildOption.Any() != true) {
-      navigationManager.NavigateTo("/setup");
+    if (await Sender.Send(new AnyGuildSetupQuery()) != true) {
+      NavigationManager.NavigateTo("/setup");
     }
 
-    var totalTickets = await dbContext.Tickets.Select(x => new {
+    var totalTickets = await DbContext.Tickets
+                                      .AsNoTracking()
+                                      .Select(x => new {
                                         IsClosed = x.ClosedDateUtc.HasValue
                                       })
                                       .ToListAsync();
     var activeTickets = totalTickets.Count(x => !x.IsClosed);
     var closedTickets = totalTickets.Count(x => x.IsClosed);
-    var totalMessages = await dbContext.TicketMessages.CountAsync();
-    var teams = await dbContext.GuildTeams.CountAsync();
-    var blacklist = await dbContext.TicketBlacklists.CountAsync();
-    var ticketTypes = await dbContext.TicketTypes.CountAsync();
-    var teamMemberData = await dbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
+    var totalMessages = await DbContext.TicketMessages.CountAsync();
+    var teams = await DbContext.GuildTeams.CountAsync();
+    var blacklist = await DbContext.TicketBlacklists.CountAsync();
+    var ticketTypes = await DbContext.TicketTypes.CountAsync();
+    var teamMemberData = await DbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
     var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
     var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
-    var option = await GuildOption.GetAsync();
-                                         
-    Stats = new HomeStats(activeTickets,
-                          closedTickets,
-                          totalMessages,
-                          teams,
-                          blacklist,
-                          ticketTypes,
-                          teamUserCount,
-                          teamRoleCount,
-                          TicketMessageQueue.This.GetChannelCount(),
-                          option.AvgResponseTimeMinutes,
-                          option.AvgTicketsOpenPerDay,
-                          option.AvgTicketsClosePerDay
-                          );
+    var option = await Sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
+
+    Stats = new HomeStatDto(activeTickets,
+                            closedTickets,
+                            totalMessages,
+                            teams,
+                            blacklist,
+                            ticketTypes,
+                            teamUserCount,
+                            teamRoleCount,
+                            TicketMessageQueue.GetChannelCount(),
+                            option.AvgResponseTimeMinutes,
+                            option.AvgTicketsOpenPerDay,
+                            option.AvgTicketsClosePerDay
+                           );
   }
 
 
   private async Task StartBotAsync() {
-    var dialogResult = await dialogService.Confirm("Are you sure you want to start the bot?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
@@ -59,14 +63,14 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.StartAsync();
+      await Bot.StartAsync();
       StateHasChanged();
-      notificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
+      NotificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
     }
   }
 
   private async Task StopBotAsync() {
-    var dialogResult = await dialogService.Confirm("Are you sure you want to stop the bot?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
@@ -74,14 +78,14 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.StopAsync();
+      await Bot.StopAsync();
       StateHasChanged();
-      notificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
+      NotificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
     }
   }
 
   private async Task RestartBotAsync() {
-    var dialogResult = await dialogService.Confirm("Are you sure you want to restart the bot?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to restart the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
@@ -89,10 +93,10 @@
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      await ModmailBot.StopAsync();
-      await ModmailBot.StartAsync();
+      await Bot.StopAsync();
+      await Bot.StartAsync();
       StateHasChanged();
-      notificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
+      NotificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
     }
   }
 
@@ -122,7 +126,7 @@
           <RadzenColumn Size="12">
             <RadzenText class="rz-my-4">
               Bot is
-              @if (ModmailBot.This.Connected) {
+              @if (Bot.Connected) {
                 <span class="rz-color-success">Connected</span>
               }
               else {
@@ -133,7 +137,7 @@
         </RadzenRow>
         <RadzenRow>
           <RadzenColumn Size="12">
-            @if (ModmailBot.This.Connected) {
+            @if (Bot.Connected) {
               <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
               <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot</RadzenButton>
             }
@@ -185,7 +189,6 @@
             </p>
           </RadzenCard>
         </RadzenColumn>
-
 
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -241,8 +244,8 @@
               Processing Message Queues
             </p>
           </RadzenCard>
-        </RadzenColumn>  
-        
+        </RadzenColumn>
+
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
@@ -263,8 +266,8 @@
               Average Tickets Opened
             </p>
           </RadzenCard>
-        </RadzenColumn>  
-        
+        </RadzenColumn>
+
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
@@ -275,7 +278,7 @@
             </p>
           </RadzenCard>
         </RadzenColumn>
-        
+
 
       </RadzenRow>
 

@@ -1,20 +1,25 @@
 ﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Features.Blacklist
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject NotificationService notificationService
-@inject DialogService dialogService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
+@inject IOptions<BotConfig> Options
 
 @code {
 
   private List<DiscordUserInfo> _users = new();
 
-  private ulong? selectedUserId;
+  private ulong? _selectedUserId;
 
-  private string? reason = string.Empty;
+  private string? _reason = string.Empty;
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
 
     _users = await dbContext.DiscordUserInfos
                             .GroupJoin(dbContext.TicketBlacklists,
@@ -25,19 +30,19 @@
                                         (x, blacklist) => new { x.user, blacklist })
                             .Where(x => x.blacklist == null) // Only take users that are not in blacklist
                             .OrderBy(x => x.user.Username)
-                            .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
-                            .Where(x => BotConfig.This.OwnerUsers.All(y => y != x.user.Id)) // Exclude bot owner
+                            .Where(x => x.user.Id != Bot.Client.CurrentUser.Id) // Exclude bot
+                            .Where(x => Options.Value.OwnerUsers.All(y => y != x.user.Id)) // Exclude bot owner
                             .Select(x => x.user)
                             .ToListAsync();
   }
 
   private async Task SubmitAsync() {
-    if (selectedUserId is null) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+    if (_selectedUserId is null) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
-    var dialogResult = await dialogService.Confirm("Are you sure you want to block this user?",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to block this user?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -47,24 +52,24 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
       try {
-        await TicketBlacklist.ProcessAddUserToBlacklist(selectedUserId.Value, reason);
-        notificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
+        await Sender.Send(new ProcessAddUserToBlacklistCommand(_selectedUserId.Value, _reason));
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
         Log.Information(logMessage,
-                        selectedUserId.Value,
-                        reason);
-        dialogService.Close(true);
+                        _selectedUserId.Value,
+                        _reason);
+        DialogService.Close(true);
       }
       catch (BotExceptionBase ex) {
-        ex.NotifyException(notificationService);
+        ex.NotifyException(NotificationService);
         Log.Warning(logMessage,
-                    selectedUserId.Value,
-                    reason);
+                    _selectedUserId.Value,
+                    _reason);
       }
       catch (Exception ex) {
-        ex.NotifyException(notificationService);
+        ex.NotifyException(NotificationService);
         Log.Fatal(logMessage,
-                  selectedUserId.Value,
-                  reason);
+                  _selectedUserId.Value,
+                  _reason);
       }
     }
   }
@@ -87,7 +92,7 @@
       </RadzenAlert>
     </RadzenRow>
     <RadzenRow class="rz-my-4">
-      <RadzenDropDown Style="width: 100%;" TValue="ulong?" @bind-Value="selectedUserId" Placeholder="Select user"
+      <RadzenDropDown Style="width: 100%;" TValue="ulong?" @bind-Value="_selectedUserId" Placeholder="Select user"
                       AllowFiltering="true" class="w-100"
                       Data="@(_users)" TextProperty="@nameof(DiscordUserInfo.Username)"
                       ValueProperty="@nameof(DiscordUserInfo.Id)"/>
@@ -95,7 +100,7 @@
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Block Reason" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="block-reason" @bind-Value="@reason" class="w-100"/>
+        <RadzenTextBox Name="block-reason" @bind-Value="@_reason" class="w-100"/>
       </RadzenFormField>
     </RadzenRow>
 

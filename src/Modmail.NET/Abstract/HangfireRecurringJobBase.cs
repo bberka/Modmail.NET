@@ -1,8 +1,7 @@
 using Hangfire;
-using Modmail.NET.Abstract;
 using Serilog;
 
-namespace Modmail.NET.Jobs;
+namespace Modmail.NET.Abstract;
 
 public abstract class HangfireRecurringJobBase : IRecurringJobDefinition
 {
