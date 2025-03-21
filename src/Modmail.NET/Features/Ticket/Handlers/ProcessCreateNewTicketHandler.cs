@@ -36,7 +36,6 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
     var ticketId = Guid.NewGuid();
-    var messageId = request.Message.Id;
 
     var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
     var members = await guild.GetAllMembersAsync();
@@ -72,9 +71,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
       CloserUserId = null,
       ClosedDateUtc = null,
       TicketTypeId = null,
-      Messages = new List<TicketMessage> {
-        ticketMessage
-      },
+      Messages = [ticketMessage],
       BotTicketCreatedMessageInDmId = 0
     };
 
@@ -93,7 +90,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
 
     ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
 
-    _dbContext.Tickets.Update(ticket);
+    _dbContext.Tickets.Add(ticket);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
