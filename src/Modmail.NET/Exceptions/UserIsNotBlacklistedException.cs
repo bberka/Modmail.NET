@@ -2,5 +2,5 @@
 
 public class UserIsNotBlacklistedException : BotExceptionBase
 {
-  public UserIsNotBlacklistedException() : base(LangData.This.GetTranslation(LangKeys.USER_IS_NOT_BLACKLISTED)) { }
+  public UserIsNotBlacklistedException() : base(LangProvider.This.GetTranslation(LangKeys.USER_IS_NOT_BLACKLISTED)) { }
 }

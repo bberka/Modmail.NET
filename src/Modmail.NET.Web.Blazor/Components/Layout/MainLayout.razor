@@ -8,7 +8,7 @@
       <RadzenColumn Size="5">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Normal"
                      AlignItems="AlignItems.Center" Gap="0">
-          <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)"/>
+          <RadzenSidebarToggle Click="@(() => _sidebarExpanded = !_sidebarExpanded)"/>
           <RadzenLabel Text="Modmail.NET"/>
         </RadzenStack>
       </RadzenColumn>
@@ -22,7 +22,7 @@
 
 
   </RadzenHeader>
-  <RadzenSidebar @bind-Expanded="@sidebarExpanded">
+  <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
       <RadzenPanelMenuItem Text="Home" Icon="home" Path="/"/>
       <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
@@ -30,6 +30,7 @@
       <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
       <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
       <RadzenPanelMenuItem Text="Ticket Types" Icon="stacks" Path="/ticket-types"/>
+      <RadzenPanelMenuItem Text="Hangfire Dashboard" Icon="grid_view" Path="/hangfire"/>
     </RadzenPanelMenu>
     @* <div class="rz-p-4"> *@
     @*   Sidebar *@
@@ -78,7 +79,7 @@
 
 @code {
 
-  bool sidebarExpanded = true;
+  bool _sidebarExpanded = true;
 
 
 }

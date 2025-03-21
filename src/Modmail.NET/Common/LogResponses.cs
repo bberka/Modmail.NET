@@ -56,7 +56,7 @@ public static class LogResponses
   }
 
 
-  public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string? reason) {
+  public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string reason) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.USER_BLACKLISTED.GetTranslation())
                 .WithUserAsAuthor(author)
@@ -119,7 +119,7 @@ public static class LogResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(Ticket ticket, TicketType? ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(Ticket ticket, TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
                 .WithCustomTimestamp()
@@ -144,7 +144,7 @@ public static class LogResponses
                 .AddField(LangKeys.OLD_PRIORITY.GetTranslation(), oldPriority.ToString(), true)
                 .AddField(LangKeys.NEW_PRIORITY.GetTranslation(), newPriority.ToString(), true);
     if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
-    else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
+    // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
     return embed;
   }
 
@@ -169,11 +169,11 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
-                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
+                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA())
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN())
       ;
     return embed;
   }
@@ -184,11 +184,11 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
-                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
+                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA());
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN());
     return embed;
   }
 
@@ -198,11 +198,11 @@ public static class LogResponses
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
                 .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
-                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNA(), true)
+                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
                 .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNA())
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNA());
+                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
+                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN());
 
     return embed;
   }

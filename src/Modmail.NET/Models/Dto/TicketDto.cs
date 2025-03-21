@@ -10,9 +10,9 @@ public sealed class TicketDto
   public required DateTime LastMessageDateUtc { get; set; }
   public required bool IsForcedClosed { get; set; }
   public required bool Anonymous { get; set; }
-  public required DiscordUserInfo? OpenerUser { get; set; }
-  public DiscordUserInfo? CloserUser { get; set; }
-  public DiscordUserInfo? AssignedUser { get; set; }
-  public TicketType? TicketType { get; set; }
-  public string? CloseReason { get; set; }
+  public required DiscordUserInfo OpenerUser { get; set; }
+  public DiscordUserInfo CloserUser { get; set; }
+  public DiscordUserInfo AssignedUser { get; set; }
+  public TicketType TicketType { get; set; }
+  public string CloseReason { get; set; }
 }

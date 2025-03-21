@@ -1,13 +1,16 @@
 ﻿@page "/setup"
+@using Modmail.NET.Features.Guild
 @using Modmail.NET.Web.Blazor.Components.Layout
 @inject NavigationManager NavigationManager
 @layout EmptyLayout
-
+@inject ModmailDbContext DbContext
+@inject ISender Sender
+@inject ModmailBot Bot
 
 @code {
 
   protected override async Task OnInitializedAsync() {
-    if (await GuildOption.Any()) {
+    if (await Sender.Send(new AnyGuildSetupQuery())) {
       NavigationManager.NavigateTo("/");
     }
   }

@@ -1,9 +1,13 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
-using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Blacklist;
+using Modmail.NET.Features.Ticket;
 using Modmail.NET.Models.Dto;
 using Modmail.NET.Utils;
 using Serilog;
@@ -12,9 +16,14 @@ namespace Modmail.NET.Queues;
 
 public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 {
-  private static TicketMessageQueue? _instance;
-  private TicketMessageQueue() : base(TimeSpan.FromMinutes(15)) { }
-  public static TicketMessageQueue This => _instance ??= new TicketMessageQueue();
+  private readonly IOptions<BotConfig> _options;
+  private readonly IServiceScopeFactory _scopeFactory;
+
+  public TicketMessageQueue(IServiceScopeFactory scopeFactory,
+                            IOptions<BotConfig> options) : base(TimeSpan.FromMinutes(15)) {
+    _scopeFactory = scopeFactory;
+    _options = options;
+  }
 
   protected override async Task HandleMessageAsync(ulong userId, DiscordTicketMessageDto dto) {
     if (dto.Args.Channel.IsPrivate)
@@ -24,21 +33,23 @@ public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDt
   }
 
   [PerformanceLoggerAspect]
-  private async Task HandlePrivateTicketMessageAsync(DiscordClient sender, DiscordMessage message, DiscordChannel channel, DiscordUser user) {
-    if (message.Content.StartsWith(BotConfig.This.BotPrefix))
+  private async Task HandlePrivateTicketMessageAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, DiscordUser user) {
+    if (message.Content.StartsWith(_options.Value.BotPrefix))
       return;
+    var scope = _scopeFactory.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     try {
-      if (await TicketBlacklist.IsBlacklistedAsync(user.Id)) {
+      if (await sender.Send(new CheckUserBlacklistStatusQuery(user.Id))) {
         await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
         return;
       }
 
-      var activeTicket = await Ticket.GetActiveTicketNullableAsync(user.Id);
+      var activeTicket = await sender.Send(new GetTicketByUserIdQuery(user.Id, false, true));
       if (activeTicket is not null)
-        await activeTicket.ProcessUserSentMessageAsync(message, channel);
+        await sender.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
       else
-        await Ticket.ProcessCreateNewTicketAsync(user, channel, message);
+        await sender.Send(new ProcessCreateNewTicketCommand(user, channel, message));
 
       Log.Information("[TicketMessageQueue] Processed private message from {UserId}: {Message}", user.Id, message.Content);
     }
@@ -51,16 +62,19 @@ public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDt
   }
 
   [PerformanceLoggerAspect]
-  private async Task HandleGuildTicketMessageAsync(DiscordClient sender, DiscordMessage message, DiscordChannel channel, DiscordUser modUser, DiscordGuild guild) {
-    if (message.Content.StartsWith(BotConfig.This.BotPrefix))
+  private async Task HandleGuildTicketMessageAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, DiscordUser modUser, DiscordGuild guild) {
+    if (message.Content.StartsWith(_options.Value.BotPrefix))
       return;
+
+    var scope = _scopeFactory.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
 
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
       if (ticketId == Guid.Empty) return;
 
-      var ticket = await Ticket.GetActiveTicketAsync(ticketId);
-      await ticket.ProcessModSendMessageAsync(modUser, message, channel, guild);
+      await sender.Send(new ProcessModSendMessageCommand(ticketId, modUser, message, channel, guild));
 
       Log.Information("[TicketMessageQueue] Processed guild message from {UserId}: {Message}", modUser.Id, message.Content);
     }

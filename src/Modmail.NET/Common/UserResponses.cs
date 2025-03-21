@@ -22,7 +22,7 @@ public static class UserResponses
     return feedbackDone;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(TicketType? ticketType) {
+  public static DiscordEmbedBuilder TicketTypeChanged(TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
                 .WithCustomTimestamp()
@@ -87,12 +87,12 @@ public static class UserResponses
                 .AddField(LangKeys.OLD_PRIORITY.GetTranslation(), oldPriority.ToString(), true)
                 .AddField(LangKeys.NEW_PRIORITY.GetTranslation(), newPriority.ToString(), true);
     if (!ticket.Anonymous) embed.WithUserAsAuthor(info);
-    else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
+    // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
     return embed;
   }
 
 
-  public static DiscordEmbedBuilder YouHaveBeenBlacklisted(string? reason = null) {
+  public static DiscordEmbedBuilder YouHaveBeenBlacklisted(string reason = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.YOU_HAVE_BEEN_BLACKLISTED.GetTranslation())
                 .WithDescription(LangKeys.YOU_HAVE_BEEN_BLACKLISTED_DESCRIPTION.GetTranslation())

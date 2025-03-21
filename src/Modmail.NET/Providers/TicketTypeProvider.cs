@@ -1,17 +1,26 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Modmail.NET.Entities;
+using MediatR;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Modmail.NET.Features.TicketType;
 
 namespace Modmail.NET.Providers;
 
-public class TicketTypeProvider : IAutocompleteProvider
+public sealed class TicketTypeProvider : IAutocompleteProvider
 {
   public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx) {
-    var key = SimpleCacher.CreateKey(nameof(TicketTypeProvider), nameof(Provider));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
+    const string cacheKey = "TicketTypeProvider.Provider.AutoComplete";
+    var cache = ctx.Services.GetRequiredService<IMemoryCache>();
+    return await cache.GetOrCreateAsync(cacheKey, Get, new MemoryCacheEntryOptions {
+      AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+    });
 
-    async Task<IEnumerable<DiscordAutoCompleteChoice>> _get() {
-      var ticketTypesDbList = await TicketType.GetAllAsync();
+    async Task<IEnumerable<DiscordAutoCompleteChoice>> Get(ICacheEntry entry) {
+      var scope = ctx.Services.CreateScope();
+      var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
+      var ticketTypesDbList = await sender.Send(new GetTicketTypeListQuery());
       var ticketTypes = ticketTypesDbList.Select(x => new DiscordAutoCompleteChoice(x.Name, x.Name));
       return await Task.FromResult(ticketTypes.AsEnumerable());
     }

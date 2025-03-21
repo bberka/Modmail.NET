@@ -2,5 +2,5 @@
 
 public class InvalidUserIdException : BotExceptionBase
 {
-  public InvalidUserIdException() : base(LangData.This.GetTranslation(LangKeys.INVALID_USER)) { }
+  public InvalidUserIdException() : base(LangProvider.This.GetTranslation(LangKeys.INVALID_USER)) { }
 }

@@ -1,16 +1,20 @@
 ﻿@page "/options"
+@using Modmail.NET.Features.Guild
 @using Serilog
 @inject NavigationManager NavigationManager
-@inject NotificationService notificationService
+@inject NotificationService NotificationService
 @inject DialogService DialogService
 @rendermode InteractiveServer
+@inject ModmailDbContext DbContext
+@inject ISender Sender
+@inject ModmailBot Bot
 
 @code {
 
   private GuildOption? _guildOption;
 
   protected override async Task OnInitializedAsync() {
-    _guildOption = await GuildOption.GetNullableAsync();
+    _guildOption = await Sender.Send(new GetGuildOptionQuery(true));
     if (_guildOption is null) {
       NavigationManager.NavigateTo("/setup");
     }
@@ -24,23 +28,29 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
-      var data = await GuildOption.GetAsync();
-      data.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
-      data.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
-      data.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
-      data.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
-      data.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
-      data.DisableBlacklistSlashCommands = _guildOption.DisableBlacklistSlashCommands;
-      data.DisableTicketSlashCommands = _guildOption.DisableTicketSlashCommands;
-      await data.UpdateAsync();
-      notificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
+      _guildOption.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
+      _guildOption.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
+      _guildOption.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
+      _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
+      _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
+      _guildOption.DisableBlacklistSlashCommands = _guildOption.DisableBlacklistSlashCommands;
+      _guildOption.DisableTicketSlashCommands = _guildOption.DisableTicketSlashCommands;
+      _guildOption.AllowUsersToCloseTickets = _guildOption.AllowUsersToCloseTickets;
+
+      DbContext.Update(_guildOption);
+      var affected = await DbContext.SaveChangesAsync();
+      if (affected == 0) {
+        NotificationService.Notify(NotificationSeverity.Success, "Failed", "Guild options could not be updated");
+      }
+
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
     catch (BotExceptionBase ex) {
-      ex.NotifyException(notificationService);
+      ex.NotifyException(NotificationService);
       Log.Warning(ex, logMessage);
     }
     catch (Exception ex) {
-      ex.NotifyException(notificationService);
+      ex.NotifyException(NotificationService);
       Log.Warning(ex, logMessage);
     }
   }
@@ -114,6 +124,13 @@
                               @bind-Value=@_guildOption.DisableBlacklistSlashCommands/>
                 <RadzenLabel Component="DisableBlacklistSlashCommands">
                   Disable all blacklist group slash commands. (Requires bot restart)
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="AllowUsersToCloseTickets"
+                              @bind-Value=@_guildOption.AllowUsersToCloseTickets/>
+                <RadzenLabel Component="AllowUsersToCloseTickets">
+                  Allow users to close tickets via command
                 </RadzenLabel>
               </RadzenRow>
               @* <RadzenRow class="rz-my-4"> *@

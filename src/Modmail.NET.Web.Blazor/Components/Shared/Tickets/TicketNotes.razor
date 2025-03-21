@@ -1,29 +1,31 @@
 ﻿@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@using Modmail.NET.Features.UserInfo
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject ISender Sender
 
 @code {
 
   [Parameter]
   public Guid TicketId { get; set; }
 
-  bool isLoading = false;
+  bool _isLoading = false;
 
   async Task ShowLoading() {
-    isLoading = true;
+    _isLoading = true;
 
     await Task.Yield();
 
-    isLoading = false;
+    _isLoading = false;
   }
 
   private IQueryable<TicketNote>? _data;
   private Dictionary<ulong, DiscordUserInfo> _users = new();
   private int _count = 0;
 
-  private async Task reloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     await ShowLoading();
 
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.TicketNotes
                          .Where(x => x.TicketId == TicketId)
                          .OrderByDescending(x => x.RegisterDateUtc)
@@ -45,14 +47,13 @@
 
 
   protected override async Task OnInitializedAsync() {
-    _users = await DiscordUserInfo.GetAllDictionaryAsync();
-
-    await reloadDataAsync();
+    _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
+    await ReloadDataAsync();
   }
 
 
   private async Task LoadDataAsync(LoadDataArgs args) {
-    await reloadDataAsync(args);
+    await ReloadDataAsync(args);
   }
 
 
@@ -68,14 +69,15 @@
         else {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="false"
-                            AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false"
+                            Density="Density.Default"
+                            AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
                             FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
                             Data="@_data" TItem="TicketNote" ColumnWidth="180px"
                             LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
+                            IsLoading=@_isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
                             Filter="@ShowLoading">
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketNote.Id)" Filterable="false" Title="ID"

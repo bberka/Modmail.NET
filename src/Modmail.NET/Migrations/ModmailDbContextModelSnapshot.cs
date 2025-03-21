@@ -64,8 +64,23 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<bool>("AllowUsersToCloseTickets")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AlwaysAnonymous")
                         .HasColumnType("bit");
+
+                    b.Property<double>("AvgResponseTimeMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsClosePerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsOpenPerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
 
                     b.Property<string>("BannerUrl")
                         .HasMaxLength(4000)
@@ -81,7 +96,6 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("IconUrl")
-                        .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
@@ -314,9 +328,6 @@ namespace Modmail.NET.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("Content")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("FileName")
                         .IsRequired()

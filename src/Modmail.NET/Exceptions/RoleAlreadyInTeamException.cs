@@ -2,5 +2,5 @@
 
 public class RoleAlreadyInTeamException : BotExceptionBase
 {
-  public RoleAlreadyInTeamException() : base(LangData.This.GetTranslation(LangKeys.ROLE_ALREADY_IN_TEAM)) { }
+  public RoleAlreadyInTeamException() : base(LangProvider.This.GetTranslation(LangKeys.ROLE_ALREADY_IN_TEAM)) { }
 }
