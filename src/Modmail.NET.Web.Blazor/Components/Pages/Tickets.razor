@@ -48,6 +48,9 @@
       case TicketFilterType.Closed:
         query = query.Where(x => x.ClosedDateUtc.HasValue);
         break;
+      case TicketFilterType.Archived:
+        query = query.Where(x => x.ArchivedDateUtc.HasValue);
+        break;
       default:
         throw new ArgumentOutOfRangeException();
     }
@@ -99,31 +102,57 @@
     @*     <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
     @*   </div> *@
     //TODO: Add reason textbox with custom component dialog
-    var dialogResult = await DialogService.Confirm("Are you sure you want to force close this ticket ? This action is not recommended and can not be undone.",
+    var dialogResult = await DialogService.Confirm("Are you sure you want to force close this ticket ? This action can not be undone.",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No"
                                                    });
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{reason}})";
+      const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{TicketId}},{{reason}})";
       try {
         await Sender.Send(new ProcessCloseTicketCommand(ticketDto.Id));
-        Log.Information(logMessage, _forceCloseReason);
+        Log.Information(logMessage, ticketDto.Id, _forceCloseReason);
         NotificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
         await ReloadDataAsync();
       }
       catch (BotExceptionBase ex) {
         ex.NotifyException(NotificationService);
-        Log.Warning(ex, logMessage, _forceCloseReason);
+        Log.Warning(ex, logMessage, ticketDto.Id, _forceCloseReason);
       }
       catch (Exception ex) {
         ex.NotifyException(NotificationService);
-        Log.Fatal(ex, logMessage, _forceCloseReason);
+        Log.Fatal(ex, logMessage, ticketDto.Id, _forceCloseReason);
       }
     }
   }
 
-  private TicketFilterType _filterTicketType = TicketFilterType.All;
+
+  private async Task ArchiveAsync(TicketDto ticketDto) {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to archive this ticket ? This action can not be undone.",
+                                                   options: new ConfirmOptions {
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(Tickets)}]{nameof(ArchiveAsync)}({{TicketId}})";
+      try {
+        await Sender.Send(new ProcessArchiveTicketCommand(ticketDto.Id));
+        Log.Information(logMessage, ticketDto.Id);
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been archived successfully.");
+        await ReloadDataAsync();
+      }
+      catch (BotExceptionBase ex) {
+        ex.NotifyException(NotificationService);
+        Log.Warning(ex, logMessage, ticketDto.Id);
+      }
+      catch (Exception ex) {
+        ex.NotifyException(NotificationService);
+        Log.Fatal(ex, logMessage, ticketDto.Id);
+      }
+    }
+  }
+
+  private TicketFilterType _filterTicketType = TicketFilterType.Active;
 
   private async Task ShowMessages(TicketDto ticketDto) {
     _ = await DialogService.OpenAsync("Ticket Messages",
@@ -270,6 +299,19 @@
                         class="rz-my-1 rz-ms-1"
                         Click="@(async () => await ForceCloseAsync(data))"
                         MouseEnter="@(args => TooltipService.Open(args, "Force Close Ticket", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                        @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
+                    else {
+                      <RadzenButton
+                        ButtonStyle="ButtonStyle.Warning"
+                        Icon="archive"
+                        Variant="Variant.Flat"
+                        Shade="Shade.Lighter"
+                        Size="ButtonSize.Medium"
+                        class="rz-my-1 rz-ms-1"
+                        Click="@(async () => await ArchiveAsync(data))"
+                        MouseEnter="@(args => TooltipService.Open(args, "Archive Ticket", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }

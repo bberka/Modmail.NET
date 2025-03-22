@@ -60,3 +60,7 @@ public sealed record ProcessChangeTicketTypeCommand(
   DiscordMessage PrivateMessageWithComponent = null,
   ulong UserId = 0
 ) : IRequest;
+
+public sealed record ProcessArchiveTicketCommand(
+  Guid TicketId,
+  ulong CloserUserId = 0) : IRequest;

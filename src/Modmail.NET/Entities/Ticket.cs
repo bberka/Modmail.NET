@@ -10,6 +10,7 @@ public sealed class Ticket : IHasRegisterDate,
   public Guid Id { get; set; }
   public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? ClosedDateUtc { get; set; }
+  public DateTime? ArchivedDateUtc { get; set; }
   public ulong OpenerUserId { get; set; } //FK
   public ulong? CloserUserId { get; set; } //FK
   public ulong? AssignedUserId { get; set; } //FK

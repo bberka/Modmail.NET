@@ -4,5 +4,6 @@ public enum TicketFilterType
 {
   All,
   Active,
-  Closed
+  Closed,
+  Archived
 }

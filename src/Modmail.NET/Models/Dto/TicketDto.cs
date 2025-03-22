@@ -7,6 +7,7 @@ public sealed class TicketDto
   public required Guid Id { get; set; }
   public required DateTime RegisterDateUtc { get; set; }
   public required DateTime? ClosedDateUtc { get; set; }
+  public DateTime? ArchivedDateUtc { get; set; }
   public required DateTime LastMessageDateUtc { get; set; }
   public required bool IsForcedClosed { get; set; }
   public required bool Anonymous { get; set; }
