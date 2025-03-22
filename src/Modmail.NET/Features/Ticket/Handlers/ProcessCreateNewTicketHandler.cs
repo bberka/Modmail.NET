@@ -32,14 +32,13 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
 
     var guild = await _bot.GetMainGuildAsync();
     //make new privateChannel
-    var channelName = string.Format(Const.TICKET_NAME_TEMPLATE, request.User.Username.Trim());
+    var channelName = string.Format(Const.TicketNameTemplate, request.User.Username.Trim());
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
     var ticketId = Guid.NewGuid();
-    var messageId = request.Message.Id;
 
     var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
-    var members = await guild.GetAllMembersAsync();
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
     var roles = guild.Roles;
 
     var (modMemberListForOverwrites, modRoleListForOverwrites) = UtilPermission.ParsePermissionInfo(permissions, members, roles);
@@ -72,9 +71,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
       CloserUserId = null,
       ClosedDateUtc = null,
       TicketTypeId = null,
-      Messages = new List<TicketMessage> {
-        ticketMessage
-      },
+      Messages = [ticketMessage],
       BotTicketCreatedMessageInDmId = 0
     };
 
@@ -93,7 +90,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
 
     ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
 
-    _dbContext.Tickets.Update(ticket);
+    _dbContext.Tickets.Add(ticket);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 

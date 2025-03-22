@@ -31,7 +31,7 @@
 
   protected override void OnInitialized() {
     base.OnInitialized();
-    var theme = HttpContext.Request.Cookies[Const.THEME_COOKIE_NAME];
+    var theme = HttpContext.Request.Cookies[Const.ThemeCookieName];
 
     if (!string.IsNullOrEmpty(theme)) {
       ThemeService.SetTheme(theme, false);

@@ -1,9 +1,10 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
+﻿using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.ContextChecks;
+using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Aspects;
-using Modmail.NET.Attributes;
+using Modmail.NET.Checks.Attributes;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Guild;
@@ -13,12 +14,11 @@ namespace Modmail.NET.Commands;
 
 [PerformanceLoggerAspect]
 [RequireGuild]
-[UpdateUserInformationForCommand]
-[Group("modmail")]
-[RequireOwner]
-[RequirePermissions(Permissions.Administrator)]
-[ModuleLifespan(ModuleLifespan.Transient)]
-public sealed class ModmailCommands : BaseCommandModule
+[UpdateUserInformation]
+[Command("modmail")]
+[RequireApplicationOwner]
+[RequirePermissions(DiscordPermission.Administrator)]
+public sealed class ModmailCommands 
 {
   private readonly ISender _sender;
 
@@ -28,7 +28,6 @@ public sealed class ModmailCommands : BaseCommandModule
 
   [Command("setup")]
   [Description("Setup the modmail bot, can only be used by the bot owner and administrator.")]
-  [GroupCommand]
   public async Task Setup(CommandContext ctx) {
     const string logMessage = $"[{nameof(ModmailCommands)}]{nameof(Setup)}({{ContextUserId}})";
 

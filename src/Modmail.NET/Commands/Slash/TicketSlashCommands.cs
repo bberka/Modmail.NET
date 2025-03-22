@@ -1,10 +1,12 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
+﻿using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using MediatR;
 using Modmail.NET.Aspects;
-using Modmail.NET.Attributes;
+using Modmail.NET.Checks.Attributes;
+using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Guild;
@@ -18,12 +20,13 @@ using Serilog;
 namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
-[SlashCommandGroup("ticket", "Ticket management commands.")]
-[UpdateUserInformationForSlash]
-[RequireMainServerForSlashCommand]
-[RequireTicketChannelForSlash]
-[ModuleLifespan(ModuleLifespan.Transient)]
-public class TicketSlashCommands : ApplicationCommandModule
+[Command("ticket")]
+[Description("Ticket management commands.")]
+[UpdateUserInformation]
+[RequireMainServer]
+[RequireTicketChannel]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Support)]
+public class TicketSlashCommands 
 {
   private readonly ISender _sender;
 
@@ -31,30 +34,23 @@ public class TicketSlashCommands : ApplicationCommandModule
     _sender = sender;
   }
 
-  [SlashCommand("close", "Close a ticket.")]
-  public async Task CloseTicket(InteractionContext ctx,
-                                [Option("reason", "Ticket closing reason. User will be notified of this reason.")]
+  [Command("close")]
+  [Description("Close a ticket.")]
+  public async Task CloseTicket(SlashCommandContext ctx,
+                                [Parameter("reason")]
+                                [Description("Ticket closing reason. User will be notified of this reason.")]
                                 string reason = null) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(CloseTicket)}({{ContextUserId}},{{reason}})";
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
+      var isPrivateChannel = ctx.Channel.IsPrivate;
+      var option = await _sender.Send(new GetGuildOptionQuery(false));
       var ticket = await _sender.Send(new GetTicketQuery(ticketId, MustBeOpen: true));
-      var userId = ctx.User.Id;
-
-      //allow only a team member or opener user
-      if (ticket.OpenerUserId == userId) {
-        var option = await _sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
-        if (!option.AllowUsersToCloseTickets) {
-          await ctx.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
-                                                    Interactions.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()).AsEphemeral());
-          return;
-        }
-      }
-      else {
-        var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(userId));
+      if (ticket.OpenerUserId != ctx.User.Id) {
+        var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(ctx.User.Id));
         if (!isAnyTeamMember) {
-          await ctx.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage,
+          await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage,
                                                     Interactions.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()).AsEphemeral());
           return;
         }
@@ -74,13 +70,15 @@ public class TicketSlashCommands : ApplicationCommandModule
     }
   }
 
-  [SlashCommand("set-priority", "Set the priority of a ticket.")]
-  [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Support)]
-  public async Task SetPriority(InteractionContext ctx,
-                                [Option("priority", "Priority of the ticket")]
+  [Command("set-priority")]
+  [Description("Set the priority of a ticket.")]
+
+  public async Task SetPriority(SlashCommandContext ctx,
+                                [Parameter("priority")]
+                                [Description("Priority of the ticket")]
                                 TicketPriority priority) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(SetPriority)}({{ContextUserId}},{{priority}})";
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessChangePriorityCommand(ticketId, ctx.User.Id, priority, ctx.Channel));
@@ -98,12 +96,15 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
 
-  [SlashCommand("add-note", "Add a note to a ticket.")]
-  [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Support)]
-  public async Task AddNote(InteractionContext ctx,
-                            [Option("note", "Note to add")] string note) {
+  [Command("add-note")]
+  [Description("Add a note to a ticket.")]
+  public async Task AddNote(SlashCommandContext ctx,
+                            [Parameter("note")] 
+                            [Description("Note to add")] 
+                            string note
+    ) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(AddNote)}({{ContextUserId}},{{note}})";
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessAddNoteCommand(ticketId, ctx.User.Id, note));
@@ -120,11 +121,11 @@ public class TicketSlashCommands : ApplicationCommandModule
     }
   }
 
-  [SlashCommand("toggle-anonymous", "Toggle anonymous mode for a ticket.")]
-  [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Moderator)]
-  public async Task ToggleAnonymous(InteractionContext ctx) {
+  [Command("toggle-anonymous")]
+  [Description("Toggle anonymous mode for a ticket.")]
+  public async Task ToggleAnonymous(SlashCommandContext ctx) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(ToggleAnonymous)}({{ContextUserId}})";
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessToggleAnonymousCommand(ticketId, ctx.Channel));
@@ -142,13 +143,15 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
 
-  [SlashCommand("set-type", "Set the type of a ticket.")]
-  [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Support)]
-  public async Task SetType(InteractionContext ctx,
-                            [Option("type", "Type of the ticket")] [Autocomplete(typeof(TicketTypeProvider))]
+  [Command("set-type")]
+  [Description("Set the type of a ticket.")]
+  public async Task SetType(SlashCommandContext ctx,
+                            [Parameter("type")] 
+                            [Description("Type of the ticket")] 
+                            [SlashAutoCompleteProvider(typeof(TicketTypeProvider))]
                             string type) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(SetType)}({{ContextUserId}},{{type}})";
-    await ctx.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessChangeTicketTypeCommand(ticketId, type, ctx.Channel, UserId: ctx.User.Id));
@@ -166,14 +169,19 @@ public class TicketSlashCommands : ApplicationCommandModule
   }
 
 
-  [SlashCommand("get-type", "Gets the ticket type for the current ticket channel")]
-  [RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Support)]
-  public async Task GetTicketType(InteractionContext ctx) {
+  [Command("get-type")]
+  [Description("Gets the ticket type for the current ticket channel")]
+  public async Task GetTicketType(SlashCommandContext ctx) {
     const string logMessage = $"[{nameof(TicketSlashCommands)}]{nameof(GetTicketType)}()";
-    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var ticketType = await _sender.Send(new GetTicketTypeByChannelIdQuery(ctx.Channel.Id));
-      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE.GetTranslation(), $"`{ticketType.Name}` - {ticketType.Description}"));
+      var ticketType = await _sender.Send(new GetTicketTypeByChannelIdQuery(ctx.Channel.Id,true));
+      if (ticketType is null) {
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE_NOT_SET.GetTranslation()));
+      }
+      else {
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE.GetTranslation(), $"`{ticketType.Name}` - {ticketType.Description}"));
+      }
       Log.Information(logMessage);
     }
     catch (BotExceptionBase ex) {

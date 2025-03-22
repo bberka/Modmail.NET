@@ -1,5 +1,6 @@
-﻿using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
+﻿using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
+using DSharpPlus.Entities;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,17 +8,17 @@ using Modmail.NET.Features.TicketType;
 
 namespace Modmail.NET.Providers;
 
-public sealed class TicketTypeProvider : IAutocompleteProvider
+public sealed class TicketTypeProvider : IAutoCompleteProvider
 {
-  public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx) {
+  public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context) {
     const string cacheKey = "TicketTypeProvider.Provider.AutoComplete";
-    var cache = ctx.Services.GetRequiredService<IMemoryCache>();
+    var cache = context.ServiceProvider.GetRequiredService<IMemoryCache>();
     return await cache.GetOrCreateAsync(cacheKey, Get, new MemoryCacheEntryOptions {
       AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
     });
 
     async Task<IEnumerable<DiscordAutoCompleteChoice>> Get(ICacheEntry entry) {
-      var scope = ctx.Services.CreateScope();
+      var scope = context.ServiceProvider.CreateScope();
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
       var ticketTypesDbList = await sender.Send(new GetTicketTypeListQuery());

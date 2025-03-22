@@ -1,15 +1,16 @@
-﻿using DSharpPlus.SlashCommands;
+﻿
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 
 namespace Modmail.NET.Static;
 
 public enum TicketPriority
 {
-  [ChoiceName("Low")]
+  [ChoiceDisplayName("Low")]
   Low,
 
-  [ChoiceName("Normal")]
+  [ChoiceDisplayName("Normal")]
   Normal,
 
-  [ChoiceName("High")]
+  [ChoiceDisplayName("High")]
   High
 }

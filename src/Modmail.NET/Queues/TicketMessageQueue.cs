@@ -45,7 +45,7 @@ public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDt
         return;
       }
 
-      var activeTicket = await sender.Send(new GetTicketByUserIdQuery(user.Id, false, true));
+      var activeTicket = await sender.Send(new GetTicketByUserIdQuery(user.Id, true, true));
       if (activeTicket is not null)
         await sender.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
       else

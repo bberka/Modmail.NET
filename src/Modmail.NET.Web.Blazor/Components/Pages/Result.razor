@@ -1,0 +1,32 @@
+@page "/result"
+@using Modmail.NET.Web.Blazor.Components.Layout
+@inject NavigationManager Navigation
+@layout EmptyLayout
+<div class="container">
+    <RadzenRow>
+        <RadzenColumn >
+            <RadzenStack JustifyContent="JustifyContent.Center">
+                <RadzenAlert Style="margin-top: 10px;">
+                    @_errorMessage
+                </RadzenAlert>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</div>
+
+@code {
+    private string _errorMessage = string.Empty;
+
+    protected override void OnInitialized() {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("m", out var msg)) {
+            _errorMessage = msg;
+        }
+        else {
+            Navigation.NavigateTo("/",true);
+        }
+    }
+
+}

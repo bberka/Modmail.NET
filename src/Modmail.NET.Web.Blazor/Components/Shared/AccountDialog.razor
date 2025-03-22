@@ -1,0 +1,82 @@
+@using System.Security.Claims
+@using Modmail.NET.Static
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+@code {
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
+  private bool _isLoading = true;
+  private ulong _userId;
+  private string _username;
+  private TeamPermissionLevel _role;
+
+
+  protected override async Task OnInitializedAsync() {
+    var auth = await AuthContext;
+    _userId = ulong.Parse(auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+    _username = auth.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+    _role = Enum.Parse<TeamPermissionLevel>(auth.User.FindFirst(ClaimTypes.Role)?.Value!);
+    _isLoading = false;
+  }
+
+  private void ClickLogout() {
+    NavigationManager.NavigateTo("/auth/logout", true);
+  }
+
+}
+
+
+
+<RadzenRow>
+  <RadzenColumn Size="12" >
+      @if (_isLoading) {
+        <Loading></Loading>
+      }
+      else {
+
+        <RadzenRow class="rz-my-4">
+          <RadzenColumn>
+            <RadzenLabel>Discord User Id</RadzenLabel>
+          </RadzenColumn>
+          <RadzenColumn>
+            @_userId.ToString()
+          </RadzenColumn>
+        </RadzenRow>
+        
+        
+        <RadzenRow class="rz-my-4">
+          <RadzenColumn>
+            <RadzenLabel>Discord Username</RadzenLabel>
+          </RadzenColumn>
+          <RadzenColumn>
+            @_username
+          </RadzenColumn>
+        </RadzenRow>
+        
+        
+        <RadzenRow class="rz-my-4">
+          <RadzenColumn>
+            <RadzenLabel>Team Permission Level</RadzenLabel>
+          </RadzenColumn>
+          <RadzenColumn>
+            @_role.ToString()
+          </RadzenColumn>
+        </RadzenRow>
+
+       
+          <RadzenRow class="rz-my-4 rz-pt-4">
+            <RadzenButton ButtonType="ButtonType.Button"
+                          Text="Logout"
+                          Icon="logout"
+                          Click="ClickLogout"
+                          ButtonStyle="ButtonStyle.Secondary"/>
+          </RadzenRow>
+
+
+      }
+
+  </RadzenColumn>
+</RadzenRow>

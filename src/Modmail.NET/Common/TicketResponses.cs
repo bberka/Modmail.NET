@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using DSharpPlus;
 using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
@@ -25,11 +24,11 @@ public static class TicketResponses
 
     var messageBuilder = new DiscordMessageBuilder()
                          .AddEmbed(embed)
-                         .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger,
+                         .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket", ticketId.ToString()),
                                                                    LangKeys.CLOSE_TICKET.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒")),
-                                        new DiscordButtonComponent(ButtonStyle.Danger,
+                                        new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
                                                                    LangKeys.CLOSE_TICKET_WITH_REASON.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒"))

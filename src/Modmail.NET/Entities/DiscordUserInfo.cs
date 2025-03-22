@@ -34,20 +34,20 @@ public sealed class DiscordUserInfo : IHasRegisterDate,
   /// </summary>
   public ulong Id { get; set; }
 
-  [MaxLength(DbLength.NAME)]
+  [MaxLength(DbLength.Name)]
   [Required]
   public required string Username { get; set; }
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   public string AvatarUrl { get; set; }
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   public string BannerUrl { get; set; }
 
-  [MaxLength(DbLength.EMAIL)]
+  [MaxLength(DbLength.Email)]
   public string Email { get; set; }
 
-  [MaxLength(DbLength.LOCALE)]
+  [MaxLength(DbLength.Locale)]
   public string Locale { get; set; } = string.Empty;
 
   public List<Ticket> OpenedTickets { get; set; } = [];

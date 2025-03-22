@@ -64,9 +64,6 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("GuildId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<bool>("AllowUsersToCloseTickets")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("AlwaysAnonymous")
                         .HasColumnType("bit");
 
@@ -89,12 +86,6 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("CategoryId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<bool>("DisableBlacklistSlashCommands")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("DisableTicketSlashCommands")
-                        .HasColumnType("bit");
-
                     b.Property<string>("IconUrl")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -110,6 +101,24 @@ namespace Modmail.NET.Migrations
 
                     b.Property<decimal>("LogChannelId")
                         .HasColumnType("decimal(20,0)");
+
+                    b.Property<int>("ManageBlacklistMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageGuildOptionMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageHangfireMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTeamsMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTicketMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTicketTypeMinAccessLevel")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()

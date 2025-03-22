@@ -8,7 +8,7 @@ public sealed class TicketBlacklist : IHasRegisterDate,
 {
   public Guid Id { get; set; }
 
-  [MaxLength(DbLength.REASON)]
+  [MaxLength(DbLength.Reason)]
   public string Reason { get; set; }
 
   public ulong DiscordUserId { get; set; }
