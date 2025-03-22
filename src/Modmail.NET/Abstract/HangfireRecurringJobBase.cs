@@ -6,7 +6,7 @@ namespace Modmail.NET.Abstract;
 public abstract class HangfireRecurringJobBase : IRecurringJobDefinition
 {
   protected HangfireRecurringJobBase(string id, string cronExpression) {
-    Id = id.ToLowerInvariant();
+    Id = id;
     CronExpression = cronExpression;
   }
 

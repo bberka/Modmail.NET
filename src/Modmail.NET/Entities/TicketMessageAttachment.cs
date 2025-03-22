@@ -8,24 +8,24 @@ public sealed class TicketMessageAttachment : IEntity
 {
   public Guid Id { get; set; }
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   [Required]
   public required string Url { get; set; }
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   [Required]
   public required string ProxyUrl { get; set; }
 
   public int? Height { get; set; }
   public int? Width { get; set; }
 
-  [MaxLength(DbLength.FILE_NAME)]
+  [MaxLength(DbLength.FileName)]
   [Required]
   public required string FileName { get; set; }
 
   public int FileSize { get; set; }
 
-  [MaxLength(DbLength.MEDIA_TYPE)]
+  [MaxLength(DbLength.MediaType)]
   [Required]
   public required string MediaType { get; set; }
 

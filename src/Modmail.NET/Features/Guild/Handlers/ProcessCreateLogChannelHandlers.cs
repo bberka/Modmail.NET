@@ -22,10 +22,9 @@ public sealed class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCre
   public async Task<DiscordChannel> Handle(ProcessCreateLogChannelCommand request, CancellationToken cancellationToken) {
     var guild = await _bot.GetMainGuildAsync();
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
-    var category = guild.GetChannel(guildOption.CategoryId);
-
+  
     var permissions = await _sender.Send(new GetPermissionInfoOrHigherQuery(TeamPermissionLevel.Admin), cancellationToken);
-    var members = await guild.GetAllMembersAsync();
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
     var roles = guild.Roles;
 
     var roleListForOverwrites = new List<DiscordRole>();
@@ -39,9 +38,15 @@ public sealed class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCre
 
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
 
-    if (category is null) category = await guild.CreateChannelCategoryAsync(Const.CATEGORY_NAME, permissionOverwrites);
+    DiscordChannel category = null;
+    try {
+      category = await guild.GetChannelAsync(guildOption.CategoryId);
+    }
+    catch (NotFoundException exception) {
+      category = await guild.CreateChannelCategoryAsync(Const.CategoryName, permissionOverwrites);
+    }
 
-    var logChannel = await guild.CreateTextChannelAsync(Const.LOG_CHANNEL_NAME, category, LangProvider.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
     guildOption.LogChannelId = logChannel.Id;
     guildOption.CategoryId = category.Id;
 

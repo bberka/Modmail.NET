@@ -14,7 +14,7 @@ public sealed class GetTimedOutTicketListHandler : IRequestHandler<GetTimedOutTi
 
   public async Task<List<Entities.Ticket>> Handle(GetTimedOutTicketListQuery request, CancellationToken cancellationToken) {
     var timeoutHours = request.TimeoutHours;
-    if (timeoutHours < Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS) timeoutHours = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
+    if (timeoutHours < Const.TicketTimeoutMinAllowedHours) timeoutHours = Const.DefaultTicketTimeoutHours;
     var timeoutDate = DateTime.UtcNow.AddHours(-timeoutHours);
     var tickets = await _dbContext.Tickets
                                   .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)

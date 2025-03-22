@@ -1,10 +1,17 @@
 using System.Reflection;
+using DSharpPlus;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.TextCommands;
+using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Exceptions;
+using DSharpPlus.Extensions;
 using FluentValidation;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET;
 using Modmail.NET.Abstract;
+using Modmail.NET.Commands;
+using Modmail.NET.Commands.Slash;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Triggers;
 using Modmail.NET.Jobs;
@@ -12,6 +19,7 @@ using Modmail.NET.Language;
 using Modmail.NET.Pipeline;
 using Modmail.NET.Queues;
 using Modmail.NET.Static;
+using Modmail.NET.Utils;
 using Modmail.NET.Web.Blazor.Components;
 using Modmail.NET.Web.Blazor.Services;
 using Radzen;
@@ -43,7 +51,8 @@ var efCoreLogger = new LoggerConfiguration()
 
 Log.Logger = appLogger;
 builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(aspNetCoreLogger);
+builder.Host.UseSerilog(aspNetCoreLogger);
+builder.Logging.AddSerilog(appLogger);
 
 #endregion
 
@@ -73,7 +82,7 @@ builder.Host.UseDefaultServiceProvider(x => {
 #region UI
 
 builder.Services.AddRadzenCookieThemeService(options => {
-  options.Name = Const.THEME_COOKIE_NAME; // The name of the cookie
+  options.Name = Const.ThemeCookieName; // The name of the cookie
   options.Duration = TimeSpan.FromDays(365); // The duration of the cookie
 });
 
@@ -126,7 +135,7 @@ builder.Services.AddHangfire(configuration => configuration
                                               .UseRecommendedSerializerSettings()
                                               .UseSqlServerStorage(botConfig.GetValue<string>("DbConnectionString")));
 
-var assembly = typeof(TicketTimeoutJob).Assembly; // Or specify a different assembly
+var assembly = typeof(ModmailBotProjectMarker).Assembly; // Or specify a different assembly
 
 var jobDefinitions = assembly.GetTypes()
                              .Where(t => typeof(IRecurringJobDefinition).IsAssignableFrom(t) && t is { IsAbstract: false, IsInterface: false })
@@ -141,7 +150,7 @@ builder.Services.AddHangfireServer();
 #region MEDIATR
 
 builder.Services.AddMediatR(x => {
-  x.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(ModmailBot).Assembly);
+  x.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly(), typeof(ModmailBotProjectMarker).Assembly);
   x.AddOpenBehavior(typeof(LoggerPipelineBehavior<,>));
   x.AddOpenBehavior(typeof(ValidationBehavior<,>));
   x.AddOpenBehavior(typeof(CachingPipelineBehavior<,>));
@@ -153,10 +162,67 @@ builder.Services.AddMediatR(x => {
 
 #region FLUENT VALIDATION
 
-builder.Services.AddValidatorsFromAssemblyContaining(typeof(ModmailBot));
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(ModmailBotProjectMarker));
 
 #endregion
 
+#region DISCORD CLIENT
+
+builder.Services.AddDiscordClient(botConfig.GetValue<string>("BotToken") ?? throw new Exception("BotToken is empty"),
+                                  DiscordIntents.MessageContents
+                                  | DiscordIntents.Guilds
+                                  | DiscordIntents.GuildMessages
+                                  | DiscordIntents.GuildMembers
+                                  | DiscordIntents.DirectMessages
+                                  | DiscordIntents.GuildMessages
+                                  | DiscordIntents.DirectMessageReactions);
+
+builder.Services.AddCommandsExtension((_, extension) => {
+  extension.AddCommands<ModmailCommands>();
+  //TODO: Enable disable commands option
+  extension.AddCommands<BlacklistSlashCommands>();
+  extension.AddCommands<TicketSlashCommands>();
+
+  extension.AddChecks(typeof(ModmailBotProjectMarker).Assembly);
+  TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration {
+    PrefixResolver = new DefaultPrefixResolver(true, botConfig.GetValue<string>("BotPrefix") ?? throw new Exception("BotPrefix is null")).ResolvePrefixAsync,
+    IgnoreBots = true,
+    SuppressMissingMessageContentIntentWarning = false,
+    CommandNameComparer = StringComparer.InvariantCultureIgnoreCase
+  });
+
+  extension.AddProcessor(textCommandProcessor);
+
+  extension.CommandErrored += (ext, args) => {
+    Log.Error(args.Exception, "Error executing command {Command} {@Args}", args.Context.Command.FullName, args.Context.Arguments);
+    return Task.CompletedTask;
+  };
+});
+
+
+builder.Services.ConfigureEventHandlers(eventHandlingBuilder => {
+  eventHandlingBuilder.HandleMessageCreated(ModmailEventHandlers.OnMessageCreated);
+  eventHandlingBuilder.HandleChannelDeleted(ModmailEventHandlers.OnChannelDeleted);
+
+  eventHandlingBuilder.HandleInteractionCreated(ModmailEventHandlers.InteractionCreated);
+  eventHandlingBuilder.HandleComponentInteractionCreated(ModmailEventHandlers.ComponentInteractionCreated);
+  eventHandlingBuilder.HandleModalSubmitted(ModmailEventHandlers.ModalSubmitted);
+
+  eventHandlingBuilder.HandleGuildMemberAdded(ModmailEventHandlers.OnGuildMemberAdded);
+  eventHandlingBuilder.HandleGuildMemberRemoved(ModmailEventHandlers.OnGuildMemberRemoved);
+  eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
+  eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
+  eventHandlingBuilder.HandleGuildBanRemoved(ModmailEventHandlers.OnGuildBanRemoved);
+
+  eventHandlingBuilder.HandleUserUpdated(ModmailEventHandlers.OnUserUpdated);
+  eventHandlingBuilder.HandleUserSettingsUpdated(ModmailEventHandlers.OnUserSettingsUpdated);
+
+  eventHandlingBuilder.HandleMessageReactionAdded(ModmailEventHandlers.OnMessageReactionAdded);
+  eventHandlingBuilder.HandleMessageDeleted(ModmailEventHandlers.OnMessageDeleted);
+  eventHandlingBuilder.HandleMessageUpdated(ModmailEventHandlers.OnMessageUpdated);
+});
+
+#endregion
 
 var app = builder.Build();
 ServiceLocator.Initialize(app.Services);
@@ -213,5 +279,5 @@ using (var scope = app.Services.CreateScope()) {
 
 #endregion
 
-Log.Information("Modmail.NET UI started!");
+Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetReadableProductVersion());
 app.Run();

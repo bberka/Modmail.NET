@@ -19,13 +19,13 @@ public sealed class Ticket : IHasRegisterDate,
   public ulong BotTicketCreatedMessageInDmId { get; set; }
   public TicketPriority Priority { get; set; }
 
-  [MaxLength(DbLength.REASON)]
+  [MaxLength(DbLength.Reason)]
   public string CloseReason { get; set; }
 
   public bool IsForcedClosed { get; set; }
   public int? FeedbackStar { get; set; }
 
-  [MaxLength(DbLength.FEEDBACK_MESSAGE)]
+  [MaxLength(DbLength.FeedbackMessage)]
   public string FeedbackMessage { get; set; }
 
   public bool Anonymous { get; set; }

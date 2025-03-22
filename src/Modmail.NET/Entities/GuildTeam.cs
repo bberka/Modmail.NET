@@ -10,7 +10,7 @@ public sealed class GuildTeam : IHasRegisterDate,
   public Guid Id { get; set; }
   public TeamPermissionLevel PermissionLevel { get; set; }
 
-  [MaxLength(DbLength.NAME)]
+  [MaxLength(DbLength.Name)]
   [Required]
   public required string Name { get; set; }
 

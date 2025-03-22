@@ -8,7 +8,7 @@ public sealed class TicketNote : IHasRegisterDate,
 {
   public Guid Id { get; set; }
 
-  [MaxLength(DbLength.NOTE)]
+  [MaxLength(DbLength.Note)]
   [Required]
   public required string Content { get; set; }
 

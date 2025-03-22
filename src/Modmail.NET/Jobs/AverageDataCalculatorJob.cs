@@ -41,7 +41,9 @@ public sealed class AverageDataCalculatorJob : HangfireRecurringJobBase
                         ) AS adminMessage
                        """;
 
-    var averageResponseTime = await dbContext.Database.SqlQueryRaw<int>(sql).FirstOrDefaultAsync();
+    var averageResponseTime = await dbContext.Database.SqlQueryRaw<int>(sql)
+                                             .OrderBy(x => x)
+                                             .FirstOrDefaultAsync();
     var option = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
 
     if (averageResponseTime >= 0) option.AvgResponseTimeMinutes = averageResponseTime / 60d;

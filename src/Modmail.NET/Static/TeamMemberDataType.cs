@@ -1,12 +1,12 @@
-﻿using DSharpPlus.SlashCommands;
+﻿using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 
 namespace Modmail.NET.Static;
 
 public enum TeamMemberDataType
 {
-  [ChoiceName("Role")]
+  [ChoiceDisplayName("Role")]
   RoleId,
 
-  [ChoiceName("User")]
+  [ChoiceDisplayName("User")]
   UserId
 }

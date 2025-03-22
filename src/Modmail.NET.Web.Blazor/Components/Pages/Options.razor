@@ -33,9 +33,6 @@
       _guildOption.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
       _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
-      _guildOption.DisableBlacklistSlashCommands = _guildOption.DisableBlacklistSlashCommands;
-      _guildOption.DisableTicketSlashCommands = _guildOption.DisableTicketSlashCommands;
-      _guildOption.AllowUsersToCloseTickets = _guildOption.AllowUsersToCloseTickets;
 
       DbContext.Update(_guildOption);
       var affected = await DbContext.SaveChangesAsync();
@@ -113,26 +110,7 @@
                   Always create anonymous tickets
                 </RadzenLabel>
               </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="DisableTicketSlashCommands" @bind-Value=@_guildOption.DisableTicketSlashCommands/>
-                <RadzenLabel Component="DisableTicketSlashCommands">
-                  Disable all ticket group slash commands. (Requires bot restart)
-                </RadzenLabel>
-              </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="DisableBlacklistSlashCommands"
-                              @bind-Value=@_guildOption.DisableBlacklistSlashCommands/>
-                <RadzenLabel Component="DisableBlacklistSlashCommands">
-                  Disable all blacklist group slash commands. (Requires bot restart)
-                </RadzenLabel>
-              </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="AllowUsersToCloseTickets"
-                              @bind-Value=@_guildOption.AllowUsersToCloseTickets/>
-                <RadzenLabel Component="AllowUsersToCloseTickets">
-                  Allow users to close tickets via command
-                </RadzenLabel>
-              </RadzenRow>
+           
               @* <RadzenRow class="rz-my-4"> *@
               @*   <RadzenSwitch Name="ShowConfirmationWhenClosingTickets" Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/> *@
               @*   <RadzenLabel Component="ShowConfirmationWhenClosingTickets"> *@

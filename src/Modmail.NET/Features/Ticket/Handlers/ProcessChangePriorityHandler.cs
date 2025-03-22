@@ -55,9 +55,9 @@ public sealed class ProcessChangePriorityHandler : IRequestHandler<ProcessChange
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (ticketChannel is not null) {
         var newChName = request.NewPriority switch {
-          TicketPriority.Normal => Const.NORMAL_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticket.OpenerUser?.Username.Trim()),
-          TicketPriority.High => Const.HIGH_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticket.OpenerUser?.Username.Trim()),
-          TicketPriority.Low => Const.LOW_PRIORITY_EMOJI + string.Format(Const.TICKET_NAME_TEMPLATE, ticket.OpenerUser?.Username.Trim()),
+          TicketPriority.Normal => Const.NormalPriorityEmoji + string.Format(Const.TicketNameTemplate, ticket.OpenerUser?.Username.Trim()),
+          TicketPriority.High => Const.HighPriorityEmoji + string.Format(Const.TicketNameTemplate, ticket.OpenerUser?.Username.Trim()),
+          TicketPriority.Low => Const.LowPriorityEmoji + string.Format(Const.TicketNameTemplate, ticket.OpenerUser?.Username.Trim()),
           _ => ""
         };
 

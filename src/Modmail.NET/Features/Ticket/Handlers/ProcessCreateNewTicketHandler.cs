@@ -32,13 +32,13 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
 
     var guild = await _bot.GetMainGuildAsync();
     //make new privateChannel
-    var channelName = string.Format(Const.TICKET_NAME_TEMPLATE, request.User.Username.Trim());
+    var channelName = string.Format(Const.TicketNameTemplate, request.User.Username.Trim());
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
     var ticketId = Guid.NewGuid();
 
     var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
-    var members = await guild.GetAllMembersAsync();
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
     var roles = guild.Roles;
 
     var (modMemberListForOverwrites, modRoleListForOverwrites) = UtilPermission.ParsePermissionInfo(permissions, members, roles);

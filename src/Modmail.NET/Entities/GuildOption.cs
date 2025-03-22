@@ -10,14 +10,14 @@ public sealed class GuildOption : IHasRegisterDate,
 {
   public ulong GuildId { get; set; }
 
-  [MaxLength(DbLength.NAME)]
+  [MaxLength(DbLength.Name)]
   [Required]
   public string Name { get; set; } = "Modmail";
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   public string IconUrl { get; set; } = "";
 
-  [MaxLength(DbLength.URL)]
+  [MaxLength(DbLength.Url)]
   public string BannerUrl { get; set; }
 
   public ulong LogChannelId { get; set; }
@@ -27,8 +27,8 @@ public sealed class GuildOption : IHasRegisterDate,
 
   public bool IsSensitiveLogging { get; set; } = true;
 
-  [Range(Const.TICKET_TIMEOUT_MIN_ALLOWED_HOURS, Const.TICKET_TIMEOUT_MAX_ALLOWED_HOURS)]
-  public long TicketTimeoutHours { get; set; } = Const.DEFAULT_TICKET_TIMEOUT_HOURS;
+  [Range(Const.TicketTimeoutMinAllowedHours, Const.TicketTimeoutMaxAllowedHours)]
+  public long TicketTimeoutHours { get; set; } = Const.DefaultTicketTimeoutHours;
 
   public bool IsEnableDiscordChannelLogging { get; set; } = true;
   public bool TakeFeedbackAfterClosing { get; set; }
@@ -36,10 +36,6 @@ public sealed class GuildOption : IHasRegisterDate,
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
   public bool AlwaysAnonymous { get; set; } = false;
-  public bool DisableBlacklistSlashCommands { get; set; } = false;
-  public bool DisableTicketSlashCommands { get; set; } = false;
-
-  public bool AllowUsersToCloseTickets { get; set; } = false;
 
   [Precision(2)]
   public double AvgResponseTimeMinutes { get; set; }

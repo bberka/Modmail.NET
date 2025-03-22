@@ -1,0 +1,12 @@
+# v2.0
+- Implemented dependency injection and container for better modularity
+- Removed unused projects, classes, and anti-pattern implementations
+- Refactored service methods to use MediatR for improved maintainability
+- Enhanced logging configuration with a better-configured file
+- Updated documentation to reflect recent changes
+- Removed allowing users to close ticket feature
+- Slash Commands can no longer be used and can not be seen in DMs
+- Removed option to disable some admin slash commands
+- Updated the project to use DSharpPlus v5.x.x-nightly version
+- Refactored the entire bot code to align with the breaking changes and new features introduced in the updated library
+- Improved code structure and ensured compatibility with the latest DSharpPlus API

@@ -1,10 +1,10 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext.Attributes;
+﻿using System.ComponentModel;
+using DSharpPlus.Commands;
+using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using MediatR;
 using Modmail.NET.Aspects;
-using Modmail.NET.Attributes;
+using Modmail.NET.Checks.Attributes;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Blacklist;
@@ -14,11 +14,10 @@ using Serilog;
 namespace Modmail.NET.Commands.Slash;
 
 [PerformanceLoggerAspect]
-[SlashCommandGroup("blacklist", "Blacklist management commands.")]
-[RequirePermissionLevelOrHigherForSlash(TeamPermissionLevel.Moderator)]
-[UpdateUserInformationForSlash]
-[ModuleLifespan(ModuleLifespan.Transient)]
-public class BlacklistSlashCommands : ApplicationCommandModule
+[Command("blacklist")]
+[RequirePermissionLevelOrHigher(TeamPermissionLevel.Moderator)]
+[UpdateUserInformation]
+public class BlacklistSlashCommands
 {
   private readonly ISender _sender;
 
@@ -26,15 +25,17 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     _sender = sender;
   }
 
-  [SlashCommand("add", "Add a user to the blacklist.")]
-  public async Task Add(InteractionContext ctx,
-                        [Option("user", "The user to blacklist.")]
+  [Command("add")]
+  [Description("Adds a user to the blacklist")]
+  [SlashCommandTypes(DiscordApplicationCommandType.SlashCommand)]
+  public async Task Add(SlashCommandContext ctx,
+                        [Parameter("user")] [Description("The user to blacklist")]
                         DiscordUser user,
-                        [Option("reason", "The reason for blacklisting.")]
+                        [Parameter("reason")] [Description("The reason for blacklisting")]
                         string reason = "No reason provided."
   ) {
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Add)}({{ContextUserId}},{{UserId}},{{Reason}})";
-    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       await _sender.Send(new UpdateDiscordUserCommand(user));
       await _sender.Send(new ProcessAddUserToBlacklistCommand(user.Id, reason, ctx.User.Id));
@@ -62,16 +63,18 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     }
   }
 
-  [SlashCommand("remove", "Remove a user from the blacklist.")]
-  public async Task Remove(InteractionContext ctx,
-                           [Option("user", "The user to remove from the blacklist.")]
+  [Command("remove")]
+  [Description("Removes a user from the blacklist.")]
+  [SlashCommandTypes(DiscordApplicationCommandType.SlashCommand)]
+  public async Task Remove(SlashCommandContext ctx,
+                           [Parameter("user")] [Description("The user to remove from the blacklist.")]
                            DiscordUser user
   ) {
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Remove)}({{ContextUserId}},{{UserId}})";
-    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       await _sender.Send(new UpdateDiscordUserCommand(user));
-      await _sender.Send(new ProcessRemoveUserFromBlacklistCommand(ctx.User.Id, user.Id));
+      await _sender.Send(new ProcessRemoveUserFromBlacklistCommand(user.Id, ctx.User.Id));
       Log.Information(logMessage,
                       ctx.User.Id,
                       user.Id);
@@ -93,12 +96,14 @@ public class BlacklistSlashCommands : ApplicationCommandModule
     }
   }
 
-  [SlashCommand("status", "Check if a user is blacklisted.")]
-  public async Task Status(InteractionContext ctx,
-                           [Option("user", "The user to check.")] DiscordUser user
+  [Command("status")]
+  [Description("Check if a user is blacklisted.")]
+  public async Task Status(SlashCommandContext ctx,
+                           [Parameter("user")] [Description("The user to check.")]
+                           DiscordUser user
   ) {
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Status)}({{ContextUserId}},{{UserId}})";
-    await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(user.Id));
       await ctx.EditResponseAsync(Webhooks.Info(LangKeys.USER_BLACKLIST_STATUS.GetTranslation(),

@@ -11,7 +11,7 @@ public sealed class TicketMessage : IHasRegisterDate,
   public Guid Id { get; set; }
   public ulong SenderUserId { get; set; }
 
-  [MaxLength(DbLength.MESSAGE)]
+  [MaxLength(DbLength.Message)]
   [Required]
   public required string MessageContent { get; set; }
 
