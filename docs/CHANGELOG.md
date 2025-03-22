@@ -10,3 +10,4 @@
 - Updated the project to use DSharpPlus v5.x.x-nightly version
 - Refactored the entire bot code to align with the breaking changes and new features introduced in the updated library
 - Improved code structure and ensured compatibility with the latest DSharpPlus API
+- Updated the option page to make labels more descriptive
