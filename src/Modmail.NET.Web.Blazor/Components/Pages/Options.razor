@@ -81,33 +81,33 @@
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="IsEnabled" @bind-Value=@_guildOption.IsEnabled/>
                 <RadzenLabel Component="IsEnabled">
-                  Enable bot ticket system
+                  Enable ticket system
                 </RadzenLabel>
               </RadzenRow>
 
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="IsSensitiveLogging" @bind-Value=@_guildOption.IsSensitiveLogging/>
                 <RadzenLabel Component="IsSensitiveLogging">
-                  Enable sensitive data logging, such as message content
+                  Log sensitive such as message content
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="IsEnableDiscordChannelLogging"
                               @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
                 <RadzenLabel Component="IsEnableDiscordChannelLogging">
-                  Enable logging to log channel
+                  Log to discord channel in main guild
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
-                  Enable taking feedback from user after closing a ticket
+                  Take feedback from user after ticket is closed
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_guildOption.AlwaysAnonymous/>
                 <RadzenLabel Component="AlwaysAnonymous">
-                  Always create anonymous tickets
+                  Always create anonymous tickets (won't apply to open tickets)
                 </RadzenLabel>
               </RadzenRow>
            
