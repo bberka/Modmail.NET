@@ -10,6 +10,7 @@ AspNetDependency.Configure(builder);
 BlazorDependency.Configure(builder);
 BusinessDependency.Configure(builder);
 HangfireDependency.Configure(builder);
+DiscordBotDependency.Configure(builder);
 MediatorDependency.Configure(builder);
 ValidatorDependency.Configure(builder);
 AuthDependency.Configure(builder);
