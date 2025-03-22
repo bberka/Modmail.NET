@@ -34,8 +34,9 @@ public sealed class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChan
     //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
 
-    var ticketType = await _sender.Send(new GetTicketTypeByChannelIdQuery(ticket.ModMessageChannelId,
-                                                                          true), cancellationToken);
+    
+    var ticketType = await _sender.Send(new GetTicketTypeBySearchQuery(request.Type,
+                                                                       true), cancellationToken);
 
     if (ticketType is null)
       ticket.TicketTypeId = null;
@@ -71,6 +72,7 @@ public sealed class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChan
 
             await privateMessageWithComponent.ModifyAsync(x => {
               x.ClearComponents();
+              x.ClearEmbeds();
               x.AddEmbed(newEmbed);
             });
 
