@@ -13,7 +13,7 @@ public class HangfireAuthorizationProvider : IDashboardAuthorizationFilter
   public bool Authorize(DashboardContext context) {
     var httpContext = context.GetHttpContext();
 
-    if (httpContext.User.Identity?.IsAuthenticated == true) {
+    if (httpContext.User.Identity?.IsAuthenticated != true) {
       return false;
     }
 
