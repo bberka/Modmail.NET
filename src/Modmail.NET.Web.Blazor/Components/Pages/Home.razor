@@ -1,9 +1,10 @@
 ﻿@page "/"
+@using DSharpPlus.Exceptions
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Queues
+@using Serilog
 @using Modmail.NET.Static
-
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
 @inject NotificationService NotificationService
@@ -11,14 +12,20 @@
 @inject ISender Sender
 @inject ModmailBot Bot
 @inject TicketMessageQueue TicketMessageQueue
+@attribute [Authorize]
 
 @code {
 
-  private HomeStatDto? Stats { get; set; }
+  private HomeStatDto Stats { get; set; }
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
 
   protected override async Task OnInitializedAsync() {
     if (await Sender.Send(new AnyGuildSetupQuery()) != true) {
       NavigationManager.NavigateTo("/setup");
+      return;
     }
 
     var totalTickets = await DbContext.Tickets

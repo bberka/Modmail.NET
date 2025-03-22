@@ -1,0 +1,9 @@
+@page "/sdaqewqwe"
+@using Modmail.NET.Web.Blazor.Components.Layout
+@layout EmptyLayout
+@inject NavigationManager Navigation
+@code {
+    protected override void OnInitialized() {
+        Navigation.NavigateTo("auth/logout", true); 
+    }
+}

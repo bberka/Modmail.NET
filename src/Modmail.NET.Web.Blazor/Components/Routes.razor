@@ -1,17 +1,31 @@
 ﻿@using Modmail.NET.Web.Blazor.Components.Layout
-<Router AppAssembly="typeof(Program).Assembly">
-  <Found Context="routeData">
-    <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
-    <FocusOnNavigate RouteData="routeData" Selector="h1"/>
-  </Found>
-  <NotFound>
-    <LayoutView Layout="typeof(MainLayout)">
-      <p>Sorry, there's nothing at this address.</p>
-    </LayoutView>
-  </NotFound>
-</Router>
+@using Modmail.NET.Web.Blazor.Components.Pages
+<CascadingAuthenticationState>
+  <Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+      <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AuthLayout)">
+        <NotAuthorized>
+          @if (context.User.Identity?.IsAuthenticated != true) {
+            <RedirectToLogin/>
+          }
+          else {
+            <p>You are not authorized to access this page.</p>
+          }
+        </NotAuthorized>
+      </AuthorizeRouteView>
+    </Found>
+    <NotFound>
+      <LayoutView Layout="@typeof(AuthLayout)">
+        <p>Sorry, there's nothing at this address.</p>
+      </LayoutView>
+    </NotFound>
+  </Router>
+</CascadingAuthenticationState>
 
-@code{
+@code {
 
+  [CascadingParameter]
+  private Task<AuthenticationState> Context { get; set; }
 
 }
+

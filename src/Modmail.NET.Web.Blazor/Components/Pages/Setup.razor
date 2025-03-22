@@ -3,9 +3,8 @@
 @using Modmail.NET.Web.Blazor.Components.Layout
 @inject NavigationManager NavigationManager
 @layout EmptyLayout
-@inject ModmailDbContext DbContext
 @inject ISender Sender
-@inject ModmailBot Bot
+@attribute [Authorize]
 
 @code {
 

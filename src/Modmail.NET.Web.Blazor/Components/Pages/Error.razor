@@ -1,6 +1,7 @@
 ﻿@page "/Error"
 @using System.Diagnostics
-
+@using Modmail.NET.Web.Blazor.Components.Layout
+@layout EmptyLayout
 <PageTitle>Error</PageTitle>
 
 <h1 class="text-danger">Error.</h1>
@@ -28,9 +29,9 @@
 @code{
 
   [CascadingParameter]
-  private HttpContext? HttpContext { get; set; }
+  private HttpContext HttpContext { get; set; }
 
-  private string? RequestId { get; set; }
+  private string RequestId { get; set; }
   private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
   protected override void OnInitialized() {

@@ -1,12 +1,17 @@
 using System.Reflection;
+using System.Security.Claims;
+using AspNet.Security.OAuth.Discord;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
+using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using DSharpPlus.Extensions;
 using FluentValidation;
 using Hangfire;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET;
 using Modmail.NET.Abstract;
@@ -14,6 +19,8 @@ using Modmail.NET.Commands;
 using Modmail.NET.Commands.Slash;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Triggers;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Teams;
 using Modmail.NET.Jobs;
 using Modmail.NET.Language;
 using Modmail.NET.Pipeline;
@@ -21,6 +28,7 @@ using Modmail.NET.Queues;
 using Modmail.NET.Static;
 using Modmail.NET.Utils;
 using Modmail.NET.Web.Blazor.Components;
+using Modmail.NET.Web.Blazor.Providers;
 using Modmail.NET.Web.Blazor.Services;
 using Radzen;
 using Serilog;
@@ -96,6 +104,8 @@ builder.Services.AddRazorComponents()
 #region ASP NET CORE
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddControllers();
 
 #endregion
 
@@ -224,6 +234,98 @@ builder.Services.ConfigureEventHandlers(eventHandlingBuilder => {
 
 #endregion
 
+
+#region AUTH
+
+builder.Services.AddAuthentication(options => {
+         options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+         options.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
+       })
+       .AddCookie(x => {
+         x.LoginPath = "/auth/login";
+         x.LogoutPath = "/auth/logout";
+         x.AccessDeniedPath = "/accessdenied";
+         x.ExpireTimeSpan = TimeSpan.FromDays(1);
+         x.SlidingExpiration = true;
+         x.Cookie.HttpOnly = true; // Prevent client-side access
+         x.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+         x.Cookie.SameSite = SameSiteMode.Lax;
+       })
+       .AddDiscord(options => {
+         options.ClientId = botConfig.GetValue<string>("BotClientId") ?? throw new Exception("BotClientId is empty");
+         options.ClientSecret = botConfig.GetValue<string>("BotClientSecret") ?? throw new Exception("BotClientSecret is empty");
+         options.CallbackPath = "/auth/callback"; // Redirect URI
+         options.SaveTokens = true; // Save tokens for later use
+         options.Scope.Add("identify"); // Fetch user details
+         options.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
+         options.AccessDeniedPath = "/result?m=AccessDenied";
+         options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+         options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+         options.Events.OnCreatingTicket += async context => {
+           if (context.Principal?.Identity?.IsAuthenticated != true) {
+             context.Fail("Invalid Token");
+             return;
+           }
+
+           var identity = (ClaimsIdentity)context.Principal.Identity;
+           identity.AddClaim(new Claim("access_token", context.AccessToken ?? string.Empty));
+           identity.AddClaim(new Claim("refresh_token", context.RefreshToken ?? string.Empty));
+           identity.AddClaim(new Claim("token_type", context.TokenType ?? string.Empty));
+
+           var identifier = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+           if (identifier is null) {
+             context.Fail("Invalid Token");
+             return;
+           }
+
+           var userId = ulong.Parse(identifier);
+
+           var scope = context.HttpContext.RequestServices.CreateScope();
+           var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
+           var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
+           try {
+             var guild = await bot.GetMainGuildAsync();
+             var discordMember = await guild.GetMemberAsync(userId);
+             var roles = discordMember.Roles.Select(x => x.Id).ToList();
+             var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId, roles));
+             if (permission is null) {
+               context.Fail("Not member of any team");
+               return;
+             }
+
+             identity.AddClaim(new Claim(ClaimTypes.Role, permission.ToString() ?? throw new NullReferenceException()));
+             Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, discordMember.DisplayName, permission.ToString());
+             context.Success();
+           }
+           catch (BotExceptionBase ex) {
+             context.Fail(ex.TitleMessage + " : " + ex.ContentMessage);
+           }
+           catch (Exception ex) {
+             context.Fail(ex);
+           }
+         };
+         options.Events.OnRemoteFailure += context => {
+           context.Response.Redirect("/result?m=RemoteAuthFailure");
+           return Task.CompletedTask;
+         };
+         options.Events.OnAccessDenied += context => {
+           context.Response.Redirect("/result?m=AccessDenied");
+           return Task.CompletedTask;
+         };
+       });
+
+
+builder.Services.AddAuthorizationBuilder()
+       .AddPolicy("AdminOnly", policy =>
+                    policy.RequireClaim("Role", "Admin"));
+
+
+builder.Services.AddScoped<AuthenticationStateProvider, DiscordAuthenticationStateProvider>();
+
+#endregion
+
 var app = builder.Build();
 ServiceLocator.Initialize(app.Services);
 
@@ -241,11 +343,17 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.UseHangfireDashboard();
 
+app.MapControllers();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions() {
+  Authorization = [
+    new HangfireAuthorizationProvider(app.Services)
+  ]
+});
 
 app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();

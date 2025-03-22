@@ -8,6 +8,7 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
+@attribute [Authorize]
 
 @code {
   private IQueryable<TicketType>? _data;
