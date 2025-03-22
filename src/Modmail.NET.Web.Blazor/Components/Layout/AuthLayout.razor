@@ -2,6 +2,7 @@
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject DialogService DialogService
 @attribute [Authorize]
 <RadzenComponents @rendermode="InteractiveServer"></RadzenComponents>
 
@@ -18,7 +19,10 @@
       <RadzenColumn Size="7">
         <RadzenStack Wrap="FlexWrap.NoWrap" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
                      AlignItems="AlignItems.Center" Gap="0">
-          <RadzenLink Text="Logout" Path="/auth/logout" class="rz-mx-2 rz-mx-lg-4 rz-mt-3" Icon="logout"></RadzenLink>
+          <RadzenButton Text="Account" class="rz-mx-2 rz-mx-lg-4 rz-mt-2" 
+                        Icon="person"
+                      Click="ShowAccountDialog">
+          </RadzenButton>
         </RadzenStack>
       </RadzenColumn>
     </RadzenRow>
@@ -60,6 +64,17 @@
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;
     _isAuth = state.User.Identity?.IsAuthenticated == true;
+  }
+
+  private async Task ShowAccountDialog() {
+    await DialogService.OpenAsync("Account",
+                                  ds =>
+                                    @<div>
+                                      <AccountDialog></AccountDialog>
+                                    </div>,
+                                  new DialogOptions {
+                                    Width = "450px"
+                                  });
   }
 
 }
