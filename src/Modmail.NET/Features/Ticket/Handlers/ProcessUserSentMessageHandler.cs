@@ -32,7 +32,7 @@ public sealed class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserS
     ticket.LastMessageDateUtc = DateTime.UtcNow;
 
     _dbContext.Update(ticket);
-    var ticketMessage = TicketMessage.MapFrom(ticket.Id, request.Message);
+    var ticketMessage = TicketMessage.MapFrom(ticket.Id, request.Message, sentByMod: false);
 
     _dbContext.Add(ticketMessage);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);

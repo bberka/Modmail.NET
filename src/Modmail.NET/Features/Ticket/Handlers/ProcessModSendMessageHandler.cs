@@ -51,7 +51,7 @@ public sealed class ProcessModSendMessageHandler : IRequestHandler<ProcessModSen
       if (guildOption.IsEnableDiscordChannelLogging)
         if (guildOption.IsSensitiveLogging) {
           //Don't await this task
-          var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message);
+          var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, sentByMod: true);
           await _dbContext.AddAsync(ticketMessage, cancellationToken);
           var affected2 = await _dbContext.SaveChangesAsync(cancellationToken);
           if (affected2 == 0) throw new DbInternalException();
@@ -63,6 +63,6 @@ public sealed class ProcessModSendMessageHandler : IRequestHandler<ProcessModSen
                                                      ticket.Anonymous);
           await logChannel.SendMessageAsync(embed3);
         }
-    });
+    }, cancellationToken);
   }
 }

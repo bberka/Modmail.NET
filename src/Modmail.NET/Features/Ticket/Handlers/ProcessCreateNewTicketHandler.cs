@@ -52,7 +52,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
     var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
 
 
-    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message);
+    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, sentByMod: false);
 
     var ticket = new Entities.Ticket {
       OpenerUserId = request.User.Id,
