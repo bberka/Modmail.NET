@@ -102,6 +102,24 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("LogChannelId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<int>("ManageBlacklistMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageGuildOptionMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageHangfireMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTeamsMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTicketMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageTicketTypeMinAccessLevel")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
