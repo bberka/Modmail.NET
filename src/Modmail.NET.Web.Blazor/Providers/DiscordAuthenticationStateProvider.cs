@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Modmail.NET.Web.Blazor.Providers;
 
-public class DiscordAuthenticationStateProvider : AuthenticationStateProvider
+public sealed class DiscordAuthenticationStateProvider : AuthenticationStateProvider
 {
   private readonly IHttpContextAccessor _httpContextAccessor;
 

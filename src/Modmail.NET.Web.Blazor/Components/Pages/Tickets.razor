@@ -8,14 +8,13 @@
 @inject TooltipService TooltipService
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject ModmailDbContext DbContext
 @inject ISender Sender
-@inject ModmailBot Bot
-@attribute [Authorize]
+@attribute [Authorize(Policy = nameof(AuthPolicy.ManageTickets))]
+
 
 @code {
 
-  private IQueryable<TicketDto>? _data;
+  private IQueryable<TicketDto> _data;
 
   bool _isLoading;
 

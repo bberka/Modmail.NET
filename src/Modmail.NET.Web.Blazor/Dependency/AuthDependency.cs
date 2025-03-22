@@ -1,10 +1,12 @@
 using System.Security.Claims;
 using AspNet.Security.OAuth.Discord;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Web.Blazor.Providers;
+using Modmail.NET.Web.Blazor.Static;
 using Serilog;
 
 namespace Modmail.NET.Web.Blazor.Dependency;
@@ -20,7 +22,7 @@ public static class AuthDependency
            .AddCookie(x => {
              x.LoginPath = "/auth/login";
              x.LogoutPath = "/auth/logout";
-             x.AccessDeniedPath = "/accessdenied";
+             x.AccessDeniedPath = "/forbidden";
              x.ExpireTimeSpan = TimeSpan.FromDays(1);
              x.SlidingExpiration = true;
              x.Cookie.HttpOnly = true; // Prevent client-side access
@@ -92,10 +94,14 @@ public static class AuthDependency
            });
 
 
-    builder.Services.AddAuthorizationBuilder()
-           .AddPolicy("AdminOnly", policy =>
-                        policy.RequireClaim("Role", "Admin"));
+    var authorizationBuilder = builder.Services.AddAuthorizationBuilder();
 
+    foreach (var policy in AuthPolicy.List) {
+      authorizationBuilder.AddPolicy(policy.Name, p => p.Requirements.Add(new TeamPermissionCheckRequirement(policy)));
+    }
+
+
+    builder.Services.AddSingleton<IAuthorizationHandler, TeamPermissionCheckHandler>();
 
     builder.Services.AddScoped<AuthenticationStateProvider, DiscordAuthenticationStateProvider>();
   }

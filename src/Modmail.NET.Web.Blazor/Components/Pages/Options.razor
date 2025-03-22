@@ -1,13 +1,15 @@
 ﻿@page "/options"
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Static
+@using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 @rendermode InteractiveServer
 @inject ModmailDbContext DbContext
 @inject ISender Sender
-@attribute [Authorize]
+@attribute [Authorize(Policy = nameof(AuthPolicy.ManageOptions))]
+
 
 @code {
 

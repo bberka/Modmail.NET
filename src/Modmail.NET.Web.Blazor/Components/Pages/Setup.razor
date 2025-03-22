@@ -1,10 +1,11 @@
 ﻿@page "/setup"
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Web.Blazor.Components.Layout
+@using Modmail.NET.Web.Blazor.Static
 @inject NavigationManager NavigationManager
 @layout EmptyLayout
 @inject ISender Sender
-@attribute [Authorize]
+@attribute [Authorize(Policy = nameof(AuthPolicy.OnlyOwner))]
 
 @code {
 

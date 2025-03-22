@@ -26,7 +26,7 @@ public static class HangfireDependency
   public static void Initialize(WebApplication app) {
     app.UseHangfireDashboard("/hangfire", new DashboardOptions() {
       Authorization = [
-        new HangfireAuthorizationProvider(app.Services)
+        new HangfireAuthorizationProvider()
       ]
     });
     

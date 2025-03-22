@@ -1,15 +1,14 @@
+@page "/forbidden"
+
+
 <div id="blazor-error-ui" class="rz-background-color-base-800">
     <RadzenCard class="rz-shadow-7 max-w-400px rz-mx-auto rz-mt-5">
         <RadzenText TextStyle="TextStyle.DisplayH3" class="rz-color-danger fw-bold">
-            ERROR 500
+            Forbidden
         </RadzenText>
         <RadzenText TextStyle="TextStyle.DisplayH4" class="rz-color-danger rz-my-5">
-            An unhandled error has occurred
+            You are not authorized to view this page
         </RadzenText>
-        <RadzenButton class="reload" ButtonType="ButtonType.Button">
-            <RadzenIcon Icon="refresh"/>
-            Refresh
-        </RadzenButton>
         <a href="/">
             <RadzenButton ButtonType="ButtonType.Button">
                 <RadzenIcon Icon="home"/>
