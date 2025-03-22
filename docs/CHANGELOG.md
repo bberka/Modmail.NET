@@ -19,3 +19,5 @@
 - Implemented SupportOrHigher, ModeratorOrHigher, and other hierarchical policies for flexible role-based access control.
 - Added a simple account view dialog for users to manage their account details.
 - Improved the authorization system to dynamically evaluate permissions from the database while still supporting attribute-based authorization.
+- Fixed a bug when selecting ticket type, message update was not being done correctly
+- Fully fixed avarage response time calculation, only calculates the first responses between mods and user.
