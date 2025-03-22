@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ardalis.SmartEnum" Version="8.2.0" />
+    <PackageReference Include="Ardalis.SmartEnum.EFCore" Version="8.2.0" />
+    <PackageReference Include="Ardalis.SmartEnum.JsonNet" Version="8.1.0" />
+    <PackageReference Include="Ardalis.SmartEnum.ModelBinding" Version="8.2.0" />
+    <PackageReference Include="Ardalis.SmartEnum.SystemTextJson" Version="8.1.0" />
     <PackageReference Include="AspectInjector" Version="2.8.2" />
     <PackageReference Include="CSharpVitamins.ShortGuid" Version="2.0.0" />
     <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02467" />

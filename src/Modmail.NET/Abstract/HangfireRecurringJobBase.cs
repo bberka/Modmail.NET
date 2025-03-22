@@ -16,7 +16,7 @@ public abstract class HangfireRecurringJobBase : IRecurringJobDefinition
   public virtual void RegisterRecurringJob(IRecurringJobManager recurringJobManager) {
     Log.Information("Registering Recurring Job {Id}", Id);
     recurringJobManager.AddOrUpdate(
-                                    Id.ToLowerInvariant(),
+                                    Id,
                                     () => Execute(),
                                     CronExpression
                                    );

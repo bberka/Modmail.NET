@@ -1,13 +1,21 @@
 # v2.0
-- Implemented dependency injection and container for better modularity
-- Removed unused projects, classes, and anti-pattern implementations
-- Refactored service methods to use MediatR for improved maintainability
-- Enhanced logging configuration with a better-configured file
-- Updated documentation to reflect recent changes
-- Removed allowing users to close ticket feature
-- Slash Commands can no longer be used and can not be seen in DMs
-- Removed option to disable some admin slash commands
-- Updated the project to use DSharpPlus v5.x.x-nightly version
-- Refactored the entire bot code to align with the breaking changes and new features introduced in the updated library
-- Improved code structure and ensured compatibility with the latest DSharpPlus API
-- Updated the option page to make labels more descriptive
+- Implemented dependency injection and container for better modularity.
+- Removed unused projects, classes, and anti-pattern implementations.
+- Refactored service methods to use MediatR for improved maintainability.
+- Enhanced logging configuration with a better-configured file.
+- Updated documentation to reflect recent changes.
+- Removed the feature allowing users to close tickets.
+- Slash Commands can no longer be used or seen in DMs.
+- Removed the option to disable some admin slash commands.
+- Updated the project to use DSharpPlus v5.x.x-nightly version.
+- Refactored the entire bot code to align with the breaking changes and new features introduced in the updated library.
+- Improved code structure and ensured compatibility with the latest DSharpPlus API.
+- Updated the option page to make labels more descriptive.
+- Added Discord OAuth2 authentication with cookie-based session management.
+- Configured access token storage in claims for session-based usage.
+- Secured Hangfire Dashboard with custom authorization filter.
+- Introduced policy-based authorization for Dashboard, leveraging ASP.NET Core policies for dynamic and centralized access control.
+- Added support for database-driven dynamic permissions using custom authorization handlers.
+- Implemented SupportOrHigher, ModeratorOrHigher, and other hierarchical policies for flexible role-based access control.
+- Added a simple account view dialog for users to manage their account details.
+- Improved the authorization system to dynamically evaluate permissions from the database while still supporting attribute-based authorization.

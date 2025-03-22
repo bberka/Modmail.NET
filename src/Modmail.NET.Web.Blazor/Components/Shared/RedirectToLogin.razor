@@ -1,0 +1,11 @@
+@using Modmail.NET.Web.Blazor.Components.Layout
+@inject NavigationManager Navigation
+@layout EmptyLayout
+
+@code {
+
+    protected override void OnInitialized() {
+        Navigation.NavigateTo("/auth/login", true); // Redirect to the login page
+    }
+
+}

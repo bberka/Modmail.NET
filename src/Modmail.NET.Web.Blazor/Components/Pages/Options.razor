@@ -1,17 +1,19 @@
 ﻿@page "/options"
 @using Modmail.NET.Features.Guild
+@using Modmail.NET.Static
+@using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
-@inject DialogService DialogService
 @rendermode InteractiveServer
 @inject ModmailDbContext DbContext
 @inject ISender Sender
-@inject ModmailBot Bot
+@attribute [Authorize(Policy = nameof(AuthPolicy.ManageOptions))]
+
 
 @code {
 
-  private GuildOption? _guildOption;
+  private GuildOption _guildOption;
 
   protected override async Task OnInitializedAsync() {
     _guildOption = await Sender.Send(new GetGuildOptionQuery(true));
@@ -77,7 +79,6 @@
         else {
           <RadzenCard class="rz-shadow-7">
             <RadzenTemplateForm TItem="GuildOption" Data=@_guildOption Submit=@SubmitAsync>
-
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="IsEnabled" @bind-Value=@_guildOption.IsEnabled/>
                 <RadzenLabel Component="IsEnabled">
@@ -110,7 +111,7 @@
                   Always create anonymous tickets (won't apply to open tickets)
                 </RadzenLabel>
               </RadzenRow>
-           
+
               @* <RadzenRow class="rz-my-4"> *@
               @*   <RadzenSwitch Name="ShowConfirmationWhenClosingTickets" Disabled="true" @bind-Value=@_guildOption.ShowConfirmationWhenClosingTickets/> *@
               @*   <RadzenLabel Component="ShowConfirmationWhenClosingTickets"> *@
@@ -126,6 +127,108 @@
               <RadzenRow>
                 <small class="text-secondary">
                   The time to wait in hours before a inactive ticket is automatically closed.
+                </small>
+              </RadzenRow>
+
+
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Option Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageGuildOptionMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Option via Web
+                </small>
+              </RadzenRow>
+
+
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Ticket Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageTicketMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Ticket via Web
+                </small>
+              </RadzenRow>
+
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Teams Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageTeamsMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Teams via Web
+                </small>
+              </RadzenRow>
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Blacklist Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageBlacklistMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Blacklist via Web
+                </small>
+              </RadzenRow>
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Ticket Type Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageTicketTypeMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Ticket Type via Web
+                </small>
+              </RadzenRow>
+
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Hangfire Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageHangfireMinAccessLevel"
+                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Hangfire via Web
                 </small>
               </RadzenRow>
 

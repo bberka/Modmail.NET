@@ -49,4 +49,11 @@ public sealed class GuildOption : IHasRegisterDate,
   public DateTime RegisterDateUtc { get; set; }
 
   public DateTime? UpdateDateUtc { get; set; }
+
+  public TeamPermissionLevel ManageGuildOptionMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
+  public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
+  public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
+  public TeamPermissionLevel ManageBlacklistMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
+  public TeamPermissionLevel ManageTicketTypeMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
+  public TeamPermissionLevel ManageHangfireMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
 }
