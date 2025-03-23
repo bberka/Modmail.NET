@@ -43,7 +43,7 @@ public class ModmailBot
 
     Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
     try {
-      await sender.Send(new ProcessGuildSetupCommand(guild));
+      await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
       Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
     }
     catch (MainServerAlreadySetupException ex) {
@@ -132,7 +132,7 @@ public class ModmailBot
       var logChannel = await guild.GetChannelAsync(option.LogChannelId);
 
       if (logChannel == null) {
-        logChannel = await sender.Send(new ProcessCreateLogChannelCommand(guild));
+        logChannel = await sender.Send(new ProcessCreateLogChannelCommand(Client.CurrentUser.Id, guild));
         Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
       }
 

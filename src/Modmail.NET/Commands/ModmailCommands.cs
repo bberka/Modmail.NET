@@ -32,7 +32,7 @@ public class ModmailCommands
     const string logMessage = $"[{nameof(ModmailCommands)}]{nameof(Setup)}({{ContextUserId}})";
 
     try {
-      await _sender.Send(new ProcessGuildSetupCommand(ctx.Guild));
+      await _sender.Send(new ProcessGuildSetupCommand(ctx.User.Id, ctx.Guild));
       await ctx.RespondAsync(Embeds.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id);

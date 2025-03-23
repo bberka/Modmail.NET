@@ -36,7 +36,7 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
       TicketTimeoutHours = Const.DefaultTicketTimeoutHours
     };
 
-    await _sender.Send(new ClearGuildOptionCommand(), cancellationToken);
+    await _sender.Send(new ClearGuildOptionCommand(request.AuthorizedUserId), cancellationToken);
     _dbContext.Add(guildOption);
     await _dbContext.SaveChangesAsync(cancellationToken);
     return guildOption;
