@@ -33,3 +33,8 @@
 - Refactored `IPermissionCheck` interface and `PermissionCheckAttribute` for better integration with the pipeline.
 - Added extension methods to simplify permission validation and improve code reusability.
 - Centralized authorization logic in the pipeline for improved logging and data collection.
+- Implemented web panel access control, allowing only users directly added to teams to access the panel.
+- Discord role members, even if roles are added to teams, will not have panel access unless explicitly added as team members.
+- Adjusted `GetTeamPermissionLevelHandler.cs` to make `roleList` nullable, enabling calls without passing a role list.
+- Updated team management methods and UI to reflect the new access control logic.
+- Ensured teams with `Owner` permission level always have access to the web panel.

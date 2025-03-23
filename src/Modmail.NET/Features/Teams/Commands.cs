@@ -17,12 +17,16 @@ public sealed record ProcessUpdateTeamCommand(
   TeamPermissionLevel? PermissionLevel,
   bool? PingOnNewTicket,
   bool? PingOnTicketMessage,
-  bool? IsEnabled) : IRequest;
+  bool? IsEnabled,
+  bool? AllowAccessToWebPanel
+  ) : IRequest;
 
 public sealed record ProcessCreateTeamCommand(
   string TeamName,
   TeamPermissionLevel PermissionLevel,
   bool PingOnNewTicket = false,
-  bool PingOnTicketMessage = false) : IRequest<GuildTeam>;
+  bool PingOnTicketMessage = false,
+  bool AllowAccessToWebPanel = false
+  ) : IRequest<GuildTeam>;
 
 public sealed record ProcessAddRoleToTeamCommand(Guid Id, DiscordRole Role) : IRequest;

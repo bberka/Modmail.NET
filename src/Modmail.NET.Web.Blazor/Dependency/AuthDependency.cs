@@ -45,7 +45,8 @@ public static class AuthDependency
              x.SaveTokens = true; // Save tokens for later use
              x.Scope.Add("identify"); // Fetch user details
              x.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
-             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;;
+             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;
+             ;
              x.CorrelationCookie.SameSite = SameSiteMode.Lax;
              x.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
              x.Events.OnCreatingTicket += async context => {
@@ -72,10 +73,7 @@ public static class AuthDependency
                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
                var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
                try {
-                 var guild = await bot.GetMainGuildAsync();
-                 var discordMember = await guild.GetMemberAsync(userId);
-                 var roles = discordMember.Roles.Select(y => y.Id).ToArray();
-                 var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId, roles));
+                 var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId));
                  if (permission is null) {
                    Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId}", userId);
                    context.Fail("Not member of any team");
@@ -83,7 +81,7 @@ public static class AuthDependency
                  }
 
                  identity.AddClaim(new Claim(ClaimTypes.Role, permission.ToString() ?? throw new NullReferenceException()));
-                 Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, discordMember.Username, permission.ToString());
+                 Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, context.Principal.FindFirst(ClaimTypes.Name), permission.ToString());
                  context.Success();
                }
                catch (BotExceptionBase ex) {
@@ -100,7 +98,7 @@ public static class AuthDependency
                return Task.CompletedTask;
              };
              x.Events.OnAccessDenied += context => {
-               context.Response.Redirect("/result/" +  LangKeys.ERROR_ACCESS_DENIED);
+               context.Response.Redirect("/result/" + LangKeys.ERROR_ACCESS_DENIED);
                return Task.CompletedTask;
              };
            });

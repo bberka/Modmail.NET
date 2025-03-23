@@ -33,7 +33,8 @@ public sealed class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeam
       Id = Guid.NewGuid(),
       PermissionLevel = request.PermissionLevel,
       PingOnNewMessage = request.PingOnTicketMessage,
-      PingOnNewTicket = request.PingOnNewTicket
+      PingOnNewTicket = request.PingOnNewTicket,
+      AllowAccessToWebPanel = request.AllowAccessToWebPanel
     };
 
     _dbContext.Add(team);

@@ -139,6 +139,9 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AllowAccessToWebPanel")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 

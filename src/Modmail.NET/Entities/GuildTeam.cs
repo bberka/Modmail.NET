@@ -17,7 +17,8 @@ public sealed class GuildTeam : IHasRegisterDate,
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
-
+  
+  public bool AllowAccessToWebPanel { get; set; } = false;
   //FK
   public List<GuildTeamMember> GuildTeamMembers { get; set; } = [];
   public DateTime RegisterDateUtc { get; set; }

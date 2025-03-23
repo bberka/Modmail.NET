@@ -20,16 +20,19 @@ public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeam
   }
 
   public async Task Handle(ProcessUpdateTeamCommand request, CancellationToken cancellationToken) {
-    var oldPermissionLevel = request.PermissionLevel;
-    var oldPingOnNewTicket = request.PingOnNewTicket;
-    var oldPingOnNewMessage = request.PingOnTicketMessage;
-    var oldIsEnabled = request.IsEnabled;
+
 
     var anyChanges = request.PermissionLevel.HasValue || request.PingOnNewTicket.HasValue || request.PingOnTicketMessage.HasValue;
     if (!anyChanges) return;
 
     var team = await _sender.Send(new GetTeamByNameQuery(request.TeamName), cancellationToken);
 
+    var oldPermissionLevel = team.PermissionLevel;
+    var oldPingOnNewTicket = team.PingOnNewTicket;
+    var oldPingOnNewMessage = team.PingOnNewMessage;
+    var oldIsEnabled = team.IsEnabled;
+    var oldAllowAccessToWebPanel = team.AllowAccessToWebPanel;
+    
     if (request.PermissionLevel.HasValue) team.PermissionLevel = request.PermissionLevel.Value;
 
     if (request.PingOnNewTicket.HasValue) team.PingOnNewTicket = request.PingOnNewTicket.Value;
@@ -37,6 +40,8 @@ public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeam
     if (request.PingOnTicketMessage.HasValue) team.PingOnNewMessage = request.PingOnTicketMessage.Value;
 
     if (request.IsEnabled.HasValue) team.IsEnabled = request.IsEnabled.Value;
+    
+    if (request.AllowAccessToWebPanel.HasValue) team.AllowAccessToWebPanel = request.AllowAccessToWebPanel.Value;
 
 
     _dbContext.Update(team);
@@ -47,10 +52,10 @@ public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeam
       var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
       if (guildOption.IsEnableDiscordChannelLogging) {
         var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel.Value,
-                                                                   oldPingOnNewTicket.Value,
-                                                                   oldPingOnNewMessage.Value,
-                                                                   oldIsEnabled.Value,
+        await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel,
+                                                                   oldPingOnNewTicket,
+                                                                   oldPingOnNewMessage,
+                                                                   oldIsEnabled,
                                                                    team.PermissionLevel,
                                                                    team.PingOnNewTicket,
                                                                    team.PingOnNewMessage,

@@ -32,10 +32,7 @@ public sealed class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipe
       return await next();
     }
 
-    var guild = await _bot.GetMainGuildAsync();
-    var member = await guild.GetMemberAsync(request.AuthorizedUserId);
-    var roleList = member.Roles.Select(x => x.Id).ToArray();
-    var permission = await _sender.Send(new GetTeamPermissionLevelQuery(request.AuthorizedUserId, roleList), cancellationToken);
+    var permission = await _sender.Send(new GetTeamPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
     if (permission is null) {
       throw new UnauthorizedAccessException();
     }

@@ -26,9 +26,12 @@ public sealed class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermi
     if (_options.Value.OwnerUsers.Contains(request.UserId)) {
       return TeamPermissionLevel.Owner;
     }
+
+
     var teamMember = await _dbContext.GuildTeamMembers
                                      .Include(x => x.GuildTeam)
-                                     .Where(x => (x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key)) || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
+                                     .Where(x => (request.RoleIdList != null && x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key)) 
+                                                 || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
                                      .OrderByDescending(x => x.GuildTeam!.PermissionLevel)
                                      .FirstOrDefaultAsync(cancellationToken);
     return teamMember?.GuildTeam?.PermissionLevel;
