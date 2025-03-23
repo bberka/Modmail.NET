@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Database;
 
-namespace Modmail.NET.Features.Teams.Handlers;
+namespace Modmail.NET.Features.Permission.Handler;
 
-public class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermissionLevelQuery, TeamPermissionLevel?>
+public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery, TeamPermissionLevel?>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly IOptions<BotConfig> _options;
   private readonly ISender _sender;
 
-  public GetTeamPermissionLevelHandler(ModmailDbContext dbContext,
+  public GetPermissionLevelHandler(ModmailDbContext dbContext,
                                        ModmailBot bot,
                                        IOptions<BotConfig> options,
                                        ISender sender) {
@@ -22,7 +22,7 @@ public class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermissionLe
     _sender = sender;
   }
 
-  public async Task<TeamPermissionLevel?> Handle(GetTeamPermissionLevelQuery request, CancellationToken cancellationToken) {
+  public async Task<TeamPermissionLevel?> Handle(GetPermissionLevelQuery request, CancellationToken cancellationToken) {
     if (_options.Value.OwnerUsers.Contains(request.UserId)) return TeamPermissionLevel.Owner;
 
 

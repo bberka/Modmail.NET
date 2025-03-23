@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Jobs;
@@ -37,7 +38,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 
     var ticketId = Guid.NewGuid();
 
-    var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
+    var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
     var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
     var roles = guild.Roles;
 

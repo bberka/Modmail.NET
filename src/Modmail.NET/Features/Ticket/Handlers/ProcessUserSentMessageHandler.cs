@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -42,7 +43,7 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
     _ = Task.Run(async () => {
       var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (mailChannel is not null) {
-        var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
+        var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
         await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, permissions));
       }
 

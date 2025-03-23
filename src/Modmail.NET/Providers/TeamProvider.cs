@@ -20,7 +20,8 @@ public class TeamProvider : IAutoCompleteProvider
     async Task<IEnumerable<DiscordAutoCompleteChoice>> Get(ICacheEntry cacheEntry) {
       var scope = context.ServiceProvider.CreateScope();
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-      var teamsDbList = await sender.Send(new GetTeamListQuery());
+      var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
+      var teamsDbList = await sender.Send(new GetTeamListQuery(bot.Client.CurrentUser.Id));
       var teams = teamsDbList.Select(x => new DiscordAutoCompleteChoice(x.Name, x.Name));
       return await Task.FromResult(teams.AsEnumerable());
     }

@@ -20,7 +20,7 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
   }
 
   public async Task<GuildTeam> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
-    var exists = await _sender.Send(new CheckTeamExistsQuery(request.TeamName), cancellationToken);
+    var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId,request.TeamName), cancellationToken);
     if (exists) throw new TeamAlreadyExistsException();
 
     var team = new GuildTeam {

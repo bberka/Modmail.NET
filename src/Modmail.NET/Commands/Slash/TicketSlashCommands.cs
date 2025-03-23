@@ -9,6 +9,7 @@ using Modmail.NET.Aspects;
 using Modmail.NET.Checks.Attributes;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.TicketType;

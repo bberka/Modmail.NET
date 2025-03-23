@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Checks.Attributes;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Checks;
@@ -32,7 +33,7 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     var roleIdList = context.Member.Roles.Select(x => x.Id).ToArray();
-    var permLevel = await sender.Send(new GetTeamPermissionLevelQuery(context.User.Id, roleIdList));
+    var permLevel = await sender.Send(new GetPermissionLevelQuery(context.User.Id, roleIdList));
     if (permLevel is null) return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
 
     var permLevelInt = (int)permLevel;

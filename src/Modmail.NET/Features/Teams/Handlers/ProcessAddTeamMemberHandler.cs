@@ -2,6 +2,7 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Permission;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -24,7 +25,7 @@ public class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeamMemberC
     if (isUserAlreadyInTeam) throw new MemberAlreadyInTeamException();
 
 
-    var team = await _sender.Send(new GetTeamQuery(request.Id), cancellationToken);
+    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId,request.Id), cancellationToken);
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = team.Id,

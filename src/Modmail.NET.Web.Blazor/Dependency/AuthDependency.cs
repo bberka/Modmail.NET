@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Modmail.NET.Abstract;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Language;
 using Modmail.NET.Static;
@@ -70,7 +71,7 @@ public static class AuthDependency
                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
                var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
                try {
-                 var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId));
+                 var permission = await sender.Send(new GetPermissionLevelQuery(userId));
                  if (permission is null) {
                    Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId}", userId);
                    context.Fail("Not member of any team");

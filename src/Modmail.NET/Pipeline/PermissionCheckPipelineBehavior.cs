@@ -4,6 +4,7 @@ using Modmail.NET.Abstract;
 using Modmail.NET.Attributes;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Pipeline;
@@ -28,7 +29,7 @@ public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBeh
 
     if (_bot.Client.CurrentUser.Id == request.AuthorizedUserId) return await next();
 
-    var permission = await _sender.Send(new GetTeamPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
+    var permission = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
     if (permission is null) throw new UnauthorizedAccessException();
 
     var option = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);

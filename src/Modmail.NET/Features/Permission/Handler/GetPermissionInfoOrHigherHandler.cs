@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Models;
 
-namespace Modmail.NET.Features.Teams.Handlers;
+namespace Modmail.NET.Features.Permission.Handler;
 
 public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
 {

@@ -19,7 +19,7 @@ public class ProcessRenameTeamHandler : IRequestHandler<ProcessRenameTeamCommand
   }
 
   public async Task Handle(ProcessRenameTeamCommand request, CancellationToken cancellationToken) {
-    var team = await _sender.Send(new GetTeamQuery(request.Id), cancellationToken);
+    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId,request.Id), cancellationToken);
     team.Name = request.NewName;
     _dbContext.Update(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
