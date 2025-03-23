@@ -1,6 +1,6 @@
 using Ardalis.SmartEnum;
 
-namespace Modmail.NET.Web.Blazor.Static;
+namespace Modmail.NET.Static;
 
 /// <summary>
 /// AuthPolicy smart enum 

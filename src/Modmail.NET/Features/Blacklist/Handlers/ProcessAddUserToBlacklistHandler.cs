@@ -23,9 +23,6 @@ public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAd
   }
 
   public async Task<TicketBlacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken) {
-    var modId = request.ModId == 0
-                  ? _bot.Client.CurrentUser.Id
-                  : request.ModId;
     var activeTicket = await _sender.Send(new GetTicketByUserIdQuery(request.UserId, true, true), cancellationToken);
     if (activeTicket is not null)
       await _sender.Send(new ProcessCloseTicketCommand(activeTicket.Id,
@@ -34,7 +31,7 @@ public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAd
                                                        DontSendFeedbackMessage: true),
                          cancellationToken);
 
-    var activeBlock = await _sender.Send(new CheckUserBlacklistStatusQuery(request.UserId), cancellationToken);
+    var activeBlock = await _sender.Send(new CheckUserBlacklistStatusQuery(request.AuthorizedUserId, request.UserId), cancellationToken);
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
     var reason = string.IsNullOrEmpty(request.Reason)
@@ -55,7 +52,7 @@ public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAd
 
     _ = Task.Run(async () => {
       var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
-      var modUser = await _sender.Send(new GetDiscordUserInfoQuery(modId), cancellationToken);
+      var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
 
       var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
       if (guildOption.IsEnableDiscordChannelLogging) {

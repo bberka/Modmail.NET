@@ -34,7 +34,7 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
 
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
-    var roleIdList = context.Member.Roles.Select(x => x.Id).ToList();
+    var roleIdList = context.Member.Roles.Select(x => x.Id).ToArray();
     var permLevel = await sender.Send(new GetTeamPermissionLevelQuery(context.User.Id, roleIdList));
     if (permLevel is null) {
       return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());

@@ -29,3 +29,7 @@
 - Fixed authorization logic to properly handle failed authentication states.
 - Added a new error message for unauthorized access.
 - Enhanced the result page with new buttons for authorized users.
+- Introduced a MediatR pipeline behavior to enforce `AuthorizedUserId` checks dynamically for commands and queries.
+- Refactored `IPermissionCheck` interface and `PermissionCheckAttribute` for better integration with the pipeline.
+- Added extension methods to simplify permission validation and improve code reusability.
+- Centralized authorization logic in the pipeline for improved logging and data collection.

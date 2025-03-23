@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
+using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
@@ -13,7 +14,7 @@ public sealed class CheckUserBlacklistStatusHandler : IRequestHandler<CheckUserB
   }
 
   public async Task<bool> Handle(CheckUserBlacklistStatusQuery request, CancellationToken cancellationToken) {
-    if (request.DiscordUserId == 0) throw new ArgumentException();
+    if (request.DiscordUserId <= 0) throw new InvalidUserIdException();
     return await _dbContext.TicketBlacklists.AnyAsync(x => x.DiscordUserId == request.DiscordUserId, cancellationToken);
   }
 }

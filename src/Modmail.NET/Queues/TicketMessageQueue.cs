@@ -38,9 +38,10 @@ public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDt
       return;
     var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
 
     try {
-      if (await sender.Send(new CheckUserBlacklistStatusQuery(user.Id))) {
+      if (await sender.Send(new CheckUserBlacklistStatusQuery(bot.Client.CurrentUser.Id,user.Id))) {
         await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
         return;
       }

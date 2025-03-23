@@ -1,6 +1,7 @@
 ﻿@page "/blacklist"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.Blacklist
+@using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.Blacklist
 @using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
@@ -10,10 +11,15 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
+@inject ModmailBot Bot
+
 @attribute [AuthorizeTeam(nameof(AuthPolicy.ManageBlacklist))]
 
 @code {
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   private IQueryable<TicketBlacklist> _data;
 
   bool _isLoading;
@@ -65,6 +71,7 @@
   private int _count;
 
   private async Task RemoveAsync(TicketBlacklist blacklist) {
+    
     var dialogResult = await DialogService.Confirm("Are you sure you want to remove this user from the blacklist?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
@@ -76,12 +83,13 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(Blacklist)}]{nameof(RemoveAsync)}{{UserId}})";
       try {
-        await Sender.Send(new ProcessRemoveUserFromBlacklistCommand(blacklist.DiscordUserId));
+        var state = await AuthContext;
+        var discordUserId = state.User.GetUserId();
+        await Sender.Send(new ProcessRemoveUserFromBlacklistCommand(discordUserId, blacklist.DiscordUserId));
         Log.Information(logMessage,
                         blacklist.DiscordUserId);
         NotificationService.Notify(NotificationSeverity.Success,
                                    "User removed from blacklist");
-
         await ReloadDataAsync();
       }
       catch (BotExceptionBase ex) {

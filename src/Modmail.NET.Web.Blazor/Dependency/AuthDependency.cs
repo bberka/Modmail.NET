@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Language;
+using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Providers;
 using Modmail.NET.Web.Blazor.Static;
 using Serilog;
@@ -73,7 +74,7 @@ public static class AuthDependency
                try {
                  var guild = await bot.GetMainGuildAsync();
                  var discordMember = await guild.GetMemberAsync(userId);
-                 var roles = discordMember.Roles.Select(y => y.Id).ToList();
+                 var roles = discordMember.Roles.Select(y => y.Id).ToArray();
                  var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId, roles));
                  if (permission is null) {
                    Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId}", userId);
