@@ -1,32 +1,53 @@
-@page "/result"
+@page "/result/{Message}"
+@using Modmail.NET.Language
 @using Modmail.NET.Web.Blazor.Components.Layout
 @inject NavigationManager Navigation
 @layout EmptyLayout
+
 <div class="container">
     <RadzenRow>
-        <RadzenColumn >
+        <RadzenColumn>
             <RadzenStack JustifyContent="JustifyContent.Center">
-                <RadzenAlert Style="margin-top: 10px;">
-                    @_errorMessage
+                <RadzenAlert Style="margin-top: 10px;" AlertStyle="AlertStyle.Secondary" AllowClose="false">
+                    @Message
                 </RadzenAlert>
+
+                @if (_showLogoutButton) {
+                    <RadzenRow>
+                        <RadzenColumn>
+                            <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="Logout">
+                                Logout
+                            </RadzenButton>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
             </RadzenStack>
         </RadzenColumn>
     </RadzenRow>
 </div>
 
 @code {
-    private string _errorMessage = string.Empty;
 
-    protected override void OnInitialized() {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthContext { get; set; }
 
-        if (query.TryGetValue("m", out var msg)) {
-            _errorMessage = msg;
+    private bool _showLogoutButton = false;
+
+    [Parameter]
+    public string Message { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        if (Enum.TryParse<LangKeys>(Message, out var langKeys)) {
+            Message = langKeys.GetTranslation();
         }
-        else {
-            Navigation.NavigateTo("/",true);
-        }
+
+        var state = await AuthContext;
+        _showLogoutButton = state.User.Identity?.IsAuthenticated == true;
     }
+
+    private void Logout() {
+        Navigation.NavigateTo("auth/logout", true);
+    }
+
 
 }

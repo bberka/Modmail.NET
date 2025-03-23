@@ -1,17 +1,18 @@
 ﻿@page "/setup"
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Web.Blazor.Components.Layout
+@using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
 @inject NavigationManager NavigationManager
 @layout EmptyLayout
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.OnlyOwner))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.Owner))]
 
 @code {
 
   protected override async Task OnInitializedAsync() {
     if (await Sender.Send(new AnyGuildSetupQuery())) {
-      NavigationManager.NavigateTo("/");
+      NavigationManager.NavigateTo("/dashboard");
     }
   }
 

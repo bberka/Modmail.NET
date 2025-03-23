@@ -16,7 +16,7 @@ ValidatorDependency.Configure(builder);
 AuthDependency.Configure(builder);
 
 var app = builder.Build();
-
+await BusinessDependency.InitializeDatabaseAsync(app);
 ServiceLocator.Initialize(app.Services);
 
 #region DEV
@@ -46,6 +46,5 @@ app.MapRazorComponents<App>()
 
 
 
-BusinessDependency.Initialize(app);
 Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetReadableProductVersion());
 app.Run();

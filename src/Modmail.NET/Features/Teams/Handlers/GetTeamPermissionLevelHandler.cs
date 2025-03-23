@@ -31,6 +31,6 @@ public sealed class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermi
                                      .Where(x => (x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key)) || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
                                      .OrderByDescending(x => x.GuildTeam!.PermissionLevel)
                                      .FirstOrDefaultAsync(cancellationToken);
-    return teamMember?.GuildTeam.PermissionLevel;
+    return teamMember?.GuildTeam?.PermissionLevel;
   }
 }

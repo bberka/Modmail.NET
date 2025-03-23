@@ -15,10 +15,10 @@ public sealed class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermis
   }
 
   private static readonly IReadOnlyDictionary<AuthPolicy, TeamPermissionLevel> PolicyMap = new Dictionary<AuthPolicy, TeamPermissionLevel>() {
-    { AuthPolicy.OnlySupport, TeamPermissionLevel.Support },
-    { AuthPolicy.OnlyModerator, TeamPermissionLevel.Moderator },
-    { AuthPolicy.OnlyAdmin, TeamPermissionLevel.Admin },
-    { AuthPolicy.OnlyOwner, TeamPermissionLevel.Owner },
+    { AuthPolicy.Support, TeamPermissionLevel.Support },
+    { AuthPolicy.Moderator, TeamPermissionLevel.Moderator },
+    { AuthPolicy.Admin, TeamPermissionLevel.Admin },
+    { AuthPolicy.Owner, TeamPermissionLevel.Owner },
   };
 
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamPermissionCheckRequirement req) {

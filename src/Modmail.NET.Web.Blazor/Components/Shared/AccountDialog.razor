@@ -1,7 +1,7 @@
 @using System.Security.Claims
+@using Modmail.NET.Language
 @using Modmail.NET.Static
 @inject NavigationManager NavigationManager
-@attribute [Authorize]
 
 @code {
 
@@ -18,7 +18,13 @@
     var auth = await AuthContext;
     _userId = ulong.Parse(auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
     _username = auth.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-    _role = Enum.Parse<TeamPermissionLevel>(auth.User.FindFirst(ClaimTypes.Role)?.Value!);
+    var roleStr = auth.User.FindFirst(ClaimTypes.Role)?.Value;
+    if (string.IsNullOrEmpty(roleStr)) {
+      NavigationManager.NavigateTo("result/" + LangKeys.ERROR_ROLE_IS_NULL);
+      return;
+    }
+
+    _role = Enum.Parse<TeamPermissionLevel>(roleStr);
     _isLoading = false;
   }
 
@@ -31,52 +37,49 @@
 
 
 <RadzenRow>
-  <RadzenColumn Size="12" >
-      @if (_isLoading) {
-        <Loading></Loading>
-      }
-      else {
-
-        <RadzenRow class="rz-my-4">
-          <RadzenColumn>
-            <RadzenLabel>Discord User Id</RadzenLabel>
-          </RadzenColumn>
-          <RadzenColumn>
-            @_userId.ToString()
-          </RadzenColumn>
-        </RadzenRow>
-        
-        
-        <RadzenRow class="rz-my-4">
-          <RadzenColumn>
-            <RadzenLabel>Discord Username</RadzenLabel>
-          </RadzenColumn>
-          <RadzenColumn>
-            @_username
-          </RadzenColumn>
-        </RadzenRow>
-        
-        
-        <RadzenRow class="rz-my-4">
-          <RadzenColumn>
-            <RadzenLabel>Team Permission Level</RadzenLabel>
-          </RadzenColumn>
-          <RadzenColumn>
-            @_role.ToString()
-          </RadzenColumn>
-        </RadzenRow>
-
-       
-          <RadzenRow class="rz-my-4 rz-pt-4">
-            <RadzenButton ButtonType="ButtonType.Button"
-                          Text="Logout"
-                          Icon="logout"
-                          Click="ClickLogout"
-                          ButtonStyle="ButtonStyle.Secondary"/>
-          </RadzenRow>
+  <RadzenColumn Size="12">
+    @if (_isLoading) {
+      <Loading></Loading>
+    }
+    else {
+      <RadzenRow class="rz-my-4">
+        <RadzenColumn>
+          <RadzenLabel>Discord User Id</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn>
+          @_userId.ToString()
+        </RadzenColumn>
+      </RadzenRow>
 
 
-      }
+      <RadzenRow class="rz-my-4">
+        <RadzenColumn>
+          <RadzenLabel>Discord Username</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn>
+          @_username
+        </RadzenColumn>
+      </RadzenRow>
+
+
+      <RadzenRow class="rz-my-4">
+        <RadzenColumn>
+          <RadzenLabel>Team Permission Level</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn>
+          @_role.ToString()
+        </RadzenColumn>
+      </RadzenRow>
+
+
+      <RadzenRow class="rz-my-4 rz-pt-4">
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Text="Logout"
+                      Icon="logout"
+                      Click="ClickLogout"
+                      ButtonStyle="ButtonStyle.Warning"/>
+      </RadzenRow>
+    }
 
   </RadzenColumn>
 </RadzenRow>

@@ -1,8 +1,9 @@
 ﻿@using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Modmail.NET.Web.Blazor.Providers
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
-@attribute [Authorize]
+@attribute [AuthorizeTeam]
 <RadzenComponents @rendermode="InteractiveServer"></RadzenComponents>
 
 <RadzenLayout>
@@ -30,7 +31,7 @@
   </RadzenHeader>
   <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
-      <RadzenPanelMenuItem Text="Home" Icon="home" Path="/"/>
+      <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard"/>
       <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
       <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
       <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>

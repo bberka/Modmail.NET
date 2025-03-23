@@ -1,10 +1,12 @@
 using System.Security.Claims;
 using AspNet.Security.OAuth.Discord;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Teams;
+using Modmail.NET.Language;
 using Modmail.NET.Web.Blazor.Providers;
 using Modmail.NET.Web.Blazor.Static;
 using Serilog;
@@ -22,24 +24,31 @@ public static class AuthDependency
            .AddCookie(x => {
              x.LoginPath = "/auth/login";
              x.LogoutPath = "/auth/logout";
-             x.AccessDeniedPath = "/forbidden";
+             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;
              x.ExpireTimeSpan = TimeSpan.FromDays(1);
              x.SlidingExpiration = true;
-             x.Cookie.HttpOnly = true; // Prevent client-side access
+             x.Cookie.HttpOnly = true;
              x.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+             x.Cookie.Name = "auth_cookie";
              x.Cookie.SameSite = SameSiteMode.Lax;
+             x.Events.OnSigningIn = async context => {
+               if (context.Principal == null || context.Principal.Identity?.IsAuthenticated != true) {
+                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+               }
+             };
            })
-           .AddDiscord(options => {
-             options.ClientId = builder.Configuration.GetValue<string>("Bot:BotClientId") ?? throw new Exception("BotClientId is empty");
-             options.ClientSecret = builder.Configuration.GetValue<string>("Bot:BotClientSecret") ?? throw new Exception("BotClientSecret is empty");
-             options.CallbackPath = "/auth/callback"; // Redirect URI
-             options.SaveTokens = true; // Save tokens for later use
-             options.Scope.Add("identify"); // Fetch user details
-             options.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
-             options.AccessDeniedPath = "/result?m=AccessDenied";
-             options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-             options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-             options.Events.OnCreatingTicket += async context => {
+           .AddDiscord(x => {
+             x.ClientId = builder.Configuration.GetValue<string>("Bot:BotClientId") ?? throw new Exception("BotClientId is empty");
+             x.ClientSecret = builder.Configuration.GetValue<string>("Bot:BotClientSecret") ?? throw new Exception("BotClientSecret is empty");
+             x.CallbackPath = "/auth/callback"; // Redirect URI
+             x.SaveTokens = true; // Save tokens for later use
+             x.Scope.Add("identify"); // Fetch user details
+             x.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
+             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;;
+             x.CorrelationCookie.SameSite = SameSiteMode.Lax;
+             x.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+             x.Events.OnCreatingTicket += async context => {
+               context.Properties.RedirectUri = "/dashboard";
                if (context.Principal?.Identity?.IsAuthenticated != true) {
                  context.Fail("Invalid Token");
                  return;
@@ -52,43 +61,45 @@ public static class AuthDependency
 
                var identifier = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                if (identifier is null) {
+                 Log.Warning("Discord.OAuth failed, UserIdentity is null");
                  context.Fail("Invalid Token");
                  return;
                }
 
                var userId = ulong.Parse(identifier);
-
                var scope = context.HttpContext.RequestServices.CreateScope();
                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-
                var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
                try {
                  var guild = await bot.GetMainGuildAsync();
                  var discordMember = await guild.GetMemberAsync(userId);
-                 var roles = discordMember.Roles.Select(x => x.Id).ToList();
+                 var roles = discordMember.Roles.Select(y => y.Id).ToList();
                  var permission = await sender.Send(new GetTeamPermissionLevelQuery(userId, roles));
                  if (permission is null) {
+                   Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId}", userId);
                    context.Fail("Not member of any team");
                    return;
                  }
 
                  identity.AddClaim(new Claim(ClaimTypes.Role, permission.ToString() ?? throw new NullReferenceException()));
-                 Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, discordMember.DisplayName, permission.ToString());
+                 Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, discordMember.Username, permission.ToString());
                  context.Success();
                }
                catch (BotExceptionBase ex) {
+                 Log.Warning(ex, "Discord.OAuth Access failed {UserId}", userId);
                  context.Fail(ex.TitleMessage + " : " + ex.ContentMessage);
                }
                catch (Exception ex) {
+                 Log.Warning(ex, "Discord.OAuth Access exception occurred {UserId}", userId);
                  context.Fail(ex);
                }
              };
-             options.Events.OnRemoteFailure += context => {
-               context.Response.Redirect("/result?m=RemoteAuthFailure");
+             x.Events.OnRemoteFailure += context => {
+               context.Response.Redirect("/result/" + LangKeys.ERROR_AUTH_REMOTE_FAIL);
                return Task.CompletedTask;
              };
-             options.Events.OnAccessDenied += context => {
-               context.Response.Redirect("/result?m=AccessDenied");
+             x.Events.OnAccessDenied += context => {
+               context.Response.Redirect("/result/" +  LangKeys.ERROR_ACCESS_DENIED);
                return Task.CompletedTask;
              };
            });

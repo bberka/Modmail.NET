@@ -2,6 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.TicketType
 @using Modmail.NET.Web.Blazor.Components.Shared.TicketType
+@using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -9,7 +10,7 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.ManageTicketTypes))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTicketTypes))]
 
 
 @code {

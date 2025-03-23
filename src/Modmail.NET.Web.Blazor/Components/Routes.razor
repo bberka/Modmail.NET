@@ -1,4 +1,5 @@
-﻿@using Modmail.NET.Web.Blazor.Components.Layout
+﻿@using Modmail.NET.Language
+@using Modmail.NET.Web.Blazor.Components.Layout
 <CascadingAuthenticationState>
   <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
@@ -8,14 +9,18 @@
             <RedirectToLogin/>
           }
           else {
-            <p>You are not authorized to access this page.</p>
+            <RadzenText TextStyle="TextStyle.Subtitle1">
+              @LangKeys.ERROR_AUTH_FORBIDDEN.GetTranslation()
+            </RadzenText>
           }
         </NotAuthorized>
       </AuthorizeRouteView>
     </Found>
     <NotFound>
       <LayoutView Layout="@typeof(AuthLayout)">
-        <p>Sorry, there's nothing at this address.</p>
+        <RadzenText TextStyle="TextStyle.Subtitle1">
+          @LangKeys.ERROR_NOT_FOUND.GetTranslation()
+        </RadzenText>
       </LayoutView>
     </NotFound>
   </Router>

@@ -8,10 +8,10 @@ namespace Modmail.NET.Web.Blazor.Static;
 public sealed class AuthPolicy : SmartEnum<AuthPolicy>
 {
   private AuthPolicy(string name, int value) : base(name, value) { }
-  public static readonly AuthPolicy OnlySupport = new(nameof(OnlySupport), 1);
-  public static readonly AuthPolicy OnlyModerator = new(nameof(OnlyModerator), 2);
-  public static readonly AuthPolicy OnlyAdmin = new(nameof(OnlyAdmin), 3);
-  public static readonly AuthPolicy OnlyOwner = new(nameof(OnlyOwner), 4);
+  public static readonly AuthPolicy Support = new(nameof(Support), 1);
+  public static readonly AuthPolicy Moderator = new(nameof(Moderator), 2);
+  public static readonly AuthPolicy Admin = new(nameof(Admin), 3);
+  public static readonly AuthPolicy Owner = new(nameof(Owner), 4);
   public static readonly AuthPolicy ManageOptions = new(nameof(ManageOptions), 5);
   public static readonly AuthPolicy ManageTickets = new(nameof(ManageTickets), 6);
   public static readonly AuthPolicy ManageTicketTypes = new(nameof(ManageTicketTypes), 7);
