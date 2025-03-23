@@ -38,3 +38,4 @@
 - Adjusted `GetTeamPermissionLevelHandler.cs` to make `roleList` nullable, enabling calls without passing a role list.
 - Updated team management methods and UI to reflect the new access control logic.
 - Ensured teams with `Owner` permission level always have access to the web panel.
+- Implemented auto setup on server startup if bot is added to main server
