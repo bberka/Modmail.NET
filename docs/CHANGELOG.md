@@ -40,3 +40,6 @@
 - Ensured teams with `Owner` permission level always have access to the web panel.
 - Implemented auto setup on server startup if bot is added to main server
 - Removed unnecessary logging to discord log channel
+- GuildOptions access level now can not be changed and can only be changed by Owner access level users
+
+

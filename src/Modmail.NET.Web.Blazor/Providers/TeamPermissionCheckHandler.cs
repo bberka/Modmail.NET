@@ -45,13 +45,7 @@ public sealed class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermis
     var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     var option = await sender.Send(new GetGuildOptionQuery(false));
-    if (req.Policy == AuthPolicy.ManageOptions) {
-      if (userPermissionLevel >= option.ManageGuildOptionMinAccessLevel) {
-        context.Succeed(req);
-        return;
-      }
-    }    
-    else if (req.Policy == AuthPolicy.ManageTickets) {
+    if (req.Policy == AuthPolicy.ManageTickets) {
       if (userPermissionLevel >= option.ManageTicketMinAccessLevel) {
         context.Succeed(req);
         return;

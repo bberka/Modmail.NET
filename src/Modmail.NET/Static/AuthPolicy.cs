@@ -12,7 +12,6 @@ public sealed class AuthPolicy : SmartEnum<AuthPolicy>
   public static readonly AuthPolicy Moderator = new(nameof(Moderator), 2);
   public static readonly AuthPolicy Admin = new(nameof(Admin), 3);
   public static readonly AuthPolicy Owner = new(nameof(Owner), 4);
-  public static readonly AuthPolicy ManageOptions = new(nameof(ManageOptions), 5);
   public static readonly AuthPolicy ManageTickets = new(nameof(ManageTickets), 6);
   public static readonly AuthPolicy ManageTicketTypes = new(nameof(ManageTicketTypes), 7);
   public static readonly AuthPolicy ManageTeams = new(nameof(ManageTeams), 8);

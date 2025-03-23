@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -11,9 +12,11 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250323192315_GuildOption_RemovedFeatureOptions")]
+    partial class GuildOption_RemovedFeatureOptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,6 +88,9 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<int>("ManageBlacklistMinAccessLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManageGuildOptionMinAccessLevel")
                         .HasColumnType("int");
 
                     b.Property<int>("ManageHangfireMinAccessLevel")
