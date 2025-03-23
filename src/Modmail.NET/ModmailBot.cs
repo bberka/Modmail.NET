@@ -27,16 +27,36 @@ public class ModmailBot
     Log.Information("Starting bot");
 
     await Client.ConnectAsync();
-    
+
     while (!Client.AllShardsConnected) {
       await Task.Delay(5);
     }
-    
+
     await Client.UpdateStatusAsync(Const.DiscordActivity);
-    
+
     var scope = Client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var options = scope.ServiceProvider.GetRequiredService<IOptions<BotConfig>>();
     await sender.Send(new UpdateDiscordUserCommand(Client.CurrentUser));
+
+
+    var guildJoined = Client.Guilds.TryGetValue(options.Value.MainServerId, out var guild);
+    if (!guildJoined) {
+      throw new NotJoinedMainServerException();
+    }
+
+    Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
+    try {
+      await sender.Send(new ProcessGuildSetupCommand(guild));
+      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
+    }
+    catch (MainServerAlreadySetupException ex) {
+      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
+    }
+    catch (Exception ex) {
+      Log.Fatal(ex, $"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup exception");
+      throw;
+    }
   }
 
   public async Task StopAsync() {
