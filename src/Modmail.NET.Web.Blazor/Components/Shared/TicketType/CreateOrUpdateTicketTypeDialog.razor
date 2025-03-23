@@ -1,5 +1,6 @@
 ﻿@using DSharpPlus.Entities
 @using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.TicketType
 @using Serilog
 @inject DialogService DialogService
@@ -9,6 +10,9 @@
 
 @code {
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   [Parameter]
   public TicketType TicketType { get; set; }
 
@@ -71,6 +75,9 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialog)}]{nameof(SubmitAsync)}({{Name}})";
       try {
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+        
         if (IsUpdate && TicketType is not null) {
           TicketType.Name = _name;
           TicketType.Emoji = emojiUnicode;
@@ -79,12 +86,13 @@
           TicketType.EmbedMessageTitle = _embedMessageTitle;
           TicketType.EmbedMessageContent = _embedMessageContent;
           TicketType.IsEnabled = _isEnabled;
-          await Sender.Send(new ProcessUpdateTicketTypeCommand(TicketType));
+          await Sender.Send(new ProcessUpdateTicketTypeCommand(userId, TicketType));
           Log.Information(logMessage, _name);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
         }
         else {
-          await Sender.Send(new ProcessCreateTicketTypeCommand(_name,
+          await Sender.Send(new ProcessCreateTicketTypeCommand(userId,
+                                                               _name,
                                                                emojiUnicode,
                                                                _description,
                                                                _order,

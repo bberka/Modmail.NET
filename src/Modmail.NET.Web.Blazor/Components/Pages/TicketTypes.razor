@@ -1,6 +1,7 @@
 ﻿@page "/ticket-types"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.TicketType
 @using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.TicketType
@@ -15,6 +16,10 @@
 
 
 @code {
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
   private IQueryable<TicketType> _data;
 
   bool _isLoading;
@@ -78,7 +83,10 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(TicketTypes)}]{nameof(RemoveAsync)}({{@ticketType}})";
       try {
-        await Sender.Send(new ProcessRemoveTicketTypeCommand(ticketType.Id));
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+
+        await Sender.Send(new ProcessRemoveTicketTypeCommand(userId, ticketType.Id));
         Log.Information(logMessage,
                         ticketType);
         NotificationService.Notify(NotificationSeverity.Success,
