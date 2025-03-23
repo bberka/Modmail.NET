@@ -1,32 +1,64 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Attributes;
 using Modmail.NET.Entities;
 
 namespace Modmail.NET.Features.Teams;
 
-public sealed record ProcessRenameTeamCommand(Guid Id, string NewName) : IRequest;
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+public sealed record ProcessRenameTeamCommand(
+  ulong AuthorizedUserId,
+  Guid Id,
+  string NewName) : IRequest,
+                    IPermissionCheck;
 
-public sealed record ProcessRemoveTeamCommand(Guid Id) : IRequest<GuildTeam>;
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+public sealed record ProcessRemoveTeamCommand(
+  ulong AuthorizedUserId,
+  Guid Id) : IRequest<GuildTeam>,
+             IPermissionCheck;
 
-public sealed record ProcessAddTeamMemberCommand(Guid Id, ulong MemberId) : IRequest;
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+public sealed record ProcessAddTeamMemberCommand(
+  ulong AuthorizedUserId,
+  Guid Id,
+  ulong MemberId) : IRequest,
+                    IPermissionCheck;
 
-public sealed record ProcessRemoveTeamMemberCommand(ulong TeamMemberKey, TeamMemberDataType Type) : IRequest;
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+public sealed record ProcessRemoveTeamMemberCommand(
+  ulong AuthorizedUserId,
+  ulong TeamMemberKey,
+  TeamMemberDataType Type) : IRequest,
+                             IPermissionCheck;
 
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
 public sealed record ProcessUpdateTeamCommand(
+  ulong AuthorizedUserId,
   string TeamName,
   TeamPermissionLevel? PermissionLevel,
   bool? PingOnNewTicket,
   bool? PingOnTicketMessage,
   bool? IsEnabled,
   bool? AllowAccessToWebPanel
-) : IRequest;
+) : IRequest,
+    IPermissionCheck;
 
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
 public sealed record ProcessCreateTeamCommand(
+  ulong AuthorizedUserId,
   string TeamName,
   TeamPermissionLevel PermissionLevel,
   bool PingOnNewTicket = false,
   bool PingOnTicketMessage = false,
   bool AllowAccessToWebPanel = false
-) : IRequest<GuildTeam>;
+) : IRequest<GuildTeam>,
+    IPermissionCheck;
 
-public sealed record ProcessAddRoleToTeamCommand(Guid Id, DiscordRole Role) : IRequest;
+[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+public sealed record ProcessAddRoleToTeamCommand(
+  ulong AuthorizedUserId,
+  Guid Id,
+  DiscordRole Role) : IRequest,
+                      IPermissionCheck;

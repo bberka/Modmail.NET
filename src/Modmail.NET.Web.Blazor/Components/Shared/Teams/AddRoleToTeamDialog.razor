@@ -1,6 +1,7 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -14,6 +15,9 @@
   private List<DiscordRole> _roles;
   private ulong _selectedRoleId = 0;
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
 
@@ -44,7 +48,10 @@
         return;
       }
 
-      await Sender.Send(new ProcessAddRoleToTeamCommand(GuildTeam.Id, role));
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+      
+      await Sender.Send(new ProcessAddRoleToTeamCommand(userId,GuildTeam.Id, role));
       Log.Information(logMessage, _selectedRoleId);
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
       DialogService.Close(true);

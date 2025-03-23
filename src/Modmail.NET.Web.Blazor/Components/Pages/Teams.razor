@@ -1,6 +1,7 @@
 ﻿@page "/teams"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.Teams
@@ -146,6 +147,10 @@
 
 @code {
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
+
   private IQueryable<GuildTeam> _data;
 
   bool _isLoading;
@@ -208,7 +213,10 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(Teams)}]{nameof(RemoveAsync)}({{TeamName}})";
       try {
-        await Sender.Send(new ProcessRemoveTeamCommand(team.Id));
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+
+        await Sender.Send(new ProcessRemoveTeamCommand(userId, team.Id));
         Log.Information(logMessage,
                         team.Name);
         NotificationService.Notify(NotificationSeverity.Success,

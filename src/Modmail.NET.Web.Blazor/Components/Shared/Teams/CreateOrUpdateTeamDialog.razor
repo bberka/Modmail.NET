@@ -1,6 +1,7 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
 @using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -16,6 +17,9 @@
 
   private List<DiscordUserInfo> _users;
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   [Parameter]
   public GuildTeam Team { get; set; }
 
@@ -69,14 +73,17 @@
                                                    });
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+      
       try {
         if (IsUpdate && Team is not null) {
-          await Sender.Send(new ProcessUpdateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled, _allowAccessToWebPanel));
+          await Sender.Send(new ProcessUpdateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled, _allowAccessToWebPanel));
           Log.Information(logMessage, _teamName, _permissionLevel);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
         }
         else {
-          await Sender.Send(new ProcessCreateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _allowAccessToWebPanel));
+          await Sender.Send(new ProcessCreateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _allowAccessToWebPanel));
           Log.Information(logMessage, _teamName, _permissionLevel);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
         }
