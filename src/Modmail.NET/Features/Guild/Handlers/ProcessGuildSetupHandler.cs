@@ -19,7 +19,7 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
     var existingMmOption = await _sender.Send(new GetGuildOptionQuery(true), cancellationToken);
     if (existingMmOption is not null) throw new MainServerAlreadySetupException();
 
-    var anyServerSetup = await _sender.Send(new AnyGuildSetupQuery(), cancellationToken);
+    var anyServerSetup = await _sender.Send(new CheckAnyGuildSetupQuery(), cancellationToken);
     if (anyServerSetup) throw new AnotherServerAlreadySetupException();
 
     var guildOption = new GuildOption {

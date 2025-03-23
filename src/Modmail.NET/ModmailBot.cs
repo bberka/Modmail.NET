@@ -41,18 +41,22 @@ public class ModmailBot
     var guildJoined = Client.Guilds.TryGetValue(options.Value.MainServerId, out var guild);
     if (!guildJoined) throw new NotJoinedMainServerException();
 
-    Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
-    try {
-      await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
-      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
+    var isSetup = await sender.Send(new CheckAnyGuildSetupQuery());
+    if (!isSetup) {
+      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
+      try {
+        await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
+        Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
+      }
+      catch (MainServerAlreadySetupException ex) {
+        Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex, $"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup exception");
+        throw;
+      }
     }
-    catch (MainServerAlreadySetupException ex) {
-      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
-    }
-    catch (Exception ex) {
-      Log.Fatal(ex, $"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup exception");
-      throw;
-    }
+   
   }
 
   public async Task StopAsync() {

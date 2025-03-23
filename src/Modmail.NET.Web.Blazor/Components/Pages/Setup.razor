@@ -11,7 +11,7 @@
 @code {
 
   protected override async Task OnInitializedAsync() {
-    if (await Sender.Send(new AnyGuildSetupQuery())) {
+    if (await Sender.Send(new CheckAnyGuildSetupQuery())) {
       NavigationManager.NavigateTo("/dashboard");
     }
   }

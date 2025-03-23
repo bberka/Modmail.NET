@@ -24,7 +24,7 @@
 
 
   protected override async Task OnInitializedAsync() {
-    if (await Sender.Send(new AnyGuildSetupQuery()) != true) {
+    if (await Sender.Send(new CheckAnyGuildSetupQuery()) != true) {
       NavigationManager.NavigateTo("/setup");
       return;
     }
