@@ -24,56 +24,84 @@ public sealed class AverageDataCalculatorJob : HangfireRecurringJobBase
     var scope = _scopeFactory.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-
-    const string sql = """
-                       SELECT
-                        DATEDIFF(SECOND, ticket.RegisterDateUtc, adminMessage.FirstAdminMessageRegisterDateUtc) AS Value
-                       FROM
-                        Tickets ticket
-                        OUTER APPLY (
-                        SELECT TOP 1 RegisterDateUtc AS FirstAdminMessageRegisterDateUtc
-                        FROM TicketMessages
-                        WHERE
-                        TicketId = ticket.Id
-                        AND SenderUserId != ticket.OpenerUserId
-                        ORDER BY
-                        RegisterDateUtc ASC
-                        ) AS adminMessage
-                       """;
-
-    var averageResponseTime = await dbContext.Database.SqlQueryRaw<int>(sql)
-                                             .OrderBy(x => x)
-                                             .FirstOrDefaultAsync();
     var option = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
 
-    if (averageResponseTime >= 0) option.AvgResponseTimeMinutes = averageResponseTime / 60d;
+    var updated = false;
+    try {
+      var responseTimes = await dbContext.TicketMessages
+                                         .Select(x => new
+                                         {
+                                           x.TicketId,
+                                           x.RegisterDateUtc,
+                                           x.SentByMod
+                                         })
+                                         .GroupBy(x => x.TicketId)
+                                         .Select(group => new
+                                         {
+                                           TicketId = group.Key,
+                                           FirstUserMessageTime = group
+                                                                  .Where(x => !x.SentByMod)
+                                                                  .OrderBy(x => x.RegisterDateUtc)
+                                                                  .Select(x => x.RegisterDateUtc)
+                                                                  .FirstOrDefault(),
+                                           FirstModResponseTime = group
+                                                                  .Where(x => x.SentByMod)
+                                                                  .OrderBy(x => x.RegisterDateUtc)
+                                                                  .Select(x => x.RegisterDateUtc)
+                                                                  .FirstOrDefault()
+                                         })
+                                         .Where(x => x.FirstUserMessageTime != default && x.FirstModResponseTime != default)
+                                         .Select(x => EF.Functions.DateDiffSecond(x.FirstUserMessageTime, x.FirstModResponseTime))
+                                         .ToListAsync();
+      var averageResponseTime = responseTimes.Count != 0 ? responseTimes.Average() : 0;
+      if (averageResponseTime >= 0) option.AvgResponseTimeMinutes = averageResponseTime / 60d;
+      updated = true;
+    }
+    catch (InvalidOperationException e) {
+      //Seq contains no elements
+      Log.Verbose(e, "Failed to calculate average response time");
+    }
 
-    var avgTicketsOpenPerDay = await dbContext.Tickets
-                                              .GroupBy(x => x.RegisterDateUtc.Date)
-                                              .Select(x => new {
-                                                Date = x.Key,
-                                                Count = x.Count()
-                                              })
-                                              .AverageAsync(x => x.Count);
-    option.AvgTicketsOpenPerDay = avgTicketsOpenPerDay;
+
+    try {
+      var avgTicketsOpenPerDay = await dbContext.Tickets
+                                                .GroupBy(x => x.RegisterDateUtc.Date)
+                                                .Select(x => new {
+                                                  Date = x.Key,
+                                                  Count = x.Count()
+                                                })
+                                                .AverageAsync(x => x.Count);
+      option.AvgTicketsOpenPerDay = avgTicketsOpenPerDay;
+      updated = true;
+    }
+    catch (InvalidOperationException e) {
+      Log.Verbose(e, "Failed to calculate average tickets open per day");
+    }
 
 
-    var avgTicketsClosePerDay = await dbContext.Tickets
-                                               .Where(x => !x.ClosedDateUtc.HasValue)
-                                               .GroupBy(x => x.RegisterDateUtc.Date)
-                                               .Select(x => new {
-                                                 Date = x.Key,
-                                                 Count = x.Count()
-                                               })
-                                               .AverageAsync(x => x.Count);
+    try {
+      var avgTicketsClosePerDay = await dbContext.Tickets
+                                                 .Where(x => x.ClosedDateUtc.HasValue)
+                                                 .GroupBy(x => x.RegisterDateUtc.Date)
+                                                 .Select(x => new {
+                                                   Date = x.Key,
+                                                   Count = x.Count()
+                                                 })
+                                                 .AverageAsync(x => x.Count);
 
-    option.AvgTicketsClosePerDay = avgTicketsClosePerDay;
+      option.AvgTicketsClosePerDay = avgTicketsClosePerDay;
+      updated = true;
+    }
+    catch (InvalidOperationException e) {
+      Log.Verbose(e, "Failed to calculate average tickets close per day");
+    }
 
+    if (updated) {
+      dbContext.Update(option);
+      var affected = await dbContext.SaveChangesAsync();
+      if (affected == 0) throw new DbInternalException();
+    }
 
-    dbContext.Update(option);
-    var affected = await dbContext.SaveChangesAsync();
-    if (affected == 0) throw new DbInternalException();
-
-    Log.Information("Average Data Calculation finished");
+    Log.Information("Average Data Calculation finished {Updated}", updated);
   }
 }

@@ -59,6 +59,7 @@ We are using this as our main ticket system actively however it is not fully rel
   being sent to user.
 - Web UI for configuring and seeing bot information
 
+
 # Installation
 
 1. Install .NET 8 SDK
@@ -80,6 +81,8 @@ Before trying to use the bot on multiple servers you must now about the limitati
 You can simply invite bot to multiple servers and you can start using the bot
 
 Ticket channels will created in main server
+
+
 
 # Commands
 
@@ -200,11 +203,6 @@ Feature roadmap, possibly upcoming features and feature ideas in no particular o
 
 - Implement option to enable confirmation dialog when closing tickets
 - Implement option to force user to select ticket type before creating the ticket
-- Authentication & Role System
-    - Internal and external auth system
-    - Basic auth with id password
-    - Discord third party link auth
-    - Ability to give access to web panel to teams
 - Language Resources
     - Culture Resource file support for multiple languages
     - Enabling culture select and auto detect for users and admins
@@ -253,6 +251,8 @@ Feature roadmap, possibly upcoming features and feature ideas in no particular o
   - Example sending `!!tag link` message to ticket channel will take actual message from db and send detailed message
 - Ticket Message Reaction Support
   - Transferring message reacting to user and from user to mod messages
+
+# [Changelog](CHANGELOG.md)
 
 # Contributing
 

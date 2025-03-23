@@ -22,7 +22,9 @@ public sealed class TicketMessage : IHasRegisterDate,
   public List<TicketMessageAttachment> Attachments { get; set; }
   public DateTime RegisterDateUtc { get; set; }
 
-  public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message) {
+  public bool SentByMod { get; set; }
+
+  public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
     var id = Guid.NewGuid();
     return new TicketMessage {
       Id = id,
@@ -31,11 +33,12 @@ public sealed class TicketMessage : IHasRegisterDate,
       TicketId = ticketId,
       Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
-      RegisterDateUtc = DateTime.UtcNow
+      RegisterDateUtc = DateTime.UtcNow,
+      SentByMod = sentByMod,
     };
   }
 
-  public static TicketMessage MapFrom(Guid ticketId, ulong authorId, ulong messageId, string messageContent, List<DiscordAttachment> discordAttachments) {
+  public static TicketMessage MapFrom(Guid ticketId, ulong authorId, ulong messageId, string messageContent, List<DiscordAttachment> discordAttachments, bool sentByMod) {
     discordAttachments ??= new List<DiscordAttachment>();
     var id = Guid.NewGuid();
     return new TicketMessage {
@@ -45,7 +48,8 @@ public sealed class TicketMessage : IHasRegisterDate,
       TicketId = ticketId,
       Attachments = discordAttachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = messageId,
-      RegisterDateUtc = UtilDate.GetNow()
+      RegisterDateUtc = UtilDate.GetNow(),
+      SentByMod = sentByMod,
     };
   }
 }
