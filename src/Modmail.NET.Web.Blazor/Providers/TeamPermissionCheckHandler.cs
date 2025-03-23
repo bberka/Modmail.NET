@@ -2,24 +2,23 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Static;
-using Modmail.NET.Web.Blazor.Static;
 
 namespace Modmail.NET.Web.Blazor.Providers;
 
-public sealed class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermissionCheckRequirement>
+public class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermissionCheckRequirement>
 {
+  private static readonly IReadOnlyDictionary<AuthPolicy, TeamPermissionLevel> PolicyMap = new Dictionary<AuthPolicy, TeamPermissionLevel> {
+    { AuthPolicy.Support, TeamPermissionLevel.Support },
+    { AuthPolicy.Moderator, TeamPermissionLevel.Moderator },
+    { AuthPolicy.Admin, TeamPermissionLevel.Admin },
+    { AuthPolicy.Owner, TeamPermissionLevel.Owner }
+  };
+
   private readonly IServiceScopeFactory _scopeFactory;
 
   public TeamPermissionCheckHandler(IServiceScopeFactory scopeFactory) {
     _scopeFactory = scopeFactory;
   }
-
-  private static readonly IReadOnlyDictionary<AuthPolicy, TeamPermissionLevel> PolicyMap = new Dictionary<AuthPolicy, TeamPermissionLevel>() {
-    { AuthPolicy.OnlySupport, TeamPermissionLevel.Support },
-    { AuthPolicy.OnlyModerator, TeamPermissionLevel.Moderator },
-    { AuthPolicy.OnlyAdmin, TeamPermissionLevel.Admin },
-    { AuthPolicy.OnlyOwner, TeamPermissionLevel.Owner },
-  };
 
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamPermissionCheckRequirement req) {
     var roleClaim = context.User.FindFirst(ClaimTypes.Role);
@@ -38,6 +37,7 @@ public sealed class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermis
         context.Succeed(req);
         return;
       }
+
       context.Fail();
       return;
     }
@@ -45,36 +45,30 @@ public sealed class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermis
     var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     var option = await sender.Send(new GetGuildOptionQuery(false));
-    if (req.Policy == AuthPolicy.ManageOptions) {
-      if (userPermissionLevel >= option.ManageGuildOptionMinAccessLevel) {
-        context.Succeed(req);
-        return;
-      }
-    }    
-    else if (req.Policy == AuthPolicy.ManageTickets) {
+    if (req.Policy == AuthPolicy.ManageTickets) {
       if (userPermissionLevel >= option.ManageTicketMinAccessLevel) {
         context.Succeed(req);
         return;
       }
-    }   
+    }
     else if (req.Policy == AuthPolicy.ManageTicketTypes) {
       if (userPermissionLevel >= option.ManageTicketTypeMinAccessLevel) {
         context.Succeed(req);
         return;
       }
-    } 
+    }
     else if (req.Policy == AuthPolicy.ManageTeams) {
       if (userPermissionLevel >= option.ManageTeamsMinAccessLevel) {
         context.Succeed(req);
         return;
       }
-    } 
+    }
     else if (req.Policy == AuthPolicy.ManageBlacklist) {
       if (userPermissionLevel >= option.ManageBlacklistMinAccessLevel) {
         context.Succeed(req);
         return;
       }
-    }   
+    }
     else if (req.Policy == AuthPolicy.ManageHangfire) {
       if (userPermissionLevel >= option.ManageHangfireMinAccessLevel) {
         context.Succeed(req);

@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonymousCommand>
+public class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonymousCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -32,13 +31,6 @@ public sealed class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggl
     _ = Task.Run(async () => {
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketResponses.AnonymousToggled(ticket));
-
-      //TODO: Handle mail channel not found
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.AnonymousToggled(ticket));
-      }
     }, cancellationToken);
   }
 }

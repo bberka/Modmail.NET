@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
-using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Blacklist;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Models.Dto;
@@ -14,7 +13,7 @@ using Serilog;
 
 namespace Modmail.NET.Queues;
 
-public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
+public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 {
   private readonly IOptions<BotConfig> _options;
   private readonly IServiceScopeFactory _scopeFactory;
@@ -38,9 +37,10 @@ public sealed class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDt
       return;
     var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
 
     try {
-      if (await sender.Send(new CheckUserBlacklistStatusQuery(user.Id))) {
+      if (await sender.Send(new CheckUserBlacklistStatusQuery(bot.Client.CurrentUser.Id, user.Id))) {
         await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
         return;
       }

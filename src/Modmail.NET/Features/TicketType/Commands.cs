@@ -1,10 +1,16 @@
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Attributes;
 
 namespace Modmail.NET.Features.TicketType;
 
-public sealed record ProcessUpdateTicketTypeCommand(Entities.TicketType TicketType) : IRequest;
+[PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
+public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, Entities.TicketType TicketType) : IRequest;
 
+
+[PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
 public sealed record ProcessCreateTicketTypeCommand(
+  ulong AuthorizedUserId,
   string Name,
   string Emoji,
   string Description,
@@ -12,4 +18,7 @@ public sealed record ProcessCreateTicketTypeCommand(
   string EmbedMessageTitle,
   string EmbedMessageContent) : IRequest;
 
-public sealed record ProcessRemoveTicketTypeCommand(Guid Id) : IRequest<Entities.TicketType>;
+
+[PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
+public sealed record ProcessRemoveTicketTypeCommand(ulong AuthorizedUserId,Guid Id) : IRequest<Entities.TicketType>,
+                                                                                     IPermissionCheck;

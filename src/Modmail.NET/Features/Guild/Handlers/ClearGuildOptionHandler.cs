@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class ClearGuildOptionHandler : IRequestHandler<ClearGuildOptionCommand>
+public class ClearGuildOptionHandler : IRequestHandler<ClearGuildOptionCommand>
 {
   private readonly ModmailDbContext _dbContext;
 

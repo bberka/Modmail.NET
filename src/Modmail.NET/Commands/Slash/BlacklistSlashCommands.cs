@@ -3,9 +3,9 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
 using Modmail.NET.Checks.Attributes;
-using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Blacklist;
 using Modmail.NET.Features.UserInfo;
@@ -38,7 +38,7 @@ public class BlacklistSlashCommands
     await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       await _sender.Send(new UpdateDiscordUserCommand(user));
-      await _sender.Send(new ProcessAddUserToBlacklistCommand(user.Id, reason, ctx.User.Id));
+      await _sender.Send(new ProcessAddUserToBlacklistCommand(ctx.User.Id, user.Id, reason));
       await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
@@ -105,7 +105,7 @@ public class BlacklistSlashCommands
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Status)}({{ContextUserId}},{{UserId}})";
     await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(user.Id));
+      var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(ctx.User.Id, user.Id));
       await ctx.EditResponseAsync(Webhooks.Info(LangKeys.USER_BLACKLIST_STATUS.GetTranslation(),
                                                 isBlocked
                                                   ? LangKeys.USER_IS_BLACKLISTED.GetTranslation()

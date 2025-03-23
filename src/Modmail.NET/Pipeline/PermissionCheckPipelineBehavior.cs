@@ -1,0 +1,40 @@
+using System.Reflection;
+using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Attributes;
+using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
+using Modmail.NET.Features.Teams;
+
+namespace Modmail.NET.Pipeline;
+
+public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+  where TRequest : IPermissionCheck, IRequest<TResponse>
+{
+  private readonly ModmailBot _bot;
+  private readonly ISender _sender;
+
+  public PermissionCheckPipelineBehavior(ModmailBot bot, ISender sender) {
+    _bot = bot;
+    _sender = sender;
+  }
+
+  public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) {
+    var cacheAttribute = typeof(TRequest).GetCustomAttribute<PermissionCheckAttribute>();
+    if (cacheAttribute == null) return await next();
+
+
+    if (request.AuthorizedUserId <= 0) throw new InvalidUserIdException();
+
+    if (_bot.Client.CurrentUser.Id == request.AuthorizedUserId) return await next();
+
+    var permission = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
+    if (permission is null) throw new UnauthorizedAccessException();
+
+    var option = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+    if (permission < option.ManageBlacklistMinAccessLevel) throw new UnauthorizedAccessException();
+
+    return await next();
+  }
+}

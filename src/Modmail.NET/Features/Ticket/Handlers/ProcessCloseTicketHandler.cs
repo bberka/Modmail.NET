@@ -5,7 +5,7 @@ using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketCommand>
+public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -52,11 +52,8 @@ public sealed class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTick
         if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(ticket, guildOption));
       }
 
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TicketClosed(ticket));
-      }
+      var logChannel = await _bot.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketClosed(ticket));
     }, cancellationToken);
   }
 }

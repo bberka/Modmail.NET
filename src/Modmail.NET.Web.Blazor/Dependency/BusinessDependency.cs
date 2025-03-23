@@ -45,11 +45,19 @@ public static class BusinessDependency
     });
   }
 
-  public static void Initialize(WebApplication app) {
+  public static async Task InitializeDatabaseAsync(WebApplication app) {
     using var scope = app.Services.CreateScope();
-    using var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+    await using var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     try {
-      dbContext.Database.MigrateAsync();
+      await dbContext.Database.EnsureCreatedAsync();
+      Log.Information("Database ensure created");
+    }
+    catch (Exception ex) {
+      Log.Error(ex, "Failed to setup server: Ensure created failed");
+    }
+
+    try {
+      await dbContext.Database.MigrateAsync();
       Log.Information("Database migration completed!");
     }
     catch (Exception ex) {

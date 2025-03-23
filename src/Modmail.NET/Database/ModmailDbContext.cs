@@ -3,7 +3,7 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database;
 
-public sealed class ModmailDbContext : DbContext
+public class ModmailDbContext : DbContext
 {
   public ModmailDbContext() { }
   public ModmailDbContext(DbContextOptions<ModmailDbContext> options) : base(options) { }

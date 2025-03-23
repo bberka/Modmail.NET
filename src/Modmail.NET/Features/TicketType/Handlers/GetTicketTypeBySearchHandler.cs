@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
-public sealed class GetTicketTypeBySearchHandler : IRequestHandler<GetTicketTypeBySearchQuery, Entities.TicketType>
+public class GetTicketTypeBySearchHandler : IRequestHandler<GetTicketTypeBySearchQuery, Entities.TicketType>
 {
   private readonly ModmailDbContext _dbContext;
 

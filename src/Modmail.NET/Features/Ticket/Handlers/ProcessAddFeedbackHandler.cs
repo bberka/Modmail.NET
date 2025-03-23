@@ -5,7 +5,7 @@ using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackCommand>
+public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -36,13 +36,6 @@ public sealed class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedba
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    _ = Task.Run(async () => {
-      await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(ticket)); });
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.FeedbackReceived(ticket));
-      }
-    }, cancellationToken);
+    _ = Task.Run(async () => { await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(ticket)); }); }, cancellationToken);
   }
 }

@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class GetTicketListByTypeHandler : IRequestHandler<GetTicketListByTypeQuery, List<Entities.Ticket>>
+public class GetTicketListByTypeHandler : IRequestHandler<GetTicketListByTypeQuery, List<Entities.Ticket>>
 {
   private readonly ModmailDbContext _dbContext;
 

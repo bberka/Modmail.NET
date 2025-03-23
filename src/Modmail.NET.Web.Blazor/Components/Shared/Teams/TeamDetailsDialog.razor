@@ -1,5 +1,7 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -11,11 +13,14 @@
 
 @code {
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
   [Parameter]
   public required GuildTeam Team { get; set; }
 
-  private List<DiscordUserInfo>? _members;
-  private List<DiscordRole>? _roles;
+  private List<DiscordUserInfo> _members;
+  private List<DiscordRole> _roles;
 
   protected override async Task OnInitializedAsync() {
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -27,7 +32,7 @@
 
   bool _isLoading = false;
   private int _count;
-  private List<GuildTeamMember>? _data;
+  private List<GuildTeamMember> _data;
 
   async Task ShowLoading() {
     _isLoading = true;
@@ -41,7 +46,7 @@
     await ReloadDataAsync(obj);
   }
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -68,7 +73,9 @@
   private async Task RemoveAsync(GuildTeamMember guildTeamMember) {
     const string logMessage = $"[{nameof(TeamDetailsDialog)}]{nameof(RemoveAsync)}({{@Member}})";
     try {
-      await Sender.Send(new ProcessRemoveTeamMemberCommand(guildTeamMember.Key, guildTeamMember.Type));
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+      await Sender.Send(new ProcessRemoveTeamMemberCommand(userId, guildTeamMember.Key, guildTeamMember.Type));
       Log.Information(logMessage, guildTeamMember);
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Team member removed");
       await ReloadDataAsync();

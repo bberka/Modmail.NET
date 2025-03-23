@@ -1,5 +1,7 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Blacklist
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -11,11 +13,15 @@
 
 @code {
 
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
   private List<DiscordUserInfo> _users = new();
 
   private ulong? _selectedUserId;
 
-  private string? _reason = string.Empty;
+  private string _reason = string.Empty;
 
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
@@ -52,7 +58,9 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
       try {
-        await Sender.Send(new ProcessAddUserToBlacklistCommand(_selectedUserId.Value, _reason));
+        var state = await AuthContext;
+        var discordUserId = state.User.GetUserId();
+        await Sender.Send(new ProcessAddUserToBlacklistCommand(discordUserId, _selectedUserId.Value, _reason));
         NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
         Log.Information(logMessage,
                         _selectedUserId.Value,

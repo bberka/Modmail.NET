@@ -2,8 +2,8 @@
 
 namespace Modmail.NET.Entities;
 
-public sealed class GuildTeamMember : IHasRegisterDate,
-                                      IEntity
+public class GuildTeamMember : IHasRegisterDate,
+                               IEntity
 {
   public Guid Id { get; set; }
   public ulong Key { get; set; }

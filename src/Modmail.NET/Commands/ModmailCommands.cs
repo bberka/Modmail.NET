@@ -3,9 +3,9 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
 using Modmail.NET.Checks.Attributes;
-using Modmail.NET.Exceptions;
 using Modmail.NET.Extensions;
 using Modmail.NET.Features.Guild;
 using Serilog;
@@ -18,7 +18,7 @@ namespace Modmail.NET.Commands;
 [Command("modmail")]
 [RequireApplicationOwner]
 [RequirePermissions(DiscordPermission.Administrator)]
-public sealed class ModmailCommands 
+public class ModmailCommands
 {
   private readonly ISender _sender;
 
@@ -32,7 +32,7 @@ public sealed class ModmailCommands
     const string logMessage = $"[{nameof(ModmailCommands)}]{nameof(Setup)}({{ContextUserId}})";
 
     try {
-      await _sender.Send(new ProcessGuildSetupCommand(ctx.Guild));
+      await _sender.Send(new ProcessGuildSetupCommand(ctx.User.Id, ctx.Guild));
       await ctx.RespondAsync(Embeds.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id);

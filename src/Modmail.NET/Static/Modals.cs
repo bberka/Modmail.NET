@@ -1,7 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Utils;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 public static class Modals
 {

@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Database;
 
-namespace Modmail.NET.Features.Teams.Handlers;
+namespace Modmail.NET.Features.Permission.Handler;
 
-public sealed class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermissionLevelQuery, TeamPermissionLevel?>
+public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery, TeamPermissionLevel?>
 {
   private readonly ModmailBot _bot;
-  private readonly IOptions<BotConfig> _options;
   private readonly ModmailDbContext _dbContext;
+  private readonly IOptions<BotConfig> _options;
   private readonly ISender _sender;
 
-  public GetTeamPermissionLevelHandler(ModmailDbContext dbContext,
+  public GetPermissionLevelHandler(ModmailDbContext dbContext,
                                        ModmailBot bot,
                                        IOptions<BotConfig> options,
                                        ISender sender) {
@@ -22,15 +22,16 @@ public sealed class GetTeamPermissionLevelHandler : IRequestHandler<GetTeamPermi
     _sender = sender;
   }
 
-  public async Task<TeamPermissionLevel?> Handle(GetTeamPermissionLevelQuery request, CancellationToken cancellationToken) {
-    if (_options.Value.OwnerUsers.Contains(request.UserId)) {
-      return TeamPermissionLevel.Owner;
-    }
+  public async Task<TeamPermissionLevel?> Handle(GetPermissionLevelQuery request, CancellationToken cancellationToken) {
+    if (_options.Value.OwnerUsers.Contains(request.UserId)) return TeamPermissionLevel.Owner;
+
+
     var teamMember = await _dbContext.GuildTeamMembers
                                      .Include(x => x.GuildTeam)
-                                     .Where(x => (x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key)) || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
+                                     .Where(x => (request.RoleIdList != null && x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key))
+                                                 || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
                                      .OrderByDescending(x => x.GuildTeam!.PermissionLevel)
                                      .FirstOrDefaultAsync(cancellationToken);
-    return teamMember?.GuildTeam.PermissionLevel;
+    return teamMember?.GuildTeam?.PermissionLevel;
   }
 }

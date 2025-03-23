@@ -3,7 +3,7 @@ using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 public static class CommandResponses
 {
@@ -16,7 +16,6 @@ public static class CommandResponses
                 .WithGuildInfoFooter(guildOption);
 
     sb.AppendLine($"`{LangKeys.ENABLED.GetTranslation()}`: " + guildOption.IsEnabled);
-    sb.AppendLine($"`{LangKeys.SENSITIVE_LOGGING.GetTranslation()}`: " + guildOption.IsSensitiveLogging);
     sb.AppendLine($"`{LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation()}`: " + guildOption.TakeFeedbackAfterClosing);
     sb.AppendLine($"`{LangKeys.SHOW_CONFIRMATIONS.GetTranslation()}`: " + guildOption.ShowConfirmationWhenClosingTickets);
     // sb.AppendLine("`Allow Anonymous Response`: " + guildOption.AllowAnonymousResponding);

@@ -1,6 +1,6 @@
 ﻿using DSharpPlus.Entities;
 
-namespace Modmail.NET.Exceptions;
+namespace Modmail.NET.Abstract;
 
 public abstract class BotExceptionBase : Exception
 {

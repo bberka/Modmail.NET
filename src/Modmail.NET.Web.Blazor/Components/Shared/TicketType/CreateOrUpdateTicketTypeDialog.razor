@@ -1,4 +1,6 @@
 ﻿@using DSharpPlus.Entities
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.TicketType
 @using Serilog
 @inject DialogService DialogService
@@ -8,17 +10,20 @@
 
 @code {
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   [Parameter]
-  public TicketType? TicketType { get; set; }
+  public TicketType TicketType { get; set; }
 
   bool IsUpdate => TicketType != null;
   string _name = "";
-  string? _emoji = "";
+  string _emoji = "";
   string _description = "";
   int _order = 0;
   bool _isEnabled = true;
-  string? _embedMessageTitle = null;
-  string? _embedMessageContent = null;
+  string _embedMessageTitle = null;
+  string _embedMessageContent = null;
 
   protected override Task OnInitializedAsync() {
     if (TicketType is not null) {
@@ -70,6 +75,9 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialog)}]{nameof(SubmitAsync)}({{Name}})";
       try {
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+        
         if (IsUpdate && TicketType is not null) {
           TicketType.Name = _name;
           TicketType.Emoji = emojiUnicode;
@@ -78,12 +86,13 @@
           TicketType.EmbedMessageTitle = _embedMessageTitle;
           TicketType.EmbedMessageContent = _embedMessageContent;
           TicketType.IsEnabled = _isEnabled;
-          await Sender.Send(new ProcessUpdateTicketTypeCommand(TicketType));
+          await Sender.Send(new ProcessUpdateTicketTypeCommand(userId, TicketType));
           Log.Information(logMessage, _name);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
         }
         else {
-          await Sender.Send(new ProcessCreateTicketTypeCommand(_name,
+          await Sender.Send(new ProcessCreateTicketTypeCommand(userId,
+                                                               _name,
                                                                emojiUnicode,
                                                                _description,
                                                                _order,

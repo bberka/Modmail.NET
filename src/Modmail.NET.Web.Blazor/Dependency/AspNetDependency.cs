@@ -19,17 +19,16 @@ public static class AspNetDependency
                            })
                            .CreateLogger();
 
-   
 
     Log.Logger = appLogger;
     builder.Logging.ClearProviders();
     builder.Host.UseSerilog(aspNetCoreLogger);
     builder.Logging.AddSerilog(appLogger);
-    
+
     builder.Services.AddKeyedSingleton("AppLogger", appLogger);
     builder.Services.AddKeyedSingleton("AspNetCoreLogger", aspNetCoreLogger);
 
-    
+
     AppDomain.CurrentDomain.UnhandledException += (_, args) => {
       var isDiscordException = args.ExceptionObject is DiscordException;
       if (isDiscordException) {

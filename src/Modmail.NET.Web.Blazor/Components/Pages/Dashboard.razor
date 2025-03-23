@@ -1,0 +1,333 @@
+﻿@page "/dashboard"
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Guild
+@using Modmail.NET.Features.Statistic
+@using Modmail.NET.Queues
+@using Modmail.NET.Static
+@using Modmail.NET.Utils
+@using Modmail.NET.Web.Blazor.Providers
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ModmailDbContext DbContext
+@inject ISender Sender
+@inject ModmailBot Bot
+@inject TicketMessageQueue TicketMessageQueue
+@attribute [AuthorizeTeam]
+
+@code {
+
+  private HomeStatDto Stats { get; set; }
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
+
+  protected override async Task OnInitializedAsync() {
+    if (await Sender.Send(new CheckAnyGuildSetupQuery()) != true) {
+      NavigationManager.NavigateTo("/setup");
+      return;
+    }
+
+    var totalTickets = await DbContext.Tickets
+                                      .AsNoTracking()
+                                      .Select(x => new {
+                                        IsClosed = x.ClosedDateUtc.HasValue
+                                      })
+                                      .ToListAsync();
+    var activeTickets = totalTickets.Count(x => !x.IsClosed);
+    var closedTickets = totalTickets.Count(x => x.IsClosed);
+    var totalMessages = await DbContext.TicketMessages.CountAsync();
+    var teams = await DbContext.GuildTeams.CountAsync();
+    var blacklist = await DbContext.TicketBlacklists.CountAsync();
+    var ticketTypes = await DbContext.TicketTypes.CountAsync();
+    var teamMemberData = await DbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
+    var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
+    var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
+    var statistics = await Sender.Send(new GetLatestStatisticQuery(true)) ?? new Statistic();
+
+    Stats = new HomeStatDto(activeTickets,
+                            closedTickets,
+                            totalMessages,
+                            teams,
+                            blacklist,
+                            ticketTypes,
+                            teamUserCount,
+                            teamRoleCount,
+                            TicketMessageQueue.GetChannelCount(),
+                            statistics.AvgResponseTimeMinutes,
+                            statistics.AvgTicketsOpenedPerDay,
+                            statistics.AvgTicketsClosedPerDay,
+                            statistics.AvgTicketResolvedMinutes,
+                            statistics.FastestClosedTicketMinutes,
+                            statistics.SlowestClosedTicketMinutes
+                           );
+  }
+
+
+  private async Task StartBotAsync() {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
+    }
+  }
+
+  private async Task StopBotAsync() {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StopAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
+    }
+  }
+
+  private async Task RestartBotAsync() {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to restart the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StopAsync();
+      await Bot.StartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
+    }
+  }
+
+}
+
+<div class="container">
+  <RadzenRow>
+    <RadzenColumn>
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Dashboard
+          </RadzenText>
+          @* <hr class="my-4"/> *@
+
+        </RadzenColumn>
+      </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="12">
+      <RadzenCard class="shadow-7">
+        <RadzenRow>
+          <RadzenColumn Size="12">
+            <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
+          </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+          <RadzenColumn Size="12">
+            <RadzenText class="rz-my-4">
+              Bot is
+              @if (Bot.Connected) {
+                <span class="rz-color-success">Connected</span>
+              }
+              else {
+                <span class="rz-color-danger">Disconnected</span>
+              }
+            </RadzenText>
+          </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+          <RadzenColumn Size="12">
+            @if (Bot.Connected) {
+              <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
+              <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot</RadzenButton>
+            }
+            else {
+              <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@StartBotAsync">Start Bot</RadzenButton>
+            }
+          </RadzenColumn>
+        </RadzenRow>
+      </RadzenCard>
+
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.ActiveTickets.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Active Tickets
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.ClosedTickets.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Closed Tickets
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TotalMessages.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Total Messages
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.Teams.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Teams
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TeamRoleCount.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Active Team Roles
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TeamMemberCount.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Active Team Members
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.Blacklist.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Blacklist
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.TicketTypes.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Ticket Types
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.ProcessingQueueCount.ToString() ?? "0")
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Processing Message Queues
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.AvgResponseTimeMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Response Time
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.AvgTicketsOpenPerDay.ToString("F") ?? "0") per day
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Tickets Opened
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(Stats?.AvgTicketsClosePerDay.ToString("F") ?? "0") per day
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Tickets Closed
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.AvgTicketResolvedMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Ticket Resolved
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.FastestResolvedTicketMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Fasted Resolved Ticket Time
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.SlowestClosedTicketMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Slowest Resolved Ticket Time
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+      </RadzenRow>
+
+    </RadzenColumn>
+  </RadzenRow>
+</div>

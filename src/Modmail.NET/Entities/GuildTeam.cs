@@ -3,9 +3,9 @@ using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Entities;
 
-public sealed class GuildTeam : IHasRegisterDate,
-                                IHasUpdateDate,
-                                IEntity
+public class GuildTeam : IHasRegisterDate,
+                         IHasUpdateDate,
+                         IEntity
 {
   public Guid Id { get; set; }
   public TeamPermissionLevel PermissionLevel { get; set; }
@@ -17,6 +17,8 @@ public sealed class GuildTeam : IHasRegisterDate,
   public bool IsEnabled { get; set; } = true;
   public bool PingOnNewTicket { get; set; }
   public bool PingOnNewMessage { get; set; }
+
+  public bool AllowAccessToWebPanel { get; set; } = false;
 
   //FK
   public List<GuildTeamMember> GuildTeamMembers { get; set; } = [];

@@ -1,18 +1,25 @@
 ﻿@page "/ticket-types"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.TicketType
+@using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.TicketType
-@using Modmail.NET.Web.Blazor.Static
+@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.ManageTicketTypes))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTicketTypes))]
 
 
 @code {
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
   private IQueryable<TicketType> _data;
 
   bool _isLoading;
@@ -26,7 +33,7 @@
     _isLoading = false;
   }
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -76,7 +83,10 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(TicketTypes)}]{nameof(RemoveAsync)}({{@ticketType}})";
       try {
-        await Sender.Send(new ProcessRemoveTicketTypeCommand(ticketType.Id));
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+
+        await Sender.Send(new ProcessRemoveTicketTypeCommand(userId, ticketType.Id));
         Log.Information(logMessage,
                         ticketType);
         NotificationService.Notify(NotificationSeverity.Success,

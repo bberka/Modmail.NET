@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand>
+public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -20,15 +19,16 @@ public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeam
   }
 
   public async Task Handle(ProcessUpdateTeamCommand request, CancellationToken cancellationToken) {
-    var oldPermissionLevel = request.PermissionLevel;
-    var oldPingOnNewTicket = request.PingOnNewTicket;
-    var oldPingOnNewMessage = request.PingOnTicketMessage;
-    var oldIsEnabled = request.IsEnabled;
-
     var anyChanges = request.PermissionLevel.HasValue || request.PingOnNewTicket.HasValue || request.PingOnTicketMessage.HasValue;
     if (!anyChanges) return;
 
-    var team = await _sender.Send(new GetTeamByNameQuery(request.TeamName), cancellationToken);
+    var team = await _sender.Send(new GetTeamByNameQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
+
+    var oldPermissionLevel = team.PermissionLevel;
+    var oldPingOnNewTicket = team.PingOnNewTicket;
+    var oldPingOnNewMessage = team.PingOnNewMessage;
+    var oldIsEnabled = team.IsEnabled;
+    var oldAllowAccessToWebPanel = team.AllowAccessToWebPanel;
 
     if (request.PermissionLevel.HasValue) team.PermissionLevel = request.PermissionLevel.Value;
 
@@ -38,25 +38,11 @@ public sealed class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeam
 
     if (request.IsEnabled.HasValue) team.IsEnabled = request.IsEnabled.Value;
 
+    if (request.AllowAccessToWebPanel.HasValue) team.AllowAccessToWebPanel = request.AllowAccessToWebPanel.Value;
+
 
     _dbContext.Update(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamUpdated(oldPermissionLevel.Value,
-                                                                   oldPingOnNewTicket.Value,
-                                                                   oldPingOnNewMessage.Value,
-                                                                   oldIsEnabled.Value,
-                                                                   team.PermissionLevel,
-                                                                   team.PingOnNewTicket,
-                                                                   team.PingOnNewMessage,
-                                                                   team.IsEnabled,
-                                                                   team.Name));
-      }
-    });
   }
 }

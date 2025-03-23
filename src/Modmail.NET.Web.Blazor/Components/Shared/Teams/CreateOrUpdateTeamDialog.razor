@@ -1,5 +1,7 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -13,15 +15,19 @@
 @code {
 
 
-  private List<DiscordUserInfo>? _users;
+  private List<DiscordUserInfo> _users;
 
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+  
   [Parameter]
-  public GuildTeam? Team { get; set; }
+  public GuildTeam Team { get; set; }
 
   private TeamPermissionLevel? _permissionLevel;
   private bool _pingOnNewTicket = false;
   private bool _pingOnTicketMessage = false;
-  private string? _teamName;
+  private bool _allowAccessToWebPanel = false;
+  private string _teamName;
   private bool _isEnabled = true;
 
   private bool IsUpdate => Team is not null;
@@ -44,6 +50,7 @@
     _pingOnNewTicket = IsUpdate && Team!.PingOnNewTicket;
     _pingOnTicketMessage = IsUpdate && (Team?.PingOnNewMessage ?? false);
     _isEnabled = IsUpdate && Team!.IsEnabled;
+    _allowAccessToWebPanel = Team?.AllowAccessToWebPanel ?? false;
   }
 
   private async Task SubmitAsync() {
@@ -66,14 +73,17 @@
                                                    });
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+      
       try {
         if (IsUpdate && Team is not null) {
-          await Sender.Send(new ProcessUpdateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled));
+          await Sender.Send(new ProcessUpdateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled, _allowAccessToWebPanel));
           Log.Information(logMessage, _teamName, _permissionLevel);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
         }
         else {
-          await Sender.Send(new ProcessCreateTeamCommand(_teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage));
+          await Sender.Send(new ProcessCreateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _allowAccessToWebPanel));
           Log.Information(logMessage, _teamName, _permissionLevel);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
         }
@@ -90,8 +100,6 @@
       }
     }
   }
-
-  // private sealed record AddBlackListModel(ulong UserId);
 
 }
 
@@ -129,6 +137,7 @@ else {
           Ping on new ticket
         </RadzenLabel>
       </RadzenRow>
+
       <RadzenRow class="rz-my-4">
         <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@_pingOnTicketMessage/>
         <RadzenLabel Component="pingOnTicketMessage">
@@ -136,6 +145,18 @@ else {
         </RadzenLabel>
 
       </RadzenRow>
+
+      @if (_permissionLevel is not TeamPermissionLevel.Owner) {
+        <RadzenRow class="rz-my-4">
+          <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@_allowAccessToWebPanel/>
+          <RadzenLabel Component="pingOnTicketMessage">
+            Allow Access To Web Panel
+          </RadzenLabel>
+        </RadzenRow>
+      }
+
+
+
       <RadzenRow class="rz-my-4">
         <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
                                                                                                  ? "Update"

@@ -1,14 +1,15 @@
 ﻿@page "/options"
+@using Modmail.NET.Abstract
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Static
-@using Modmail.NET.Web.Blazor.Static
+@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 @rendermode InteractiveServer
 @inject ModmailDbContext DbContext
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.ManageOptions))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.Owner))]
 
 
 @code {
@@ -30,9 +31,8 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
+      //TODO: Call mediator command
       _guildOption.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
-      _guildOption.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
-      _guildOption.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
       _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
 
@@ -87,19 +87,6 @@
               </RadzenRow>
 
               <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="IsSensitiveLogging" @bind-Value=@_guildOption.IsSensitiveLogging/>
-                <RadzenLabel Component="IsSensitiveLogging">
-                  Log sensitive such as message content
-                </RadzenLabel>
-              </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="IsEnableDiscordChannelLogging"
-                              @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
-                <RadzenLabel Component="IsEnableDiscordChannelLogging">
-                  Log to discord channel in main guild
-                </RadzenLabel>
-              </RadzenRow>
-              <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
                   Take feedback from user after ticket is closed
@@ -127,24 +114,6 @@
               <RadzenRow>
                 <small class="text-secondary">
                   The time to wait in hours before a inactive ticket is automatically closed.
-                </small>
-              </RadzenRow>
-
-
-
-              <RadzenRow class="rz-my-4">
-                <RadzenFormField class="w-100" Text="Manage Option Access Level" Variant="Variant.Outlined">
-                  <RadzenDropDown Style="user-select: none"
-                                  Multiple="false"
-                                  @bind-Value="@_guildOption.ManageGuildOptionMinAccessLevel"
-                                  Data="Enum.GetValues<TeamPermissionLevel>()"
-                                  TValue="TeamPermissionLevel"
-                                  AllowFiltering="false"/>
-                </RadzenFormField>
-              </RadzenRow>
-              <RadzenRow>
-                <small class="text-secondary">
-                  Minimum access level for managing Option via Web
                 </small>
               </RadzenRow>
 

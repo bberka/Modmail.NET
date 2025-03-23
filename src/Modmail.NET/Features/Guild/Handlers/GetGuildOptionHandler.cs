@@ -7,7 +7,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class GetGuildOptionHandler : IRequestHandler<GetGuildOptionQuery, GuildOption>
+public class GetGuildOptionHandler : IRequestHandler<GetGuildOptionQuery, GuildOption>
 {
   private readonly ModmailDbContext _dbContext;
   private readonly IOptions<BotConfig> _options;

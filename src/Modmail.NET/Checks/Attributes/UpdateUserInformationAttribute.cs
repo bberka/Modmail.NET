@@ -2,4 +2,4 @@
 
 namespace Modmail.NET.Checks.Attributes;
 
-public sealed class UpdateUserInformationAttribute : ContextCheckAttribute;
+public class UpdateUserInformationAttribute : ContextCheckAttribute;

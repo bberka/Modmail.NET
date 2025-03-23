@@ -16,26 +16,24 @@ public static class HangfireDependency
     builder.Services.Scan(scan => scan
                                   .FromAssemblyOf<IRecurringJobDefinition>()
                                   .AddClasses(classes => classes.AssignableTo<IRecurringJobDefinition>())
-                                  .AsSelf() 
-                                  .AsImplementedInterfaces() 
+                                  .AsSelf()
+                                  .AsImplementedInterfaces()
                                   .WithSingletonLifetime());
 
     builder.Services.AddHangfireServer();
   }
 
   public static void Initialize(WebApplication app) {
-    app.UseHangfireDashboard("/hangfire", new DashboardOptions() {
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions {
       Authorization = [
         new HangfireAuthorizationProvider()
       ]
     });
-    
+
     using var scope = app.Services.CreateScope();
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
     var registeredJobDefinitions = scope.ServiceProvider.GetServices<IRecurringJobDefinition>().ToArray();
-    if (registeredJobDefinitions.Length == 0) {
-      Log.Error("No registered job definitions found");
-    }
+    if (registeredJobDefinitions.Length == 0) Log.Error("No registered job definitions found");
     foreach (var jobDefinition in registeredJobDefinitions) jobDefinition.RegisterRecurringJob(recurringJobManager);
   }
 }

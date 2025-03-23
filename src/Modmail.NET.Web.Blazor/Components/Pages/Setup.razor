@@ -1,17 +1,18 @@
 ﻿@page "/setup"
 @using Modmail.NET.Features.Guild
+@using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Layout
-@using Modmail.NET.Web.Blazor.Static
+@using Modmail.NET.Web.Blazor.Providers
 @inject NavigationManager NavigationManager
 @layout EmptyLayout
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.OnlyOwner))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.Owner))]
 
 @code {
 
   protected override async Task OnInitializedAsync() {
-    if (await Sender.Send(new AnyGuildSetupQuery())) {
-      NavigationManager.NavigateTo("/");
+    if (await Sender.Send(new CheckAnyGuildSetupQuery())) {
+      NavigationManager.NavigateTo("/dashboard");
     }
   }
 
@@ -19,13 +20,13 @@
 }
 
 <div class="container">
-<div class="row">
-  <h1>Setup</h1>
-  <p class="text-secondary">
-    You must setup the bot before you can use the dashboard.
-  </p>
-  <p class="text-secondary">
-    You can setup bot using bot commands through discord.
-  </p>
-</div>
+  <div class="row">
+    <h1>Setup</h1>
+    <p class="text-secondary">
+      You must setup the bot before you can use the dashboard.
+    </p>
+    <p class="text-secondary">
+      You can setup bot using bot commands through discord.
+    </p>
+  </div>
 </div>

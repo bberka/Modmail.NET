@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Checks.Attributes;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Checks;
@@ -20,31 +21,24 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
     var guild = context.Guild?.Id == config.MainServerId
                   ? context.Guild
                   : null;
-    if (guild is null) {
-      return await Task.FromResult(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation());
-    }
+    if (guild is null) return await Task.FromResult(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation());
 
-    if (context.Member is null) {
+    if (context.Member is null)
       //TODO: Add another message
       return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
-    }
 
     var isAdmin = context.Member.Permissions.HasPermission(DiscordPermission.Administrator);
     if (isAdmin) return null;
 
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
-    var roleIdList = context.Member.Roles.Select(x => x.Id).ToList();
-    var permLevel = await sender.Send(new GetTeamPermissionLevelQuery(context.User.Id, roleIdList));
-    if (permLevel is null) {
-      return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
-    }
+    var roleIdList = context.Member.Roles.Select(x => x.Id).ToArray();
+    var permLevel = await sender.Send(new GetPermissionLevelQuery(context.User.Id, roleIdList));
+    if (permLevel is null) return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
 
     var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)attribute.TeamPermissionLevel;
-    if (permLevelInt < expectedLevelInt) {
-      return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
-    }
+    if (permLevelInt < expectedLevelInt) return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
 
 
     return null;

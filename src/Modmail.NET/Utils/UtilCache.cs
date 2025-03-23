@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Modmail.NET.Utils;
 
-public class UtilCache
+public static class UtilCache
 {
   private static readonly string NullHashCode = "$__null_value".GetHashCode().ToString();
 

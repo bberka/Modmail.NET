@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
-public sealed class CheckTicketTypeExistsHandler : IRequestHandler<CheckTicketTypeExistsQuery, bool>
+public class CheckTicketTypeExistsHandler : IRequestHandler<CheckTicketTypeExistsQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

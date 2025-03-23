@@ -1,8 +1,14 @@
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Attributes;
 using Modmail.NET.Entities;
 
 namespace Modmail.NET.Features.Blacklist;
 
-public sealed record ProcessAddUserToBlacklistCommand(ulong UserId, string Reason = null, ulong ModId = 0) : IRequest<TicketBlacklist>;
+[PermissionCheck(nameof(AuthPolicy.ManageBlacklist))]
+public sealed record ProcessAddUserToBlacklistCommand(ulong AuthorizedUserId, ulong UserId, string Reason = null) : IRequest<TicketBlacklist>,
+                                                                                                                    IPermissionCheck;
 
-public sealed record ProcessRemoveUserFromBlacklistCommand(ulong UserId, ulong AuthorUserId = 0) : IRequest<TicketBlacklist>;
+[PermissionCheck(nameof(AuthPolicy.ManageBlacklist))]
+public sealed record ProcessRemoveUserFromBlacklistCommand(ulong AuthorizedUserId, ulong UserId) : IRequest<TicketBlacklist>,
+                                                                                                   IPermissionCheck;

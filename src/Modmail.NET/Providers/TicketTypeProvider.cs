@@ -8,7 +8,7 @@ using Modmail.NET.Features.TicketType;
 
 namespace Modmail.NET.Providers;
 
-public sealed class TicketTypeProvider : IAutoCompleteProvider
+public class TicketTypeProvider : IAutoCompleteProvider
 {
   public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context) {
     const string cacheKey = "TicketTypeProvider.Provider.AutoComplete";

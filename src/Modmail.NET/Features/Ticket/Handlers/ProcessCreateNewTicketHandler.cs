@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Jobs;
@@ -10,7 +11,7 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTicketCommand>
+public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTicketCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -37,8 +38,8 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
 
     var ticketId = Guid.NewGuid();
 
-    var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
-    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+    var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
     var roles = guild.Roles;
 
     var (modMemberListForOverwrites, modRoleListForOverwrites) = UtilPermission.ParsePermissionInfo(permissions, members, roles);
@@ -52,7 +53,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
     var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
 
 
-    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, sentByMod: false);
+    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, false);
 
     var ticket = new Entities.Ticket {
       OpenerUserId = request.User.Id,
@@ -99,13 +100,9 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
       await mailChannel.SendMessageAsync(newTicketMessageBuilder);
       await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message));
 
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(newTicketCreatedLog);
-        if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(request.Message, ticket.Id));
-      }
+      var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
+      var logChannel = await _bot.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(newTicketCreatedLog);
     }, cancellationToken);
   }
 }

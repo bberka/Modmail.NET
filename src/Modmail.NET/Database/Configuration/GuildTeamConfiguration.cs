@@ -4,7 +4,7 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public sealed class GuildTeamConfiguration : IEntityTypeConfiguration<GuildTeam>
+public class GuildTeamConfiguration : IEntityTypeConfiguration<GuildTeam>
 {
   public void Configure(EntityTypeBuilder<GuildTeam> builder) {
     builder.HasKey(x => x.Id);

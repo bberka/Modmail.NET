@@ -78,22 +78,13 @@ namespace Modmail.NET.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
-                    b.Property<bool>("IsEnableDiscordChannelLogging")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSensitiveLogging")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("LogChannelId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<int>("ManageBlacklistMinAccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManageGuildOptionMinAccessLevel")
                         .HasColumnType("int");
 
                     b.Property<int>("ManageHangfireMinAccessLevel")
@@ -138,6 +129,9 @@ namespace Modmail.NET.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllowAccessToWebPanel")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");

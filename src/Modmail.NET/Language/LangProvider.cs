@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Modmail.NET.Language;
 
-public sealed class LangProvider
+public class LangProvider
 {
   private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<LangKeys, string>> _languages;
 

@@ -1,4 +1,4 @@
-﻿namespace Modmail.NET.Common;
+﻿namespace Modmail.NET.Static;
 
 public static class DbLength
 {

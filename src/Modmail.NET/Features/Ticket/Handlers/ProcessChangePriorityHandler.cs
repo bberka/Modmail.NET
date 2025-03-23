@@ -6,7 +6,7 @@ using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorityCommand>
+public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorityCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -34,10 +34,6 @@ public sealed class ProcessChangePriorityHandler : IRequestHandler<ProcessChange
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     _ = Task.Run(async () => {
-      //Don't await this task
-      // var modUser = await ModmailBot.This.Client.GetUserAsync(modUserId);
-      // if (modUser is null) throw new InvalidOperationException("ModUser is null");
-
       var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.ModUserId), cancellationToken);
       if (modUser is null) throw new InvalidOperationException("ModUser is null");
@@ -46,11 +42,8 @@ public sealed class ProcessChangePriorityHandler : IRequestHandler<ProcessChange
       var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
       if (privateChannel is not null) await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, ticket, oldPriority, request.NewPriority));
 
-      //TODO: Handle private messageContent privateChannel not found
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, ticket, oldPriority, request.NewPriority));
-      }
+      var logChannel = await _bot.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, ticket, oldPriority, request.NewPriority));
 
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (ticketChannel is not null) {

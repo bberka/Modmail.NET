@@ -5,7 +5,7 @@ using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Jobs;
 
-public sealed class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
+public class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
 {
   public TicketTypeSelectionTimeoutJob() : base("TicketTypeSelectionTimeoutJob", Cron.Minutely()) {
     Messages = new ConcurrentDictionary<DiscordMessage, DateTime>();

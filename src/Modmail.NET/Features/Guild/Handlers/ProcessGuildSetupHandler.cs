@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand, GuildOption>
+public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand, GuildOption>
 {
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
@@ -19,14 +19,13 @@ public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetup
     var existingMmOption = await _sender.Send(new GetGuildOptionQuery(true), cancellationToken);
     if (existingMmOption is not null) throw new MainServerAlreadySetupException();
 
-    var anyServerSetup = await _sender.Send(new AnyGuildSetupQuery(), cancellationToken);
+    var anyServerSetup = await _sender.Send(new CheckAnyGuildSetupQuery(), cancellationToken);
     if (anyServerSetup) throw new AnotherServerAlreadySetupException();
 
     var guildOption = new GuildOption {
       CategoryId = 0,
       LogChannelId = 0,
       GuildId = request.Guild.Id,
-      IsSensitiveLogging = false,
       IsEnabled = true,
       RegisterDateUtc = DateTime.UtcNow,
       TakeFeedbackAfterClosing = false,
@@ -37,17 +36,9 @@ public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetup
       TicketTimeoutHours = Const.DefaultTicketTimeoutHours
     };
 
-    await _sender.Send(new ClearGuildOptionCommand(), cancellationToken);
+    await _sender.Send(new ClearGuildOptionCommand(request.AuthorizedUserId), cancellationToken);
     _dbContext.Add(guildOption);
     await _dbContext.SaveChangesAsync(cancellationToken);
-
-    _ = Task.Run(async () => {
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _sender.Send(new ProcessCreateLogChannelCommand(request.Guild), cancellationToken);
-        await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
-      }
-    }, cancellationToken);
-
     return guildOption;
   }
 }

@@ -1,6 +1,6 @@
-﻿namespace Modmail.NET.Common;
+﻿namespace Modmail.NET.Extensions;
 
-public static class CommonHelper
+public static class ExtString
 {
   public static string GetStringOrNaN(this string value) {
     if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value)) return "NaN";

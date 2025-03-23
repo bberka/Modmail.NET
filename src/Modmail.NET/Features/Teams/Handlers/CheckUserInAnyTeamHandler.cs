@@ -1,10 +1,11 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Permission;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery, bool>
+public class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

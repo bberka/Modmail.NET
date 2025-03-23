@@ -2,4 +2,4 @@
 
 namespace Modmail.NET.Checks.Attributes;
 
-public sealed class RequireMainServerAttribute : ContextCheckAttribute;
+public class RequireMainServerAttribute : ContextCheckAttribute;

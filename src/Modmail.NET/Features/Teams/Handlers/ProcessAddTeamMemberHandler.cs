@@ -2,12 +2,11 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
-using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Features.Permission;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeamMemberCommand>
+public class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeamMemberCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -26,7 +25,7 @@ public sealed class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeam
     if (isUserAlreadyInTeam) throw new MemberAlreadyInTeamException();
 
 
-    var team = await _sender.Send(new GetTeamQuery(request.Id), cancellationToken);
+    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId,request.Id), cancellationToken);
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = team.Id,
@@ -38,14 +37,5 @@ public sealed class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeam
     _dbContext.GuildTeamMembers.Add(memberEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var userInfo = await _sender.Send(new GetDiscordUserInfoQuery(request.MemberId), cancellationToken);
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, team.Name));
-      }
-    }, cancellationToken);
   }
 }

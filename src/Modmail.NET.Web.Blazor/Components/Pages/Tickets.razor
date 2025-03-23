@@ -1,7 +1,10 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Abstract
 @using Modmail.NET.Features.Ticket
+@using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.Tickets
+@using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -9,7 +12,7 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject ISender Sender
-@attribute [Authorize(Policy = nameof(AuthPolicy.ManageTickets))]
+@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTickets))]
 
 
 @code {
@@ -26,7 +29,7 @@
     _isLoading = false;
   }
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -78,7 +81,7 @@
 
   private int _count;
 
-  private readonly string? _forceCloseReason = null;
+  private readonly string _forceCloseReason = null;
 
   private async Task ForceCloseAsync(TicketDto ticketDto) {
     @* var customDialogResult = await dialogService.OpenAsync("Are you sure you want to force close this ticket ?", *@

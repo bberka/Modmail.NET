@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Models;
 
-namespace Modmail.NET.Features.Teams.Handlers;
+namespace Modmail.NET.Features.Permission.Handler;
 
-public sealed class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
+public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
 {
   private readonly ModmailDbContext _dbContext;
 

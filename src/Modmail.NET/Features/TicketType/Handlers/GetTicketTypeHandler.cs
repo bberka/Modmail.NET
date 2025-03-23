@@ -4,7 +4,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
-public sealed class GetTicketTypeHandler : IRequestHandler<GetTicketTypeQuery, Entities.TicketType>
+public class GetTicketTypeHandler : IRequestHandler<GetTicketTypeQuery, Entities.TicketType>
 {
   private readonly ModmailDbContext _dbContext;
 

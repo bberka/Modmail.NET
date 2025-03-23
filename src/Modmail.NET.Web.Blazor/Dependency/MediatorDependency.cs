@@ -11,6 +11,7 @@ public static class MediatorDependency
       x.AddOpenBehavior(typeof(ValidationBehavior<,>));
       x.AddOpenBehavior(typeof(CachingPipelineBehavior<,>));
       x.AddOpenBehavior(typeof(RetryPipelineBehavior<,>));
+      x.AddOpenBehavior(typeof(PermissionCheckPipelineBehavior<,>));
       x.Lifetime = ServiceLifetime.Scoped;
     });
   }

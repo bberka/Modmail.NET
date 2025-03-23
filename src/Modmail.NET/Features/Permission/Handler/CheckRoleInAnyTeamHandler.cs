@@ -2,9 +2,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 
-namespace Modmail.NET.Features.Teams.Handlers;
+namespace Modmail.NET.Features.Permission.Handler;
 
-public sealed class CheckRoleInAnyTeamHandler : IRequestHandler<CheckRoleInAnyTeamQuery, bool>
+public class CheckRoleInAnyTeamHandler : IRequestHandler<CheckRoleInAnyTeamQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

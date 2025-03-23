@@ -2,11 +2,10 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
+public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -21,7 +20,7 @@ public sealed class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeam
   }
 
   public async Task<GuildTeam> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
-    var exists = await _sender.Send(new CheckTeamExistsQuery(request.TeamName), cancellationToken);
+    var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId,request.TeamName), cancellationToken);
     if (exists) throw new TeamAlreadyExistsException();
 
     var team = new GuildTeam {
@@ -33,21 +32,13 @@ public sealed class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeam
       Id = Guid.NewGuid(),
       PermissionLevel = request.PermissionLevel,
       PingOnNewMessage = request.PingOnTicketMessage,
-      PingOnNewTicket = request.PingOnNewTicket
+      PingOnNewTicket = request.PingOnNewTicket,
+      AllowAccessToWebPanel = request.AllowAccessToWebPanel
     };
 
     _dbContext.Add(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamCreated(team));
-      }
-    }, cancellationToken);
-
     return team;
   }
 }
