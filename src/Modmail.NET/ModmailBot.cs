@@ -48,7 +48,7 @@ public class ModmailBot
         await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
         Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
       }
-      catch (MainServerAlreadySetupException ex) {
+      catch (MainServerAlreadySetupException) {
         Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
       }
       catch (Exception ex) {

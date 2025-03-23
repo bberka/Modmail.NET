@@ -29,7 +29,7 @@
     _isLoading = false;
   }
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -81,7 +81,7 @@
 
   private int _count;
 
-  private readonly string? _forceCloseReason = null;
+  private readonly string _forceCloseReason = null;
 
   private async Task ForceCloseAsync(TicketDto ticketDto) {
     @* var customDialogResult = await dialogService.OpenAsync("Are you sure you want to force close this ticket ?", *@

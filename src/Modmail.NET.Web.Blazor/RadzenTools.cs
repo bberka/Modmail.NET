@@ -6,7 +6,7 @@ namespace Modmail.NET.Web.Blazor;
 
 public static class RadzenTools
 {
-  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs? args = null) {
+  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs args = null) {
     if (args is null) return queryable;
 
     if (args.Filter is not null) queryable = queryable.Where(args.Filter);

@@ -34,7 +34,7 @@
   }
 
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();

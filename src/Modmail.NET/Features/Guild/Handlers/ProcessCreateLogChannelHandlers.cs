@@ -42,7 +42,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
     try {
       category = await guild.GetChannelAsync(guildOption.CategoryId);
     }
-    catch (NotFoundException exception) {
+    catch (NotFoundException) {
       category = await guild.CreateChannelCategoryAsync(Const.CategoryName, permissionOverwrites);
     }
 

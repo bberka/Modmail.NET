@@ -10,16 +10,16 @@
 @code {
 
   [Parameter]
-  public TicketType? TicketType { get; set; }
+  public TicketType TicketType { get; set; }
 
   bool IsUpdate => TicketType != null;
   string _name = "";
-  string? _emoji = "";
+  string _emoji = "";
   string _description = "";
   int _order = 0;
   bool _isEnabled = true;
-  string? _embedMessageTitle = null;
-  string? _embedMessageContent = null;
+  string _embedMessageTitle = null;
+  string _embedMessageContent = null;
 
   protected override Task OnInitializedAsync() {
     if (TicketType is not null) {

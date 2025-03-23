@@ -18,11 +18,11 @@
     _isLoading = false;
   }
 
-  private IQueryable<TicketNote>? _data;
+  private IQueryable<TicketNote> _data;
   private Dictionary<ulong, DiscordUserInfo> _users = new();
   private int _count = 0;
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
