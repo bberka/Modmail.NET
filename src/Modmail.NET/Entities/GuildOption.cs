@@ -37,14 +37,6 @@ public sealed class GuildOption : IHasRegisterDate,
   public bool ShowConfirmationWhenClosingTickets { get; set; }
   public bool AlwaysAnonymous { get; set; } = false;
 
-  [Precision(2)]
-  public double AvgResponseTimeMinutes { get; set; }
-
-  [Precision(2)]
-  public double AvgTicketsClosePerDay { get; set; }
-
-  [Precision(2)]
-  public double AvgTicketsOpenPerDay { get; set; }
 
   public DateTime RegisterDateUtc { get; set; }
 

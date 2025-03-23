@@ -17,6 +17,7 @@ public sealed class ModmailDbContext : DbContext
   public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; } = null!;
   public DbSet<TicketBlacklist> TicketBlacklists { get; set; } = null!;
   public DbSet<TicketType> TicketTypes { get; set; } = null!;
+  public DbSet<Statistic> Statistics { get; set; } = null!;
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);

@@ -191,5 +191,6 @@
   "TICKET_MUST_BE_CLOSED": "Ticket must be closed in order to give feedback",
   "TICKET_TYPE_NOT_EXISTS": "Ticket type does not exists.",
   "TEAM_NOT_EXISTS": "Team does not exists",
-  "TICKET_TYPE_NOT_SET": "Ticket type is not set"
+  "TICKET_TYPE_NOT_SET": "Ticket type is not set",
+  "STATISTIC" : "Statistic"
 }
