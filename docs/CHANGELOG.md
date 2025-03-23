@@ -1,4 +1,6 @@
-# v2.0
+# Changelogs
+
+## v2.0
 - Implemented dependency injection and container for better modularity.
 - Removed unused projects, classes, and anti-pattern implementations.
 - Refactored service methods to use MediatR for improved maintainability.
