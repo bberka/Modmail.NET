@@ -39,3 +39,4 @@
 - Updated team management methods and UI to reflect the new access control logic.
 - Ensured teams with `Owner` permission level always have access to the web panel.
 - Implemented auto setup on server startup if bot is added to main server
+- Removed unnecessary logging to discord log channel
