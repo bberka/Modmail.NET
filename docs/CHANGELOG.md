@@ -24,3 +24,8 @@
 - Fixed a bug when selecting ticket type, message update was not being done correctly
 - Fully fixed average response time calculation, only calculates the first responses between mods and user.
 - UI consistency changes and fixes
+- Moved the dashboard to `/dashboard` URI.
+- Added a landing page at `/` with a login button.
+- Fixed authorization logic to properly handle failed authentication states.
+- Added a new error message for unauthorized access.
+- Enhanced the result page with new buttons for authorized users.
