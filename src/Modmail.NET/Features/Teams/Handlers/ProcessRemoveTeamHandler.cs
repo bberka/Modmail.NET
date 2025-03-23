@@ -26,15 +26,6 @@ public sealed class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeam
     _dbContext.Remove(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamRemoved(team.Name));
-      }
-    }, cancellationToken);
-
     return team;
   }
 }

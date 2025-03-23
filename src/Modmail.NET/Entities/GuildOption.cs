@@ -25,18 +25,13 @@ public sealed class GuildOption : IHasRegisterDate,
   public ulong CategoryId { get; set; }
   public bool IsEnabled { get; set; } = true;
 
-  public bool IsSensitiveLogging { get; set; } = true;
-
   [Range(Const.TicketTimeoutMinAllowedHours, Const.TicketTimeoutMaxAllowedHours)]
   public long TicketTimeoutHours { get; set; } = Const.DefaultTicketTimeoutHours;
-
-  public bool IsEnableDiscordChannelLogging { get; set; } = true;
   public bool TakeFeedbackAfterClosing { get; set; }
 
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
   public bool AlwaysAnonymous { get; set; } = false;
-
 
   public DateTime RegisterDateUtc { get; set; }
 

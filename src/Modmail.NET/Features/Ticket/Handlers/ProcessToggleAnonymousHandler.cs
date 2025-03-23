@@ -32,13 +32,6 @@ public sealed class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggl
     _ = Task.Run(async () => {
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketResponses.AnonymousToggled(ticket));
-
-      //TODO: Handle mail channel not found
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.AnonymousToggled(ticket));
-      }
     }, cancellationToken);
   }
 }

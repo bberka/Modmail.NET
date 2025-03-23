@@ -28,22 +28,5 @@ public sealed class ProcessRemoveTeamMemberHandler : IRequestHandler<ProcessRemo
     _dbContext.GuildTeamMembers.Remove(memberEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        var teamName = await _dbContext.GuildTeams.Where(x => x.Id == memberEntity.GuildTeamId).Select(x => x.Name).FirstOrDefaultAsync(cancellationToken);
-
-        if (request.Type == TeamMemberDataType.UserId) {
-          var userInfo = await _sender.Send(new GetDiscordUserInfoQuery(request.TeamMemberKey), cancellationToken);
-
-          await logChannel.SendMessageAsync(LogResponses.TeamMemberRemoved(userInfo, teamName));
-        }
-        else {
-          await logChannel.SendMessageAsync(LogResponses.TeamRoleRemoved(request.TeamMemberKey, teamName));
-        }
-      }
-    }, cancellationToken);
   }
 }

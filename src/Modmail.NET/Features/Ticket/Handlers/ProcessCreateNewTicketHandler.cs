@@ -99,13 +99,9 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
       await mailChannel.SendMessageAsync(newTicketMessageBuilder);
       await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message));
 
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(newTicketCreatedLog);
-        if (guildOption.IsSensitiveLogging) await logChannel.SendMessageAsync(LogResponses.MessageSentByUser(request.Message, ticket.Id));
-      }
+      var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
+      var logChannel = await _bot.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(newTicketCreatedLog);
     }, cancellationToken);
   }
 }

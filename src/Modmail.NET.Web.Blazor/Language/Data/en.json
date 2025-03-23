@@ -198,5 +198,6 @@
   "ERROR_AUTH_REMOTE_FAIL" : "Auth remote has failed, please try again",
   "ERROR_AUTH_FORBIDDEN" : "You dont have access to view this page",
   "ERROR_NOT_FOUND" : "Page you looking for doesnt exist or moved",
-  "NOT_JOINED_MAIN_SERVER" : "Bot is not added to main server"
+  "NOT_JOINED_MAIN_SERVER" : "Bot is not added to main server",
+  "TICKET_PRIORITY" : "Ticket Priority"
 }

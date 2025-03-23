@@ -79,13 +79,6 @@ public sealed class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChan
             _ticketTypeSelectionTimeoutJob.RemoveMessage(privateMessageWithComponent.Id);
           }
         }
-
-      //TODO: Handle private channel not found
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TicketTypeChanged(ticket, ticketType));
-      }
     }, cancellationToken);
   }
 }

@@ -35,15 +35,5 @@ public sealed class ProcessAddRoleToTeamHandler : IRequestHandler<ProcessAddRole
     _dbContext.GuildTeamMembers.Add(roleEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-
-    _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        var teamName = await _dbContext.GuildTeams.Where(x => x.Id == request.Id).Select(x => x.Name).FirstOrDefaultAsync(cancellationToken);
-        await logChannel.SendMessageAsync(LogResponses.TeamRoleAdded(request.Role, teamName));
-      }
-    }, cancellationToken);
   }
 }

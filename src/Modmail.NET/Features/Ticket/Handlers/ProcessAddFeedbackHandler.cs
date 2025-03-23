@@ -38,11 +38,6 @@ public sealed class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedba
 
     _ = Task.Run(async () => {
       await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(ticket)); });
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.FeedbackReceived(ticket));
-      }
     }, cancellationToken);
   }
 }

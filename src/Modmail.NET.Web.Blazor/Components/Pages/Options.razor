@@ -31,9 +31,8 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
+      //TODO: Call mediator command
       _guildOption.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
-      _guildOption.IsSensitiveLogging = _guildOption.IsSensitiveLogging;
-      _guildOption.IsEnableDiscordChannelLogging = _guildOption.IsEnableDiscordChannelLogging;
       _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
       _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
 
@@ -87,19 +86,6 @@
                 </RadzenLabel>
               </RadzenRow>
 
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="IsSensitiveLogging" @bind-Value=@_guildOption.IsSensitiveLogging/>
-                <RadzenLabel Component="IsSensitiveLogging">
-                  Log sensitive such as message content
-                </RadzenLabel>
-              </RadzenRow>
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="IsEnableDiscordChannelLogging"
-                              @bind-Value=@_guildOption.IsEnableDiscordChannelLogging/>
-                <RadzenLabel Component="IsEnableDiscordChannelLogging">
-                  Log to discord channel in main guild
-                </RadzenLabel>
-              </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">

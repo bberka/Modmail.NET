@@ -30,15 +30,8 @@ public sealed class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteComman
     };
     _dbContext.TicketNotes.Add(noteEntity);
     await _dbContext.SaveChangesAsync(cancellationToken);
-
     _ = Task.Run(async () => {
       var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
-
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.NoteAdded(ticket, noteEntity, user));
-      }
-
       var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (mailChannel is not null) await mailChannel.SendMessageAsync(TicketResponses.NoteAdded(noteEntity, user));
     }, cancellationToken);

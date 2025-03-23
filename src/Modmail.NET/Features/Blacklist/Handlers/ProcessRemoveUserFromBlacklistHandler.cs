@@ -30,14 +30,6 @@ public sealed class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<Proc
 
     _ = Task.Run(async () => {
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
-      var userInfo = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var embedLog = LogResponses.BlacklistRemoved(modUser, userInfo);
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(embedLog);
-      }
-
       var member = await _bot.GetMemberFromAnyGuildAsync(request.UserId);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenRemovedFromBlacklist(modUser);

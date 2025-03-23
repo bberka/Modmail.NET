@@ -38,14 +38,5 @@ public sealed class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeam
     _dbContext.GuildTeamMembers.Add(memberEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      var userInfo = await _sender.Send(new GetDiscordUserInfoQuery(request.MemberId), cancellationToken);
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamMemberAdded(userInfo, team.Name));
-      }
-    }, cancellationToken);
   }
 }

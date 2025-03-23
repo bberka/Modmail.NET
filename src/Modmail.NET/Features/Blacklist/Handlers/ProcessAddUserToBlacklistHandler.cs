@@ -54,13 +54,10 @@ public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAd
       var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
 
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(embedLog);
-      }
-
+      var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
+      var logChannel = await _bot.GetLogChannelAsync();
+      await logChannel.SendMessageAsync(embedLog);
+      
       var member = await _bot.GetMemberFromAnyGuildAsync(user.Id);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenBlacklisted(reason);

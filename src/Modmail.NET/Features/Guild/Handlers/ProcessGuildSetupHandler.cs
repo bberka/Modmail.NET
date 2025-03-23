@@ -26,7 +26,6 @@ public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetup
       CategoryId = 0,
       LogChannelId = 0,
       GuildId = request.Guild.Id,
-      IsSensitiveLogging = false,
       IsEnabled = true,
       RegisterDateUtc = DateTime.UtcNow,
       TakeFeedbackAfterClosing = false,
@@ -40,14 +39,6 @@ public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetup
     await _sender.Send(new ClearGuildOptionCommand(), cancellationToken);
     _dbContext.Add(guildOption);
     await _dbContext.SaveChangesAsync(cancellationToken);
-
-    _ = Task.Run(async () => {
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _sender.Send(new ProcessCreateLogChannelCommand(request.Guild), cancellationToken);
-        await logChannel.SendMessageAsync(LogResponses.SetupComplete(guildOption));
-      }
-    }, cancellationToken);
-
     return guildOption;
   }
 }

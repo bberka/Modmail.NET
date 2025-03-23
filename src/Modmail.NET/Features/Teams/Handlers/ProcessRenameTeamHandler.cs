@@ -21,20 +21,9 @@ public sealed class ProcessRenameTeamHandler : IRequestHandler<ProcessRenameTeam
 
   public async Task Handle(ProcessRenameTeamCommand request, CancellationToken cancellationToken) {
     var team = await _sender.Send(new GetTeamQuery(request.Id), cancellationToken);
-
-    var oldName = team.Name;
     team.Name = request.NewName;
     _dbContext.Update(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
-
-    _ = Task.Run(async () => {
-      //Don't await this task
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-      if (guildOption.IsEnableDiscordChannelLogging) {
-        var logChannel = await _bot.GetLogChannelAsync();
-        await logChannel.SendMessageAsync(LogResponses.TeamRenamed(oldName, team.Name));
-      }
-    }, cancellationToken);
   }
 }
