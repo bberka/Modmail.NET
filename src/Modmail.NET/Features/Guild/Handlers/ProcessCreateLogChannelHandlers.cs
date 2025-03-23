@@ -7,7 +7,7 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogChannelCommand, DiscordChannel>
+public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogChannelCommand, DiscordChannel>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -22,9 +22,9 @@ public sealed class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCre
   public async Task<DiscordChannel> Handle(ProcessCreateLogChannelCommand request, CancellationToken cancellationToken) {
     var guild = await _bot.GetMainGuildAsync();
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
-  
+
     var permissions = await _sender.Send(new GetPermissionInfoOrHigherQuery(TeamPermissionLevel.Admin), cancellationToken);
-    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
     var roles = guild.Roles;
 
     var roleListForOverwrites = new List<DiscordRole>();

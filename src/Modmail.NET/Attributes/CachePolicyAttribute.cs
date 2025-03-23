@@ -1,7 +1,7 @@
 namespace Modmail.NET.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public sealed class CachePolicyAttribute : Attribute
+public class CachePolicyAttribute : Attribute
 {
   public CachePolicyAttribute(string cacheKey, int durationInSeconds, bool includeRequestDataToCacheKey = true) {
     CacheKey = cacheKey;

@@ -6,7 +6,7 @@ using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorityCommand>
+public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorityCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

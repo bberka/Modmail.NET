@@ -6,7 +6,7 @@ using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
+public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

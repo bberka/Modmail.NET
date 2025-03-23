@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
-public sealed class ProcessUpdateTicketTypeHandler : IRequestHandler<ProcessUpdateTicketTypeCommand>
+public class ProcessUpdateTicketTypeHandler : IRequestHandler<ProcessUpdateTicketTypeCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

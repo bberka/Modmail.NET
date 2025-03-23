@@ -1,6 +1,6 @@
 ﻿namespace Modmail.NET.Web.Blazor.Services;
 
-public sealed class ModmailHostedService : IHostedService
+public class ModmailHostedService : IHostedService
 {
   private readonly ModmailBot _modmailBot;
 

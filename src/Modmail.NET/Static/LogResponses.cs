@@ -2,7 +2,7 @@
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 /// <summary>
 ///   Contains the embed messages bot to send to log channel
@@ -21,7 +21,7 @@ public static class LogResponses
                 .AddField(LangKeys.USER.GetTranslation(), initialMessage.Author!.Mention);
     return embed;
   }
-  
+
   public static DiscordEmbedBuilder TicketClosed(Ticket ticket) {
     var embed = new DiscordEmbedBuilder()
                 .WithCustomTimestamp()
@@ -36,7 +36,7 @@ public static class LogResponses
 
     return embed;
   }
-  
+
 
   public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string reason) {
     var embed = new DiscordEmbedBuilder()
@@ -59,7 +59,7 @@ public static class LogResponses
                 .AddField(LangKeys.USER_ID.GetTranslation(), user.Id.ToString(), true);
     return embed;
   }
-  
+
 
   public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo modUser, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
     var embed = new DiscordEmbedBuilder()
@@ -74,7 +74,6 @@ public static class LogResponses
     return embed;
   }
 
-  
 
   public static DiscordEmbedBuilder TicketTypeUpdated(TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()

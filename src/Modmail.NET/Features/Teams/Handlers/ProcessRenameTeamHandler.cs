@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessRenameTeamHandler : IRequestHandler<ProcessRenameTeamCommand>
+public class ProcessRenameTeamHandler : IRequestHandler<ProcessRenameTeamCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

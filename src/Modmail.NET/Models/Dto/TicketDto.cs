@@ -2,7 +2,7 @@
 
 namespace Modmail.NET.Models.Dto;
 
-public sealed class TicketDto
+public class TicketDto
 {
   public required Guid Id { get; set; }
   public required DateTime RegisterDateUtc { get; set; }

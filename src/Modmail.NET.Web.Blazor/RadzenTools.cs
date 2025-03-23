@@ -1,5 +1,5 @@
 ﻿using System.Linq.Dynamic.Core;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Abstract;
 using Radzen;
 
 namespace Modmail.NET.Web.Blazor;

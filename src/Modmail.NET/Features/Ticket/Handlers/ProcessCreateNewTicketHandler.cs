@@ -10,7 +10,7 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTicketCommand>
+public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTicketCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -38,7 +38,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
     var ticketId = Guid.NewGuid();
 
     var permissions = await _sender.Send(new GetTeamPermissionInfoQuery(), cancellationToken);
-    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken: cancellationToken);
+    var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
     var roles = guild.Roles;
 
     var (modMemberListForOverwrites, modRoleListForOverwrites) = UtilPermission.ParsePermissionInfo(permissions, members, roles);
@@ -52,7 +52,7 @@ public sealed class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreat
     var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
 
 
-    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, sentByMod: false);
+    var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, false);
 
     var ticket = new Entities.Ticket {
       OpenerUserId = request.User.Id,

@@ -6,7 +6,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
-public sealed class GetAllBlacklistHandler : IRequestHandler<GetAllBlacklistQuery, List<TicketBlacklist>>
+public class GetAllBlacklistHandler : IRequestHandler<GetAllBlacklistQuery, List<TicketBlacklist>>
 {
   private readonly ModmailDbContext _dbContext;
 

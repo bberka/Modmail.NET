@@ -1,4 +1,6 @@
-﻿namespace Modmail.NET.Exceptions;
+﻿using Modmail.NET.Abstract;
+
+namespace Modmail.NET.Exceptions;
 
 public class UserAlreadyBlacklistedException : BotExceptionBase
 {

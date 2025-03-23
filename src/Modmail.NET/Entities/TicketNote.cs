@@ -3,8 +3,8 @@ using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Entities;
 
-public sealed class TicketNote : IHasRegisterDate,
-                                 IEntity
+public class TicketNote : IHasRegisterDate,
+                          IEntity
 {
   public Guid Id { get; set; }
 

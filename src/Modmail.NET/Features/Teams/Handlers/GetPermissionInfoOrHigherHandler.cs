@@ -5,7 +5,7 @@ using Modmail.NET.Models;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
+public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
 {
   private readonly ModmailDbContext _dbContext;
 

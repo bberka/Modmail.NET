@@ -2,7 +2,7 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 
-namespace Modmail.NET.Manager;
+namespace Modmail.NET.Language;
 
 public static class StringInterpolationMgr
 {

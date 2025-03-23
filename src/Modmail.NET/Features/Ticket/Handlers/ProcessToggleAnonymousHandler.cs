@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonymousCommand>
+public class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonymousCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

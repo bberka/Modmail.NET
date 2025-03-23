@@ -1,5 +1,4 @@
-﻿
-using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
+﻿using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 
 namespace Modmail.NET.Static;
 

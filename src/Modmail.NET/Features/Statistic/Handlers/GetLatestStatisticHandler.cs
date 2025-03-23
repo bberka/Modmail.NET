@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Statistic.Handlers;
 
-public sealed class GetLatestStatisticHandler : IRequestHandler<GetLatestStatisticQuery, Entities.Statistic>
+public class GetLatestStatisticHandler : IRequestHandler<GetLatestStatisticQuery, Entities.Statistic>
 {
   private readonly ModmailDbContext _dbContext;
 
@@ -14,10 +14,8 @@ public sealed class GetLatestStatisticHandler : IRequestHandler<GetLatestStatist
   }
 
   public async Task<Entities.Statistic> Handle(GetLatestStatisticQuery request, CancellationToken cancellationToken) {
-    var data = await _dbContext.Statistics.OrderByDescending(x => x.RegisterDateUtc).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-    if (!request.AllowNull && data is null) {
-      throw new NotFoundException(LangKeys.STATISTIC);
-    }
+    var data = await _dbContext.Statistics.OrderByDescending(x => x.RegisterDateUtc).FirstOrDefaultAsync(cancellationToken);
+    if (!request.AllowNull && data is null) throw new NotFoundException(LangKeys.STATISTIC);
 
     return data;
   }

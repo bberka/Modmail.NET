@@ -1,10 +1,10 @@
 ﻿@page "/teams"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Abstract
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Components.Shared.Teams
 @using Modmail.NET.Web.Blazor.Providers
-@using Modmail.NET.Web.Blazor.Static
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject DialogService DialogService
@@ -25,9 +25,10 @@
           </RadzenText>
           <p>
             Assign members and roles to access tickets and web panel.
-          </p> 
+          </p>
           <p>
-            You must add users to teams to have access to web panel. Role members on discord will not have access to panel. Owner teams will always have access to web panel.
+            You must add users to teams to have access to web panel. Role members on discord will not have access to
+            panel. Owner teams will always have access to web panel.
           </p>
         </RadzenColumn>
       </RadzenRow>

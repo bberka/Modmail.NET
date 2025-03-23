@@ -19,9 +19,9 @@
       <RadzenColumn Size="7">
         <RadzenStack Wrap="FlexWrap.NoWrap" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
                      AlignItems="AlignItems.Center" Gap="0">
-          <RadzenButton Text="Account" class="rz-mx-2 rz-mx-lg-4 rz-mt-2" 
+          <RadzenButton Text="Account" class="rz-mx-2 rz-mx-lg-4 rz-mt-2"
                         Icon="person"
-                      Click="ShowAccountDialog">
+                        Click="ShowAccountDialog">
           </RadzenButton>
         </RadzenStack>
       </RadzenColumn>
@@ -59,7 +59,7 @@
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
 
-  private bool _isAuth = false;
+  private bool _isAuth;
 
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;

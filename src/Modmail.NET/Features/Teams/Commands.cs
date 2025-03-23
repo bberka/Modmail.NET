@@ -19,7 +19,7 @@ public sealed record ProcessUpdateTeamCommand(
   bool? PingOnTicketMessage,
   bool? IsEnabled,
   bool? AllowAccessToWebPanel
-  ) : IRequest;
+) : IRequest;
 
 public sealed record ProcessCreateTeamCommand(
   string TeamName,
@@ -27,6 +27,6 @@ public sealed record ProcessCreateTeamCommand(
   bool PingOnNewTicket = false,
   bool PingOnTicketMessage = false,
   bool AllowAccessToWebPanel = false
-  ) : IRequest<GuildTeam>;
+) : IRequest<GuildTeam>;
 
 public sealed record ProcessAddRoleToTeamCommand(Guid Id, DiscordRole Role) : IRequest;

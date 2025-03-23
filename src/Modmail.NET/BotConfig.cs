@@ -1,6 +1,6 @@
 ﻿namespace Modmail.NET;
 
-public sealed class BotConfig
+public class BotConfig
 {
   public EnvironmentType Environment { get; set; }
   public string BotToken { get; set; }

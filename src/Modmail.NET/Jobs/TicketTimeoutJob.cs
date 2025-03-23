@@ -8,7 +8,7 @@ using Serilog;
 
 namespace Modmail.NET.Jobs;
 
-public sealed class TicketTimeoutJob : HangfireRecurringJobBase
+public class TicketTimeoutJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 

@@ -2,11 +2,10 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
+public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

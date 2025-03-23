@@ -5,7 +5,7 @@ using Modmail.NET.Extensions;
 using Modmail.NET.Models;
 using Modmail.NET.Utils;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 /// <summary>
 ///   Contains the embed messages bot to send to ticket channels

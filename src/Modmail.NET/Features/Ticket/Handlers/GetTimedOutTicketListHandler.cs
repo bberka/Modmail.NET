@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class GetTimedOutTicketListHandler : IRequestHandler<GetTimedOutTicketListQuery, List<Entities.Ticket>>
+public class GetTimedOutTicketListHandler : IRequestHandler<GetTimedOutTicketListQuery, List<Entities.Ticket>>
 {
   private readonly ModmailDbContext _dbContext;
 

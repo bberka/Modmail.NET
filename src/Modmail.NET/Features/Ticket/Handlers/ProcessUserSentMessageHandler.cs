@@ -4,11 +4,10 @@ using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Teams;
-using Polly;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMessageCommand>
+public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMessageCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -33,13 +32,13 @@ public sealed class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserS
     ticket.LastMessageDateUtc = DateTime.UtcNow;
 
     _dbContext.Update(ticket);
-    var ticketMessage = TicketMessage.MapFrom(ticket.Id, request.Message, sentByMod: false);
+    var ticketMessage = TicketMessage.MapFrom(ticket.Id, request.Message, false);
 
     _dbContext.Add(ticketMessage);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    
+
     _ = Task.Run(async () => {
       var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (mailChannel is not null) {
@@ -50,7 +49,6 @@ public sealed class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserS
       var privateChannel = request.PrivateChannel ?? await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
       if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, ticket.PrivateMessageChannelId);
       await privateChannel.SendMessageAsync(UserResponses.MessageSent(request.Message));
-
     }, cancellationToken);
   }
 }

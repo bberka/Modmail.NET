@@ -3,7 +3,7 @@ using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 using Modmail.NET.Utils;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 /// <summary>
 ///   Contains the messages bot to send to user

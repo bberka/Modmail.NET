@@ -1,4 +1,3 @@
-using Modmail.NET.Abstract;
 using Modmail.NET.Pipeline;
 
 namespace Modmail.NET.Web.Blazor.Dependency;

@@ -2,13 +2,11 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
-using Modmail.NET.Features.Teams;
 using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
-public sealed class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemoveUserFromBlacklistCommand, TicketBlacklist>
+public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemoveUserFromBlacklistCommand, TicketBlacklist>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -23,7 +21,7 @@ public sealed class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<Proc
   }
 
   public async Task<TicketBlacklist> Handle(ProcessRemoveUserFromBlacklistCommand request, CancellationToken cancellationToken) {
-    var blacklist = await _sender.Send(new GetBlacklistQuery(request.AuthorizedUserId ,request.UserId), cancellationToken);
+    var blacklist = await _sender.Send(new GetBlacklistQuery(request.AuthorizedUserId, request.UserId), cancellationToken);
     _dbContext.Remove(blacklist);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();

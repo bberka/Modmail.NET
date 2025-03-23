@@ -3,9 +3,9 @@
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Features.Statistic
 @using Modmail.NET.Queues
+@using Modmail.NET.Static
 @using Modmail.NET.Utils
 @using Modmail.NET.Web.Blazor.Providers
-@using Modmail.NET.Static
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
 @inject NotificationService NotificationService
@@ -270,7 +270,7 @@
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
-            <RadzenText TextStyle="TextStyle.H3" >
+            <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.AvgTicketsOpenPerDay.ToString("F") ?? "0") per day
             </RadzenText>
             <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
@@ -285,13 +285,10 @@
               @(Stats?.AvgTicketsClosePerDay.ToString("F") ?? "0") per day
             </RadzenText>
             <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
-              Average Tickets Closed 
+              Average Tickets Closed
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
-
-
- 
 
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -327,8 +324,6 @@
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
-
-
 
 
       </RadzenRow>

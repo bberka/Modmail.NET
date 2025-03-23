@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery, bool>
+public class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

@@ -5,7 +5,7 @@ using Modmail.NET.Models;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class GetTeamPermissionInfoHandler : IRequestHandler<GetTeamPermissionInfoQuery, List<PermissionInfo>>
+public class GetTeamPermissionInfoHandler : IRequestHandler<GetTeamPermissionInfoQuery, List<PermissionInfo>>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

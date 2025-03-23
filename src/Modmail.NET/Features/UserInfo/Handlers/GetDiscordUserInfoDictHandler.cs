@@ -5,7 +5,7 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 
-public sealed class GetDiscordUserInfoDictHandler : IRequestHandler<GetDiscordUserInfoDictQuery, Dictionary<ulong, DiscordUserInfo>>
+public class GetDiscordUserInfoDictHandler : IRequestHandler<GetDiscordUserInfoDictQuery, Dictionary<ulong, DiscordUserInfo>>
 {
   private readonly ModmailDbContext _dbContext;
 

@@ -6,7 +6,7 @@ using Modmail.NET.Checks.Attributes;
 
 namespace Modmail.NET.Checks;
 
-public class RequireMainServerCheck : IContextCheck<RequireMainServerAttribute> 
+public class RequireMainServerCheck : IContextCheck<RequireMainServerAttribute>
 {
   public async ValueTask<string> ExecuteCheckAsync(RequireMainServerAttribute attribute, CommandContext context) {
     var config = context.ServiceProvider.GetRequiredService<IOptions<BotConfig>>().Value;

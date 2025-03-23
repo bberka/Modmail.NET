@@ -207,7 +207,6 @@ Feature roadmap, possibly upcoming features and feature ideas in no particular o
 - Implement option to force user to select ticket type before creating the ticket
 - Implement authorization permission check for all actions (Currently only implemented to blacklist option)
 - Removed redundancy DI injections on classes
-- Check all classes and make them sealed whenever possible 
 - Implement Polly for not awaited task on bot actions for creating, add retries or add hangfire background jobs 
 - Check and delete unused classes/files
 - Change rules for naming enums to regular CSharp naming

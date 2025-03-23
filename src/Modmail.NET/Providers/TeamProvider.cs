@@ -8,7 +8,7 @@ using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Providers;
 
-public sealed class TeamProvider : IAutoCompleteProvider
+public class TeamProvider : IAutoCompleteProvider
 {
   public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext context) {
     const string cacheKey = "TeamProvider.Provider.AutoComplete";

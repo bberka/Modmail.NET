@@ -5,7 +5,7 @@ using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketCommand>
+public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

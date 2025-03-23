@@ -5,7 +5,7 @@ using Modmail.NET.Extensions;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 
-public sealed class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand, DiscordUserInfo>
+public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand, DiscordUserInfo>
 {
   private readonly ModmailDbContext _dbContext;
 

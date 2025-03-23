@@ -1,17 +1,15 @@
 using Hangfire;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Abstract;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
 
-public sealed class StatisticsCalculatorJob : HangfireRecurringJobBase
+public class StatisticsCalculatorJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 
@@ -27,7 +25,6 @@ public sealed class StatisticsCalculatorJob : HangfireRecurringJobBase
 
     var statistics = new Statistic();
     try {
-      
       //TODO: Improve performance of this db call
       var responseTimes = await dbContext.TicketMessages
                                          .Select(x => new {
@@ -101,10 +98,7 @@ public sealed class StatisticsCalculatorJob : HangfireRecurringJobBase
                                             .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
                                             .AverageAsync();
 
-      if (avgTicketResolve.HasValue) {
-        statistics.AvgTicketResolvedMinutes = avgTicketResolve.Value / 60d;
-      }
-
+      if (avgTicketResolve.HasValue) statistics.AvgTicketResolvedMinutes = avgTicketResolve.Value / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate avg tickets close time");
@@ -113,30 +107,24 @@ public sealed class StatisticsCalculatorJob : HangfireRecurringJobBase
 
     try {
       var fastestClosedTicketTime = await dbContext.Tickets
-                                            .Where(x => x.ClosedDateUtc.HasValue)
-                                            .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
-                                            .MinAsync();
+                                                   .Where(x => x.ClosedDateUtc.HasValue)
+                                                   .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
+                                                   .MinAsync();
 
-      if (fastestClosedTicketTime.HasValue) {
-        statistics.FastestClosedTicketMinutes = fastestClosedTicketTime.Value / 60d;
-      }
-
+      if (fastestClosedTicketTime.HasValue) statistics.FastestClosedTicketMinutes = fastestClosedTicketTime.Value / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate fastest closed ticket time");
     }
 
-    
+
     try {
       var slowestClosedTicketTime = await dbContext.Tickets
-                                            .Where(x => x.ClosedDateUtc.HasValue)
-                                            .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
-                                            .MaxAsync();
+                                                   .Where(x => x.ClosedDateUtc.HasValue)
+                                                   .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
+                                                   .MaxAsync();
 
-      if (slowestClosedTicketTime.HasValue) {
-        statistics.SlowestClosedTicketMinutes = slowestClosedTicketTime.Value / 60d;
-      }
-
+      if (slowestClosedTicketTime.HasValue) statistics.SlowestClosedTicketMinutes = slowestClosedTicketTime.Value / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate longest closed ticket time");

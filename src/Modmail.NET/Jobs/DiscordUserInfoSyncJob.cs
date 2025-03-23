@@ -10,7 +10,7 @@ using Serilog;
 
 namespace Modmail.NET.Jobs;
 
-public sealed class DiscordUserInfoSyncJob : HangfireRecurringJobBase
+public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 
@@ -25,7 +25,7 @@ public sealed class DiscordUserInfoSyncJob : HangfireRecurringJobBase
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     var guild = await bot.GetMainGuildAsync();
-    var members =  await guild.GetAllMembersAsync().ToListAsync();
+    var members = await guild.GetAllMembersAsync().ToListAsync();
     // var allDbUsers = await DiscordUserInfo.GetAllAsync();
     var allDbUsers = await sender.Send(new GetDiscordUserInfoListQuery());
     var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x) {

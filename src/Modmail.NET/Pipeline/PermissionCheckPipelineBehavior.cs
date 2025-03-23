@@ -8,7 +8,7 @@ using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Pipeline;
 
-public sealed class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
   where TRequest : IPermissionCheck, IRequest<TResponse>
 {
   private readonly ModmailBot _bot;
@@ -24,23 +24,15 @@ public sealed class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipe
     if (cacheAttribute == null) return await next();
 
 
-    if (request.AuthorizedUserId <= 0) {
-      throw new InvalidUserIdException();
-    }
+    if (request.AuthorizedUserId <= 0) throw new InvalidUserIdException();
 
-    if (_bot.Client.CurrentUser.Id == request.AuthorizedUserId) {
-      return await next();
-    }
+    if (_bot.Client.CurrentUser.Id == request.AuthorizedUserId) return await next();
 
     var permission = await _sender.Send(new GetTeamPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
-    if (permission is null) {
-      throw new UnauthorizedAccessException();
-    }
+    if (permission is null) throw new UnauthorizedAccessException();
 
     var option = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-    if (permission < option.ManageBlacklistMinAccessLevel) {
-      throw new UnauthorizedAccessException();
-    }
+    if (permission < option.ManageBlacklistMinAccessLevel) throw new UnauthorizedAccessException();
 
     return await next();
   }

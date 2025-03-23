@@ -55,7 +55,7 @@ public static class BusinessDependency
     catch (Exception ex) {
       Log.Error(ex, "Failed to setup server: Ensure created failed");
     }
-    
+
     try {
       await dbContext.Database.MigrateAsync();
       Log.Information("Database migration completed!");

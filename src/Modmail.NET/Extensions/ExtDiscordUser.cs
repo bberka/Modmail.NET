@@ -4,8 +4,6 @@ namespace Modmail.NET.Extensions;
 
 public static class ExtDiscordUser
 {
-  //implement caching for log channel etc.
-
   public static string GetUsername(this DiscordUser user) {
     if (user == null) return string.Empty;
     return user.Discriminator == "0" || string.IsNullOrEmpty(user.Discriminator)

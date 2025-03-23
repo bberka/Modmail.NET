@@ -3,9 +3,9 @@ using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Entities;
 
-public sealed class TicketType : IHasRegisterDate,
-                                 IHasUpdateDate,
-                                 IEntity
+public class TicketType : IHasRegisterDate,
+                          IHasUpdateDate,
+                          IEntity
 {
   public Guid Id { get; set; }
 

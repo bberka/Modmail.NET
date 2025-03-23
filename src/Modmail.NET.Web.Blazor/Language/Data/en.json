@@ -192,12 +192,12 @@
   "TICKET_TYPE_NOT_EXISTS": "Ticket type does not exists.",
   "TEAM_NOT_EXISTS": "Team does not exists",
   "TICKET_TYPE_NOT_SET": "Ticket type is not set",
-  "STATISTIC" : "Statistic",
-  "ERROR_ROLE_IS_NULL" : "Error role is null, no permission found",
-  "ERROR_ACCESS_DENIED" : "Access denied",
-  "ERROR_AUTH_REMOTE_FAIL" : "Auth remote has failed, please try again",
-  "ERROR_AUTH_FORBIDDEN" : "You dont have access to view this page",
-  "ERROR_NOT_FOUND" : "Page you looking for doesnt exist or moved",
-  "NOT_JOINED_MAIN_SERVER" : "Bot is not added to main server",
-  "TICKET_PRIORITY" : "Ticket Priority"
+  "STATISTIC": "Statistic",
+  "ERROR_ROLE_IS_NULL": "Error role is null, no permission found",
+  "ERROR_ACCESS_DENIED": "Access denied",
+  "ERROR_AUTH_REMOTE_FAIL": "Auth remote has failed, please try again",
+  "ERROR_AUTH_FORBIDDEN": "You dont have access to view this page",
+  "ERROR_NOT_FOUND": "Page you looking for doesnt exist or moved",
+  "NOT_JOINED_MAIN_SERVER": "Bot is not added to main server",
+  "TICKET_PRIORITY": "Ticket Priority"
 }

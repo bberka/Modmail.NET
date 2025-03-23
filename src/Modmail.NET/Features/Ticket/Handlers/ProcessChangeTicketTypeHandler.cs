@@ -2,14 +2,13 @@ using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Features.UserInfo;
 using Modmail.NET.Jobs;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicketTypeCommand>
+public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicketTypeCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -34,7 +33,7 @@ public sealed class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChan
     //TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
 
-    
+
     var ticketType = await _sender.Send(new GetTicketTypeBySearchQuery(request.Type,
                                                                        true), cancellationToken);
 

@@ -2,11 +2,10 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, GuildTeam>
+public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, GuildTeam>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

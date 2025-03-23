@@ -1,6 +1,6 @@
 namespace Modmail.NET.Attributes;
 
-public sealed class PermissionCheckAttribute : Attribute
+public class PermissionCheckAttribute : Attribute
 {
   private readonly string _policy;
 

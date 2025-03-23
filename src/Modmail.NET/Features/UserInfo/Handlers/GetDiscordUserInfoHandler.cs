@@ -6,7 +6,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 
-public sealed class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery, DiscordUserInfo>
+public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery, DiscordUserInfo>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

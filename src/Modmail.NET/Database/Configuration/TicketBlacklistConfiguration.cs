@@ -4,7 +4,7 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public sealed class TicketBlacklistConfiguration : IEntityTypeConfiguration<TicketBlacklist>
+public class TicketBlacklistConfiguration : IEntityTypeConfiguration<TicketBlacklist>
 {
   public void Configure(EntityTypeBuilder<TicketBlacklist> builder) {
     builder.HasKey(x => x.Id);

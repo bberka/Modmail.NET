@@ -31,7 +31,7 @@
     [CascadingParameter]
     public Task<AuthenticationState> AuthContext { get; set; }
 
-    private bool _showLogoutButton = false;
+    private bool _showLogoutButton;
 
     [Parameter]
     public string Message { get; set; }

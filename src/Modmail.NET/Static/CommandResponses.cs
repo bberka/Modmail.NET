@@ -3,7 +3,7 @@ using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 
-namespace Modmail.NET.Common;
+namespace Modmail.NET.Static;
 
 public static class CommandResponses
 {

@@ -5,8 +5,8 @@ using Modmail.NET.Utils;
 
 namespace Modmail.NET.Entities;
 
-public sealed class TicketMessage : IHasRegisterDate,
-                                    IEntity
+public class TicketMessage : IHasRegisterDate,
+                             IEntity
 {
   public Guid Id { get; set; }
   public ulong SenderUserId { get; set; }
@@ -20,9 +20,9 @@ public sealed class TicketMessage : IHasRegisterDate,
 
   //FK
   public List<TicketMessageAttachment> Attachments { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
 
   public bool SentByMod { get; set; }
+  public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
     var id = Guid.NewGuid();
@@ -34,7 +34,7 @@ public sealed class TicketMessage : IHasRegisterDate,
       Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
       RegisterDateUtc = DateTime.UtcNow,
-      SentByMod = sentByMod,
+      SentByMod = sentByMod
     };
   }
 
@@ -49,7 +49,7 @@ public sealed class TicketMessage : IHasRegisterDate,
       Attachments = discordAttachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = messageId,
       RegisterDateUtc = UtilDate.GetNow(),
-      SentByMod = sentByMod,
+      SentByMod = sentByMod
     };
   }
 }

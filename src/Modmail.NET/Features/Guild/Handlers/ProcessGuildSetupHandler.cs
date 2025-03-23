@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand, GuildOption>
+public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand, GuildOption>
 {
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;

@@ -4,7 +4,7 @@ using Modmail.NET.Database;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
-public sealed class AnyGuildSetupHandler : IRequestHandler<AnyGuildSetupQuery, bool>
+public class AnyGuildSetupHandler : IRequestHandler<AnyGuildSetupQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

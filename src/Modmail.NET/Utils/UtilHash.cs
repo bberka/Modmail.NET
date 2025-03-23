@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Modmail.NET.Utils;
 
-public class UtilHash
+public static class UtilHash
 {
   public static string CreateSha256Hash(string text) {
     var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(text));

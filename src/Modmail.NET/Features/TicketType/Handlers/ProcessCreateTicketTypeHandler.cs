@@ -1,11 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
-public sealed class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicketTypeCommand>
+public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicketTypeCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;

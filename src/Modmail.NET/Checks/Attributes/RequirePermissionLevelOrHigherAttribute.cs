@@ -2,11 +2,11 @@
 
 namespace Modmail.NET.Checks.Attributes;
 
-public sealed class RequirePermissionLevelOrHigherAttribute : ContextCheckAttribute
+public class RequirePermissionLevelOrHigherAttribute : ContextCheckAttribute
 {
-  public TeamPermissionLevel TeamPermissionLevel { get; }
-
   public RequirePermissionLevelOrHigherAttribute(TeamPermissionLevel teamPermissionLevel) {
     TeamPermissionLevel = teamPermissionLevel;
   }
+
+  public TeamPermissionLevel TeamPermissionLevel { get; }
 }

@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
-public sealed class CheckUserBlacklistStatusHandler : IRequestHandler<CheckUserBlacklistStatusQuery, bool>
+public class CheckUserBlacklistStatusHandler : IRequestHandler<CheckUserBlacklistStatusQuery, bool>
 {
   private readonly ModmailDbContext _dbContext;
 

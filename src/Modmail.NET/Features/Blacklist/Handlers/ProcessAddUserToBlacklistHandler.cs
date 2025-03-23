@@ -2,13 +2,12 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
-public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserToBlacklistCommand, TicketBlacklist>
+public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserToBlacklistCommand, TicketBlacklist>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -57,7 +56,7 @@ public sealed class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAd
       var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
       var logChannel = await _bot.GetLogChannelAsync();
       await logChannel.SendMessageAsync(embedLog);
-      
+
       var member = await _bot.GetMemberFromAnyGuildAsync(user.Id);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenBlacklisted(reason);

@@ -1,5 +1,7 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
+@using Modmail.NET.Abstract
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Blacklist
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -11,10 +13,10 @@
 
 @code {
 
-  
+
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
-  
+
   private List<DiscordUserInfo> _users = new();
 
   private ulong? _selectedUserId;

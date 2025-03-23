@@ -41,5 +41,7 @@
 - Implemented auto setup on server startup if bot is added to main server
 - Removed unnecessary logging to discord log channel
 - GuildOptions access level now can not be changed and can only be changed by Owner access level users
-
-
+- Deleted unused and empty files to streamline the codebase.
+- Removed unused classes and optimized folder structure by moving classes to appropriate locations.
+- Updated coding standards: new classes will no longer be defined as `sealed`, and existing sealed classes have been converted to non-sealed.
+- Optimized code imports and improved overall code styling for consistency.

@@ -34,7 +34,6 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 
-
 //DO NOT CHANGE FOLLOWING METHODS ORDER
 app.UseAuthentication();
 app.UseAuthorization();
@@ -43,7 +42,6 @@ app.MapControllers();
 HangfireDependency.Initialize(app); //initializes UI 
 app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();
-
 
 
 Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetReadableProductVersion());

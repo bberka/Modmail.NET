@@ -6,7 +6,7 @@ using Modmail.NET.Features.Guild;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public sealed class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessageCommand>
+public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessageCommand>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -47,8 +47,8 @@ public sealed class ProcessModSendMessageHandler : IRequestHandler<ProcessModSen
         await ticketChannel.SendMessageAsync(embed2);
         await request.Message.DeleteAsync();
       }
-      
-      var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, sentByMod: true);
+
+      var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
       await _dbContext.AddAsync(ticketMessage, cancellationToken);
       var affected2 = await _dbContext.SaveChangesAsync(cancellationToken);
       if (affected2 == 0) throw new DbInternalException();

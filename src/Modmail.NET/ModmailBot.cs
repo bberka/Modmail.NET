@@ -28,9 +28,7 @@ public class ModmailBot
 
     await Client.ConnectAsync();
 
-    while (!Client.AllShardsConnected) {
-      await Task.Delay(5);
-    }
+    while (!Client.AllShardsConnected) await Task.Delay(5);
 
     await Client.UpdateStatusAsync(Const.DiscordActivity);
 
@@ -41,9 +39,7 @@ public class ModmailBot
 
 
     var guildJoined = Client.Guilds.TryGetValue(options.Value.MainServerId, out var guild);
-    if (!guildJoined) {
-      throw new NotJoinedMainServerException();
-    }
+    if (!guildJoined) throw new NotJoinedMainServerException();
 
     Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
     try {

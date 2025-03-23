@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Abstract;
 using Modmail.NET.Features.Teams;
 using Modmail.NET.Language;
 using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Providers;
-using Modmail.NET.Web.Blazor.Static;
 using Serilog;
 
 namespace Modmail.NET.Web.Blazor.Dependency;
@@ -33,9 +32,7 @@ public static class AuthDependency
              x.Cookie.Name = "auth_cookie";
              x.Cookie.SameSite = SameSiteMode.Lax;
              x.Events.OnSigningIn = async context => {
-               if (context.Principal == null || context.Principal.Identity?.IsAuthenticated != true) {
-                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-               }
+               if (context.Principal == null || context.Principal.Identity?.IsAuthenticated != true) await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
              };
            })
            .AddDiscord(x => {
@@ -106,9 +103,7 @@ public static class AuthDependency
 
     var authorizationBuilder = builder.Services.AddAuthorizationBuilder();
 
-    foreach (var policy in AuthPolicy.List) {
-      authorizationBuilder.AddPolicy(policy.Name, p => p.Requirements.Add(new TeamPermissionCheckRequirement(policy)));
-    }
+    foreach (var policy in AuthPolicy.List) authorizationBuilder.AddPolicy(policy.Name, p => p.Requirements.Add(new TeamPermissionCheckRequirement(policy)));
 
 
     builder.Services.AddSingleton<IAuthorizationHandler, TeamPermissionCheckHandler>();

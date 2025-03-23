@@ -4,7 +4,7 @@ using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public sealed class TicketConfiguration : IEntityTypeConfiguration<Ticket>
+public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
 {
   public void Configure(EntityTypeBuilder<Ticket> builder) {
     builder.HasKey(x => x.Id);

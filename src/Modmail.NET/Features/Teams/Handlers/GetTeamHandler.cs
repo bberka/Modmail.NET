@@ -5,7 +5,7 @@ using Modmail.NET.Exceptions;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public sealed class GetTeamHandler : IRequestHandler<GetTeamQuery, GuildTeam>
+public class GetTeamHandler : IRequestHandler<GetTeamQuery, GuildTeam>
 {
   private readonly ModmailDbContext _dbContext;
 

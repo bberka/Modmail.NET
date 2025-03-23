@@ -5,9 +5,9 @@ using Modmail.NET.Extensions;
 
 namespace Modmail.NET.Entities;
 
-public sealed class DiscordUserInfo : IHasRegisterDate,
-                                      IHasUpdateDate,
-                                      IEntity
+public class DiscordUserInfo : IHasRegisterDate,
+                               IHasUpdateDate,
+                               IEntity
 {
   public DiscordUserInfo() { }
 
