@@ -12,5 +12,8 @@ public sealed record HomeStatDto(
   int ProcessingQueueCount,
   double AvgResponseTimeMinutes,
   double AvgTicketsOpenPerDay,
-  double AvgTicketsClosePerDay
+  double AvgTicketsClosePerDay,
+  double AvgTicketResolvedMinutes,
+  double FastestResolvedTicketMinutes,
+  double SlowestClosedTicketMinutes
 );

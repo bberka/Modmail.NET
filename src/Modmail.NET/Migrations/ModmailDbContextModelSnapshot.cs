@@ -67,18 +67,6 @@ namespace Modmail.NET.Migrations
                     b.Property<bool>("AlwaysAnonymous")
                         .HasColumnType("bit");
 
-                    b.Property<double>("AvgResponseTimeMinutes")
-                        .HasPrecision(2)
-                        .HasColumnType("float(2)");
-
-                    b.Property<double>("AvgTicketsClosePerDay")
-                        .HasPrecision(2)
-                        .HasColumnType("float(2)");
-
-                    b.Property<double>("AvgTicketsOpenPerDay")
-                        .HasPrecision(2)
-                        .HasColumnType("float(2)");
-
                     b.Property<string>("BannerUrl")
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
@@ -202,6 +190,44 @@ namespace Modmail.NET.Migrations
                     b.HasIndex("GuildTeamId");
 
                     b.ToTable("GuildTeamMembers");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Entities.Statistic", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("AvgResponseTimeMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketResolvedMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsClosedPerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("AvgTicketsOpenedPerDay")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<double>("FastestClosedTicketMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("SlowestClosedTicketMinutes")
+                        .HasPrecision(2)
+                        .HasColumnType("float(2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Statistics");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.Ticket", b =>

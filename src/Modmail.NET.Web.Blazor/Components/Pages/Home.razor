@@ -1,7 +1,9 @@
 ﻿@page "/"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.Guild
+@using Modmail.NET.Features.Statistic
 @using Modmail.NET.Queues
+@using Modmail.NET.Utils
 @using Modmail.NET.Static
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
@@ -41,7 +43,7 @@
     var teamMemberData = await DbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
     var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
     var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
-    var option = await Sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
+    var statistics = await Sender.Send(new GetLatestStatisticQuery(true)) ?? new Statistic();
 
     Stats = new HomeStatDto(activeTickets,
                             closedTickets,
@@ -52,9 +54,12 @@
                             teamUserCount,
                             teamRoleCount,
                             TicketMessageQueue.GetChannelCount(),
-                            option.AvgResponseTimeMinutes,
-                            option.AvgTicketsOpenPerDay,
-                            option.AvgTicketsClosePerDay
+                            statistics.AvgResponseTimeMinutes,
+                            statistics.AvgTicketsOpenedPerDay,
+                            statistics.AvgTicketsClosedPerDay,
+                            statistics.AvgTicketResolvedMinutes,
+                            statistics.FastestClosedTicketMinutes,
+                            statistics.SlowestClosedTicketMinutes
                            );
   }
 
@@ -159,9 +164,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.ActiveTickets.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Active Tickets
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -169,9 +174,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.ClosedTickets.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Closed Tickets
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -179,9 +184,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.TotalMessages.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Total Messages
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -189,9 +194,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.Teams.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Teams
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
@@ -201,9 +206,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.TeamRoleCount.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Active Team Roles
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
@@ -212,9 +217,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.TeamMemberCount.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Active Team Members
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
@@ -224,9 +229,9 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.Blacklist.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Blacklist
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
@@ -234,55 +239,95 @@
             <RadzenText TextStyle="TextStyle.H3">
               @(Stats?.TicketTypes.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Ticket Types
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
-              @(Stats?.ProcessingQueueCount.ToString() ?? "0") users
+              @(Stats?.ProcessingQueueCount.ToString() ?? "0")
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Processing Message Queues
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
-              @(Stats?.AvgResponseTimeMinutes.ToString("F") ?? "0") m
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.AvgResponseTimeMinutes))
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Average Response Time
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
-            <RadzenText TextStyle="TextStyle.H3">
-              @(Stats?.AvgTicketsOpenPerDay.ToString("F1") ?? "0") per day
+            <RadzenText TextStyle="TextStyle.H3" >
+              @(Stats?.AvgTicketsOpenPerDay.ToString("F") ?? "0") per day
             </RadzenText>
-            <p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
               Average Tickets Opened
-            </p>
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
 
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
-              @(Stats?.AvgTicketsClosePerDay.ToString("F1") ?? "0") per day
+              @(Stats?.AvgTicketsClosePerDay.ToString("F") ?? "0") per day
             </RadzenText>
-            <p>
-              Average Tickets Closed
-            </p>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Tickets Closed 
+            </RadzenText>
           </RadzenCard>
         </RadzenColumn>
+
+
+ 
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.AvgTicketResolvedMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Average Ticket Resolved
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.FastestResolvedTicketMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Fasted Resolved Ticket Time
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
+        <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+          <RadzenCard class="rz-shadow-7">
+            <RadzenText TextStyle="TextStyle.H3">
+              @(UtilReadable.ConvertMinutesToReadableString(Stats?.SlowestClosedTicketMinutes))
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+              Slowest Resolved Ticket Time
+            </RadzenText>
+          </RadzenCard>
+        </RadzenColumn>
+
+
 
 
       </RadzenRow>
