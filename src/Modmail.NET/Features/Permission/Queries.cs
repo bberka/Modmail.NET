@@ -12,3 +12,5 @@ public sealed record GetPermissionInfoOrHigherQuery(TeamPermissionLevel LevelOrH
 public sealed record CheckUserInAnyTeamQuery(ulong MemberId) : IRequest<bool>;
 
 public sealed record CheckRoleInAnyTeamQuery(ulong RoleId) : IRequest<bool>;
+
+public sealed record CheckPermissionAccessQuery(ulong UserId, AuthPolicy Policy) : IRequest<bool>;

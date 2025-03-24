@@ -1,6 +1,8 @@
 ﻿@page "/dashboard"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Extensions
 @using Modmail.NET.Features.Guild
+@using Modmail.NET.Features.Permission
 @using Modmail.NET.Features.Statistic
 @using Modmail.NET.Queues
 @using Modmail.NET.Static
@@ -22,12 +24,18 @@
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
 
+  private bool _canManageStartStop = false;
 
   protected override async Task OnInitializedAsync() {
     if (await Sender.Send(new CheckAnyGuildSetupQuery()) != true) {
       NavigationManager.NavigateTo("/setup");
       return;
     }
+
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
+    
 
     var totalTickets = await DbContext.Tickets
                                       .AsNoTracking()
@@ -66,6 +74,9 @@
 
 
   private async Task StartBotAsync() {
+    if (!_canManageStartStop) {
+      return;
+    }
     var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
@@ -81,6 +92,9 @@
   }
 
   private async Task StopBotAsync() {
+    if (!_canManageStartStop) {
+      return;
+    }
     var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
@@ -127,38 +141,39 @@
       </RadzenRow>
     </RadzenColumn>
     <RadzenColumn Size="12">
-      <RadzenCard class="shadow-7">
-        <RadzenRow>
-          <RadzenColumn Size="12">
-            <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
-          </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow>
-          <RadzenColumn Size="12">
-            <RadzenText class="rz-my-4">
-              Bot is
+      @if (_canManageStartStop) {
+        <RadzenCard class="shadow-7">
+          <RadzenRow>
+            <RadzenColumn Size="12">
+              <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
+            </RadzenColumn>
+          </RadzenRow>
+          <RadzenRow>
+            <RadzenColumn Size="12">
+              <RadzenText class="rz-my-4">
+                Bot is
+                @if (Bot.Connected) {
+                  <span class="rz-color-success">Connected</span>
+                }
+                else {
+                  <span class="rz-color-danger">Disconnected</span>
+                }
+              </RadzenText>
+            </RadzenColumn>
+          </RadzenRow>
+          <RadzenRow>
+            <RadzenColumn Size="12">
               @if (Bot.Connected) {
-                <span class="rz-color-success">Connected</span>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot</RadzenButton>
               }
               else {
-                <span class="rz-color-danger">Disconnected</span>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@StartBotAsync">Start Bot</RadzenButton>
               }
-            </RadzenText>
-          </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow>
-          <RadzenColumn Size="12">
-            @if (Bot.Connected) {
-              <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
-              <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot</RadzenButton>
-            }
-            else {
-              <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@StartBotAsync">Start Bot</RadzenButton>
-            }
-          </RadzenColumn>
-        </RadzenRow>
-      </RadzenCard>
-
+            </RadzenColumn>
+          </RadzenRow>
+        </RadzenCard>
+      }
       <RadzenRow RowGap="4" class="rz-mt-5">
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
