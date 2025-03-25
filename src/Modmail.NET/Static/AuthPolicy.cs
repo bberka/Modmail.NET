@@ -5,7 +5,7 @@ namespace Modmail.NET.Static;
 /// <summary>
 ///   AuthPolicy smart enum
 /// </summary>
-public class AuthPolicy : SmartEnum<AuthPolicy>
+public sealed class AuthPolicy : SmartEnum<AuthPolicy>
 {
   public static readonly AuthPolicy Support = new(nameof(Support), 1);
   public static readonly AuthPolicy Moderator = new(nameof(Moderator), 2);
