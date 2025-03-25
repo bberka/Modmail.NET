@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <Deterministic>false</Deterministic>
     <LangVersion>13</LangVersion>
-    <Version>2.0.0-beta5</Version>
+    <Version>2.0.0-beta6</Version>
   </PropertyGroup>
 
   <ItemGroup>
