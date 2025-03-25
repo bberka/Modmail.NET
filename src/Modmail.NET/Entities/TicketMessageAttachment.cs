@@ -4,7 +4,8 @@ using Modmail.NET.Abstract;
 
 namespace Modmail.NET.Entities;
 
-public class TicketMessageAttachment : IEntity
+public class TicketMessageAttachment : IEntity,
+                                       IGuidId
 {
   public Guid Id { get; set; }
 

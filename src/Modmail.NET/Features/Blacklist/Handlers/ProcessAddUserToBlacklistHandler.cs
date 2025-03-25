@@ -38,7 +38,6 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
                    : request.Reason;
 
     var blackList = new TicketBlacklist {
-      Id = Guid.NewGuid(),
       Reason = reason,
       DiscordUserId = request.UserId,
       RegisterDateUtc = DateTime.UtcNow

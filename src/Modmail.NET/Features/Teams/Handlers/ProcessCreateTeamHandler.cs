@@ -35,7 +35,6 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
       IsEnabled = true,
       GuildTeamMembers = [],
       UpdateDateUtc = null,
-      Id = Guid.NewGuid(),
       PermissionLevel = request.PermissionLevel,
       PingOnNewMessage = request.PingOnTicketMessage,
       PingOnNewTicket = request.PingOnNewTicket,

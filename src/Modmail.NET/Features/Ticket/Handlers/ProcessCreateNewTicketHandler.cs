@@ -36,7 +36,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     var channelName = string.Format(Const.TicketNameTemplate, request.User.Username.Trim());
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
-    var ticketId = Guid.NewGuid();
+    var ticketId = Guid.CreateVersion7();
 
     var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
     var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);

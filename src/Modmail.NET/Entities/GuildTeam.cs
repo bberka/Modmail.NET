@@ -5,7 +5,8 @@ namespace Modmail.NET.Entities;
 
 public class GuildTeam : IHasRegisterDate,
                          IHasUpdateDate,
-                         IEntity
+                         IEntity,
+                         IGuidId
 {
   public Guid Id { get; set; }
   public TeamPermissionLevel PermissionLevel { get; set; }

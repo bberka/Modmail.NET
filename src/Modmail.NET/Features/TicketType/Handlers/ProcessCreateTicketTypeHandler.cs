@@ -25,7 +25,7 @@ public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicke
     var exists = await _sender.Send(new CheckTicketTypeExistsQuery(request.Name), cancellationToken);
     if (exists) throw new TicketTypeAlreadyExistsException(request.Name);
 
-    var id = Guid.NewGuid();
+    var id = Guid.CreateVersion7();
     var idClean = id.ToString().Replace("-", "");
     var ticketType = new Entities.TicketType {
       Id = id,

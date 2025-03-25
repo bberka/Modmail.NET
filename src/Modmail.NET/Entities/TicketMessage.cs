@@ -25,7 +25,7 @@ public class TicketMessage : IHasRegisterDate,
   public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
-    var id = Guid.NewGuid();
+    var id = Guid.CreateVersion7();
     return new TicketMessage {
       Id = id,
       SenderUserId = message.Author.Id,
@@ -40,7 +40,7 @@ public class TicketMessage : IHasRegisterDate,
 
   public static TicketMessage MapFrom(Guid ticketId, ulong authorId, ulong messageId, string messageContent, List<DiscordAttachment> discordAttachments, bool sentByMod) {
     discordAttachments ??= new List<DiscordAttachment>();
-    var id = Guid.NewGuid();
+    var id = Guid.CreateVersion7();
     return new TicketMessage {
       Id = id,
       SenderUserId = authorId,

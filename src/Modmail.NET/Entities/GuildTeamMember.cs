@@ -3,7 +3,8 @@
 namespace Modmail.NET.Entities;
 
 public class GuildTeamMember : IHasRegisterDate,
-                               IEntity
+                               IEntity,
+                               IGuidId
 {
   public Guid Id { get; set; }
   public ulong Key { get; set; }

@@ -5,7 +5,8 @@ using Modmail.NET.Abstract;
 namespace Modmail.NET.Entities;
 
 public class Ticket : IHasRegisterDate,
-                      IEntity
+                      IEntity,
+                      IGuidId
 {
   public Guid Id { get; set; }
   public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;

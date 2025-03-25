@@ -5,7 +5,8 @@ namespace Modmail.NET.Entities;
 
 public class TicketType : IHasRegisterDate,
                           IHasUpdateDate,
-                          IEntity
+                          IEntity,
+                          IGuidId
 {
   public Guid Id { get; set; }
 
