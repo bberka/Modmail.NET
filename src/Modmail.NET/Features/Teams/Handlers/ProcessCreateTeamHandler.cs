@@ -25,7 +25,7 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
     if (exists) throw new TeamAlreadyExistsException();
     
     var userPermissionLevel = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId, true), cancellationToken) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
-    if (userPermissionLevel > request.PermissionLevel) {
+    if (request.PermissionLevel > userPermissionLevel) {
       throw new InvalidOperationException("Can not set higher team permission than self user");
     }
 
