@@ -211,6 +211,7 @@ Feature roadmap, possibly upcoming features and feature ideas in no particular o
 - Check and delete unused classes/files
 - Change rules for naming enums to regular CSharp naming
 - Implement SmartEnums for all enums in the project including EF Core
+- Implement exception handling for GetChannel etc. methods in Discord Client
 - Language Resources
     - Culture Resource file support for multiple languages
     - Enabling culture select and auto detect for users and admins
