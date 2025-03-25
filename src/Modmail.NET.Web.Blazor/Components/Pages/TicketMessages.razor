@@ -1,10 +1,11 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿@page "/tickets/messages/{TicketId:guid}"
+@using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.UserInfo
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject ISender Sender
 
 @code {
-
+  
   [Parameter]
   public Guid TicketId { get; set; }
 
@@ -64,6 +65,13 @@
 <div class="rz-mx-auto">
   <RadzenRow>
     <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Ticket Messages
+          </RadzenText>
+        </RadzenColumn>
+      </RadzenRow>
       <RadzenRow RowGap="4" class="rz-mt-5">
         @if (_data is null) {
           <Loading></Loading>
