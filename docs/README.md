@@ -205,13 +205,9 @@ Feature roadmap, possibly upcoming features and feature ideas in no particular o
 
 - Implement option to enable confirmation dialog when closing tickets
 - Implement option to force user to select ticket type before creating the ticket
-- Implement authorization permission check for all actions (Currently only implemented to blacklist option)
-- Removed redundancy DI injections on classes
 - Implement Polly for not awaited task on bot actions for creating, add retries or add hangfire background jobs 
 - Check and delete unused classes/files
-- Change rules for naming enums to regular CSharp naming
 - Implement SmartEnums for all enums in the project including EF Core
-- Implement exception handling for GetChannel etc. methods in Discord Client
 - Language Resources
     - Culture Resource file support for multiple languages
     - Enabling culture select and auto detect for users and admins
