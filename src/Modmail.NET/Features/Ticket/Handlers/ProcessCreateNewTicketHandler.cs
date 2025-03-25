@@ -2,9 +2,9 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Jobs;
 using Modmail.NET.Utils;
@@ -31,7 +31,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
   public async Task Handle(ProcessCreateNewTicketCommand request, CancellationToken cancellationToken) {
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
 
-    var guild = await _bot.GetMainGuildAsync();
+    var guild = await _sender.Send(new GetDiscordMainGuildQuery(), cancellationToken);
     //make new privateChannel
     var channelName = string.Format(Const.TicketNameTemplate, request.User.Username.Trim());
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
@@ -46,7 +46,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites, modRoleListForOverwrites);
     var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
-    var member = await _bot.GetMemberFromAnyGuildAsync(request.User.Id);
+    var member = await _sender.Send(new GetDiscordMemberQuery(request.User.Id), cancellationToken);
     if (member is null) return;
 
 
@@ -101,7 +101,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
       await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message));
 
       var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(newTicketCreatedLog);
     }, cancellationToken);
   }

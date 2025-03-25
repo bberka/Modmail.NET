@@ -2,6 +2,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Abstract
 @using Modmail.NET.Extensions
+@using Modmail.NET.Features.Bot
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -27,7 +28,9 @@
 
     await ReloadDataAsync();
     _members = await dbContext.DiscordUserInfos.ToListAsync();
-    _roles = await Bot.GetRoles();
+
+    var guild = await Sender.Send(new GetDiscordMainGuildQuery());
+    _roles = guild.Roles.Select(x => x.Value).ToList();
   }
 
   bool _isLoading = false;

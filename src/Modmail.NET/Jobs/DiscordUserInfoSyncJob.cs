@@ -5,6 +5,8 @@ using Modmail.NET.Abstract;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
+using Modmail.NET.Features.Bot;
+using Modmail.NET.Features.Bot.Handlers;
 using Modmail.NET.Features.UserInfo;
 using Serilog;
 
@@ -24,7 +26,7 @@ public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
     var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    var guild = await bot.GetMainGuildAsync();
+    var guild = await sender.Send(new GetDiscordMainGuildQuery());
     var members = await guild.GetAllMembersAsync().ToListAsync();
     // var allDbUsers = await DiscordUserInfo.GetAllAsync();
     var allDbUsers = await sender.Send(new GetDiscordUserInfoListQuery());

@@ -2,8 +2,8 @@ using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Guild.Handlers;
@@ -21,7 +21,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
   }
 
   public async Task<DiscordChannel> Handle(ProcessCreateLogChannelCommand request, CancellationToken cancellationToken) {
-    var guild = await _bot.GetMainGuildAsync();
+    var guild = await _sender.Send(new GetDiscordMainGuildQuery(), cancellationToken);
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
 
     var permissions = await _sender.Send(new GetPermissionInfoOrHigherQuery(TeamPermissionLevel.Admin), cancellationToken);

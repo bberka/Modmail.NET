@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Entities;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Extensions;
@@ -23,8 +24,8 @@ public static class ExtEmbed
   }
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder) {
-    var bot = ServiceLocator.GetModmailBot();
-    var guildInfo = bot.GetMainGuildAsync().GetAwaiter().GetResult();
+    var sender = ServiceLocator.CreateSender();
+    var guildInfo = sender.Send(new GetDiscordMainGuildQuery()).GetAwaiter().GetResult();// TODO: Find a better way to handle this
     return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
   }
 

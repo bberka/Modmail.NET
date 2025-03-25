@@ -4,7 +4,6 @@ using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 

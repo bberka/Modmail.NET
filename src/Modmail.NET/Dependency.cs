@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Modmail.NET;
@@ -32,5 +33,10 @@ public static class ServiceLocator
 
   public static LangProvider GetLangProvider() {
     return _serviceProvider.GetRequiredService<LangProvider>();
+  }
+
+  public static ISender CreateSender() {
+    var scope = _serviceProvider.CreateScope();
+    return scope.ServiceProvider.GetRequiredService<ISender>();
   }
 }

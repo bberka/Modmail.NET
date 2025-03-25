@@ -1,6 +1,7 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
 
@@ -42,7 +43,7 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
       var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
       if (privateChannel is not null) await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, ticket, oldPriority, request.NewPriority));
 
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, ticket, oldPriority, request.NewPriority));
 
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);

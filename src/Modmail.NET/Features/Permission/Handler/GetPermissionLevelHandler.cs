@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Bot;
 
 namespace Modmail.NET.Features.Permission.Handler;
 
@@ -27,7 +28,7 @@ public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery
 
     var roleList = new List<ulong>();
     if (request.IncludeRole) {
-      var guild = await _bot.GetMainGuildAsync();
+      var guild = await _sender.Send(new GetDiscordMainGuildQuery(), cancellationToken);
       var member = await guild.GetMemberAsync(request.UserId);
       roleList.AddRange(member.Roles.Select(x => x.Id));
     }

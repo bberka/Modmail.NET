@@ -1,5 +1,6 @@
 using MediatR;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
 
@@ -52,7 +53,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
         if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(ticket, guildOption));
       }
 
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(LogResponses.TicketClosed(ticket));
     }, cancellationToken);
   }

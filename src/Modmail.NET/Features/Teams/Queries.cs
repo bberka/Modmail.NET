@@ -2,7 +2,6 @@ using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Attributes;
 using Modmail.NET.Entities;
-using Modmail.NET.Models;
 
 namespace Modmail.NET.Features.Teams;
 

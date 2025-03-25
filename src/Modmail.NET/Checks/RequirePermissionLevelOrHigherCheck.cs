@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Checks.Attributes;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Checks;
 
