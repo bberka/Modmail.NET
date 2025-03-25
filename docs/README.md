@@ -64,7 +64,7 @@ We are using this as our main ticket system actively however it is not fully rel
 
 # Installation
 
-1. Install .NET 8 SDK
+1. Install .NET 9 SDK
 2. Download project build and publish for your desired platform or download build from github
 3. Visit Discord Developer Portal and create a new application
 4. Configure appsettings.json
