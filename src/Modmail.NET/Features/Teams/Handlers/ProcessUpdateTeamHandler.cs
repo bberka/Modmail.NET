@@ -23,13 +23,7 @@ public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand
     if (!anyChanges) return;
 
     var team = await _sender.Send(new GetTeamByNameQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
-
-    var oldPermissionLevel = team.PermissionLevel;
-    var oldPingOnNewTicket = team.PingOnNewTicket;
-    var oldPingOnNewMessage = team.PingOnNewMessage;
-    var oldIsEnabled = team.IsEnabled;
-    var oldAllowAccessToWebPanel = team.AllowAccessToWebPanel;
-
+    
     if (request.PermissionLevel.HasValue) team.PermissionLevel = request.PermissionLevel.Value;
 
     if (request.PingOnNewTicket.HasValue) team.PingOnNewTicket = request.PingOnNewTicket.Value;

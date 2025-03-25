@@ -3,7 +3,7 @@ using Modmail.NET.Models;
 
 namespace Modmail.NET.Features.Permission;
 
-public sealed record GetPermissionLevelQuery(ulong UserId, ulong[] RoleIdList = null) : IRequest<TeamPermissionLevel?>;
+public sealed record GetPermissionLevelQuery(ulong UserId, bool IncludeRole = false) : IRequest<TeamPermissionLevel?>;
 
 public sealed record GetPermissionInfoQuery : IRequest<List<PermissionInfo>>;
 

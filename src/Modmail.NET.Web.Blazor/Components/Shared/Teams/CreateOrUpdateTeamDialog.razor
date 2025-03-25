@@ -2,6 +2,7 @@
 @using Microsoft.Extensions.Options
 @using Modmail.NET.Abstract
 @using Modmail.NET.Extensions
+@using Modmail.NET.Features.Permission
 @using Modmail.NET.Features.Teams
 @using Modmail.NET.Static
 @using Serilog
@@ -19,7 +20,7 @@
 
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
-  
+
   [Parameter]
   public GuildTeam Team { get; set; }
 
@@ -29,6 +30,7 @@
   private bool _allowAccessToWebPanel = false;
   private string _teamName;
   private bool _isEnabled = true;
+  private TeamPermissionLevel _userPermissionLevel;
 
   private bool IsUpdate => Team is not null;
 
@@ -51,6 +53,10 @@
     _pingOnTicketMessage = IsUpdate && (Team?.PingOnNewMessage ?? false);
     _isEnabled = IsUpdate && Team!.IsEnabled;
     _allowAccessToWebPanel = Team?.AllowAccessToWebPanel ?? false;
+
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    _userPermissionLevel = await Sender.Send(new GetPermissionLevelQuery(userId, true)) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
   }
 
   private async Task SubmitAsync() {
@@ -75,7 +81,7 @@
       const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
       var state = await AuthContext;
       var userId = state.User.GetUserId();
-      
+
       try {
         if (IsUpdate && Team is not null) {
           await Sender.Send(new ProcessUpdateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled, _allowAccessToWebPanel));
@@ -127,7 +133,8 @@ else {
       </RadzenRow>
 
       <RadzenRow class="rz-my-4">
-        <RadzenDropDown Style="user-select: none" Name="permission-level" Data="Enum.GetValues<TeamPermissionLevel>()"
+        <RadzenDropDown Style="user-select: none" Name="permission-level"
+                        Data="Enum.GetValues<TeamPermissionLevel>().Where(x => (int)x  <= (int)_userPermissionLevel)"
                         class="w-100" TValue="TeamPermissionLevel?" @bind-Value="_permissionLevel"
                         Placeholder="Select Permission Level" AllowFiltering="false"/>
       </RadzenRow>

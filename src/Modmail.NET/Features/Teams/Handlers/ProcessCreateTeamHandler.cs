@@ -2,6 +2,7 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Permission;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -22,6 +23,11 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
   public async Task<GuildTeam> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
     var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId,request.TeamName), cancellationToken);
     if (exists) throw new TeamAlreadyExistsException();
+    
+    var userPermissionLevel = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId, true), cancellationToken) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
+    if (userPermissionLevel > request.PermissionLevel) {
+      throw new InvalidOperationException("Can not set higher team permission than self user");
+    }
 
     var team = new GuildTeam {
       Name = request.TeamName,

@@ -13,9 +13,9 @@ public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery
   private readonly ISender _sender;
 
   public GetPermissionLevelHandler(ModmailDbContext dbContext,
-                                       ModmailBot bot,
-                                       IOptions<BotConfig> options,
-                                       ISender sender) {
+                                   ModmailBot bot,
+                                   IOptions<BotConfig> options,
+                                   ISender sender) {
     _dbContext = dbContext;
     _bot = bot;
     _options = options;
@@ -25,10 +25,16 @@ public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery
   public async Task<TeamPermissionLevel?> Handle(GetPermissionLevelQuery request, CancellationToken cancellationToken) {
     if (_options.Value.OwnerUsers.Contains(request.UserId)) return TeamPermissionLevel.Owner;
 
+    var roleList = new List<ulong>();
+    if (request.IncludeRole) {
+      var guild = await _bot.GetMainGuildAsync();
+      var member = await guild.GetMemberAsync(request.UserId);
+      roleList.AddRange(member.Roles.Select(x => x.Id));
+    }
 
     var teamMember = await _dbContext.GuildTeamMembers
                                      .Include(x => x.GuildTeam)
-                                     .Where(x => (request.RoleIdList != null && x.Type == TeamMemberDataType.RoleId && request.RoleIdList.Contains(x.Key))
+                                     .Where(x => (x.Type == TeamMemberDataType.RoleId && roleList.Contains(x.Key))
                                                  || (x.Key == request.UserId && x.Type == TeamMemberDataType.UserId))
                                      .OrderByDescending(x => x.GuildTeam!.PermissionLevel)
                                      .FirstOrDefaultAsync(cancellationToken);
