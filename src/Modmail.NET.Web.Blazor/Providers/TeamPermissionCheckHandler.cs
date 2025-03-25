@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Modmail.NET.Extensions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
 using Modmail.NET.Static;
 
@@ -22,7 +21,7 @@ public class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermissionChe
       return;
     }
 
-    if (!Enum.TryParse<TeamPermissionLevel>(roleClaim.Value, out var userPermissionLevel)) {
+    if (!Enum.TryParse<TeamPermissionLevel>(roleClaim.Value, out _)) {
       context.Fail();
       return;
     }

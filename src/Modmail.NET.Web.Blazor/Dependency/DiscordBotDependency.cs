@@ -37,7 +37,7 @@ public static class DiscordBotDependency
 
       extension.AddProcessor(textCommandProcessor);
 
-      extension.CommandErrored += (ext, args) => {
+      extension.CommandErrored += (_, args) => {
         Log.Error(args.Exception, "Error executing command {Command} {@Args}", args.Context.Command.FullName, args.Context.Arguments);
         return Task.CompletedTask;
       };

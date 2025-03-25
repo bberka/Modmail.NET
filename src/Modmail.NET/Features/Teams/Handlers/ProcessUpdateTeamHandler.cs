@@ -6,14 +6,12 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessUpdateTeamHandler(ModmailBot bot,
                                   ModmailDbContext dbContext,
                                   ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }

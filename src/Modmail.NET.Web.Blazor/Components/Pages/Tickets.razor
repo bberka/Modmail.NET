@@ -155,9 +155,9 @@
                                       });
   }
 
-  private Task ShowAddNoteDialog(TicketDto ticketDto) {
-    throw new NotImplementedException();
-  }
+  // private Task ShowAddNoteDialog(TicketDto ticketDto) {
+  //   throw new NotImplementedException();
+  // }
 
 }
 
@@ -228,7 +228,7 @@
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenImage Style="width: 100px; height: 100px;" Path="@data.CloserUser?.AvatarUrl"
+                      <RadzenImage Style="width: 100px; height: 100px;" Path="@(data.CloserUser != null ? data.CloserUser.AvatarUrl : "#")"
                                    AlternateText=""/>
                     </RadzenStack>
                   </Template>

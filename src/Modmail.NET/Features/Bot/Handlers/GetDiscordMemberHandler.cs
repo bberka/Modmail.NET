@@ -16,18 +16,19 @@ public class GetDiscordMemberHandler : IRequestHandler<GetDiscordMemberQuery, Di
     _sender = sender;
   }
   public async Task<DiscordMember> Handle(GetDiscordMemberQuery request, CancellationToken cancellationToken) {
-    foreach (var guild in _bot.Client.Guilds)
+    foreach (var guild in _bot.Client.Guilds) {
       try {
         var member = await guild.Value.GetMemberAsync(request.UserId);
         await _sender.Send(new UpdateDiscordUserCommand(member), cancellationToken);
         return member;
       }
       catch (NotFoundException) {
-        continue;
+        // ignored
       }
       catch (Exception) {
         // ignored
       }
+    }
 
     return null;
   }

@@ -8,7 +8,6 @@ using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
 using Modmail.NET.Checks.Attributes;
 using Modmail.NET.Extensions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.TicketType;
@@ -42,8 +41,6 @@ public class TicketSlashCommands
     await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
-      var isPrivateChannel = ctx.Channel.IsPrivate;
-      var option = await _sender.Send(new GetGuildOptionQuery(false));
       var ticket = await _sender.Send(new GetTicketQuery(ticketId, MustBeOpen: true));
       if (ticket.OpenerUserId != ctx.User.Id) {
         var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(ctx.User.Id));

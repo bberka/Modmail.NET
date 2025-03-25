@@ -241,7 +241,7 @@
 
   private async Task ShowAddDialog() {
     var dialog = await DialogService.OpenAsync("Create Team",
-                                               ds =>
+                                               _ =>
                                                  @<div>
                                                    <CreateOrUpdateTeamDialog></CreateOrUpdateTeamDialog>
                                                  </div>,
@@ -255,7 +255,7 @@
 
   private async Task ShowEditDialog(GuildTeam team) {
     var dialog = await DialogService.OpenAsync("Edit Team",
-                                               ds =>
+                                               _ =>
                                                  @<CreateOrUpdateTeamDialog Team="team"></CreateOrUpdateTeamDialog>,
                                                new DialogOptions {
                                                  Width = "450px"
@@ -267,7 +267,7 @@
 
   private async Task ShowAddUserDialog(GuildTeam guildTeam) {
     var dialog = await DialogService.OpenAsync("Add User to Team",
-                                               ds =>
+                                               _ =>
                                                  @<AddUserToTeamDialog GuildTeam="guildTeam"></AddUserToTeamDialog>,
                                                new DialogOptions {
                                                  Width = "450px"
@@ -279,7 +279,7 @@
 
   private async Task ShowAddRoleDialog(GuildTeam guildTeam) {
     var dialog = await DialogService.OpenAsync("Add Role to Team",
-                                               ds =>
+                                               _ =>
                                                  @<AddRoleToTeamDialog GuildTeam="guildTeam"></AddRoleToTeamDialog>,
                                                new DialogOptions {
                                                  Width = "450px"
@@ -291,7 +291,7 @@
 
   private async Task ShowDetailsDialog(GuildTeam guildTeam) {
     var dialog = await DialogService.OpenAsync("Team Details",
-                                               ds =>
+                                               _ =>
                                                  @<TeamDetailsDialog Team="guildTeam"></TeamDetailsDialog>,
                                                new DialogOptions());
     if (dialog is true) {

@@ -6,16 +6,12 @@ namespace Modmail.NET.Features.TicketType.Handlers;
 
 public class ProcessUpdateTicketTypeHandler : IRequestHandler<ProcessUpdateTicketTypeCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
 
   public ProcessUpdateTicketTypeHandler(ModmailDbContext dbContext,
                                         ISender sender,
                                         ModmailBot bot) {
     _dbContext = dbContext;
-    _sender = sender;
-    _bot = bot;
   }
 
   public async Task Handle(ProcessUpdateTicketTypeCommand request, CancellationToken cancellationToken) {

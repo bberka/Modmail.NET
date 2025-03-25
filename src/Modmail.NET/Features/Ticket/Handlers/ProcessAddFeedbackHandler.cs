@@ -7,7 +7,6 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
@@ -16,7 +15,6 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
                                    ModmailBot bot) {
     _sender = sender;
     _dbContext = dbContext;
-    _bot = bot;
   }
 
   public async Task Handle(ProcessAddFeedbackCommand request, CancellationToken cancellationToken) {

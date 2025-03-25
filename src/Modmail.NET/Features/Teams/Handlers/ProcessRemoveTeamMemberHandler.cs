@@ -7,16 +7,10 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessRemoveTeamMemberHandler : IRequestHandler<ProcessRemoveTeamMemberCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
 
-  public ProcessRemoveTeamMemberHandler(ModmailDbContext dbContext,
-                                        ModmailBot bot,
-                                        ISender sender) {
+  public ProcessRemoveTeamMemberHandler(ModmailDbContext dbContext) {
     _dbContext = dbContext;
-    _bot = bot;
-    _sender = sender;
   }
 
   public async Task Handle(ProcessRemoveTeamMemberCommand request, CancellationToken cancellationToken) {

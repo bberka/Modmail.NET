@@ -111,7 +111,7 @@
 
   private async Task ShowAddDialog() {
     var dialog = await DialogService.OpenAsync("Create Ticket Type",
-                                               ds =>
+                                               _ =>
                                                  @<div>
                                                    <CreateOrUpdateTicketTypeDialog></CreateOrUpdateTicketTypeDialog>
                                                  </div>,
@@ -125,7 +125,7 @@
 
   private async Task ShowEditDialog(TicketType ticketType) {
     var dialog = await DialogService.OpenAsync("Edit Ticket Type",
-                                               ds =>
+                                               _ =>
                                                  @<CreateOrUpdateTicketTypeDialog
                                                    TicketType="ticketType"></CreateOrUpdateTicketTypeDialog>,
                                                new DialogOptions {

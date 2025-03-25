@@ -9,7 +9,7 @@
   [Parameter]
   public Guid TicketId { get; set; }
 
-  bool _isLoading = false;
+  bool _isLoading;
 
   async Task ShowLoading() {
     _isLoading = true;
@@ -21,7 +21,7 @@
 
   private IQueryable<TicketMessage> _data;
   private Dictionary<ulong, DiscordUserInfo> _users = new();
-  private int _count = 0;
+  private int _count;
 
   private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();

@@ -12,7 +12,6 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
-@inject ModmailBot Bot
 
 @attribute [AuthorizeTeam(nameof(AuthPolicy.ManageBlacklist))]
 
@@ -108,7 +107,7 @@
   }
 
   private async Task ShowAddDialogAsync() {
-    var result = await DialogService.OpenAsync("Block User", ds =>
+    var result = await DialogService.OpenAsync("Block User", _ =>
                                                  @<div>
                                                    <AddBlacklistDialog></AddBlacklistDialog>
                                                  </div>,

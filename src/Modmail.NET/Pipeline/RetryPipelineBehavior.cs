@@ -18,7 +18,7 @@ public class RetryPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TReq
                       .WaitAndRetryAsync(
                                          retryAttribute.RetryCount,
                                          retryAttempt => TimeSpan.FromSeconds(retryAttribute.DelaySeconds * retryAttempt), // Exponential backoff
-                                         (exception, timeSpan, retryCount, context) => {
+                                         (exception, timeSpan, retryCount, _) => {
                                            Log.Warning("Retry {RetryCount}/{RetryAttributeRetryCount} after {TimeSpanTotalSeconds} seconds due to: {ExceptionMessage}",
                                                        retryCount,
                                                        retryAttribute.RetryCount,

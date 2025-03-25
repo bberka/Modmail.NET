@@ -103,7 +103,7 @@
 
   private async Task ShowAccountDialog() {
     await DialogService.OpenAsync("Account",
-                                  ds =>
+                                  _ =>
                                     @<div>
                                       <AccountDialog></AccountDialog>
                                     </div>,

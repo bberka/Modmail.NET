@@ -8,17 +8,14 @@ namespace Modmail.NET.Features.Permission.Handler;
 
 public class GetPermissionLevelHandler : IRequestHandler<GetPermissionLevelQuery, TeamPermissionLevel?>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly IOptions<BotConfig> _options;
   private readonly ISender _sender;
 
   public GetPermissionLevelHandler(ModmailDbContext dbContext,
-                                   ModmailBot bot,
                                    IOptions<BotConfig> options,
                                    ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _options = options;
     _sender = sender;
   }

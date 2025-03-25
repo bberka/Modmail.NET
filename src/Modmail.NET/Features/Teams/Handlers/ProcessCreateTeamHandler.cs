@@ -8,15 +8,12 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessCreateTeamHandler(ModmailDbContext dbContext,
-                                  ModmailBot bot,
                                   ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 

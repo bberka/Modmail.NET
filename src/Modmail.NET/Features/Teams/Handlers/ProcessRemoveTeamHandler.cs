@@ -7,15 +7,12 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, GuildTeam>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessRemoveTeamHandler(ModmailDbContext dbContext,
-                                  ModmailBot bot,
                                   ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 

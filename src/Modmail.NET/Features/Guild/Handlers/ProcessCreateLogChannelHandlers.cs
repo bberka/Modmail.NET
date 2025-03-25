@@ -10,13 +10,11 @@ namespace Modmail.NET.Features.Guild.Handlers;
 
 public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogChannelCommand, DiscordChannel>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
-  public ProcessCreateLogChannelHandlers(ISender sender, ModmailBot bot, ModmailDbContext dbContext) {
+  public ProcessCreateLogChannelHandlers(ISender sender, ModmailDbContext dbContext) {
     _sender = sender;
-    _bot = bot;
     _dbContext = dbContext;
   }
 
@@ -39,7 +37,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
 
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
 
-    DiscordChannel category = null;
+    DiscordChannel category;
     try {
       category = await guild.GetChannelAsync(guildOption.CategoryId);
     }

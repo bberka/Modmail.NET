@@ -10,15 +10,12 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserToBlacklistCommand, TicketBlacklist>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessAddUserToBlacklistHandler(ModmailDbContext dbContext,
-                                          ModmailBot bot,
                                           ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 

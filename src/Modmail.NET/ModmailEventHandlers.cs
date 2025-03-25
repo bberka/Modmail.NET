@@ -17,12 +17,6 @@ namespace Modmail.NET;
 
 public class ModmailEventHandlers
 {
-  private readonly IServiceScopeFactory _scopeFactory;
-
-  public ModmailEventHandlers(IServiceScopeFactory scopeFactory) {
-    _scopeFactory = scopeFactory;
-  }
-
   public static async Task InteractionCreated(DiscordClient client, InteractionCreatedEventArgs args) {
     var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();

@@ -1,7 +1,6 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -22,7 +21,6 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 
   public async Task Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
     var noteEntity = new TicketNote {
       TicketId = ticket.Id,
       Content = request.Note,

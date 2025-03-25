@@ -9,14 +9,11 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemoveUserFromBlacklistCommand, TicketBlacklist>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
-  public ProcessRemoveUserFromBlacklistHandler(ModmailBot bot,
-                                               ModmailDbContext dbContext,
+  public ProcessRemoveUserFromBlacklistHandler(ModmailDbContext dbContext,
                                                ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }

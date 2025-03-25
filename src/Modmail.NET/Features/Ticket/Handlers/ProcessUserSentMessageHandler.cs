@@ -2,7 +2,6 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -25,9 +24,6 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
     ArgumentNullException.ThrowIfNull(request.Message);
     await Task.Delay(50, cancellationToken); //wait for privateChannel creation process to finish
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
-
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-
 
     ticket.LastMessageDateUtc = DateTime.UtcNow;
 

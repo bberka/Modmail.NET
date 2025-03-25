@@ -6,14 +6,12 @@ namespace Modmail.NET.Features.TicketType.Handlers;
 
 public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicketTypeCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessCreateTicketTypeHandler(ModmailBot bot,
                                         ModmailDbContext dbContext,
                                         ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }

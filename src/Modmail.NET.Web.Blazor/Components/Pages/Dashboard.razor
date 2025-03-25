@@ -24,7 +24,7 @@
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
 
-  private bool _canManageStartStop = false;
+  private bool _canManageStartStop;
 
   protected override async Task OnInitializedAsync() {
     if (await Sender.Send(new CheckAnyGuildSetupQuery()) != true) {
