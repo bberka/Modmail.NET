@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Entities;
+using SmartEnum.EFCore;
 
 namespace Modmail.NET.Database;
 
@@ -21,5 +22,9 @@ public class ModmailDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
+  }
+
+  protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) {
+    configurationBuilder.ConfigureSmartEnum();
   }
 }
