@@ -45,11 +45,12 @@
       @if (_hasAccessTicketTypes) {
         <RadzenPanelMenuItem Text="Ticket Types" Icon="stacks" Path="/ticket-types"/>
       }
-      @if (_isOwner) {
-        <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
-      }
+  
       @if (_hasAccessTeams) {
         <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
+      }
+      @if (_isOwner) {
+        <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
       }
       @if (_hasAccessHangfire) {
         <RadzenPanelMenuItem Text="Hangfire Dashboard" Icon="grid_view" Path="/hangfire"/>
