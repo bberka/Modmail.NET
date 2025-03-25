@@ -26,32 +26,28 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
     ArgumentNullException.ThrowIfNull(request.Channel);
     ArgumentNullException.ThrowIfNull(request.Guild);
 
+    var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
+
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
     ticket.LastMessageDateUtc = DateTime.UtcNow;
 
     _dbContext.Update(ticket);
+    await _dbContext.AddAsync(ticketMessage, cancellationToken);
+    
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
     _ = Task.Run(async () => {
+      var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
       var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      if (privateChannel is not null) {
-        var embed = UserResponses.MessageReceived(request.Message, ticket.Anonymous);
-        await privateChannel.SendMessageAsync(embed);
-      }
+      var embed = UserResponses.MessageReceived(request.Message, anonymous);
+      await privateChannel.SendMessageAsync(embed);
 
       var ticketChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (ticketChannel is not null) {
-        var embed2 = TicketResponses.MessageSent(request.Message, ticket.Anonymous);
-        await ticketChannel.SendMessageAsync(embed2);
-        await request.Message.DeleteAsync();
-      }
-
-      var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
-      await _dbContext.AddAsync(ticketMessage, cancellationToken);
-      var affected2 = await _dbContext.SaveChangesAsync(cancellationToken);
-      if (affected2 == 0) throw new DbInternalException();
+      var embed2 = TicketResponses.MessageSent(request.Message, anonymous);
+      await ticketChannel.SendMessageAsync(embed2);
+      await request.Message.DeleteAsync();
     }, cancellationToken);
   }
 }
