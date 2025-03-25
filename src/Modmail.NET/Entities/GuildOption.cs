@@ -7,21 +7,21 @@ public class GuildOption : IHasRegisterDate,
                            IHasUpdateDate,
                            IEntity
 {
-  public ulong GuildId { get; set; }
+  public required ulong GuildId { get; set; }
 
   [MaxLength(DbLength.Name)]
   [Required]
-  public string Name { get; set; } = "Modmail";
+  public required string Name { get; set; } = "Modmail";
 
   [MaxLength(DbLength.Url)]
-  public string IconUrl { get; set; } = "";
+  public required string IconUrl { get; set; } = "";
 
   [MaxLength(DbLength.Url)]
-  public string BannerUrl { get; set; }
+  public required string BannerUrl { get; set; }
 
-  public ulong LogChannelId { get; set; }
+  public required ulong LogChannelId { get; set; }
 
-  public ulong CategoryId { get; set; }
+  public required ulong CategoryId { get; set; }
   public bool IsEnabled { get; set; } = true;
 
   [Range(Const.TicketTimeoutMinAllowedHours, Const.TicketTimeoutMaxAllowedHours)]
@@ -31,7 +31,7 @@ public class GuildOption : IHasRegisterDate,
 
   //TODO: Implement ShowConfirmationWhenClosingTickets
   public bool ShowConfirmationWhenClosingTickets { get; set; }
-  public bool AlwaysAnonymous { get; set; } = false;
+  public bool AlwaysAnonymous { get; set; }
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
   public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
   public TeamPermissionLevel ManageBlacklistMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;

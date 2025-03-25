@@ -23,7 +23,7 @@ public class TicketType : IHasRegisterDate,
 
   [MaxLength(DbLength.Description)]
   [Required]
-  public string Description { get; set; } = string.Empty;
+  public required string Description { get; set; }
 
   public int Order { get; set; }
 

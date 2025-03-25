@@ -6,9 +6,9 @@ public class GuildTeamMember : IHasRegisterDate,
                                IEntity,
                                IGuidId
 {
-  public ulong Key { get; set; }
-  public TeamMemberDataType Type { get; set; }
-  public Guid GuildTeamId { get; set; }
+  public required ulong Key { get; set; }
+  public required TeamMemberDataType Type { get; set; }
+  public required Guid GuildTeamId { get; set; }
   public GuildTeam GuildTeam { get; set; }
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; }

@@ -10,14 +10,14 @@ public class Ticket : IHasRegisterDate,
 {
   public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? ClosedDateUtc { get; set; }
-  public ulong OpenerUserId { get; set; } //FK
+  public required ulong OpenerUserId { get; set; } //FK
   public ulong? CloserUserId { get; set; } //FK
   public ulong? AssignedUserId { get; set; } //FK
-  public ulong PrivateMessageChannelId { get; set; }
-  public ulong ModMessageChannelId { get; set; }
-  public ulong InitialMessageId { get; set; }
-  public ulong BotTicketCreatedMessageInDmId { get; set; }
-  public TicketPriority Priority { get; set; }
+  public required ulong PrivateMessageChannelId { get; set; }
+  public required ulong ModMessageChannelId { get; set; }
+  public required ulong InitialMessageId { get; set; }
+  public required ulong BotTicketCreatedMessageInDmId { get; set; }
+  public required TicketPriority Priority { get; set; }
 
   [MaxLength(DbLength.Reason)]
   public string CloseReason { get; set; }

@@ -8,9 +8,9 @@ public class TicketBlacklist : IHasRegisterDate,
                                IGuidId
 {
   [MaxLength(DbLength.Reason)]
-  public string Reason { get; set; }
+  public required string Reason { get; set; }
 
-  public ulong DiscordUserId { get; set; }
+  public required ulong DiscordUserId { get; set; }
 
   public DiscordUserInfo DiscordUser { get; set; }
   public Guid Id { get; set; }

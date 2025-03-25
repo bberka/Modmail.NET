@@ -8,7 +8,7 @@ public class GuildTeam : IHasRegisterDate,
                          IEntity,
                          IGuidId
 {
-  public TeamPermissionLevel PermissionLevel { get; set; }
+  public required TeamPermissionLevel PermissionLevel { get; set; }
 
   [MaxLength(DbLength.Name)]
   [Required]

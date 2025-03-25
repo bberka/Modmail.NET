@@ -15,20 +15,20 @@ public class TicketMessageAttachment : IEntity,
   [Required]
   public required string ProxyUrl { get; set; }
 
-  public int? Height { get; set; }
-  public int? Width { get; set; }
+  public required int? Height { get; set; }
+  public required int? Width { get; set; }
 
   [MaxLength(DbLength.FileName)]
   [Required]
   public required string FileName { get; set; }
 
-  public int FileSize { get; set; }
+  public required int FileSize { get; set; }
 
   [MaxLength(DbLength.MediaType)]
   [Required]
   public required string MediaType { get; set; }
 
-  public Guid TicketMessageId { get; set; }
+  public required Guid TicketMessageId { get; set; }
   public Guid Id { get; set; }
 
 
