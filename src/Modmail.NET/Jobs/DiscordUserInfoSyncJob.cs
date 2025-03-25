@@ -28,9 +28,7 @@ public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
     var members = await guild.GetAllMembersAsync().ToListAsync();
     // var allDbUsers = await DiscordUserInfo.GetAllAsync();
     var allDbUsers = await sender.Send(new GetDiscordUserInfoListQuery());
-    var convertedDiscordUsers = members.Select(x => new DiscordUserInfo(x) {
-      Username = x.GetUsername()
-    }).ToList();
+    var convertedDiscordUsers = members.Select(DiscordUserInfo.FromDiscordMember).ToList();
 
     var updateList = new List<DiscordUserInfo>();
     foreach (var dbUser in allDbUsers) {

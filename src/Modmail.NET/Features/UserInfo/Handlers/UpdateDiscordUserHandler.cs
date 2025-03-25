@@ -15,10 +15,7 @@ public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand
 
   public async Task<DiscordUserInfo> Handle(UpdateDiscordUserCommand request, CancellationToken cancellationToken) {
     if (request.DiscordUser is null) return default; //TODO: Check this and handle it better
-    var entity = new DiscordUserInfo(request.DiscordUser) {
-      Username = request.DiscordUser.GetUsername()
-    };
-
+    var entity = DiscordUserInfo.FromDiscordUser(request.DiscordUser);
 
     var dbData = await _dbContext.DiscordUserInfos.FindAsync([entity.Id], cancellationToken);
     if (dbData is not null) {
