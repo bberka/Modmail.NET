@@ -271,7 +271,10 @@
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
-
+      </RadzenRow>
+      
+      
+      <RadzenRow RowGap="4" class="rz-mt-5">
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">
             <RadzenText TextStyle="TextStyle.H3">
@@ -312,7 +315,7 @@
               @(UtilReadable.ConvertMinutesToReadableString(Stats?.AvgTicketResolvedMinutes))
             </RadzenText>
             <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
-              Average Ticket Resolved
+              Average Ticket Resolved Time
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
@@ -323,7 +326,7 @@
               @(UtilReadable.ConvertMinutesToReadableString(Stats?.FastestResolvedTicketMinutes))
             </RadzenText>
             <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
-              Fasted Resolved Ticket Time
+              Fastest Resolved Ticket Time
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
@@ -339,8 +342,6 @@
             </RadzenText>
           </RadzenCard>
         </RadzenColumn>
-
-
       </RadzenRow>
 
     </RadzenColumn>
