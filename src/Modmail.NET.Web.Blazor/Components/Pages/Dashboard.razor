@@ -52,7 +52,7 @@
     var teamMemberData = await DbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync();
     var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
     var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
-    var statistics = await Sender.Send(new GetLatestStatisticQuery(true)) ?? new Statistic();
+    var statistics = await Sender.Send(new GetLatestStatisticQuery(true)) ?? Statistic.Default();
 
     Stats = new HomeStatDto(activeTickets,
                             closedTickets,

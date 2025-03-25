@@ -8,24 +8,35 @@ public class Statistic : IHasRegisterDate,
                          IGuidId
 {
   [Precision(2)]
-  public double AvgResponseTimeMinutes { get; set; }
+  public required double AvgResponseTimeMinutes { get; set; }
 
   [Precision(2)]
-  public double AvgTicketsClosedPerDay { get; set; }
+  public required double AvgTicketsClosedPerDay { get; set; }
 
   [Precision(2)]
-  public double AvgTicketsOpenedPerDay { get; set; }
+  public required double AvgTicketsOpenedPerDay { get; set; }
 
   [Precision(2)]
-  public double AvgTicketResolvedMinutes { get; set; }
+  public required double AvgTicketResolvedMinutes { get; set; }
 
   [Precision(2)]
-  public double FastestClosedTicketMinutes { get; set; }
+  public required double FastestClosedTicketMinutes { get; set; }
 
   [Precision(2)]
-  public double SlowestClosedTicketMinutes { get; set; }
+  public required double SlowestClosedTicketMinutes { get; set; }
 
   public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; }
+
+  public static Statistic Default() {
+    return new Statistic {
+      AvgResponseTimeMinutes = 0,
+      AvgTicketsClosedPerDay = 0,
+      AvgTicketsOpenedPerDay = 0,
+      AvgTicketResolvedMinutes = 0,
+      FastestClosedTicketMinutes = 0,
+      SlowestClosedTicketMinutes = 0,
+    };
+  }
 }

@@ -23,36 +23,37 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
     var scope = _scopeFactory.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
-    var statistics = new Statistic();
+    double averageResponseTime = 0;
+    double avgTicketsOpenPerDay = 0;
+    double avgTicketsClosePerDay = 0;
+    double avgTicketResolveTime = 0;
+    double fastestClosedTicketTime = 0;
+    double slowestClosedTicketTime = 0;
     try {
-      //TODO: Improve performance of this db call
-      var responseTimes = await dbContext.TicketMessages
-                                         .Select(x => new {
-                                           x.TicketId,
-                                           x.RegisterDateUtc,
-                                           x.SentByMod
-                                         })
-                                         .GroupBy(x => x.TicketId)
-                                         .Select(group => new {
-                                           TicketId = group.Key,
-                                           FirstUserMessageTime = group
-                                                                  .Where(x => !x.SentByMod)
-                                                                  .OrderBy(x => x.RegisterDateUtc)
-                                                                  .Select(x => x.RegisterDateUtc)
-                                                                  .FirstOrDefault(),
-                                           FirstModResponseTime = group
-                                                                  .Where(x => x.SentByMod)
-                                                                  .OrderBy(x => x.RegisterDateUtc)
-                                                                  .Select(x => x.RegisterDateUtc)
-                                                                  .FirstOrDefault()
-                                         })
-                                         .Where(x => x.FirstUserMessageTime != default && x.FirstModResponseTime != default)
-                                         .Select(x => EF.Functions.DateDiffSecond(x.FirstUserMessageTime, x.FirstModResponseTime))
-                                         .ToListAsync();
-      var averageResponseTime = responseTimes.Count != 0
-                                  ? responseTimes.Average()
-                                  : 0;
-      if (averageResponseTime >= 0) statistics.AvgResponseTimeMinutes = averageResponseTime / 60d;
+      averageResponseTime = await dbContext.TicketMessages
+                                           .Select(x => new {
+                                             x.TicketId,
+                                             x.RegisterDateUtc,
+                                             x.SentByMod
+                                           })
+                                           .GroupBy(x => x.TicketId)
+                                           .Select(group => new {
+                                             TicketId = group.Key,
+                                             FirstUserMessageTime = group
+                                                                    .Where(x => !x.SentByMod)
+                                                                    .OrderBy(x => x.RegisterDateUtc)
+                                                                    .Select(x => x.RegisterDateUtc)
+                                                                    .FirstOrDefault(),
+                                             FirstModResponseTime = group
+                                                                    .Where(x => x.SentByMod)
+                                                                    .OrderBy(x => x.RegisterDateUtc)
+                                                                    .Select(x => x.RegisterDateUtc)
+                                                                    .FirstOrDefault()
+                                           })
+                                           .Where(x => x.FirstUserMessageTime != default && x.FirstModResponseTime != default)
+                                           .Select(x => EF.Functions.DateDiffSecond(x.FirstUserMessageTime, x.FirstModResponseTime))
+                                           .DefaultIfEmpty()
+                                           .AverageAsync() / 60d;
     }
     catch (InvalidOperationException e) {
       //Seq contains no elements
@@ -61,14 +62,13 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 
 
     try {
-      var avgTicketsOpenPerDay = await dbContext.Tickets
+      avgTicketsOpenPerDay = await dbContext.Tickets
                                                 .GroupBy(x => x.RegisterDateUtc.Date)
                                                 .Select(x => new {
                                                   Date = x.Key,
                                                   Count = x.Count()
                                                 })
                                                 .AverageAsync(x => x.Count);
-      statistics.AvgTicketsOpenedPerDay = avgTicketsOpenPerDay;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate average tickets open per day");
@@ -76,7 +76,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 
 
     try {
-      var avgTicketsClosePerDay = await dbContext.Tickets
+      avgTicketsClosePerDay = await dbContext.Tickets
                                                  .Where(x => x.ClosedDateUtc.HasValue)
                                                  .GroupBy(x => x.RegisterDateUtc.Date)
                                                  .Select(x => new {
@@ -84,8 +84,6 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
                                                    Count = x.Count()
                                                  })
                                                  .AverageAsync(x => x.Count);
-
-      statistics.AvgTicketsClosedPerDay = avgTicketsClosePerDay;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate average tickets close per day");
@@ -93,12 +91,11 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 
 
     try {
-      var avgTicketResolve = await dbContext.Tickets
-                                            .Where(x => x.ClosedDateUtc.HasValue)
-                                            .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
-                                            .AverageAsync();
-
-      if (avgTicketResolve.HasValue) statistics.AvgTicketResolvedMinutes = avgTicketResolve.Value / 60d;
+      avgTicketResolveTime = await dbContext.Tickets
+                                        .Where(x => x.ClosedDateUtc.HasValue)
+                                        .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
+                                        .DefaultIfEmpty(0)
+                                        .AverageAsync() ?? 0 / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate avg tickets close time");
@@ -106,12 +103,11 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 
 
     try {
-      var fastestClosedTicketTime = await dbContext.Tickets
+      fastestClosedTicketTime = await dbContext.Tickets
                                                    .Where(x => x.ClosedDateUtc.HasValue)
                                                    .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
-                                                   .MinAsync();
-
-      if (fastestClosedTicketTime.HasValue) statistics.FastestClosedTicketMinutes = fastestClosedTicketTime.Value / 60d;
+                                                   .DefaultIfEmpty(0)
+                                                   .MinAsync() ?? 0 / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate fastest closed ticket time");
@@ -119,17 +115,25 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 
 
     try {
-      var slowestClosedTicketTime = await dbContext.Tickets
+      slowestClosedTicketTime = await dbContext.Tickets
                                                    .Where(x => x.ClosedDateUtc.HasValue)
                                                    .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc!))
-                                                   .MaxAsync();
-
-      if (slowestClosedTicketTime.HasValue) statistics.SlowestClosedTicketMinutes = slowestClosedTicketTime.Value / 60d;
+                                                   .DefaultIfEmpty(0)
+                                                   .MaxAsync() ?? 0 / 60d;
     }
     catch (InvalidOperationException e) {
       Log.Verbose(e, "Failed to calculate longest closed ticket time");
     }
-
+    
+    var statistics = new Statistic {
+      AvgResponseTimeMinutes = averageResponseTime,
+      AvgTicketsClosedPerDay = avgTicketsClosePerDay,
+      AvgTicketsOpenedPerDay = avgTicketsOpenPerDay,
+      AvgTicketResolvedMinutes =  avgTicketResolveTime,
+      FastestClosedTicketMinutes = fastestClosedTicketTime,
+      SlowestClosedTicketMinutes = slowestClosedTicketTime
+    };
+    
     dbContext.Add(statistics);
     var affected = await dbContext.SaveChangesAsync();
     if (affected == 0) throw new DbInternalException();
