@@ -20,11 +20,11 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
     var guild = context.Guild?.Id == config.MainServerId
                   ? context.Guild
                   : null;
-    if (guild is null) return await Task.FromResult(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation());
+    if (guild is null) return await Task.FromResult(LangKeys.ThisCommandCanOnlyBeUsedInMainServer.GetTranslation());
 
     if (context.Member is null)
       //TODO: Add another message
-      return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
+      return await Task.FromResult(LangKeys.YouDoNotHavePermissionToUseThisCommand.GetTranslation());
 
     var isAdmin = context.Member.Permissions.HasPermission(DiscordPermission.Administrator);
     if (isAdmin) return null;
@@ -32,11 +32,11 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     var permLevel = await sender.Send(new GetPermissionLevelQuery(context.User.Id, true));
-    if (permLevel is null) return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
+    if (permLevel is null) return await Task.FromResult(LangKeys.YouDoNotHavePermissionToUseThisCommand.GetTranslation());
 
     var permLevelInt = (int)permLevel;
     var expectedLevelInt = (int)attribute.TeamPermissionLevel;
-    if (permLevelInt < expectedLevelInt) return await Task.FromResult(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation());
+    if (permLevelInt < expectedLevelInt) return await Task.FromResult(LangKeys.YouDoNotHavePermissionToUseThisCommand.GetTranslation());
 
 
     return null;

@@ -7,7 +7,6 @@ namespace Modmail.NET.Features.TicketType;
 [PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
 public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, Entities.TicketType TicketType) : IRequest;
 
-
 [PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
 public sealed record ProcessCreateTicketTypeCommand(
   ulong AuthorizedUserId,
@@ -18,7 +17,6 @@ public sealed record ProcessCreateTicketTypeCommand(
   string EmbedMessageTitle,
   string EmbedMessageContent) : IRequest;
 
-
 [PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
-public sealed record ProcessRemoveTicketTypeCommand(ulong AuthorizedUserId,Guid Id) : IRequest<Entities.TicketType>,
-                                                                                     IPermissionCheck;
+public sealed record ProcessRemoveTicketTypeCommand(ulong AuthorizedUserId, Guid Id) : IRequest<Entities.TicketType>,
+                                                                                       IPermissionCheck;

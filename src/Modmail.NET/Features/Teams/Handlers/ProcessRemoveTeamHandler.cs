@@ -17,7 +17,7 @@ public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand
   }
 
   public async Task<GuildTeam> Handle(ProcessRemoveTeamCommand request, CancellationToken cancellationToken) {
-    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId,request.Id), cancellationToken);
+    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId, request.Id), cancellationToken);
 
     _dbContext.Remove(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);

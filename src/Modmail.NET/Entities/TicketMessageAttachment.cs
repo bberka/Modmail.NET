@@ -7,8 +7,6 @@ namespace Modmail.NET.Entities;
 public class TicketMessageAttachment : IEntity,
                                        IGuidId
 {
-  public Guid Id { get; set; }
-
   [MaxLength(DbLength.Url)]
   [Required]
   public required string Url { get; set; }
@@ -31,6 +29,7 @@ public class TicketMessageAttachment : IEntity,
   public required string MediaType { get; set; }
 
   public Guid TicketMessageId { get; set; }
+  public Guid Id { get; set; }
 
 
   public static TicketMessageAttachment MapFrom(DiscordAttachment attachment, Guid ticketMessageId) {

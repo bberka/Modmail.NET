@@ -16,7 +16,7 @@ public class GetActiveTicketByUserIdHandler : IRequestHandler<GetTicketByUserIdQ
   public async Task<Entities.Ticket> Handle(GetTicketByUserIdQuery request, CancellationToken cancellationToken) {
     var ticket = await _dbContext.Tickets
                                  .FirstOrDefaultAsync(x => x.OpenerUserId == request.UserId && !x.ClosedDateUtc.HasValue, cancellationToken);
-    if (!request.AllowNull && ticket is null) throw new NotFoundException(LangKeys.TICKET);
+    if (!request.AllowNull && ticket is null) throw new NotFoundException(LangKeys.Ticket);
     return ticket;
   }
 }

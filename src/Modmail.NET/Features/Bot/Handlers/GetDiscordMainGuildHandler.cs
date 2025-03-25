@@ -6,15 +6,16 @@ using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
 using Serilog;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.Bot.Handlers;
 
 public class GetDiscordMainGuildHandler : IRequestHandler<GetDiscordMainGuildQuery, DiscordGuild>
 {
   private readonly ModmailBot _bot;
-  private readonly ISender _sender;
   private readonly ModmailDbContext _dbContext;
   private readonly IOptions<BotConfig> _options;
+  private readonly ISender _sender;
 
   public GetDiscordMainGuildHandler(ModmailBot bot,
                                     ISender sender,
@@ -25,27 +26,27 @@ public class GetDiscordMainGuildHandler : IRequestHandler<GetDiscordMainGuildQue
     _dbContext = dbContext;
     _options = options;
   }
+
   public async Task<DiscordGuild> Handle(GetDiscordMainGuildQuery request, CancellationToken cancellationToken) {
     var guildId = _options.Value.MainServerId;
     DiscordGuild guild;
     try {
       guild = await _bot.Client.GetGuildAsync(guildId);
     }
-    catch (DSharpPlus.Exceptions.NotFoundException) {
+    catch (NotFoundException) {
       Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new NotFoundException(LangKeys.MAIN_GUILD);
+      throw new Exceptions.NotFoundException(LangKeys.MainGuild);
     }
+
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
     var isSame = guildOption.Name == guild.Name && guildOption.IconUrl == guild.IconUrl && guildOption.BannerUrl == guild.BannerUrl;
-    if (isSame) {
-      return guild;
-    }
-    
+    if (isSame) return guild;
+
     guildOption.Name = guild.Name;
     guildOption.IconUrl = guild.IconUrl;
     guildOption.BannerUrl = guild.BannerUrl;
 
-    _dbContext.Update(guildOption); 
+    _dbContext.Update(guildOption);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 

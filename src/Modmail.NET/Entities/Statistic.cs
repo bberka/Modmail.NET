@@ -7,8 +7,6 @@ public class Statistic : IHasRegisterDate,
                          IEntity,
                          IGuidId
 {
-  public Guid Id { get; set; }
-
   [Precision(2)]
   public double AvgResponseTimeMinutes { get; set; }
 
@@ -26,6 +24,8 @@ public class Statistic : IHasRegisterDate,
 
   [Precision(2)]
   public double SlowestClosedTicketMinutes { get; set; }
+
+  public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; }
 }

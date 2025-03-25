@@ -39,7 +39,7 @@ public class BlacklistSlashCommands
     try {
       await _sender.Send(new UpdateDiscordUserCommand(user));
       await _sender.Send(new ProcessAddUserToBlacklistCommand(ctx.User.Id, user.Id, reason));
-      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.UserBlacklisted.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id,
                       user.Id,
@@ -78,7 +78,7 @@ public class BlacklistSlashCommands
       Log.Information(logMessage,
                       ctx.User.Id,
                       user.Id);
-      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.USER_BLACKLISTED.GetTranslation()));
+      await ctx.EditResponseAsync(Webhooks.Success(LangKeys.UserBlacklisted.GetTranslation()));
     }
     catch (BotExceptionBase ex) {
       await ctx.EditResponseAsync(ex.ToWebhookResponse());
@@ -106,10 +106,10 @@ public class BlacklistSlashCommands
     await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
       var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(ctx.User.Id, user.Id));
-      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.USER_BLACKLIST_STATUS.GetTranslation(),
+      await ctx.EditResponseAsync(Webhooks.Info(LangKeys.UserBlacklistStatus.GetTranslation(),
                                                 isBlocked
-                                                  ? LangKeys.USER_IS_BLACKLISTED.GetTranslation()
-                                                  : LangKeys.USER_IS_NOT_BLACKLISTED.GetTranslation()));
+                                                  ? LangKeys.UserIsBlacklisted.GetTranslation()
+                                                  : LangKeys.UserIsNotBlacklisted.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, user.Id);
     }
     catch (BotExceptionBase ex) {

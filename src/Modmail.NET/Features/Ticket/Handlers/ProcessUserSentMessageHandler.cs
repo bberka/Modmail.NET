@@ -43,7 +43,7 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
       }
 
       var privateChannel = request.PrivateChannel ?? await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      if (privateChannel is null) throw new NotFoundWithException(LangKeys.CHANNEL, ticket.PrivateMessageChannelId);
+      if (privateChannel is null) throw new NotFoundWithException(LangKeys.Channel, ticket.PrivateMessageChannelId);
       await privateChannel.SendMessageAsync(UserResponses.MessageSent(request.Message));
     }, cancellationToken);
   }

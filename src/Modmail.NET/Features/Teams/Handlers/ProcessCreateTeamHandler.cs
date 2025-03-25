@@ -18,13 +18,11 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
   }
 
   public async Task<GuildTeam> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
-    var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId,request.TeamName), cancellationToken);
+    var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
     if (exists) throw new TeamAlreadyExistsException();
-    
+
     var userPermissionLevel = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId, true), cancellationToken) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
-    if (request.PermissionLevel > userPermissionLevel) {
-      throw new InvalidOperationException("Can not set higher team permission than self user");
-    }
+    if (request.PermissionLevel > userPermissionLevel) throw new InvalidOperationException("Can not set higher team permission than self user");
 
     var team = new GuildTeam {
       Name = request.TeamName,

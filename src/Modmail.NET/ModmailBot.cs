@@ -22,7 +22,7 @@ public class ModmailBot
   public async Task StartAsync() {
     Log.Information("Starting bot");
 
-    await Client.ConnectAsync(activity: Const.DiscordActivity);
+    await Client.ConnectAsync(Const.DiscordActivity);
 
     while (!Client.AllShardsConnected) await Task.Delay(5);
 
@@ -51,7 +51,6 @@ public class ModmailBot
         throw;
       }
     }
-   
   }
 
   public async Task StopAsync() {
@@ -59,5 +58,4 @@ public class ModmailBot
     await Client.DisconnectAsync();
     Client.Dispose();
   }
-
 }

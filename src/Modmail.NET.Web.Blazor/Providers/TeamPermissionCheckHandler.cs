@@ -34,7 +34,7 @@ public class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermissionChe
       context.Fail();
       return;
     }
-    
+
     context.Succeed(req);
   }
 }

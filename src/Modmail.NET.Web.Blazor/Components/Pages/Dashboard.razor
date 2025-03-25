@@ -35,7 +35,7 @@
     var state = await AuthContext;
     var userId = state.User.GetUserId();
     _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
-    
+
 
     var totalTickets = await DbContext.Tickets
                                       .AsNoTracking()
@@ -77,6 +77,7 @@
     if (!_canManageStartStop) {
       return;
     }
+
     var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
@@ -95,6 +96,7 @@
     if (!_canManageStartStop) {
       return;
     }
+
     var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
@@ -272,8 +274,8 @@
           </RadzenCard>
         </RadzenColumn>
       </RadzenRow>
-      
-      
+
+
       <RadzenRow RowGap="4" class="rz-mt-5">
         <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
           <RadzenCard class="rz-shadow-7">

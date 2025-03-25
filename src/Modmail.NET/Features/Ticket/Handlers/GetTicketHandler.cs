@@ -15,7 +15,7 @@ public class GetTicketHandler : IRequestHandler<GetTicketQuery, Entities.Ticket>
   public async Task<Entities.Ticket> Handle(GetTicketQuery request, CancellationToken cancellationToken) {
     var ticket = await _dbContext.Tickets.FindAsync([request.Id], cancellationToken);
     if (ticket is null) {
-      if (!request.AllowNull) throw new NotFoundException(LangKeys.TICKET);
+      if (!request.AllowNull) throw new NotFoundException(LangKeys.Ticket);
       return null;
     }
 

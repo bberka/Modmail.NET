@@ -33,7 +33,7 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
 
     _dbContext.Update(ticket);
     await _dbContext.AddAsync(ticketMessage, cancellationToken);
-    
+
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 

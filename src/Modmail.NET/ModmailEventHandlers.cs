@@ -103,7 +103,7 @@ public class ModmailEventHandlers
         var ticket = await sender.Send(new GetTicketQuery(ticketId, true));
         if (ticket is not null) {
           if (ticket.ClosedDateUtc.HasValue) return; // Ticket is already closed
-          await sender.Send(new ProcessCloseTicketCommand(ticketId, user.Id, langData.GetTranslation(LangKeys.CHANNEL_WAS_DELETED), args.Channel));
+          await sender.Send(new ProcessCloseTicketCommand(ticketId, user.Id, langData.GetTranslation(LangKeys.ChannelWasDeleted), args.Channel));
           Log.Information(logMessage, args.Channel.Id);
         }
       }
@@ -222,7 +222,7 @@ public class ModmailEventHandlers
   public static async Task ModalSubmitted(DiscordClient client, ModalSubmittedEventArgs args) {
     const string logMessage = $"[{nameof(ModalSubmitted)}]({{CustomId}},{{InteractionId}})";
     await args.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                                               new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(LangProvider.This.GetTranslation(LangKeys.THANK_YOU_FOR_FEEDBACK)));
+                                               new DiscordInteractionResponseBuilder().AsEphemeral().WithContent(LangProvider.This.GetTranslation(LangKeys.ThankYouForFeedback)));
     var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     try {

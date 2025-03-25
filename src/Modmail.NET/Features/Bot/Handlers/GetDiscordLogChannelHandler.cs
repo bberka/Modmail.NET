@@ -8,8 +8,8 @@ namespace Modmail.NET.Features.Bot.Handlers;
 
 public class GetDiscordLogChannelHandler : IRequestHandler<GetDiscordLogChannelQuery, DiscordChannel>
 {
-  private readonly ISender _sender;
   private readonly ModmailBot _bot;
+  private readonly ISender _sender;
 
   public GetDiscordLogChannelHandler(ISender sender,
                                      ModmailBot bot) {
@@ -29,6 +29,7 @@ public class GetDiscordLogChannelHandler : IRequestHandler<GetDiscordLogChannelQ
       logChannel = await _sender.Send(new ProcessCreateLogChannelCommand(_bot.Client.CurrentUser.Id, guild), cancellationToken);
       Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
     }
+
     return logChannel;
   }
 }

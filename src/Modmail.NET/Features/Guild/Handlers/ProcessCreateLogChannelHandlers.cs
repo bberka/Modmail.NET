@@ -45,7 +45,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
       category = await guild.CreateChannelCategoryAsync(Const.CategoryName, permissionOverwrites);
     }
 
-    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.ModmailLogChannelTopic), permissionOverwrites);
     guildOption.LogChannelId = logChannel.Id;
     guildOption.CategoryId = category.Id;
 

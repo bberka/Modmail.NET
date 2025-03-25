@@ -37,7 +37,7 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
 
     _ = Task.Run(async () => {
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.ModUserId), cancellationToken);
-      
+
       try {
         var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
         var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);

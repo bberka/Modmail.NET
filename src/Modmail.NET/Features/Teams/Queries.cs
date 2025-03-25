@@ -10,10 +10,10 @@ public sealed record CheckTeamExistsQuery(ulong AuthorizedUserId, string Name) :
                                                                                  IPermissionCheck;
 
 [PermissionCheck(nameof(AuthPolicy.ManageTeams))]
-public sealed record GetTeamListQuery(ulong AuthorizedUserId,bool ThrowIfEmpty = false) : IRequest<List<GuildTeam>>;
+public sealed record GetTeamListQuery(ulong AuthorizedUserId, bool ThrowIfEmpty = false) : IRequest<List<GuildTeam>>;
 
 [PermissionCheck(nameof(AuthPolicy.ManageTeams))]
-public sealed record GetTeamByNameQuery(ulong AuthorizedUserId,string Name, bool AllowNull = false) : IRequest<GuildTeam>;
+public sealed record GetTeamByNameQuery(ulong AuthorizedUserId, string Name, bool AllowNull = false) : IRequest<GuildTeam>;
 
 [PermissionCheck(nameof(AuthPolicy.ManageTeams))]
-public sealed record GetTeamQuery(ulong AuthorizedUserId,Guid Id, bool AllowNull = false) : IRequest<GuildTeam>;
+public sealed record GetTeamQuery(ulong AuthorizedUserId, Guid Id, bool AllowNull = false) : IRequest<GuildTeam>;

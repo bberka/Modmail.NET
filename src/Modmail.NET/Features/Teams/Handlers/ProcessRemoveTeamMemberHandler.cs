@@ -16,7 +16,7 @@ public class ProcessRemoveTeamMemberHandler : IRequestHandler<ProcessRemoveTeamM
   public async Task Handle(ProcessRemoveTeamMemberCommand request, CancellationToken cancellationToken) {
     var memberEntity = await _dbContext.GuildTeamMembers
                                        .FirstOrDefaultAsync(x => x.Key == request.TeamMemberKey && x.Type == request.Type, cancellationToken);
-    if (memberEntity is null) throw new NotFoundInException(LangKeys.MEMBER, LangKeys.TEAM);
+    if (memberEntity is null) throw new NotFoundInException(LangKeys.Member, LangKeys.Team);
     _dbContext.GuildTeamMembers.Remove(memberEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();

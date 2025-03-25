@@ -33,7 +33,7 @@ public class ModmailCommands
 
     try {
       await _sender.Send(new ProcessGuildSetupCommand(ctx.User.Id, ctx.Guild));
-      await ctx.RespondAsync(Embeds.Success(LangKeys.SERVER_SETUP_COMPLETE.GetTranslation()));
+      await ctx.RespondAsync(Embeds.Success(LangKeys.ServerSetupComplete.GetTranslation()));
       Log.Information(logMessage,
                       ctx.User.Id);
     }

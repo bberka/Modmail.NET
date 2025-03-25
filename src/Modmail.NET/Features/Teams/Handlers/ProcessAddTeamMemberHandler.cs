@@ -22,7 +22,7 @@ public class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeamMemberC
     if (isUserAlreadyInTeam) throw new MemberAlreadyInTeamException();
 
 
-    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId,request.Id), cancellationToken);
+    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId, request.Id), cancellationToken);
 
     var memberEntity = new GuildTeamMember {
       GuildTeamId = team.Id,

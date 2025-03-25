@@ -27,7 +27,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
                          ? _bot.Client.CurrentUser.Id
                          : request.CloserUserId;
     var closeReason = string.IsNullOrEmpty(request.CloseReason)
-                        ? LangProvider.This.GetTranslation(LangKeys.NO_REASON_PROVIDED)
+                        ? LangProvider.This.GetTranslation(LangKeys.NoReasonProvided)
                         : request.CloseReason;
     var closerUser = await _sender.Send(new GetDiscordUserInfoQuery(closerUserId), cancellationToken);
     ArgumentNullException.ThrowIfNull(closerUser);
@@ -47,7 +47,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 
     _ = Task.Run(async () => {
       var modChatChannel = request.ModChatChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TICKET_CLOSED));
+      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TicketClosed));
       try {
         var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
         await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(ticket, guildOption));

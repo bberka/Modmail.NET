@@ -46,13 +46,13 @@ public class TicketSlashCommands
         var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(ctx.User.Id));
         if (!isAnyTeamMember) {
           await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage,
-                                                    Interactions.Error(LangKeys.YOU_DO_NOT_HAVE_PERMISSION_TO_USE_THIS_COMMAND.GetTranslation()).AsEphemeral());
+                                                    Interactions.Error(LangKeys.YouDoNotHavePermissionToUseThisCommand.GetTranslation()).AsEphemeral());
           return;
         }
       }
 
       await _sender.Send(new ProcessCloseTicketCommand(ticketId, ctx.User.Id, reason, ctx.Channel));
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_CLOSED.GetTranslation()));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TicketClosed.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, reason);
     }
     catch (BotExceptionBase ex) {
@@ -75,7 +75,7 @@ public class TicketSlashCommands
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessChangePriorityCommand(ticketId, ctx.User.Id, priority, ctx.Channel));
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation()));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TicketPriorityChanged.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, priority);
     }
     catch (BotExceptionBase ex) {
@@ -100,7 +100,7 @@ public class TicketSlashCommands
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessAddNoteCommand(ticketId, ctx.User.Id, note));
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.NOTE_ADDED.GetTranslation()));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.NoteAdded.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, note);
     }
     catch (BotExceptionBase ex) {
@@ -121,7 +121,7 @@ public class TicketSlashCommands
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessToggleAnonymousCommand(ticketId, ctx.Channel));
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_ANONYMOUS_TOGGLED.GetTranslation()));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TicketAnonymousToggled.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id);
     }
     catch (BotExceptionBase ex) {
@@ -145,7 +145,7 @@ public class TicketSlashCommands
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
       await _sender.Send(new ProcessChangeTicketTypeCommand(ticketId, type, ctx.Channel, UserId: ctx.User.Id));
-      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TICKET_TYPE_CHANGED.GetTranslation()));
+      await ctx.Interaction.EditOriginalResponseAsync(Webhooks.Success(LangKeys.TicketTypeChanged.GetTranslation()));
       Log.Information(logMessage, ctx.User.Id, type);
     }
     catch (BotExceptionBase e) {
@@ -167,9 +167,9 @@ public class TicketSlashCommands
     try {
       var ticketType = await _sender.Send(new GetTicketTypeByChannelIdQuery(ctx.Channel.Id, true));
       if (ticketType is null)
-        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE_NOT_SET.GetTranslation()));
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TicketTypeNotSet.GetTranslation()));
       else
-        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TICKET_TYPE.GetTranslation(), $"`{ticketType.Name}` - {ticketType.Description}"));
+        await ctx.EditResponseAsync(Webhooks.Info(LangKeys.TicketType.GetTranslation(), $"`{ticketType.Name}` - {ticketType.Description}"));
       Log.Information(logMessage);
     }
     catch (BotExceptionBase ex) {

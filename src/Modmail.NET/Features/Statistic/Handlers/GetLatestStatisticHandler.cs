@@ -15,7 +15,7 @@ public class GetLatestStatisticHandler : IRequestHandler<GetLatestStatisticQuery
 
   public async Task<Entities.Statistic> Handle(GetLatestStatisticQuery request, CancellationToken cancellationToken) {
     var data = await _dbContext.Statistics.OrderByDescending(x => x.RegisterDateUtc).FirstOrDefaultAsync(cancellationToken);
-    if (!request.AllowNull && data is null) throw new NotFoundException(LangKeys.STATISTIC);
+    if (!request.AllowNull && data is null) throw new NotFoundException(LangKeys.Statistic);
 
     return data;
   }

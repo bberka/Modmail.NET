@@ -37,6 +37,6 @@ public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery
       //ignored
     }
 
-    throw new NotFoundWithException(LangKeys.USER, request.UserId);
+    throw new NotFoundWithException(LangKeys.User, request.UserId);
   }
 }

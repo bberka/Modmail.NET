@@ -20,24 +20,24 @@ public static class ExtException
   public static DiscordWebhookBuilder ToWebhookResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return Webhooks.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return Webhooks.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
 
-    return Webhooks.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
+    return Webhooks.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
   }
 
   public static DiscordEmbedBuilder ToEmbedResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return Embeds.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return Embeds.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
 
-    return Embeds.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
+    return Embeds.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
   }
 
   public static DiscordInteractionResponseBuilder ToInteractionResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return Interactions.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return Interactions.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
 
-    return Interactions.Error(LangProvider.This.GetTranslation(LangKeys.AN_EXCEPTION_OCCURRED));
+    return Interactions.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
   }
 }

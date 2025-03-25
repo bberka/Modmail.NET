@@ -19,7 +19,7 @@ public class GetTeamListHandler : IRequestHandler<GetTeamListQuery, List<GuildTe
                                  .Include(x => x.GuildTeamMembers)
                                  .ToListAsync(cancellationToken);
 
-    if (request.ThrowIfEmpty && result.Count == 0) throw new EmptyListResultException(LangKeys.TEAM);
+    if (request.ThrowIfEmpty && result.Count == 0) throw new EmptyListResultException(LangKeys.Team);
 
     return result;
   }

@@ -24,7 +24,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
     if (activeTicket is not null)
       await _sender.Send(new ProcessCloseTicketCommand(activeTicket.Id,
                                                        request.UserId,
-                                                       LangProvider.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST),
+                                                       LangProvider.This.GetTranslation(LangKeys.TicketClosedDueToBlacklist),
                                                        DontSendFeedbackMessage: true),
                          cancellationToken);
 
@@ -32,7 +32,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
     var reason = string.IsNullOrEmpty(request.Reason)
-                   ? LangProvider.This.GetTranslation(LangKeys.NO_REASON_PROVIDED)
+                   ? LangProvider.This.GetTranslation(LangKeys.NoReasonProvided)
                    : request.Reason;
 
     var blackList = new TicketBlacklist {

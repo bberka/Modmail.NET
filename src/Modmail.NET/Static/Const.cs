@@ -20,5 +20,5 @@ public static class Const
   public const int TicketTimeoutMinAllowedHours = 12;
   public const int TicketTimeoutMaxAllowedHours = 168 * 2; // 2 weeks
   public const string ThemeCookieName = "Modmail.NET.Theme";
-  public static readonly DiscordActivity DiscordActivity = new(LangProvider.This.GetTranslation(LangKeys.MODERATION_CONCERNS), DiscordActivityType.ListeningTo);
+  public static readonly DiscordActivity DiscordActivity = new(LangProvider.This.GetTranslation(LangKeys.ModerationConcerns), DiscordActivityType.ListeningTo);
 }

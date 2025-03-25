@@ -30,11 +30,11 @@
                                  .ToList();
 
     var guild = await Sender.Send(new GetDiscordMainGuildQuery());
-    _roles = (guild.Roles)
-             .Where(x => x.Value.Name != "@everyone")
-             .Where(x => teamMemberIds.All(y => y != x.Key)) // Exclude team members
-             .Select(x => x.Value)
-             .ToList();
+    _roles = guild.Roles
+                  .Where(x => x.Value.Name != "@everyone")
+                  .Where(x => teamMemberIds.All(y => y != x.Key)) // Exclude team members
+                  .Select(x => x.Value)
+                  .ToList();
   }
 
   private async Task SubmitAsync() {

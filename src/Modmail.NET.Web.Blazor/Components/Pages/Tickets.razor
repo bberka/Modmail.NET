@@ -228,7 +228,9 @@
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenImage Style="width: 100px; height: 100px;" Path="@(data.CloserUser != null ? data.CloserUser.AvatarUrl : "#")"
+                      <RadzenImage Style="width: 100px; height: 100px;" Path="@(data.CloserUser != null
+                                                                                  ? data.CloserUser.AvatarUrl
+                                                                                  : "#")"
                                    AlternateText=""/>
                     </RadzenStack>
                   </Template>

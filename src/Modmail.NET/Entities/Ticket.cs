@@ -8,7 +8,6 @@ public class Ticket : IHasRegisterDate,
                       IEntity,
                       IGuidId
 {
-  public Guid Id { get; set; }
   public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
   public DateTime? ClosedDateUtc { get; set; }
   public ulong OpenerUserId { get; set; } //FK
@@ -42,5 +41,6 @@ public class Ticket : IHasRegisterDate,
   public TicketType TicketType { get; set; }
   public List<TicketMessage> Messages { get; set; } = [];
   public List<TicketNote> TicketNotes { get; set; } = [];
+  public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; }
 }

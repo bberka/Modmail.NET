@@ -14,23 +14,23 @@ public static class TicketResponses
 {
   public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<PermissionInfo> permissionInfos) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.NEW_TICKET.GetTranslation())
+                .WithTitle(LangKeys.NewTicket.GetTranslation())
                 .WithCustomTimestamp()
-                .WithDescription(LangKeys.NEW_TICKET_DESCRIPTION_MESSAGE.GetTranslation())
+                .WithDescription(LangKeys.NewTicketDescriptionMessage.GetTranslation())
                 .WithAuthor(member.GetUsername(), iconUrl: member.AvatarUrl)
-                .AddField(LangKeys.USER.GetTranslation(), member.Mention, true)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticketId.ToString().ToUpper(), true)
+                .AddField(LangKeys.User.GetTranslation(), member.Mention, true)
+                .AddField(LangKeys.TicketId.GetTranslation(), ticketId.ToString().ToUpper(), true)
                 .WithColor(Colors.TicketCreatedColor);
 
     var messageBuilder = new DiscordMessageBuilder()
                          .AddEmbed(embed)
                          .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket", ticketId.ToString()),
-                                                                   LangKeys.CLOSE_TICKET.GetTranslation(),
+                                                                   LangKeys.CloseTicket.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒")),
                                         new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
-                                                                   LangKeys.CLOSE_TICKET_WITH_REASON.GetTranslation(),
+                                                                   LangKeys.CloseTicketWithReason.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒"))
                                        );
 
@@ -43,7 +43,7 @@ public static class TicketResponses
 
   public static DiscordEmbedBuilder NoteAdded(TicketNote note, DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.NOTE_ADDED.GetTranslation())
+                .WithTitle(LangKeys.NoteAdded.GetTranslation())
                 .WithDescription(note.Content)
                 .WithColor(Colors.NoteAddedColor)
                 .WithCustomTimestamp()
@@ -54,13 +54,13 @@ public static class TicketResponses
   public static DiscordEmbedBuilder AnonymousToggled(Ticket ticket) {
     var embed2 = new DiscordEmbedBuilder()
                  .WithTitle(ticket.Anonymous
-                              ? LangKeys.ANONYMOUS_MOD_ON.GetTranslation()
-                              : LangKeys.ANONYMOUS_MOD_OFF.GetTranslation())
+                              ? LangKeys.AnonymousModOn.GetTranslation()
+                              : LangKeys.AnonymousModOff.GetTranslation())
                  .WithColor(Colors.AnonymousToggledColor)
                  .WithCustomTimestamp()
                  .WithDescription(ticket.Anonymous
-                                    ? LangKeys.TICKET_SET_ANONYMOUS_DESCRIPTION.GetTranslation()
-                                    : LangKeys.TICKET_SET_NOT_ANONYMOUS_DESCRIPTION.GetTranslation());
+                                    ? LangKeys.TicketSetAnonymousDescription.GetTranslation()
+                                    : LangKeys.TicketSetNotAnonymousDescription.GetTranslation());
 
     if (ticket.OpenerUser is not null) embed2.WithUserAsAuthor(ticket.OpenerUser);
 
@@ -70,25 +70,25 @@ public static class TicketResponses
 
   public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
+                .WithTitle(LangKeys.TicketTypeChanged.GetTranslation())
                 .WithUserAsAuthor(user)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
     if (ticketType is not null)
-      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+      embed.WithDescription(string.Format(LangKeys.TicketTypeSet.GetTranslation(), ticketType.Emoji, ticketType.Name));
     else
-      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+      embed.WithDescription(LangKeys.TicketTypeRemoved.GetTranslation());
 
     return embed;
   }
 
   public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo modUser, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation())
+                .WithTitle(LangKeys.TicketPriorityChanged.GetTranslation())
                 .WithColor(Colors.TicketPriorityChangedColor)
                 .WithCustomTimestamp()
-                .AddField(LangKeys.OLD_PRIORITY.GetTranslation(), oldPriority.ToString(), true)
-                .AddField(LangKeys.NEW_PRIORITY.GetTranslation(), newPriority.ToString(), true)
+                .AddField(LangKeys.OldPriority.GetTranslation(), oldPriority.ToString(), true)
+                .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true)
                 .WithUserAsAuthor(modUser);
     return embed;
   }
@@ -101,7 +101,7 @@ public static class TicketResponses
                 .WithUserAsAuthor(message.Author)
                 .AddAttachment(message.Attachments);
 
-    if (anonymous) embed.WithFooter(LangKeys.THIS_MESSAGE_SENT_ANONYMOUSLY.GetTranslation());
+    if (anonymous) embed.WithFooter(LangKeys.ThisMessageSentAnonymously.GetTranslation());
 
     return embed;
   }

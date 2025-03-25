@@ -1,4 +1,5 @@
 using Modmail.NET;
+using Modmail.NET.Language;
 using Modmail.NET.Utils;
 using Modmail.NET.Web.Blazor.Components;
 using Modmail.NET.Web.Blazor.Dependency;
@@ -18,6 +19,7 @@ AuthDependency.Configure(builder);
 var app = builder.Build();
 await BusinessDependency.InitializeDatabaseAsync(app);
 ServiceLocator.Initialize(app.Services);
+_ = LangProvider.This;
 
 #region DEV
 

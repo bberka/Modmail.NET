@@ -12,7 +12,7 @@
 
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
-  
+
   [Parameter]
   public TicketType TicketType { get; set; }
 
@@ -77,7 +77,7 @@
       try {
         var state = await AuthContext;
         var userId = state.User.GetUserId();
-        
+
         if (IsUpdate && TicketType is not null) {
           TicketType.Name = _name;
           TicketType.Emoji = emojiUnicode;

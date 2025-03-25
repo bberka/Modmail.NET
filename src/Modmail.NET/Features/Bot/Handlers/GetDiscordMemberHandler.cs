@@ -15,6 +15,7 @@ public class GetDiscordMemberHandler : IRequestHandler<GetDiscordMemberQuery, Di
     _bot = bot;
     _sender = sender;
   }
+
   public async Task<DiscordMember> Handle(GetDiscordMemberQuery request, CancellationToken cancellationToken) {
     foreach (var guild in _bot.Client.Guilds) {
       try {

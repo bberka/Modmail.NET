@@ -16,7 +16,7 @@ public class GetAllBlacklistHandler : IRequestHandler<GetAllBlacklistQuery, List
 
   public async Task<List<TicketBlacklist>> Handle(GetAllBlacklistQuery request, CancellationToken cancellationToken) {
     var result = await _dbContext.TicketBlacklists.ToListAsync(cancellationToken);
-    if (result.Count == 0) throw new EmptyListResultException(LangKeys.BLACKLISTED_USERS);
+    if (result.Count == 0) throw new EmptyListResultException(LangKeys.BlacklistedUsers);
     return result;
   }
 }
