@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <Deterministic>false</Deterministic>
     <LangVersion>13</LangVersion>
-    <Version>2.0.0-beta5</Version>
+    <Version>2.0.0-beta6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,9 +17,9 @@
     <PackageReference Include="Ardalis.SmartEnum.SystemTextJson" Version="8.1.0"/>
     <PackageReference Include="AspectInjector" Version="2.8.2"/>
     <PackageReference Include="CSharpVitamins.ShortGuid" Version="2.0.0"/>
-    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02467"/>
+    <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02474" />
     <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02467"/>
-    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02467"/>
+    <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02472" />
     <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.2.2"/>
     <PackageReference Include="FluentValidation" Version="11.11.0"/>
     <PackageReference Include="Hangfire.Core" Version="1.8.18"/>

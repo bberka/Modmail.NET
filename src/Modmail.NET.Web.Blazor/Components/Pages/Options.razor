@@ -89,13 +89,13 @@
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
-                  Take feedback from user after ticket is closed
+                  Take feedback from user
                 </RadzenLabel>
               </RadzenRow>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_guildOption.AlwaysAnonymous/>
                 <RadzenLabel Component="AlwaysAnonymous">
-                  Always create anonymous tickets (won't apply to open tickets)
+                  Force anonymous messages
                 </RadzenLabel>
               </RadzenRow>
 
@@ -136,21 +136,7 @@
               </RadzenRow>
 
 
-              <RadzenRow class="rz-my-4">
-                <RadzenFormField class="w-100" Text="Manage Teams Access Level" Variant="Variant.Outlined">
-                  <RadzenDropDown Style="user-select: none"
-                                  Multiple="false"
-                                  @bind-Value="@_guildOption.ManageTeamsMinAccessLevel"
-                                  Data="Enum.GetValues<TeamPermissionLevel>()"
-                                  TValue="TeamPermissionLevel"
-                                  AllowFiltering="false"/>
-                </RadzenFormField>
-              </RadzenRow>
-              <RadzenRow>
-                <small class="text-secondary">
-                  Minimum access level for managing Teams via Web
-                </small>
-              </RadzenRow>
+          
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Blacklist Access Level" Variant="Variant.Outlined">
@@ -184,13 +170,35 @@
                 </small>
               </RadzenRow>
 
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Manage Teams Access Level" Variant="Variant.Outlined">
+                  <RadzenDropDown Style="user-select: none"
+                                  Multiple="false"
+                                  @bind-Value="@_guildOption.ManageTeamsMinAccessLevel"
+                                  Data="new List<TeamPermissionLevel>(){
+                                      TeamPermissionLevel.Admin,
+                                      TeamPermissionLevel.Owner,
+                                    }"
+                                  TValue="TeamPermissionLevel"
+                                  AllowFiltering="false"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Minimum access level for managing Teams via Web
+                </small>
+              </RadzenRow>
+              
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Hangfire Access Level" Variant="Variant.Outlined">
                   <RadzenDropDown Style="user-select: none"
                                   Multiple="false"
                                   @bind-Value="@_guildOption.ManageHangfireMinAccessLevel"
-                                  Data="Enum.GetValues<TeamPermissionLevel>()"
+                                  Data="new List<TeamPermissionLevel>(){
+                                      TeamPermissionLevel.Admin,
+                                      TeamPermissionLevel.Owner,
+                                    }"
                                   TValue="TeamPermissionLevel"
                                   AllowFiltering="false"/>
                 </RadzenFormField>

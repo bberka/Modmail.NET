@@ -12,28 +12,18 @@ namespace Modmail.NET.Pipeline;
 public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
   where TRequest : IPermissionCheck, IRequest<TResponse>
 {
-  private readonly ModmailBot _bot;
   private readonly ISender _sender;
 
-  public PermissionCheckPipelineBehavior(ModmailBot bot, ISender sender) {
-    _bot = bot;
+  public PermissionCheckPipelineBehavior(ISender sender) {
     _sender = sender;
   }
 
   public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) {
-    var cacheAttribute = typeof(TRequest).GetCustomAttribute<PermissionCheckAttribute>();
-    if (cacheAttribute == null) return await next();
+    var attribute = typeof(TRequest).GetCustomAttribute<PermissionCheckAttribute>();
+    if (attribute == null) return await next();
 
-
-    if (request.AuthorizedUserId <= 0) throw new InvalidUserIdException();
-
-    if (_bot.Client.CurrentUser.Id == request.AuthorizedUserId) return await next();
-
-    var permission = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId), cancellationToken);
-    if (permission is null) throw new UnauthorizedAccessException();
-
-    var option = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
-    if (permission < option.ManageBlacklistMinAccessLevel) throw new UnauthorizedAccessException();
+    var allowed = await _sender.Send(new CheckPermissionAccessQuery(request.AuthorizedUserId, AuthPolicy.FromName(attribute.Policy)), cancellationToken);
+    if (!allowed) throw new UnauthorizedAccessException();
 
     return await next();
   }
