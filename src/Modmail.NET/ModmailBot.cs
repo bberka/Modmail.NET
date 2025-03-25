@@ -26,11 +26,10 @@ public class ModmailBot
   public async Task StartAsync() {
     Log.Information("Starting bot");
 
-    await Client.ConnectAsync();
+    await Client.ConnectAsync(activity: Const.DiscordActivity);
 
     while (!Client.AllShardsConnected) await Task.Delay(5);
 
-    await Client.UpdateStatusAsync(Const.DiscordActivity);
 
     var scope = Client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
