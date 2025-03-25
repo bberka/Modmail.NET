@@ -1,3 +1,4 @@
+using DSharpPlus.Exceptions;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Bot;
@@ -47,10 +48,13 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
     _ = Task.Run(async () => {
       var modChatChannel = request.ModChatChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TICKET_CLOSED));
-      var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      if (pmChannel != null) {
+      try {
+        var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
         await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(ticket, guildOption));
         if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(ticket, guildOption));
+      }
+      catch (NotFoundException) {
+        //ignored
       }
 
       var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);

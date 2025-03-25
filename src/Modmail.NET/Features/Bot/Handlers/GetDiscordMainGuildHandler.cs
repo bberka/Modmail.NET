@@ -27,12 +27,14 @@ public class GetDiscordMainGuildHandler : IRequestHandler<GetDiscordMainGuildQue
   }
   public async Task<DiscordGuild> Handle(GetDiscordMainGuildQuery request, CancellationToken cancellationToken) {
     var guildId = _options.Value.MainServerId;
-    var guild = await _bot.Client.GetGuildAsync(guildId);
-    if (guild == null) {
+    DiscordGuild guild;
+    try {
+      guild = await _bot.Client.GetGuildAsync(guildId);
+    }
+    catch (DSharpPlus.Exceptions.NotFoundException) {
       Log.Error("Main guild not found: {GuildId}", guildId);
       throw new NotFoundException(LangKeys.MAIN_GUILD);
     }
-
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
     var isSame = guildOption.Name == guild.Name && guildOption.IconUrl == guild.IconUrl && guildOption.BannerUrl == guild.BannerUrl;
     if (isSame) {

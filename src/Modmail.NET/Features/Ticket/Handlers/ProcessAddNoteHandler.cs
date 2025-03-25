@@ -1,3 +1,4 @@
+using DSharpPlus.Exceptions;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -29,9 +30,14 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
     _dbContext.TicketNotes.Add(noteEntity);
     await _dbContext.SaveChangesAsync(cancellationToken);
     _ = Task.Run(async () => {
-      var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
-      var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (mailChannel is not null) await mailChannel.SendMessageAsync(TicketResponses.NoteAdded(noteEntity, user));
+      try {
+        var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
+        var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
+        await mailChannel.SendMessageAsync(TicketResponses.NoteAdded(noteEntity, user));
+      }
+      catch (NotFoundException) {
+        //ignored
+      }
     }, cancellationToken);
   }
 }
