@@ -53,7 +53,6 @@ Ticket channels will created in main server
 
 # [Discord Commands](COMMANDS.md)
 # [Changelog](CHANGELOG.md)
-# [Roadmap and Bugs](ROADMAP.md)
 # [Web UI Images](img)
 
 # Warning
