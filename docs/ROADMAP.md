@@ -1,0 +1,60 @@
+# Roadmap and Bugs
+Feature roadmap, possibly upcoming features and feature ideas in no particular order
+
+- Implement option to enable confirmation dialog when closing tickets
+- Implement option to force user to select ticket type before creating the ticket
+- Implement Polly for not awaited task on bot actions for creating, add retries or add hangfire background jobs
+- Implement SmartEnums where it is fit
+- Discord Permission Sync
+  - Implement a feature that will sync permissions on all discord ticket channels when teams has changed
+- Language Resources
+    - Culture Resource file support for multiple languages
+    - Enabling culture select and auto detect for users and admins
+    - Implement culture selection on Web UI
+- API Endpoints
+    - Allowing external apps to query the ticket information etc.
+- Editing Bot Embed Messages
+    - Changing the colors and structure of embeds and bot messages
+- Ticket Assign and Claim system
+    - Implement feature that admin can claim ticket responsibility
+    - Higher role admin assign or change assignment of ticket responsibility to someone else
+- Improve Ticket Type system
+    - Adding automatic assignment to certain ticket types to certain teams
+    - Implement splitting tickets to discord categories
+    - Option to show form modals to user after ticket type selection
+    - After user submits form the data should be stored to db and send to ticket channel
+- Ticket Transcription
+    - View and create public link of ticket messages and attachments
+- Web Panel Ticket System
+    - Ability to continue ticket chat through web link (for user and admin)
+- Improve Attachment Handling
+    - Option to save the user attachments to database
+    - Add page to view message attachments on Web panel
+- Improve Metrics
+    - Ability to view and monitor mod activity and stats
+    - New page of mod stat details, average response times, activity, resolve time, total sent messages, graphs etc.
+    - Add more metrics
+- Change DB Provider
+    - MS SQL is not the best, moving towards something like PostgresQL or adding option to configure which db to use.
+- Ticket Archive
+    - New filter type for tickets menu
+    - Archived tickets will not be visible by default however by filtering them you will still be able to see them
+    - Option to set a timeout for ticket archiving via background job. Options menu will have a TicketArchiveTimeoutDays
+      value to be set for this.
+- Custom reconnecting dialog
+    - Default dialog is not working properly, find a way to render a custom component or a page instead of default
+      dialog
+- Tag System
+    - Shortcut tag messages for bot to respond with predefined messages
+    - Example sending `!!tag link` message to ticket channel will take actual message from db and send detailed message
+- Ticket Message Reaction Support
+    - Transferring message reacting to user and from user to mod messages
+- Ticket Message Edit Support
+  - Allowing message editing support for users, when user edits the ticket message bot can update messages
+  - Bot needs to update the message it sent to user and to mod channel. For mod channel we can also keep the old version.
+  - For mod messages this is not very likely since bot deletes the mod messages sent instantly.
+  - If this option enabled bot mod message behavior needs to change
+- Ticket Message Delete Support
+  - Deleting ticket messages when user or mod deletes messages
+- Support for Plugins
+  - Implement plugins support feature
