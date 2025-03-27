@@ -8,56 +8,76 @@
 - Removed unused and empty files, classes, and projects to streamline the codebase.
 - Optimized folder structure by moving classes to appropriate locations.
 - Updated coding standards:
-    - New classes will no longer be defined as `sealed`.
-    - Converted existing `sealed` classes to non-sealed.
+  - New classes will no longer be defined as `sealed`.
+  - Converted existing `sealed` classes to non-sealed.
+  - Sealed classes currently only being used by SmartEnum inherited classes
 - Optimized code imports and improved overall code styling for consistency.
 - Enhanced logging configuration with better file-based logging.
 - Removed anti-pattern implementations for better modularity.
 - Added `.editorconfig` for consistent code styling across the project.
+- Addressed almost all warnings reported by Rider's code analysis tools, improving code quality and compliance with recommended practices.
+- Standardized naming conventions for `LangKeys` enum and fields across the project.
+- Upgraded package versions for improved stability and access to new features.
 
 ---
 
 ### **Authentication and Authorization**
 - **Discord OAuth2 Authentication**:
-    - Added cookie-based session management.
-    - Configured access token storage in claims for session-based usage.
+  - Added cookie-based session management.
+  - Configured access token storage in claims for session-based usage.
 - **Authorization Enhancements**:
-    - Secured Hangfire Dashboard with a custom authorization filter.
-    - Introduced policy-based authorization for the Dashboard, leveraging ASP.NET Core policies for dynamic and centralized access control.
-    - Added support for database-driven dynamic permissions using custom authorization handlers.
-    - Implemented hierarchical policies like `SupportOrHigher` and `ModeratorOrHigher` for flexible role-based access control.
-    - Improved the authorization system to dynamically evaluate permissions from the database while still supporting attribute-based authorization.
+  - Secured Hangfire Dashboard with a custom authorization filter.
+  - Introduced policy-based authorization for the Dashboard, leveraging ASP.NET Core policies for dynamic and centralized access control.
+  - Added support for database-driven dynamic permissions using custom authorization handlers.
+  - Implemented hierarchical policies like `SupportOrHigher` and `ModeratorOrHigher` for flexible role-based access control.
+  - Improved the authorization system to dynamically evaluate permissions from the database while still supporting attribute-based authorization.
 - **Web Panel Access Control**:
-    - Restricted web panel access to users directly added to teams.
-    - Discord role members, even if roles are added to teams, will not have panel access unless explicitly added as team members.
-    - Ensured teams with `Owner` permission level always have access to the web panel.
+  - Restricted web panel access to users directly added to teams.
+  - Discord role members, even if roles are added to teams, will not have panel access unless explicitly added as team members.
+  - Ensured teams with `Owner` permission level always have access to the web panel.
 - **Permission Validation**:
-    - Refactored `GetTeamPermissionLevelHandler.cs` to make `roleList` nullable, enabling calls without passing a role list.
-    - Refactored `IPermissionCheck` interface and `PermissionCheckAttribute` for better integration with the pipeline.
-    - Introduced a MediatR pipeline behavior to enforce `AuthorizedUserId` checks dynamically for commands and queries.
-    - Centralized authorization logic in the pipeline for improved logging and data collection.
-    - Added extension methods to simplify permission validation and improve code reusability.
-    - Added query call for authentication permission checks.
-    - Refactored and fixed existing authentication permission check logic.
-    - Teams can now only be managed by Admins and Owners.
-    - Team permissions cannot be set higher than the user's own permission level.
-    - Refactored `GetPermissionLevel` query to include roles dynamically instead of requiring a role list.
+  - Refactored `GetTeamPermissionLevelHandler.cs` to make `roleList` nullable, enabling calls without passing a role list.
+  - Refactored `IPermissionCheck` interface and `PermissionCheckAttribute` for better integration with the pipeline.
+  - Introduced a MediatR pipeline behavior to enforce `AuthorizedUserId` checks dynamically for commands and queries.
+  - Centralized authorization logic in the pipeline for improved logging and data collection.
+  - Added extension methods to simplify permission validation and improve code reusability.
+  - Added query call for authentication permission checks.
+  - Refactored and fixed existing authentication permission check logic.
+  - Teams can now only be managed by Admins and Owners.
+  - Team permissions cannot be set higher than the user's own permission level.
+  - Refactored `GetPermissionLevel` query to include roles dynamically instead of requiring a role list.
 
 ---
 
 ### **Features and Enhancements**
 - **Navigation and Pages**:
-    - Moved the dashboard to `/dashboard` URI.
-    - Added a landing page at `/` with a login button.
+  - Moved the dashboard to `/dashboard` URI.
+  - Added a landing page at `/` with a login button.
+  - Ticket messages are now displayed on their own page instead of a dialog.
 - **User Management**:
-    - Added a simple account view dialog for users to manage their account details.
+  - Added a simple account view dialog for users to manage their account details.
+  - Fixed account dialog behavior to close on overlay click.
 - **Auto Setup**:
-    - Implemented auto setup on server startup if the bot is added to the main server.
+  - Implemented auto setup on server startup if the bot is added to the main server.
 - **Guild Options**:
-    - Restricted access to `GuildOptions` to users with `Owner` permission level.
-    - "Always Anonymous" option now affects active tickets.
+  - Restricted access to `GuildOptions` to users with `Owner` permission level.
+  - "Always Anonymous" option now affects active tickets.
 - **Result Page**:
-    - Enhanced the result page with new buttons for authorized users.
+  - Enhanced the result page with new buttons for authorized users.
+- **Metrics and Statistics**:
+  - Refactored the statistics entity for consistent naming conventions.
+  - Renamed the "Statistic" feature to "Metric" for clearer terminology.
+  - Added new charts to the dashboard for better visualization of metrics.
+  - Increased caching duration for metrics to improve performance.
+  - Improved statistic job performance by using `DefaultIfEmpty`, enabling direct DB average calculations.
+  - Added default values to the statistic entity for use in the dashboard.
+- **SmartEnum Integration**:
+  - Converted `DbType` to a smart enum.
+  - Enabled SmartEnum mapping for `DbContext`.
+  - Set SmartEnum to `sealed` class for better performance and clarity.
+- **GuidV7 Implementation**:
+  - Replaced all usages of `Guid.NewGuid` with `Guid.CreateVersion7`.
+  - Added a new database trigger to automatically set IDs for entities if not provided.
 
 ---
 
@@ -68,7 +88,10 @@
 - Fully fixed average response time calculation to only consider the first responses between moderators and users.
 - Removed unnecessary logging to the Discord log channel; only essential information is now logged.
 - Changed log level to `Verbose` for warning exceptions in the exception logger.
-- **UtilReadable.cs**: Fixed ordering logic to ensure correct return values.
+- Fixed team add and update permission check bug.
+- Fixed dashboard UI issues, typos, and separation of average stats.
+- Fixed ticket notes dialog width for better usability.
+- Fixed unnecessary guild option value assignment on the options page.
 
 ---
 
@@ -78,3 +101,16 @@
 - Improved UI consistency across the application.
 - Changed sidebar order for better navigation.
 - Simplified labels in the Options UI.
+- Updated UI images for better visual clarity.
+- Teams UI default column behavior updated:
+  - `RegisterDate` and `UpdateDate` columns are now hidden by default.
+
+---
+
+### **Documentation**
+- Improved project documentation:
+  - Separated some headers into their own markdown files for better organization.
+  - Added direct links to the `img` folder instead of embedding images in markdown.
+  - Created `ROADMAP.md` to outline future plans and features.
+  - Created `COMMANDS.md` to document available commands.
+  - Updated README.md with new details and images.
