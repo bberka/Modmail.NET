@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Modmail.NET.Abstract;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 using Modmail.NET.Language;
 using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Providers;
@@ -25,7 +24,7 @@ public static class AuthDependency
            .AddCookie(x => {
              x.LoginPath = "/auth/login";
              x.LogoutPath = "/auth/logout";
-             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;
+             x.AccessDeniedPath = "/result/" + LangKeys.ErrorAccessDenied;
              x.ExpireTimeSpan = TimeSpan.FromDays(1);
              x.SlidingExpiration = true;
              x.Cookie.HttpOnly = true;
@@ -43,8 +42,7 @@ public static class AuthDependency
              x.SaveTokens = true; // Save tokens for later use
              x.Scope.Add("identify"); // Fetch user details
              x.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
-             x.AccessDeniedPath = "/result/" + LangKeys.ERROR_ACCESS_DENIED;
-             ;
+             x.AccessDeniedPath = "/result/" + LangKeys.ErrorAccessDenied;
              x.CorrelationCookie.SameSite = SameSiteMode.Lax;
              x.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
              x.Events.OnCreatingTicket += async context => {
@@ -69,7 +67,6 @@ public static class AuthDependency
                var userId = ulong.Parse(identifier);
                var scope = context.HttpContext.RequestServices.CreateScope();
                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-               var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
                try {
                  var permission = await sender.Send(new GetPermissionLevelQuery(userId));
                  if (permission is null) {
@@ -92,11 +89,11 @@ public static class AuthDependency
                }
              };
              x.Events.OnRemoteFailure += context => {
-               context.Response.Redirect("/result/" + LangKeys.ERROR_AUTH_REMOTE_FAIL);
+               context.Response.Redirect("/result/" + LangKeys.ErrorAuthRemoteFail);
                return Task.CompletedTask;
              };
              x.Events.OnAccessDenied += context => {
-               context.Response.Redirect("/result/" + LangKeys.ERROR_ACCESS_DENIED);
+               context.Response.Redirect("/result/" + LangKeys.ErrorAccessDenied);
                return Task.CompletedTask;
              };
            });

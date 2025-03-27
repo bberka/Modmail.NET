@@ -15,7 +15,7 @@ public class GetTicketTypeBySearchHandler : IRequestHandler<GetTicketTypeBySearc
 
   public async Task<Entities.TicketType> Handle(GetTicketTypeBySearchQuery request, CancellationToken cancellationToken) {
     var result = await _dbContext.TicketTypes.FirstOrDefaultAsync(x => x.Key == request.NameOrKey || x.Name == request.NameOrKey, cancellationToken);
-    if (!request.AllowNull && result is null) throw new NotFoundWithException(LangKeys.TICKET_TYPE, request.NameOrKey);
+    if (!request.AllowNull && result is null) throw new NotFoundWithException(LangKeys.TicketType, request.NameOrKey);
     return result;
   }
 }

@@ -2,6 +2,7 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.UserInfo;
 
@@ -9,15 +10,12 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserToBlacklistCommand, TicketBlacklist>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessAddUserToBlacklistHandler(ModmailDbContext dbContext,
-                                          ModmailBot bot,
                                           ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 
@@ -26,7 +24,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
     if (activeTicket is not null)
       await _sender.Send(new ProcessCloseTicketCommand(activeTicket.Id,
                                                        request.UserId,
-                                                       LangProvider.This.GetTranslation(LangKeys.TICKET_CLOSED_DUE_TO_BLACKLIST),
+                                                       LangProvider.This.GetTranslation(LangKeys.TicketClosedDueToBlacklist),
                                                        DontSendFeedbackMessage: true),
                          cancellationToken);
 
@@ -34,11 +32,10 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
     var reason = string.IsNullOrEmpty(request.Reason)
-                   ? LangProvider.This.GetTranslation(LangKeys.NO_REASON_PROVIDED)
+                   ? LangProvider.This.GetTranslation(LangKeys.NoReasonProvided)
                    : request.Reason;
 
     var blackList = new TicketBlacklist {
-      Id = Guid.NewGuid(),
       Reason = reason,
       DiscordUserId = request.UserId,
       RegisterDateUtc = DateTime.UtcNow
@@ -54,10 +51,10 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
 
       var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(embedLog);
 
-      var member = await _bot.GetMemberFromAnyGuildAsync(user.Id);
+      var member = await _sender.Send(new GetDiscordMemberQuery(user.Id), cancellationToken);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenBlacklisted(reason);
         await member.SendMessageAsync(dmEmbed);

@@ -45,7 +45,7 @@
       @if (_hasAccessTicketTypes) {
         <RadzenPanelMenuItem Text="Ticket Types" Icon="stacks" Path="/ticket-types"/>
       }
-  
+
       @if (_hasAccessTeams) {
         <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
       }
@@ -103,12 +103,13 @@
 
   private async Task ShowAccountDialog() {
     await DialogService.OpenAsync("Account",
-                                  ds =>
+                                  _ =>
                                     @<div>
                                       <AccountDialog></AccountDialog>
                                     </div>,
                                   new DialogOptions {
-                                    Width = "450px"
+                                    Width = "450px",
+                                    CloseDialogOnOverlayClick = true
                                   });
   }
 

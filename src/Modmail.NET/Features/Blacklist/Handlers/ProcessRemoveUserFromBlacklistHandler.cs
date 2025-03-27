@@ -2,20 +2,18 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.UserInfo;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemoveUserFromBlacklistCommand, TicketBlacklist>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
-  public ProcessRemoveUserFromBlacklistHandler(ModmailBot bot,
-                                               ModmailDbContext dbContext,
+  public ProcessRemoveUserFromBlacklistHandler(ModmailDbContext dbContext,
                                                ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }
@@ -28,7 +26,7 @@ public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemo
 
     _ = Task.Run(async () => {
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
-      var member = await _bot.GetMemberFromAnyGuildAsync(request.UserId);
+      var member = await _sender.Send(new GetDiscordMemberQuery(request.UserId), cancellationToken);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenRemovedFromBlacklist(modUser);
         await member.SendMessageAsync(dmEmbed);

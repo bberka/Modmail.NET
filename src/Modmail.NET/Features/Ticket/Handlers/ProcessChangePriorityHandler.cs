@@ -1,8 +1,10 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -34,19 +36,22 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     _ = Task.Run(async () => {
-      var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.ModUserId), cancellationToken);
-      if (modUser is null) throw new InvalidOperationException("ModUser is null");
 
+      try {
+        var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+        var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
+        await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, ticket, oldPriority, request.NewPriority));
+      }
+      catch (NotFoundException) {
+        //ignored
+      }
 
-      var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      if (privateChannel is not null) await privateChannel.SendMessageAsync(UserResponses.TicketPriorityChanged(guildOption, modUser, ticket, oldPriority, request.NewPriority));
-
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(LogResponses.TicketPriorityChanged(modUser, ticket, oldPriority, request.NewPriority));
 
-      var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (ticketChannel is not null) {
+      try {
+        var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
         var newChName = request.NewPriority switch {
           TicketPriority.Normal => Const.NormalPriorityEmoji + string.Format(Const.TicketNameTemplate, ticket.OpenerUser?.Username.Trim()),
           TicketPriority.High => Const.HighPriorityEmoji + string.Format(Const.TicketNameTemplate, ticket.OpenerUser?.Username.Trim()),
@@ -57,7 +62,9 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
         await ticketChannel.ModifyAsync(x => { x.Name = newChName; });
         await ticketChannel.SendMessageAsync(TicketResponses.TicketPriorityChanged(modUser, ticket, oldPriority, request.NewPriority));
       }
-      //TODO: Handle ticket privateChannel not found
+      catch (NotFoundException) {
+        //ignored
+      }
     }, cancellationToken);
   }
 }

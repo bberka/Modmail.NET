@@ -8,15 +8,12 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessAddRoleToTeamHandler : IRequestHandler<ProcessAddRoleToTeamCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessAddRoleToTeamHandler(ModmailDbContext dbContext,
-                                     ModmailBot bot,
                                      ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 

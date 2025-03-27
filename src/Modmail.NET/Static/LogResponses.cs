@@ -13,25 +13,25 @@ public static class LogResponses
                                                      DiscordChannel mailChannel,
                                                      Guid ticketId) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.NEW_TICKET_CREATED.GetTranslation())
+                .WithTitle(LangKeys.NewTicketCreated.GetTranslation())
                 .WithUserAsAuthor(initialMessage.Author)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticketId.ToString().ToUpper())
-                .AddField(LangKeys.USER.GetTranslation(), initialMessage.Author!.Mention);
+                .AddField(LangKeys.TicketId.GetTranslation(), ticketId.ToString().ToUpper())
+                .AddField(LangKeys.User.GetTranslation(), initialMessage.Author!.Mention);
     return embed;
   }
 
   public static DiscordEmbedBuilder TicketClosed(Ticket ticket) {
     var embed = new DiscordEmbedBuilder()
                 .WithCustomTimestamp()
-                .WithTitle(LangKeys.TICKET_CLOSED.GetTranslation())
+                .WithTitle(LangKeys.TicketClosed.GetTranslation())
                 .WithColor(Colors.TicketClosedColor)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
-                .AddField(LangKeys.OPENED_BY.GetTranslation(), ticket.OpenerUser!.GetMention(), true)
-                .AddField(LangKeys.CLOSED_BY.GetTranslation(), ticket.CloserUser!.GetMention(), true)
-                .AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason, true)
-                .AddField(LangKeys.TICKET_PRIORITY.GetTranslation(), ticket.Priority.ToString(), true);
+                .AddField(LangKeys.TicketId.GetTranslation(), ticket.Id.ToString().ToUpper())
+                .AddField(LangKeys.OpenedBy.GetTranslation(), ticket.OpenerUser!.GetMention(), true)
+                .AddField(LangKeys.ClosedBy.GetTranslation(), ticket.CloserUser!.GetMention(), true)
+                .AddField(LangKeys.CloseReason.GetTranslation(), ticket.CloseReason, true)
+                .AddField(LangKeys.TicketPriority.GetTranslation(), ticket.Priority.ToString(), true);
     if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
 
     return embed;
@@ -40,11 +40,11 @@ public static class LogResponses
 
   public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string reason) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.USER_BLACKLISTED.GetTranslation())
+                .WithTitle(LangKeys.UserBlacklisted.GetTranslation())
                 .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.USER.GetTranslation(), user.GetMention(), true)
-                .AddField(LangKeys.USER_ID.GetTranslation(), user.Id.ToString(), true);
+                .AddField(LangKeys.User.GetTranslation(), user.GetMention(), true)
+                .AddField(LangKeys.UserId.GetTranslation(), user.Id.ToString(), true);
 
 
     return embed;
@@ -52,23 +52,23 @@ public static class LogResponses
 
   public static DiscordEmbed BlacklistRemoved(DiscordUserInfo author, DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.USER_BLACKLIST_REMOVED.GetTranslation())
+                .WithTitle(LangKeys.UserBlacklistRemoved.GetTranslation())
                 .WithUserAsAuthor(author)
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.USER.GetTranslation(), user.GetMention(), true)
-                .AddField(LangKeys.USER_ID.GetTranslation(), user.Id.ToString(), true);
+                .AddField(LangKeys.User.GetTranslation(), user.GetMention(), true)
+                .AddField(LangKeys.UserId.GetTranslation(), user.Id.ToString(), true);
     return embed;
   }
 
 
   public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo modUser, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation())
+                .WithTitle(LangKeys.TicketPriorityChanged.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketPriorityChangedColor)
-                .AddField(LangKeys.TICKET_ID.GetTranslation(), ticket.Id.ToString().ToUpper())
-                .AddField(LangKeys.OLD_PRIORITY.GetTranslation(), oldPriority.ToString(), true)
-                .AddField(LangKeys.NEW_PRIORITY.GetTranslation(), newPriority.ToString(), true);
+                .AddField(LangKeys.TicketId.GetTranslation(), ticket.Id.ToString().ToUpper())
+                .AddField(LangKeys.OldPriority.GetTranslation(), oldPriority.ToString(), true)
+                .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true);
     if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
     // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
     return embed;
@@ -77,30 +77,30 @@ public static class LogResponses
 
   public static DiscordEmbedBuilder TicketTypeUpdated(TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TICKET_TYPE_UPDATED.GetTranslation())
+                .WithTitle(LangKeys.TicketTypeUpdated.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.TICKET_TYPE.GetTranslation(), ticketType.Name, true)
-                .AddField(LangKeys.EMOJI.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
-                .AddField(LangKeys.ORDER.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.DESCRIPTION.GetTranslation(), ticketType.Description.GetStringOrNaN())
-                .AddField(LangKeys.EMBED_MESSAGE_TITLE.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
-                .AddField(LangKeys.EMBED_MESSAGE_CONTENT.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN());
+                .AddField(LangKeys.TicketType.GetTranslation(), ticketType.Name, true)
+                .AddField(LangKeys.Emoji.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
+                .AddField(LangKeys.Order.GetTranslation(), ticketType.Order.ToString(), true)
+                .AddField(LangKeys.Description.GetTranslation(), ticketType.Description.GetStringOrNaN())
+                .AddField(LangKeys.EmbedMessageTitle.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
+                .AddField(LangKeys.EmbedMessageContent.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN());
     return embed;
   }
 
 
   public static DiscordEmbedBuilder SetupComplete(GuildOption guildOption) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.SETUP_COMPLETE.GetTranslation())
+                .WithTitle(LangKeys.SetupComplete.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.GUILD_ID.GetTranslation(), guildOption.GuildId.ToString())
-                .AddField(LangKeys.GUILD_NAME.GetTranslation(), guildOption.Name, true)
-                .AddField(LangKeys.CATEGORY_ID.GetTranslation(), guildOption.CategoryId.ToString(), true)
-                .AddField(LangKeys.LOG_CHANNEL_ID.GetTranslation(), guildOption.LogChannelId.ToString(), true)
-                .AddField(LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
-                .AddField(LangKeys.TICKET_TIMEOUT_HOURS.GetTranslation(), guildOption.TicketTimeoutHours.ToString());
+                .AddField(LangKeys.GuildId.GetTranslation(), guildOption.GuildId.ToString())
+                .AddField(LangKeys.GuildName.GetTranslation(), guildOption.Name, true)
+                .AddField(LangKeys.CategoryId.GetTranslation(), guildOption.CategoryId.ToString(), true)
+                .AddField(LangKeys.LogChannelId.GetTranslation(), guildOption.LogChannelId.ToString(), true)
+                .AddField(LangKeys.TakeFeedbackAfterClosing.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
+                .AddField(LangKeys.TicketTimeoutHours.GetTranslation(), guildOption.TicketTimeoutHours.ToString());
     return embed;
   }
 }

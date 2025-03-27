@@ -6,14 +6,12 @@ namespace Modmail.NET.Features.TicketType.Handlers;
 
 public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicketTypeCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessCreateTicketTypeHandler(ModmailBot bot,
                                         ModmailDbContext dbContext,
                                         ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }
@@ -25,7 +23,7 @@ public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicke
     var exists = await _sender.Send(new CheckTicketTypeExistsQuery(request.Name), cancellationToken);
     if (exists) throw new TicketTypeAlreadyExistsException(request.Name);
 
-    var id = Guid.NewGuid();
+    var id = Guid.CreateVersion7();
     var idClean = id.ToString().Replace("-", "");
     var ticketType = new Entities.TicketType {
       Id = id,

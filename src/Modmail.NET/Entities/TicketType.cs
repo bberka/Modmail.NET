@@ -5,10 +5,9 @@ namespace Modmail.NET.Entities;
 
 public class TicketType : IHasRegisterDate,
                           IHasUpdateDate,
-                          IEntity
+                          IEntity,
+                          IGuidId
 {
-  public Guid Id { get; set; }
-
   public bool IsEnabled { get; set; } = true;
 
   [MaxLength(DbLength.KeyString)]
@@ -24,7 +23,7 @@ public class TicketType : IHasRegisterDate,
 
   [MaxLength(DbLength.Description)]
   [Required]
-  public string Description { get; set; } = string.Empty;
+  public required string Description { get; set; }
 
   public int Order { get; set; }
 
@@ -33,6 +32,8 @@ public class TicketType : IHasRegisterDate,
 
   [MaxLength(DbLength.BotMessage)]
   public string EmbedMessageContent { get; set; }
+
+  public Guid Id { get; set; }
 
   public DateTime RegisterDateUtc { get; set; }
   public DateTime? UpdateDateUtc { get; set; }

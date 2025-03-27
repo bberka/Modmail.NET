@@ -2,26 +2,24 @@ using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
 public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogChannelCommand, DiscordChannel>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
-  public ProcessCreateLogChannelHandlers(ISender sender, ModmailBot bot, ModmailDbContext dbContext) {
+  public ProcessCreateLogChannelHandlers(ISender sender, ModmailDbContext dbContext) {
     _sender = sender;
-    _bot = bot;
     _dbContext = dbContext;
   }
 
   public async Task<DiscordChannel> Handle(ProcessCreateLogChannelCommand request, CancellationToken cancellationToken) {
-    var guild = await _bot.GetMainGuildAsync();
+    var guild = await _sender.Send(new GetDiscordMainGuildQuery(), cancellationToken);
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
 
     var permissions = await _sender.Send(new GetPermissionInfoOrHigherQuery(TeamPermissionLevel.Admin), cancellationToken);
@@ -39,7 +37,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
 
     var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, memberListForOverwrites, roleListForOverwrites);
 
-    DiscordChannel category = null;
+    DiscordChannel category;
     try {
       category = await guild.GetChannelAsync(guildOption.CategoryId);
     }
@@ -47,7 +45,7 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
       category = await guild.CreateChannelCategoryAsync(Const.CategoryName, permissionOverwrites);
     }
 
-    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.MODMAIL_LOG_CHANNEL_TOPIC), permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.ModmailLogChannelTopic), permissionOverwrites);
     guildOption.LogChannelId = logChannel.Id;
     guildOption.CategoryId = category.Id;
 

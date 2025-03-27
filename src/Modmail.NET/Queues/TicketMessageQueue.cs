@@ -1,4 +1,3 @@
-using DSharpPlus;
 using DSharpPlus.Entities;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,13 +25,13 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 
   protected override async Task HandleMessageAsync(ulong userId, DiscordTicketMessageDto dto) {
     if (dto.Args.Channel.IsPrivate)
-      await HandlePrivateTicketMessageAsync(dto.Sender, dto.Args.Message, dto.Args.Channel, dto.Args.Author);
+      await HandlePrivateTicketMessageAsync(dto.Args.Message, dto.Args.Channel, dto.Args.Author);
     else
-      await HandleGuildTicketMessageAsync(dto.Sender, dto.Args.Message, dto.Args.Channel, dto.Args.Author, dto.Args.Guild);
+      await HandleGuildTicketMessageAsync(dto.Args.Message, dto.Args.Channel, dto.Args.Author, dto.Args.Guild);
   }
 
   [PerformanceLoggerAspect]
-  private async Task HandlePrivateTicketMessageAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, DiscordUser user) {
+  private async Task HandlePrivateTicketMessageAsync(DiscordMessage message, DiscordChannel channel, DiscordUser user) {
     if (message.Content.StartsWith(_options.Value.BotPrefix))
       return;
     var scope = _scopeFactory.CreateScope();
@@ -62,7 +61,7 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
   }
 
   [PerformanceLoggerAspect]
-  private async Task HandleGuildTicketMessageAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, DiscordUser modUser, DiscordGuild guild) {
+  private async Task HandleGuildTicketMessageAsync(DiscordMessage message, DiscordChannel channel, DiscordUser modUser, DiscordGuild guild) {
     if (message.Content.StartsWith(_options.Value.BotPrefix))
       return;
 

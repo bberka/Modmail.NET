@@ -7,16 +7,10 @@ namespace Modmail.NET.Features.Permission.Handler;
 
 public class GetPermissionInfoHandler : IRequestHandler<GetPermissionInfoQuery, List<PermissionInfo>>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
 
-  public GetPermissionInfoHandler(ModmailBot bot,
-                                      ModmailDbContext dbContext,
-                                      ISender sender) {
-    _bot = bot;
+  public GetPermissionInfoHandler(ModmailDbContext dbContext) {
     _dbContext = dbContext;
-    _sender = sender;
   }
 
   public async Task<List<PermissionInfo>> Handle(GetPermissionInfoQuery request, CancellationToken cancellationToken) {

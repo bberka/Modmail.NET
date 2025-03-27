@@ -4,27 +4,39 @@ using Modmail.NET.Abstract;
 namespace Modmail.NET.Entities;
 
 public class Statistic : IHasRegisterDate,
-                         IEntity
+                         IEntity,
+                         IGuidId
 {
+  [Precision(2)]
+  public required double AvgResponseTimeSeconds { get; set; }
+
+  [Precision(2)]
+  public required double AvgTicketsClosedPerDay { get; set; }
+
+  [Precision(2)]
+  public required double AvgTicketsOpenedPerDay { get; set; }
+
+  [Precision(2)]
+  public required double AvgTicketClosedSeconds { get; set; }
+
+  [Precision(2)]
+  public required double FastestClosedTicketSeconds { get; set; }
+
+  [Precision(2)]
+  public required double SlowestClosedTicketSeconds { get; set; }
+
   public Guid Id { get; set; }
 
-  [Precision(2)]
-  public double AvgResponseTimeMinutes { get; set; }
-
-  [Precision(2)]
-  public double AvgTicketsClosedPerDay { get; set; }
-
-  [Precision(2)]
-  public double AvgTicketsOpenedPerDay { get; set; }
-
-  [Precision(2)]
-  public double AvgTicketResolvedMinutes { get; set; }
-
-  [Precision(2)]
-  public double FastestClosedTicketMinutes { get; set; }
-
-  [Precision(2)]
-  public double SlowestClosedTicketMinutes { get; set; }
-
   public DateTime RegisterDateUtc { get; set; }
+
+  public static Statistic Default() {
+    return new Statistic {
+      AvgResponseTimeSeconds = 0,
+      AvgTicketsClosedPerDay = 0,
+      AvgTicketsOpenedPerDay = 0,
+      AvgTicketClosedSeconds = 0,
+      FastestClosedTicketSeconds = 0,
+      SlowestClosedTicketSeconds = 0,
+    };
+  }
 }

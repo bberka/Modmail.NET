@@ -33,6 +33,7 @@ public static class BusinessDependency
       options.UseTriggers(triggerOptions => {
         triggerOptions.AddTrigger<RegisterDateTrigger>();
         triggerOptions.AddTrigger<UpdateDateTrigger>();
+        triggerOptions.AddTrigger<IdentityV7Trigger>();
       });
 
 

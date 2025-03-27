@@ -1,5 +1,7 @@
+using DSharpPlus.Exceptions;
 using MediatR;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
 
@@ -25,7 +27,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
                          ? _bot.Client.CurrentUser.Id
                          : request.CloserUserId;
     var closeReason = string.IsNullOrEmpty(request.CloseReason)
-                        ? LangProvider.This.GetTranslation(LangKeys.NO_REASON_PROVIDED)
+                        ? LangProvider.This.GetTranslation(LangKeys.NoReasonProvided)
                         : request.CloseReason;
     var closerUser = await _sender.Send(new GetDiscordUserInfoQuery(closerUserId), cancellationToken);
     ArgumentNullException.ThrowIfNull(closerUser);
@@ -45,14 +47,17 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 
     _ = Task.Run(async () => {
       var modChatChannel = request.ModChatChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TICKET_CLOSED));
-      var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      if (pmChannel != null) {
+      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TicketClosed));
+      try {
+        var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
         await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(ticket, guildOption));
         if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(ticket, guildOption));
       }
+      catch (NotFoundException) {
+        //ignored
+      }
 
-      var logChannel = await _bot.GetLogChannelAsync();
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(LogResponses.TicketClosed(ticket));
     }, cancellationToken);
   }

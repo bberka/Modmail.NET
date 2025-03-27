@@ -7,15 +7,12 @@ namespace Modmail.NET.Features.TicketType.Handlers;
 
 public class ProcessRemoveTicketTypeHandler : IRequestHandler<ProcessRemoveTicketTypeCommand, Entities.TicketType>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessRemoveTicketTypeHandler(ModmailDbContext dbContext,
-                                        ModmailBot bot,
                                         ISender sender) {
     _dbContext = dbContext;
-    _bot = bot;
     _sender = sender;
   }
 

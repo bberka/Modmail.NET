@@ -1,4 +1,5 @@
-﻿@using Microsoft.EntityFrameworkCore
+﻿@page "/tickets/messages/{TicketId:guid}"
+@using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Features.UserInfo
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject ISender Sender
@@ -8,7 +9,7 @@
   [Parameter]
   public Guid TicketId { get; set; }
 
-  bool _isLoading = false;
+  bool _isLoading;
 
   async Task ShowLoading() {
     _isLoading = true;
@@ -20,7 +21,7 @@
 
   private IQueryable<TicketMessage> _data;
   private Dictionary<ulong, DiscordUserInfo> _users = new();
-  private int _count = 0;
+  private int _count;
 
   private async Task ReloadDataAsync(LoadDataArgs args = null) {
     await ShowLoading();
@@ -64,6 +65,13 @@
 <div class="rz-mx-auto">
   <RadzenRow>
     <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Ticket Messages
+          </RadzenText>
+        </RadzenColumn>
+      </RadzenRow>
       <RadzenRow RowGap="4" class="rz-mt-5">
         @if (_data is null) {
           <Loading></Loading>

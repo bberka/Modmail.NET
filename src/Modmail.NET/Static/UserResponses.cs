@@ -12,44 +12,44 @@ public static class UserResponses
 {
   public static DiscordEmbed FeedbackReceivedUpdateMessage(Ticket ticket) {
     var feedbackDone = new DiscordEmbedBuilder()
-                       .WithTitle(LangKeys.FEEDBACK_RECEIVED.GetTranslation())
+                       .WithTitle(LangKeys.FeedbackReceived.GetTranslation())
                        .WithCustomTimestamp()
                        .WithGuildInfoFooter()
-                       .AddField(LangKeys.STAR.GetTranslation(), LangKeys.STAR_EMOJI.GetTranslation() + ticket.FeedbackStar)
-                       .AddField(LangKeys.FEEDBACK.GetTranslation(), ticket.FeedbackMessage)
+                       .AddField(LangKeys.Star.GetTranslation(), LangKeys.StarEmoji.GetTranslation() + ticket.FeedbackStar)
+                       .AddField(LangKeys.Feedback.GetTranslation(), ticket.FeedbackMessage)
                        .WithColor(Colors.FeedbackColor);
     return feedbackDone;
   }
 
   public static DiscordEmbedBuilder TicketTypeChanged(TicketType ticketType) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TICKET_TYPE_CHANGED.GetTranslation())
+                .WithTitle(LangKeys.TicketTypeChanged.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketTypeChangedColor);
     if (!string.IsNullOrEmpty(ticketType?.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
       embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
 
     if (ticketType is not null)
-      embed.WithDescription(string.Format(LangKeys.TICKET_TYPE_SET.GetTranslation(), ticketType.Emoji, ticketType.Name));
+      embed.WithDescription(string.Format(LangKeys.TicketTypeSet.GetTranslation(), ticketType.Emoji, ticketType.Name));
     else
-      embed.WithDescription(LangKeys.TICKET_TYPE_REMOVED.GetTranslation());
+      embed.WithDescription(LangKeys.TicketTypeRemoved.GetTranslation());
 
     return embed;
   }
 
   public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket, GuildOption guildOption) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YOUR_TICKET_HAS_BEEN_CLOSED.GetTranslation())
-                .WithDescription(LangKeys.YOUR_TICKET_HAS_BEEN_CLOSED_DESCRIPTION.GetTranslation())
+                .WithTitle(LangKeys.YourTicketHasBeenClosed.GetTranslation())
+                .WithDescription(LangKeys.YourTicketHasBeenClosedDescription.GetTranslation())
                 .WithGuildInfoFooter(guildOption)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketClosedColor);
 
-    var closingMessage = LangKeys.CLOSING_MESSAGE_DESCRIPTION.GetTranslation();
+    var closingMessage = LangKeys.ClosingMessageDescription.GetTranslation();
 
     if (!string.IsNullOrEmpty(closingMessage)) embed.WithDescription(closingMessage);
 
-    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CLOSE_REASON.GetTranslation(), ticket.CloseReason);
+    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CloseReason.GetTranslation(), ticket.CloseReason);
 
     return embed;
   }
@@ -65,8 +65,8 @@ public static class UserResponses
     };
 
     var ticketFeedbackEmbed = new DiscordEmbedBuilder()
-                              .WithTitle(LangKeys.FEEDBACK.GetTranslation())
-                              .WithDescription(LangKeys.FEEDBACK_DESCRIPTION.GetTranslation())
+                              .WithTitle(LangKeys.Feedback.GetTranslation())
+                              .WithDescription(LangKeys.FeedbackDescription.GetTranslation())
                               .WithCustomTimestamp()
                               .WithGuildInfoFooter(guildOption)
                               .WithColor(Colors.FeedbackColor);
@@ -80,11 +80,11 @@ public static class UserResponses
   public static DiscordEmbedBuilder TicketPriorityChanged(GuildOption guildOption, DiscordUserInfo info, Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
     var embed = new DiscordEmbedBuilder()
                 .WithGuildInfoFooter(guildOption)
-                .WithTitle(LangKeys.TICKET_PRIORITY_CHANGED.GetTranslation())
+                .WithTitle(LangKeys.TicketPriorityChanged.GetTranslation())
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketPriorityChangedColor)
-                .AddField(LangKeys.OLD_PRIORITY.GetTranslation(), oldPriority.ToString(), true)
-                .AddField(LangKeys.NEW_PRIORITY.GetTranslation(), newPriority.ToString(), true);
+                .AddField(LangKeys.OldPriority.GetTranslation(), oldPriority.ToString(), true)
+                .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true);
     if (!ticket.Anonymous) embed.WithUserAsAuthor(info);
     // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
     return embed;
@@ -93,13 +93,13 @@ public static class UserResponses
 
   public static DiscordEmbedBuilder YouHaveBeenBlacklisted(string reason = null) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YOU_HAVE_BEEN_BLACKLISTED.GetTranslation())
-                .WithDescription(LangKeys.YOU_HAVE_BEEN_BLACKLISTED_DESCRIPTION.GetTranslation())
+                .WithTitle(LangKeys.YouHaveBeenBlacklisted.GetTranslation())
+                .WithDescription(LangKeys.YouHaveBeenBlacklistedDescription.GetTranslation())
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
                 .WithColor(Colors.ErrorColor);
 
-    if (!string.IsNullOrEmpty(reason)) embed.AddField(LangKeys.REASON.GetTranslation(), reason);
+    if (!string.IsNullOrEmpty(reason)) embed.AddField(LangKeys.Reason.GetTranslation(), reason);
 
     return embed;
   }
@@ -109,11 +109,11 @@ public static class UserResponses
                                                               List<TicketType> ticketTypes,
                                                               Guid ticketId) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YOU_HAVE_CREATED_NEW_TICKET.GetTranslation())
+                .WithTitle(LangKeys.YouHaveCreatedNewTicket.GetTranslation())
                 .WithFooter(guild.Name, guild.IconUrl)
                 .WithCustomTimestamp()
                 .WithColor(Colors.TicketCreatedColor);
-    var greetingMessage = LangKeys.GREETING_MESSAGE_DESCRIPTION.GetTranslation();
+    var greetingMessage = LangKeys.GreetingMessageDescription.GetTranslation();
     if (!string.IsNullOrEmpty(greetingMessage))
       embed.WithDescription(greetingMessage);
 
@@ -122,7 +122,7 @@ public static class UserResponses
 
     if (ticketTypes.Count > 0) {
       var selectBox = new DiscordSelectComponent(UtilInteraction.BuildKey("ticket_type", ticketId.ToString()),
-                                                 LangKeys.PLEASE_SELECT_A_TICKET_TYPE.GetTranslation(),
+                                                 LangKeys.PleaseSelectATicketType.GetTranslation(),
                                                  ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name,
                                                                                                           x.Key.ToString(),
                                                                                                           x.Description,
@@ -140,8 +140,8 @@ public static class UserResponses
 
   public static DiscordEmbedBuilder YouHaveBeenRemovedFromBlacklist(DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST.GetTranslation())
-                .WithDescription(LangKeys.YOU_HAVE_BEEN_REMOVED_FROM_BLACKLIST_DESCRIPTION.GetTranslation())
+                .WithTitle(LangKeys.YouHaveBeenRemovedFromBlacklist.GetTranslation())
+                .WithDescription(LangKeys.YouHaveBeenRemovedFromBlacklistDescription.GetTranslation())
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
                 .WithUserAsAuthor(user)

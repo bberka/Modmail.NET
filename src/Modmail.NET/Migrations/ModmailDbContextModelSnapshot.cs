@@ -192,11 +192,11 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("AvgResponseTimeMinutes")
+                    b.Property<double>("AvgResponseTimeSeconds")
                         .HasPrecision(2)
                         .HasColumnType("float(2)");
 
-                    b.Property<double>("AvgTicketResolvedMinutes")
+                    b.Property<double>("AvgTicketClosedSeconds")
                         .HasPrecision(2)
                         .HasColumnType("float(2)");
 
@@ -208,14 +208,14 @@ namespace Modmail.NET.Migrations
                         .HasPrecision(2)
                         .HasColumnType("float(2)");
 
-                    b.Property<double>("FastestClosedTicketMinutes")
+                    b.Property<double>("FastestClosedTicketSeconds")
                         .HasPrecision(2)
                         .HasColumnType("float(2)");
 
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("SlowestClosedTicketMinutes")
+                    b.Property<double>("SlowestClosedTicketSeconds")
                         .HasPrecision(2)
                         .HasColumnType("float(2)");
 

@@ -30,12 +30,6 @@
       if (_guildOption is null) {
         throw new InvalidOperationException("Guild option is null");
       }
-
-      //TODO: Call mediator command
-      _guildOption.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
-      _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
-      _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
-
       DbContext.Update(_guildOption);
       var affected = await DbContext.SaveChangesAsync();
       if (affected == 0) {
@@ -136,7 +130,7 @@
               </RadzenRow>
 
 
-          
+
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Blacklist Access Level" Variant="Variant.Outlined">
@@ -175,10 +169,10 @@
                   <RadzenDropDown Style="user-select: none"
                                   Multiple="false"
                                   @bind-Value="@_guildOption.ManageTeamsMinAccessLevel"
-                                  Data="new List<TeamPermissionLevel>(){
+                                  Data="new List<TeamPermissionLevel> {
                                       TeamPermissionLevel.Admin,
-                                      TeamPermissionLevel.Owner,
-                                    }"
+                                      TeamPermissionLevel.Owner
+                                  }"
                                   TValue="TeamPermissionLevel"
                                   AllowFiltering="false"/>
                 </RadzenFormField>
@@ -188,17 +182,17 @@
                   Minimum access level for managing Teams via Web
                 </small>
               </RadzenRow>
-              
+
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Hangfire Access Level" Variant="Variant.Outlined">
                   <RadzenDropDown Style="user-select: none"
                                   Multiple="false"
                                   @bind-Value="@_guildOption.ManageHangfireMinAccessLevel"
-                                  Data="new List<TeamPermissionLevel>(){
+                                  Data="new List<TeamPermissionLevel> {
                                       TeamPermissionLevel.Admin,
-                                      TeamPermissionLevel.Owner,
-                                    }"
+                                      TeamPermissionLevel.Owner
+                                  }"
                                   TValue="TeamPermissionLevel"
                                   AllowFiltering="false"/>
                 </RadzenFormField>

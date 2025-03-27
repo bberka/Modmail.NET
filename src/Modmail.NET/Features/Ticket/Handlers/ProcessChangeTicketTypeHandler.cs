@@ -66,7 +66,7 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
               var emoji = DiscordEmoji.FromUnicode(_bot.Client, ticketType.Emoji);
               var typeName = ticketType.Name;
               var str = $"{emoji} {typeName}";
-              newEmbed.AddField(LangKeys.TICKET_TYPE.GetTranslation(), str);
+              newEmbed.AddField(LangKeys.TicketType.GetTranslation(), str);
             }
 
             await privateMessageWithComponent.ModifyAsync(x => {

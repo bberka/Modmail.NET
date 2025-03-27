@@ -7,11 +7,11 @@ public static class Modals
 {
   public static DiscordInteractionResponseBuilder CreateFeedbackModal(int starCount, Guid ticketId, ulong messageId) {
     var modal = new DiscordInteractionResponseBuilder()
-                .WithTitle(LangKeys.FEEDBACK.GetTranslation())
+                .WithTitle(LangKeys.Feedback.GetTranslation())
                 .WithCustomId(UtilInteraction.BuildKey("feedback", starCount, ticketId, messageId))
-                .AddComponents(new DiscordTextInputComponent(LangKeys.FEEDBACK.GetTranslation(),
+                .AddComponents(new DiscordTextInputComponent(LangKeys.Feedback.GetTranslation(),
                                                              "feedback",
-                                                             LangKeys.PLEASE_TELL_US_REASONS_FOR_YOUR_RATING.GetTranslation(),
+                                                             LangKeys.PleaseTellUsReasonsForYourRating.GetTranslation(),
                                                              style: DiscordTextInputStyle.Paragraph,
                                                              min_length: 10,
                                                              max_length: 500));
@@ -20,11 +20,11 @@ public static class Modals
 
   public static DiscordInteractionResponseBuilder CreateCloseTicketWithReasonModal(Guid ticketId) {
     var modal = new DiscordInteractionResponseBuilder()
-                .WithTitle(LangKeys.CLOSE_TICKET_WITH_REASON.GetTranslation())
+                .WithTitle(LangKeys.CloseTicketWithReason.GetTranslation())
                 .WithCustomId(UtilInteraction.BuildKey("close_ticket_with_reason", ticketId))
-                .AddComponents(new DiscordTextInputComponent(LangKeys.REASON.GetTranslation(),
+                .AddComponents(new DiscordTextInputComponent(LangKeys.Reason.GetTranslation(),
                                                              "reason",
-                                                             LangKeys.ENTER_A_REASON_FOR_CLOSING_THIS_TICKET.GetTranslation(),
+                                                             LangKeys.EnterReasonForClosingThisTicket.GetTranslation(),
                                                              style: DiscordTextInputStyle.Paragraph,
                                                              min_length: 10,
                                                              max_length: 500));

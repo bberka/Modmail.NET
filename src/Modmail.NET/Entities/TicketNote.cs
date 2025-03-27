@@ -4,15 +4,15 @@ using Modmail.NET.Abstract;
 namespace Modmail.NET.Entities;
 
 public class TicketNote : IHasRegisterDate,
-                          IEntity
+                          IEntity,
+                          IGuidId
 {
-  public Guid Id { get; set; }
-
   [MaxLength(DbLength.Note)]
   [Required]
   public required string Content { get; set; }
 
-  public Guid TicketId { get; set; }
-  public ulong DiscordUserId { get; set; }
+  public required Guid TicketId { get; set; }
+  public required ulong DiscordUserId { get; set; }
+  public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; }
 }

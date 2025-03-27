@@ -20,7 +20,7 @@
     _username = auth.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
     var roleStr = auth.User.FindFirst(ClaimTypes.Role)?.Value;
     if (string.IsNullOrEmpty(roleStr)) {
-      NavigationManager.NavigateTo("result/" + LangKeys.ERROR_ROLE_IS_NULL);
+      NavigationManager.NavigateTo("result/" + LangKeys.ErrorRoleIsNull);
       return;
     }
 

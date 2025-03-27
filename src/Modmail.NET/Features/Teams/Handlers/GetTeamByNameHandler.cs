@@ -17,7 +17,7 @@ public class GetTeamByNameHandler : IRequestHandler<GetTeamByNameQuery, GuildTea
   public async Task<GuildTeam> Handle(GetTeamByNameQuery request, CancellationToken cancellationToken) {
     var result = await _dbContext.GuildTeams
                                  .FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
-    if (!request.AllowNull && result is null) throw new NotFoundWithException(LangKeys.TEAM, request.Name);
+    if (!request.AllowNull && result is null) throw new NotFoundWithException(LangKeys.Team, request.Name);
     return result;
   }
 }

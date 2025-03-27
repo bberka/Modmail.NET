@@ -6,14 +6,12 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand>
 {
-  private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
 
   public ProcessUpdateTeamHandler(ModmailBot bot,
                                   ModmailDbContext dbContext,
                                   ISender sender) {
-    _bot = bot;
     _dbContext = dbContext;
     _sender = sender;
   }
@@ -23,7 +21,7 @@ public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand
     if (!anyChanges) return;
 
     var team = await _sender.Send(new GetTeamByNameQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
-    
+
     if (request.PermissionLevel.HasValue) team.PermissionLevel = request.PermissionLevel.Value;
 
     if (request.PingOnNewTicket.HasValue) team.PingOnNewTicket = request.PingOnNewTicket.Value;

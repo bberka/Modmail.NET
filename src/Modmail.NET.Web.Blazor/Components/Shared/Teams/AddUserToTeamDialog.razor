@@ -17,7 +17,7 @@
 
   [CascadingParameter]
   public Task<AuthenticationState> AuthContext { get; set; }
-  
+
   private List<DiscordUserInfo> _users;
 
   private ulong _selectedUserId = 0;
@@ -53,10 +53,9 @@
     const string logMessage = $"[{nameof(AddUserToTeamDialog)}]{nameof(SubmitAsync)}({{UserId}})";
 
     try {
-      
       var state = await AuthContext;
       var userId = state.User.GetUserId();
-      
+
       await Sender.Send(new ProcessAddTeamMemberCommand(userId, GuildTeam.Id, _selectedUserId));
       Log.Information(logMessage, _selectedUserId);
       NotificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");

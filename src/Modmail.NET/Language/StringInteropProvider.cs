@@ -6,7 +6,7 @@ namespace Modmail.NET.Language;
 
 public static class StringInterpolationMgr
 {
-  private const string NEW_LINE_INTERPOLATION = "{NewLine}";
+  private const string NewLineInterpolation = "{NewLine}";
 
   public static string Build(string text,
                              ulong? userId = null,
@@ -33,7 +33,7 @@ public static class StringInterpolationMgr
              .Replace("{RoleName}", roleName ?? "Unknown")
              .Replace("{TeamName}", teamName ?? "Unknown")
              .Replace("{TicketId}", ticketId ?? "Unknown")
-             .Replace(NEW_LINE_INTERPOLATION, Environment.NewLine)
+             .Replace(NewLineInterpolation, Environment.NewLine)
              .ToString();
   }
 

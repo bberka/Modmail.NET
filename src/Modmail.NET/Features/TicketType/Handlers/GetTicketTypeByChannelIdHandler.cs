@@ -17,7 +17,7 @@ public class GetTicketTypeByChannelIdHandler : IRequestHandler<GetTicketTypeByCh
     var result = await _dbContext.Tickets.Where(x => x.ModMessageChannelId == request.ChannelId)
                                  .Select(x => x.TicketType)
                                  .FirstOrDefaultAsync(cancellationToken);
-    if (!request.AllowNull && result is null) throw new NotFoundException(LangKeys.TICKET_TYPE);
+    if (!request.AllowNull && result is null) throw new NotFoundException(LangKeys.TicketType);
     return result;
   }
 }

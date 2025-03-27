@@ -43,14 +43,6 @@ public class LangProvider
       dict.Add(lang, processLangData);
     }
 
-    var enumValues = Enum.GetValues<LangKeys>();
-    //EXPORT ENUM VALUES TO JSON
-
-    var enumValuesAsDictionary = enumValues.ToDictionary(x => x.ToString(), x => x.ToString());
-
-    var enumValuesJson = JsonConvert.SerializeObject(enumValuesAsDictionary, Formatting.Indented);
-    File.WriteAllText(Path.Combine(langDir, "_keys.json"), enumValuesJson);
-
     _languages = dict;
   }
 

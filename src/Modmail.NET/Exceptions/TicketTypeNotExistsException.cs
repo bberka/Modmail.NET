@@ -4,7 +4,7 @@ namespace Modmail.NET.Exceptions;
 
 public class TicketTypeNotExistsException : BotExceptionBase
 {
-  public TicketTypeNotExistsException(string name = null) : base(LangProvider.This.GetTranslation(LangKeys.TICKET_TYPE_NOT_EXISTS)) {
+  public TicketTypeNotExistsException(string name = null) : base(LangProvider.This.GetTranslation(LangKeys.TicketTypeNotExists)) {
     Name = name;
   }
 

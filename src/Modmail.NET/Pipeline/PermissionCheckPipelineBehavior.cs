@@ -2,10 +2,7 @@ using System.Reflection;
 using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Attributes;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
-using Modmail.NET.Features.Teams;
 
 namespace Modmail.NET.Pipeline;
 

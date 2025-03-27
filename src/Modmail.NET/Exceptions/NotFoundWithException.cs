@@ -4,7 +4,7 @@ namespace Modmail.NET.Exceptions;
 
 public class NotFoundWithException : BotExceptionBase
 {
-  public NotFoundWithException(LangKeys name, object id) : base(LangProvider.This.GetTranslation(LangKeys.X_NOT_FOUND, name, id)) {
+  public NotFoundWithException(LangKeys name, object id) : base(LangProvider.This.GetTranslation(LangKeys.XNotFound, name, id)) {
     Name = name;
     Id = id;
   }

@@ -11,6 +11,6 @@ public class RequireTicketChannelCheck : IContextCheck<RequireTicketChannelAttri
     var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(context.Channel.Topic);
     if (ticketId != Guid.Empty) return null;
 
-    return await Task.FromResult(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_TICKET_CHANNEL.GetTranslation());
+    return await Task.FromResult(LangKeys.ThisCommandCanOnlyBeUsedInTicketChannel.GetTranslation());
   }
 }

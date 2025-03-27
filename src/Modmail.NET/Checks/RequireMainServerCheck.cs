@@ -13,6 +13,6 @@ public class RequireMainServerCheck : IContextCheck<RequireMainServerAttribute>
     var isMainServer = config.MainServerId == context.Guild?.Id;
     if (isMainServer) return null;
 
-    return await Task.FromResult(LangKeys.THIS_COMMAND_CAN_ONLY_BE_USED_IN_MAIN_SERVER.GetTranslation());
+    return await Task.FromResult(LangKeys.ThisCommandCanOnlyBeUsedInMainServer.GetTranslation());
   }
 }

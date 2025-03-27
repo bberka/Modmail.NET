@@ -11,16 +11,16 @@ public static class CommandResponses
     var sb = new StringBuilder();
     var embed = new DiscordEmbedBuilder()
                 .WithCustomTimestamp()
-                .WithTitle(LangKeys.MODMAIL_SETTINGS.GetTranslation())
+                .WithTitle(LangKeys.ModmailSettings.GetTranslation())
                 .WithColor(Colors.InfoColor)
                 .WithGuildInfoFooter(guildOption);
 
-    sb.AppendLine($"`{LangKeys.ENABLED.GetTranslation()}`: " + guildOption.IsEnabled);
-    sb.AppendLine($"`{LangKeys.TAKE_FEEDBACK_AFTER_CLOSING.GetTranslation()}`: " + guildOption.TakeFeedbackAfterClosing);
-    sb.AppendLine($"`{LangKeys.SHOW_CONFIRMATIONS.GetTranslation()}`: " + guildOption.ShowConfirmationWhenClosingTickets);
+    sb.AppendLine($"`{LangKeys.Enabled.GetTranslation()}`: " + guildOption.IsEnabled);
+    sb.AppendLine($"`{LangKeys.TakeFeedbackAfterClosing.GetTranslation()}`: " + guildOption.TakeFeedbackAfterClosing);
+    sb.AppendLine($"`{LangKeys.ShowConfirmations.GetTranslation()}`: " + guildOption.ShowConfirmationWhenClosingTickets);
     // sb.AppendLine("`Allow Anonymous Response`: " + guildOption.AllowAnonymousResponding);
-    sb.AppendLine($"`{LangKeys.LOG_CHANNEL.GetTranslation()}`: <#" + guildOption.LogChannelId + "> | " + guildOption.LogChannelId);
-    sb.AppendLine($"`{LangKeys.TICKET_CATEGORY.GetTranslation()}`: <#" + guildOption.CategoryId + "> | " + guildOption.CategoryId);
+    sb.AppendLine($"`{LangKeys.LogChannel.GetTranslation()}`: <#" + guildOption.LogChannelId + "> | " + guildOption.LogChannelId);
+    sb.AppendLine($"`{LangKeys.TicketCategory.GetTranslation()}`: <#" + guildOption.CategoryId + "> | " + guildOption.CategoryId);
 
     embed.WithDescription(sb.ToString());
 

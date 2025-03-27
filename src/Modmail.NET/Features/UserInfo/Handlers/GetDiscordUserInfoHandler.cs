@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 
@@ -25,13 +26,17 @@ public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery
     var result = await _dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
     if (result is not null)
       return result;
-    var discordUser = await _bot.Client.GetUserAsync(request.UserId);
 
-    if (discordUser is not null) {
+    try {
+      var discordUser = await _bot.Client.GetUserAsync(request.UserId);
       await _sender.Send(new UpdateDiscordUserCommand(discordUser), cancellationToken);
+      result = await _dbContext.DiscordUserInfos.SingleAsync(x => x.Id == request.UserId, cancellationToken);
       return result;
     }
+    catch (NotFoundException) {
+      //ignored
+    }
 
-    throw new NotFoundWithException(LangKeys.USER, request.UserId);
+    throw new NotFoundWithException(LangKeys.User, request.UserId);
   }
 }
