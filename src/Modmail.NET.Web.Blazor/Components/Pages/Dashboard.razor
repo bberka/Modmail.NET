@@ -1,5 +1,4 @@
 ﻿@page "/dashboard"
-@using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Extensions
 @using Modmail.NET.Features.Guild
 @using Modmail.NET.Features.Metric
@@ -11,9 +10,9 @@
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject ISender Sender
 @inject ModmailBot Bot
 @inject TicketMessageQueue TicketMessageQueue
+@inject IServiceScopeFactory ScopeFactory
 @attribute [AuthorizeTeam]
 
 @code {
@@ -26,16 +25,18 @@
   private MetricDto _metricDto;
 
   protected override async Task OnInitializedAsync() {
-    if (await Sender.Send(new CheckAnyGuildSetupQuery()) != true) {
+    var scope = ScopeFactory.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    if (await sender.Send(new CheckAnyGuildSetupQuery()) != true) {
       NavigationManager.NavigateTo("/setup");
       return;
     }
 
     var state = await AuthContext;
     var userId = state.User.GetUserId();
-    _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
+    _canManageStartStop = await sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
 
-    _metricDto = await Sender.Send(new GetLatestMetricQuery(true));
+    _metricDto = await sender.Send(new GetLatestMetricQuery(true));
   }
 
 
