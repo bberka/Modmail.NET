@@ -58,12 +58,21 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
                                                       .ToArrayAsync(cancellationToken: cancellationToken);
 
 
-    var messageCountChartDataArray = await _dbContext.TicketMessages
-                                                     .GroupBy(x => x.RegisterDateUtc.Date)
-                                                     .OrderByDescending(x => x.Key)
-                                                     .Take(metricsTakeDay)
-                                                     .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
-                                                     .ToArrayAsync(cancellationToken: cancellationToken);
+    var userMessageCountChartDataArray = await _dbContext.TicketMessages
+                                                         .Where(x => !x.SentByMod)
+                                                         .GroupBy(x => x.RegisterDateUtc.Date)
+                                                         .OrderByDescending(x => x.Key)
+                                                         .Take(metricsTakeDay)
+                                                         .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
+                                                         .ToArrayAsync(cancellationToken: cancellationToken);
+
+    var modMessageCountChartDataArray = await _dbContext.TicketMessages
+                                                        .Where(x => x.SentByMod)
+                                                        .GroupBy(x => x.RegisterDateUtc.Date)
+                                                        .OrderByDescending(x => x.Key)
+                                                        .Take(metricsTakeDay)
+                                                        .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
+                                                        .ToArrayAsync(cancellationToken: cancellationToken);
 
 
     var ticketTypeChartDataArray = await _dbContext.Tickets
@@ -79,8 +88,8 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
     var ticketPriorityChartDataArray = await _dbContext.Tickets
                                                        .GroupBy(x => x.Priority)
                                                        .Select(group => new ChartItemDto<string, int>(group.Key.ToString(),
-                                                                                                              group.Count()
-                                                                                                             ))
+                                                                                                      group.Count()
+                                                                                                     ))
                                                        .ToArrayAsync(cancellationToken: cancellationToken);
 
     return new MetricDto {
@@ -96,7 +105,8 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
       TeamUserCount = teamUserCount,
       OpenedTicketsChartDataArray = openTicketsChartDataArray,
       ClosedTicketsChartDataArray = closedTicketsChartDataArray,
-      MessageCountChartDataArray = messageCountChartDataArray,
+      UserMessageCountChartDataArray = userMessageCountChartDataArray,
+      ModMessageCountChartDataArray = userMessageCountChartDataArray,
       TicketTypeChartDataArray = ticketTypeChartDataArray,
       TicketPriorityChartDataArray = ticketPriorityChartDataArray,
     };

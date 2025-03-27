@@ -17,7 +17,8 @@ public sealed record MetricDto
   public required int TeamUserCount { get; init; }
   public required ChartItemDto<DateTime, int>[] OpenedTicketsChartDataArray { get; init; }
   public required ChartItemDto<DateTime,int>[] ClosedTicketsChartDataArray { get; init; }
-  public required ChartItemDto<DateTime,int>[] MessageCountChartDataArray { get; init; }
+  public required ChartItemDto<DateTime,int>[] ModMessageCountChartDataArray { get; init; }
+  public required ChartItemDto<DateTime,int>[] UserMessageCountChartDataArray { get; init; }
   public required ChartItemDto<string, int>[] TicketTypeChartDataArray { get; init; }
   public required ChartItemDto<string,int>[] TicketPriorityChartDataArray { get; init; }
 };
