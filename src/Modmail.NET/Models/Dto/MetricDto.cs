@@ -1,4 +1,3 @@
-using System.Text;
 using Modmail.NET.Entities;
 
 namespace Modmail.NET.Models.Dto;

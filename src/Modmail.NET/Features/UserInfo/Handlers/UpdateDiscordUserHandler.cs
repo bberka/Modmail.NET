@@ -1,7 +1,6 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
-using Modmail.NET.Extensions;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 

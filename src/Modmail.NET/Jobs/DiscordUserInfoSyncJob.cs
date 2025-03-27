@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Abstract;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
-using Modmail.NET.Extensions;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.UserInfo;
 using Serilog;
