@@ -1,70 +1,96 @@
 # Modmail.NET
 
-An Open-Source feature rich Modmail Discord Bot made with .NET 
+**An Open-Source & Feature-Rich Modmail Discord Bot for .NET 9**
 
-This bot can be easily setup and used on your server for managing community communication on a single way.
+Modmail.NET provides a comprehensive solution for managing community communications within Discord servers. It's designed for easy setup and self-hosting, giving you complete control over your data and configuration.
 
-Bot creates tickets and users message with the bot directly instead of sending message to mods.
+This bot streamlines communication by creating tickets that allow users to message moderators directly, without needing to directly message them.
 
-This bot is only available through self hosting, you can host it anywhere.
+## Key Features
 
-# Features
+### Private Ticketing
 
-- Open tickets by sending a private message to bot
-- Close tickets by using command or deleting the channel or web ui
-- Logging to messages/transcript to database and modmail log channel (sensitive logging)
-- Admins or mod team can respond tickets by sending message to created channel
-- Toggle anonymous messages by mods, allows responding tickets anonymously
-- Setting up teams adding roles and members to team for ticket management and access
-- Setting priority for tickets (adds emoji to ticket channel name)
-- Adding private mod notes to tickets
-- Pinging team roles/members on ticket open
-- Caching user information on certain guild events
-- Blacklist, blocking users from opening tickets to avoid spam
-- Getting feedback from user after ticket is closed. User can give up to 5 stars and reason.
-- Ticket type system, users can select ticket types to select what the ticket is about.
-- Moderators can talk with each other in ticket channel with by starting messages with bot prefix. To avoid message
-  being sent to user.
-- Web UI for configuring and seeing bot information
+Users open tickets by sending a private message to the bot.
 
+### Centralized Communication
 
-# Installation
+Moderators respond to tickets within dedicated channels.
 
-1. Install .NET 9 SDK
-2. Download project build and publish for your desired platform or download build from github
-3. Visit Discord Developer Portal and create a new application
-4. Configure appsettings.json
-5. Run the app in your server
+### Versatile Ticket Management
 
-# Multiple Servers Usage
+*   Close tickets via command, channel deletion, or web UI.
+*   Set ticket priority (adds emoji to ticket channel name).
+*   Add private mod notes.
 
-Before trying to use the bot on multiple servers you must now about the limitations;
+### Anonymous Responses
 
-1. This bot can only be setup once and only for main server
-2. Ticket management/commands only allowed on the main server, which id provided in configuration
-3. Team management/commands is locked to main server only, meaning teams and members can only be managed in main server
-4. Modmail setting management/commands is locked to main server only
-5. Ticket types management/commands is locked to main server only
+Moderators can toggle anonymous mode for responding to tickets.
 
-You can simply invite bot to multiple servers and you can start using the bot
+### Team-Based Access
 
-Ticket channels will created in main server
+Set up teams, assign roles, and manage team members for efficient ticket handling.
 
+### Event-Driven User Caching
 
-# [Discord Commands](COMMANDS.md)
-# [Changelog](CHANGELOG.md)
-# [Web UI Images](img)
+User information is automatically cached during key Discord events.
 
-# Warning
+### Blacklisting
 
-This project may come with bugs, missing features and problems.
+Prevent spam by blocking users from opening tickets.
 
-We are using this as our main ticket system actively however it is not fully released.
+### Feedback System
 
-# Contributing
+Gather user feedback (ratings and reasons) after ticket closure.
 
-Project is open to contributing if you willing to spend time fixing things or adding features. Much appreciated.
+### Ticket Types
 
-# Disclaimer
+Categorize tickets with a customizable ticket type system.
 
-You are responsible for data safety of users and messages when you are using this bot.
+### Moderator-Only Chat
+
+Moderators can communicate privately within ticket channels using a bot prefix.
+
+### Comprehensive Web UI
+
+Configure bot settings, manage teams, and view bot statistics through an intuitive web interface.
+
+###  Logging
+
+Logs messages and transcripts to a database and ticket actions to discord log channel.
+
+## Getting Started
+
+1.  **Prerequisites:** Install the [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
+2.  **Download & Build:** Download the project source code and build/publish it for your desired platform. You can also grab a pre-built release from the [GitHub Releases](link-to-releases-when-available)  *(Currently not available)*.
+3.  **Discord Application:** Create a new application on the [Discord Developer Portal](https://discord.com/developers/applications).
+4.  **Configuration:** Configure the bot's settings in `appsettings.json`.
+5.  **Run:** Start the application on your server.
+
+## Using the Bot Across Multiple Discord Servers
+
+Modmail.NET is designed with a main server in mind, which handles the core functionality. Please be aware of the following limitations when using the bot across multiple servers:
+
+1.  The bot can only be set up once and for the designated main server.
+2.  Ticket management commands are only available on the main server.
+3.  Team management, modmail settings, and ticket type management are locked to the main server.
+
+To use Modmail.NET on multiple servers, simply invite the bot to each server. Ticket channels will be created in the main server for cross-server communication.
+
+## Explore the Documentation
+
+*   [Discord Commands](COMMANDS.md) - Learn about the available bot commands and their usage.
+*   [Changelog](CHANGELOG.md) - See what's new in the latest releases.
+*   [Web UI Images](img) - Get a visual overview of the web interface.
+*   [Roadmap](ROADMAP.md) - View the roadmap!
+
+## Important: Please Read!
+
+This project is under active development and may contain bugs, missing features, or other issues. We use Modmail.NET as our main ticket system, but it is not yet considered a fully stable release.
+
+## Contributing
+
+We welcome contributions from the community! If you're interested in helping fix bugs or add new features, please feel free to submit pull requests.
+
+## Disclaimer
+
+By using Modmail.NET, you acknowledge that you are responsible for ensuring the data safety and privacy of your users and their messages.
