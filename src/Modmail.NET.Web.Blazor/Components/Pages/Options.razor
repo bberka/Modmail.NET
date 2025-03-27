@@ -30,12 +30,6 @@
       if (_guildOption is null) {
         throw new InvalidOperationException("Guild option is null");
       }
-
-      //TODO: Call mediator command
-      _guildOption.TicketTimeoutHours = _guildOption.TicketTimeoutHours;
-      _guildOption.TakeFeedbackAfterClosing = _guildOption.TakeFeedbackAfterClosing;
-      _guildOption.AlwaysAnonymous = _guildOption.AlwaysAnonymous;
-
       DbContext.Update(_guildOption);
       var affected = await DbContext.SaveChangesAsync();
       if (affected == 0) {
