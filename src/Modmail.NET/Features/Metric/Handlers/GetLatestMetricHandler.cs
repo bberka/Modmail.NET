@@ -106,7 +106,7 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
       OpenedTicketsChartDataArray = openTicketsChartDataArray,
       ClosedTicketsChartDataArray = closedTicketsChartDataArray,
       UserMessageCountChartDataArray = userMessageCountChartDataArray,
-      ModMessageCountChartDataArray = userMessageCountChartDataArray,
+      ModMessageCountChartDataArray = modMessageCountChartDataArray,
       TicketTypeChartDataArray = ticketTypeChartDataArray,
       TicketPriorityChartDataArray = ticketPriorityChartDataArray,
     };
