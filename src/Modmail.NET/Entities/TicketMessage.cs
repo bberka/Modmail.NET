@@ -20,10 +20,10 @@ public class TicketMessage : IHasRegisterDate,
   public required Guid TicketId { get; set; }
 
   public required bool SentByMod { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
-  
+
   //FK
   public List<TicketMessageAttachment> Attachments { get; set; }
+  public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
     var id = Guid.CreateVersion7();

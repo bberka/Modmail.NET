@@ -29,7 +29,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
       AvgResponseTimeSeconds = await GetAvgResponseTimeSeconds(dbContext) ?? 0,
       AvgTicketClosedSeconds = await GetAvgTicketClosedSeconds(dbContext) ?? 0,
       FastestClosedTicketSeconds = await GetFastestClosedTicketSeconds(dbContext) ?? 0,
-      SlowestClosedTicketSeconds = await GetSlowestClosedTicketSeconds(dbContext) ?? 0,
+      SlowestClosedTicketSeconds = await GetSlowestClosedTicketSeconds(dbContext) ?? 0
     };
 
     dbContext.Add(statistics);

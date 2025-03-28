@@ -9,30 +9,6 @@ public class DiscordUserInfo : IHasRegisterDate,
                                IHasUpdateDate,
                                IEntity
 {
-  public DiscordUserInfo() { } 
-
-  public static DiscordUserInfo FromDiscordUser(DiscordUser user) {
-    return new DiscordUserInfo {
-      Id = user.Id,
-      Username = user.GetUsername(),
-      AvatarUrl = user.AvatarUrl,
-      BannerUrl = user.BannerUrl,
-      Email = user.Email,
-      Locale = user.Locale
-    };
-  }
-
-  public static DiscordUserInfo FromDiscordMember(DiscordMember member) {
-    return new DiscordUserInfo {
-      Id = member.Id,
-      Username = member.GetUsername(),
-      AvatarUrl = member.AvatarUrl,
-      BannerUrl = member.BannerUrl,
-      Email = member.Email,
-      Locale = member.Locale
-    };
-  }
-
   /// <summary>
   ///   Users Discord Id
   /// </summary>
@@ -61,6 +37,28 @@ public class DiscordUserInfo : IHasRegisterDate,
   public DateTime RegisterDateUtc { get; set; }
 
   public DateTime? UpdateDateUtc { get; set; }
+
+  public static DiscordUserInfo FromDiscordUser(DiscordUser user) {
+    return new DiscordUserInfo {
+      Id = user.Id,
+      Username = user.GetUsername(),
+      AvatarUrl = user.AvatarUrl,
+      BannerUrl = user.BannerUrl,
+      Email = user.Email,
+      Locale = user.Locale
+    };
+  }
+
+  public static DiscordUserInfo FromDiscordMember(DiscordMember member) {
+    return new DiscordUserInfo {
+      Id = member.Id,
+      Username = member.GetUsername(),
+      AvatarUrl = member.AvatarUrl,
+      BannerUrl = member.BannerUrl,
+      Email = member.Email,
+      Locale = member.Locale
+    };
+  }
 
   public string GetMention() {
     return $"<@{Id}>";
