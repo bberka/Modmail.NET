@@ -1,0 +1,67 @@
+@page "/transcript/{TicketId:guid}"
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Guild
+@using Modmail.NET.Features.UserInfo
+@using Modmail.NET.Web.Blazor.Components.Layout
+@using Modmail.NET.Web.Blazor.Components.Shared.TicketMessage
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject ISender Sender
+@layout EmptyLayout
+
+
+<div class="discord-messages-container">
+    <div class="rz-mx-auto">
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+                            Ticket Messages
+                        </RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow RowGap="4" class="rz-mt-5">
+                    @if (_messages is null) {
+                        <Loading></Loading>
+                    }
+                    else {
+                        <div class="discord-messages-container">
+                            @foreach (var message in _messages) {
+                                <DiscordChatMessageView
+                                    MessageContent="@message.MessageContent"
+                                    RegisterDateUtc="@message.RegisterDateUtc"
+                                    Username="@_users[message.SenderUserId].Username"
+                                    AvatarUrl="@_users[message.SenderUserId].AvatarUrl"
+                                    Attachments="@message.Attachments"/>
+                            }
+                        </div>
+                    }
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid TicketId { get; set; }
+
+    private List<TicketMessage> _messages;
+    private Dictionary<ulong, DiscordUserInfo> _users = new();
+
+    protected override async Task OnInitializedAsync() {
+        _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
+        await LoadMessagesAsync();
+    }
+
+    private async Task LoadMessagesAsync() {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        _messages = await dbContext.TicketMessages
+                                   .Include(x => x.Attachments)
+                                   .Where(x => x.TicketId == TicketId)
+                                   .OrderBy(x => x.RegisterDateUtc)
+                                   .ToListAsync();
+    }
+
+}

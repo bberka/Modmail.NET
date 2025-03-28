@@ -131,16 +131,11 @@
 
   private void ShowMessages(TicketDto ticketDto) {
     Navi.NavigateTo("tickets/messages/" + ticketDto.Id);
-
-    @* _ = await DialogService.OpenAsync("Ticket Messages", *@
-    @*                                   _ => *@
-    @*                                     @<TicketMessages TicketId="ticketDto.Id"></TicketMessages>, *@
-    @*                                   new DialogOptions { *@
-    @*                                     Width = "900px", *@
-    @*                                     Style = "max-width: 100%", *@
-    @*                                     CloseDialogOnEsc = true, *@
-    @*                                     CloseDialogOnOverlayClick = true *@
-    @*                                   }); *@
+  }
+  
+  
+  private void ShowTranscript(TicketDto ticketDto) {
+    Navi.NavigateTo("transcript/" + ticketDto.Id);
   }
 
 
@@ -278,6 +273,18 @@
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }
+
+                    <RadzenButton
+                      ButtonStyle="ButtonStyle.Info"
+                      Icon="forum"
+                      Variant="Variant.Flat"
+                      Shade="Shade.Lighter"
+                      Size="ButtonSize.Medium"
+                      class="rz-my-1 rz-ms-1"
+                      Click="@(() => ShowTranscript(data))"
+                      MouseEnter="@(args => TooltipService.Open(args, "Transcript"))"
+                      @onclick:stopPropagation="true">
+                    </RadzenButton>
 
                     <RadzenButton
                       ButtonStyle="ButtonStyle.Info"
