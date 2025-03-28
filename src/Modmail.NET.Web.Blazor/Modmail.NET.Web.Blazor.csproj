@@ -82,12 +82,4 @@
         <Content Remove="Logs\**"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Language\"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="Language\Data\en.json"/>
-    </ItemGroup>
-
 </Project>
