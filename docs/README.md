@@ -81,7 +81,6 @@ To use Modmail.NET on multiple servers, simply invite the bot to each server. Ti
 *   [Discord Commands](COMMANDS.md) - Learn about the available bot commands and their usage.
 *   [Changelog](CHANGELOG.md) - See what's new in the latest releases.
 *   [Web UI Images](img) - Get a visual overview of the web interface.
-*   [Roadmap](ROADMAP.md) - View the roadmap!
 
 ## Important: Please Read!
 
