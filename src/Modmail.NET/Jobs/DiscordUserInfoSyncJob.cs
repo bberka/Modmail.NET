@@ -6,6 +6,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Utils;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
@@ -44,7 +45,6 @@ public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
       dbUser.BannerUrl = discordUser.BannerUrl;
       dbUser.Email = discordUser.Email;
       dbUser.Locale = discordUser.Locale;
-      dbUser.UpdateDateUtc = DateTime.UtcNow;
       updateList.Add(dbUser);
     }
 

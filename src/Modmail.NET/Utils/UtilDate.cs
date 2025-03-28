@@ -3,6 +3,6 @@
 public static class UtilDate
 {
   public static DateTime GetNow() {
-    return DateTime.UtcNow;
+    return UtilDate.GetNow();
   }
 }

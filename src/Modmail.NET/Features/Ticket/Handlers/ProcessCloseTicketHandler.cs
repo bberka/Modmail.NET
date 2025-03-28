@@ -4,6 +4,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -36,7 +37,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
 
 
-    ticket.ClosedDateUtc = DateTime.UtcNow;
+    ticket.ClosedDateUtc = UtilDate.GetNow();
     ticket.CloseReason = closeReason;
     ticket.CloserUserId = closerUserId;
     ticket.CloserUser = closerUser;

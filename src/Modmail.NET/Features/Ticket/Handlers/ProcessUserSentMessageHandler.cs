@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Permission;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -25,7 +26,7 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
     await Task.Delay(50, cancellationToken); //wait for privateChannel creation process to finish
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
 
-    ticket.LastMessageDateUtc = DateTime.UtcNow;
+    ticket.LastMessageDateUtc = UtilDate.GetNow();
 
     _dbContext.Update(ticket);
     var ticketMessage = TicketMessage.MapFrom(ticket.Id, request.Message, false);

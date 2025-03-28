@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Permission;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -28,7 +29,7 @@ public class ProcessAddTeamMemberHandler : IRequestHandler<ProcessAddTeamMemberC
       GuildTeamId = team.Id,
       Type = TeamMemberDataType.UserId,
       Key = request.MemberId,
-      RegisterDateUtc = DateTime.UtcNow
+      RegisterDateUtc = UtilDate.GetNow()
     };
 
     _dbContext.GuildTeamMembers.Add(memberEntity);

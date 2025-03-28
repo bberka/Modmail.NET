@@ -58,11 +58,11 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     var ticket = new Entities.Ticket {
       OpenerUserId = request.User.Id,
       ModMessageChannelId = mailChannel.Id,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = UtilDate.GetNow(),
       PrivateMessageChannelId = request.PrivateChannel.Id,
       InitialMessageId = request.Message.Id,
       Priority = TicketPriority.Normal,
-      LastMessageDateUtc = DateTime.UtcNow,
+      LastMessageDateUtc = UtilDate.GetNow(),
       Id = ticketId,
       Anonymous = guildOption.AlwaysAnonymous,
       IsForcedClosed = false,

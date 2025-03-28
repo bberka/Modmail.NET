@@ -34,7 +34,7 @@ public class TicketMessage : IHasRegisterDate,
       TicketId = ticketId,
       Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = UtilDate.GetNow(),
       SentByMod = sentByMod
     };
   }

@@ -1,6 +1,7 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.TicketType.Handlers;
 
@@ -32,7 +33,7 @@ public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicke
       Emoji = request.Emoji,
       Description = request.Description,
       Order = (int)request.Order,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = UtilDate.GetNow(),
       EmbedMessageTitle = request.EmbedMessageTitle,
       EmbedMessageContent = request.EmbedMessageContent
     };

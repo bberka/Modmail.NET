@@ -6,7 +6,7 @@ public static class UtilChannelTopic
 
 {
   public static string BuildChannelTopic(Guid mailId) {
-    return $"DO NOT CHANGE THIS || {mailId.ToString().ToUpper()} || {DateTime.UtcNow:O}";
+    return $"DO NOT CHANGE THIS || {mailId.ToString().ToUpper()} || {UtilDate.GetNow():O}";
   }
 
   public static Guid GetTicketIdFromChannelTopic(string topic) {

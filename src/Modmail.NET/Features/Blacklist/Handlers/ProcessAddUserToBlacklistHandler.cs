@@ -5,6 +5,7 @@ using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
@@ -38,7 +39,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
     var blackList = new TicketBlacklist {
       Reason = reason,
       DiscordUserId = request.UserId,
-      RegisterDateUtc = DateTime.UtcNow
+      RegisterDateUtc = UtilDate.GetNow()
     };
 
     _dbContext.Add(blackList);

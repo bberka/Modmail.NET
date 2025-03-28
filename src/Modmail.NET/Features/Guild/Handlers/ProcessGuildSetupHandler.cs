@@ -2,6 +2,7 @@ using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
@@ -27,7 +28,7 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
       LogChannelId = 0,
       GuildId = request.Guild.Id,
       IsEnabled = true,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = UtilDate.GetNow(),
       TakeFeedbackAfterClosing = false,
       ShowConfirmationWhenClosingTickets = false,
       IconUrl = request.Guild.IconUrl,
