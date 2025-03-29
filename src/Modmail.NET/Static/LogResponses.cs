@@ -38,7 +38,7 @@ public static class LogResponses
   }
 
 
-  public static DiscordEmbed BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string reason) {
+  public static DiscordEmbedBuilder BlacklistAdded(DiscordUserInfo author, DiscordUserInfo user, string reason) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.UserBlacklisted.GetTranslation())
                 .WithUserAsAuthor(author)
@@ -50,7 +50,7 @@ public static class LogResponses
     return embed;
   }
 
-  public static DiscordEmbed BlacklistRemoved(DiscordUserInfo author, DiscordUserInfo user) {
+  public static DiscordEmbedBuilder BlacklistRemoved(DiscordUserInfo author, DiscordUserInfo user) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.UserBlacklistRemoved.GetTranslation())
                 .WithUserAsAuthor(author)
@@ -71,36 +71,6 @@ public static class LogResponses
                 .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true);
     if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
     // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
-    return embed;
-  }
-
-
-  public static DiscordEmbedBuilder TicketTypeUpdated(TicketType ticketType) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TicketTypeUpdated.GetTranslation())
-                .WithCustomTimestamp()
-                .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.TicketType.GetTranslation(), ticketType.Name, true)
-                .AddField(LangKeys.Emoji.GetTranslation(), ticketType.Emoji.GetStringOrNaN(), true)
-                .AddField(LangKeys.Order.GetTranslation(), ticketType.Order.ToString(), true)
-                .AddField(LangKeys.Description.GetTranslation(), ticketType.Description.GetStringOrNaN())
-                .AddField(LangKeys.EmbedMessageTitle.GetTranslation(), ticketType.EmbedMessageTitle.GetStringOrNaN())
-                .AddField(LangKeys.EmbedMessageContent.GetTranslation(), ticketType.EmbedMessageContent.GetStringOrNaN());
-    return embed;
-  }
-
-
-  public static DiscordEmbedBuilder SetupComplete(GuildOption guildOption) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.SetupComplete.GetTranslation())
-                .WithCustomTimestamp()
-                .WithColor(Colors.InfoColor)
-                .AddField(LangKeys.GuildId.GetTranslation(), guildOption.GuildId.ToString())
-                .AddField(LangKeys.GuildName.GetTranslation(), guildOption.Name, true)
-                .AddField(LangKeys.CategoryId.GetTranslation(), guildOption.CategoryId.ToString(), true)
-                .AddField(LangKeys.LogChannelId.GetTranslation(), guildOption.LogChannelId.ToString(), true)
-                .AddField(LangKeys.TakeFeedbackAfterClosing.GetTranslation(), guildOption.TakeFeedbackAfterClosing.ToString(), true)
-                .AddField(LangKeys.TicketTimeoutHours.GetTranslation(), guildOption.TicketTimeoutHours.ToString());
     return embed;
   }
 }
