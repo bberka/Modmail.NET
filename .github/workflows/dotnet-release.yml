@@ -35,18 +35,25 @@ jobs:
         id: get_version
         if: steps.check_global_json.outputs.exists == 'true'
         run: |
-          VERSION=$(jq -r .sdk.version ./global.json)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          VERSION=$(jq -r .sdk.version ./global.json 2>/dev/null)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from global.json"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "::set-output name=version::$VERSION"
-        
+
       - name: Get Version from csproj
         id: get_version_csproj
         if: steps.check_global_json.outputs.exists != 'true'
         run: |
-          # Extract version from the .csproj file.
           PROJECT_FILE="./src/Modmail.NET.Web.Blazor/Modmail.NET.Web.Blazor.csproj"
-          VERSION=$(grep -oP '<Version>\K[^<]+' $PROJECT_FILE)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          VERSION=$(grep -oP '<Version>\K[^<]+' "$PROJECT_FILE" 2>/dev/null)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from .csproj"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "::set-output name=version::$VERSION"
 
       - name: Check if Tag Exists
@@ -66,7 +73,7 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git tag -a v${{ env.VERSION }} -m "Release v${{ env.VERSION }}"
+          git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
           git push origin --tags
 
       - name: Build
@@ -78,8 +85,9 @@ jobs:
       - name: Create Release
         uses: actions/create-release@v1
         with:
-          tag_name: v${{ env.VERSION }}
-          release_name: Release v${{ env.VERSION }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Add this line
+          tag_name: "v${{ env.VERSION }}"
+          release_name: "Release v${{ env.VERSION }}"
           body: |
             ## What's New
             *   See CHANGELOG.md for details
@@ -89,5 +97,6 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-            name: publish
-            path: ./publish
+          name: publish
+          path: ./publish
+          retention-days: 7 # Keep artifacts for 7 days
