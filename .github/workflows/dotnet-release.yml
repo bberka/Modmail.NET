@@ -24,10 +24,10 @@ jobs:
         id: check_global_json
         run: |
           if [ -f "./global.json" ]; then
-            echo "::set-output name=exists::true"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "global.json exists."
           else
-            echo "::set-output name=exists::false"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "global.json does not exist."
           fi
 
@@ -40,8 +40,8 @@ jobs:
             echo "Error: Could not extract version from global.json"
             exit 1
           fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "::set-output name=version::$VERSION"
 
       - name: Get Version from csproj
         id: get_version_csproj
@@ -53,18 +53,18 @@ jobs:
             echo "Error: Could not extract version from .csproj"
             exit 1
           fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "::set-output name=version::$VERSION"
 
       - name: Check if Tag Exists
         id: check_tag
         run: |
           TAG="v${{ env.VERSION }}"
           if git show-ref --quiet "refs/tags/$TAG"; then
-            echo "::set-output name=exists::true"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag $TAG already exists."
           else
-            echo "::set-output name=exists::false"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "Tag $TAG does not exist."
           fi
 
@@ -83,9 +83,9 @@ jobs:
         run: dotnet publish -c Release -o ./publish
 
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: actions/create-release@v1.1.4 # Update the version here
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Add this line
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: "v${{ env.VERSION }}"
           release_name: "Release v${{ env.VERSION }}"
           body: |
