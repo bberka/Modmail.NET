@@ -102,6 +102,8 @@
                              .Include(x => x.Attachments)
                              .OrderBy(x => x.RegisterDateUtc)
                              .AsQueryable();
+        //TODO: Add syntax highlight support for pre -> code elements rendered as markdown
+
         //TODO: Allow virtualization, it can be enabled now but it does query the database too much and a bit clunky, also consider it must scroll to bottom or change order type
     }
 
