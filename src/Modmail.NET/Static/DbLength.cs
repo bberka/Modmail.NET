@@ -7,7 +7,7 @@ public static class DbLength
   public const int Email = 128;
   public const int Locale = 10;
   public const int BotMessage = 1000; //Greetings, closing messages
-  public const int Message = 4000;
+  public const int Message = int.MaxValue;
   public const int Reason = 300;
   public const int FeedbackMessage = 1000;
   public const int FileName = 500;
