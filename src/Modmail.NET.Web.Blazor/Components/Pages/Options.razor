@@ -102,6 +102,13 @@
               </RadzenRow>
 
               <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="SendTranscriptLinkToUser" @bind-Value=@_guildOption.SendTranscriptLinkToUser/>
+                <RadzenLabel Component="SendTranscriptLinkToUser">
+                  Send transcript link to user when ticket closed
+                </RadzenLabel>
+              </RadzenRow>
+
+              <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
                   <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
                 </RadzenFormField>

@@ -202,5 +202,6 @@ public enum LangKeys
   ErrorAuthForbidden,
   ErrorNotFound,
   NotJoinedMainServer,
-  TicketPriority
+  TicketPriority,
+  Transcript
 }

@@ -30,6 +30,7 @@ public class GuildOption : IHasRegisterDate,
   public bool TakeFeedbackAfterClosing { get; set; }
   public bool AlwaysAnonymous { get; set; }
   public bool PublicTranscripts { get; set; }
+  public bool SendTranscriptLinkToUser { get; set; }
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
   public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
   public TeamPermissionLevel ManageBlacklistMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;

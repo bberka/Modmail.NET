@@ -199,5 +199,6 @@
   "ErrorAuthForbidden": "You dont have access to view this page",
   "ErrorNotFound": "Page you looking for doesnt exist or moved",
   "NotJoinedMainServer": "Bot is not added to main server",
-  "TicketPriority": "Ticket Priority"
+  "TicketPriority": "Ticket Priority",
+  "Transcript": "Transcript"
 }

@@ -110,6 +110,9 @@ namespace Modmail.NET.Migrations
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("SendTranscriptLinkToUser")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("TakeFeedbackAfterClosing")
                         .HasColumnType("bit");
 
