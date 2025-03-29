@@ -1,13 +1,15 @@
 @page "/transcript/{TicketId:guid}"
 @using CSharpVitamins
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Features.Guild
 @using Modmail.NET.Features.UserInfo
 @using Modmail.NET.Web.Blazor.Components.Layout
 @using Path = Path
+@layout EmptyLayout
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject ISender Sender
 @inject IJSRuntime JsRuntime
-@layout EmptyLayout
+@inject NavigationManager Navi
 
 <PageTitle>
     Ticket Transcript @_id
@@ -85,6 +87,9 @@
 
 @code {
 
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthContext { get; set; }
+
     [Parameter]
     public Guid TicketId { get; set; }
 
@@ -94,6 +99,16 @@
     private ModmailDbContext _context;
 
     protected override async Task OnInitializedAsync() {
+        var option = await Sender.Send(new GetGuildOptionQuery(false));
+        if (!option.PublicTranscripts) {
+            var authState = await AuthContext;
+            if (authState.User.Identity?.IsAuthenticated == false) {
+                Navi.NavigateTo("/", true);
+                return;
+            }
+        }
+
+
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
         _context = await DbContextFactory.CreateDbContextAsync();
