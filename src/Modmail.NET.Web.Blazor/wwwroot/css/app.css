@@ -219,3 +219,10 @@ h1, h2, h3, h4, h5, h6 {
 .h-100 {
     height: 100% !important;
 }
+
+.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 100; /* Ensure it's above other content */
+    background-color: white; /* Or your desired background color */
+}

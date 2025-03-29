@@ -21,21 +21,6 @@ public static class UserResponses
     return feedbackDone;
   }
 
-  public static DiscordEmbedBuilder TicketTypeChanged(TicketType ticketType) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.TicketTypeChanged.GetTranslation())
-                .WithCustomTimestamp()
-                .WithColor(Colors.TicketTypeChangedColor);
-    if (!string.IsNullOrEmpty(ticketType?.EmbedMessageTitle) && !string.IsNullOrEmpty(ticketType.EmbedMessageContent))
-      embed.AddField(ticketType.EmbedMessageTitle, ticketType.EmbedMessageContent);
-
-    if (ticketType is not null)
-      embed.WithDescription(string.Format(LangKeys.TicketTypeSet.GetTranslation(), ticketType.Emoji, ticketType.Name));
-    else
-      embed.WithDescription(LangKeys.TicketTypeRemoved.GetTranslation());
-
-    return embed;
-  }
 
   public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket, GuildOption guildOption) {
     var embed = new DiscordEmbedBuilder()

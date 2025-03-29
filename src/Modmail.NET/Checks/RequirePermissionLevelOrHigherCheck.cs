@@ -23,7 +23,6 @@ public class RequirePermissionLevelOrHigherCheck : IContextCheck<RequirePermissi
     if (guild is null) return await Task.FromResult(LangKeys.ThisCommandCanOnlyBeUsedInMainServer.GetTranslation());
 
     if (context.Member is null)
-      //TODO: Add another message
       return await Task.FromResult(LangKeys.YouDoNotHavePermissionToUseThisCommand.GetTranslation());
 
     var isAdmin = context.Member.Permissions.HasPermission(DiscordPermission.Administrator);

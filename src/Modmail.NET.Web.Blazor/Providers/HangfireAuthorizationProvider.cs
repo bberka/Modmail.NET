@@ -13,12 +13,9 @@ public class HangfireAuthorizationProvider : IDashboardAuthorizationFilter
 
     var authorizationService = httpContext.RequestServices.GetRequiredService<IAuthorizationService>();
 
-    //TODO: Optimize async here
     var authorizationResult = authorizationService.AuthorizeAsync(httpContext.User, null, AuthPolicy.ManageHangfire.Name)
-                                                  .ConfigureAwait(false)
                                                   .GetAwaiter()
                                                   .GetResult();
-
     return authorizationResult.Succeeded;
   }
 }

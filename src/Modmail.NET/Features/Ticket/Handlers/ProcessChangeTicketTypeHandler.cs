@@ -5,6 +5,7 @@ using Modmail.NET.Exceptions;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Features.UserInfo;
 using Modmail.NET.Jobs;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -53,12 +54,10 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
       if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketResponses.TicketTypeChanged(userInfo, ticketType));
 
-      //TODO: Handle mail channel not found
-      var privateChannelId = ticket.PrivateMessageChannelId;
-      var privateChannel = request.PrivateChannel ?? await _bot.Client.GetChannelAsync(privateChannelId);
-      if (privateChannel is not null)
-        // await privateChannel.SendMessageAsync(UserResponses.TicketTypeChanged(ticketType));
-        if (ticket.BotTicketCreatedMessageInDmId != 0) {
+      if (ticket.BotTicketCreatedMessageInDmId != 0) {
+        try {
+          var privateChannelId = ticket.PrivateMessageChannelId;
+          var privateChannel = request.PrivateChannel ?? await _bot.Client.GetChannelAsync(privateChannelId);
           var privateMessageWithComponent = request.PrivateMessageWithComponent ?? await privateChannel.GetMessageAsync(ticket.BotTicketCreatedMessageInDmId);
           if (privateMessageWithComponent is not null) {
             var newEmbed = new DiscordEmbedBuilder(privateMessageWithComponent.Embeds[0]);
@@ -78,6 +77,10 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
             _ticketTypeSelectionTimeoutJob.RemoveMessage(privateMessageWithComponent.Id);
           }
         }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
     }, cancellationToken);
   }
 }
