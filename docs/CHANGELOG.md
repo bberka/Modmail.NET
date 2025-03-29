@@ -83,6 +83,12 @@
   - Replaced all usages of `Guid.NewGuid` with `Guid.CreateVersion7`.
   - Added a new database trigger to automatically set IDs for entities if not provided.
 - **Public Discord Transcript Page View:** Implemented a public page for viewing Discord transcripts.
+- **Ticket Closing Confirmation:**
+  - Enforced a confirmation dialog for all ticket closings initiated via button interactions in the initial ticket message.
+  - Removed the direct close functionality from the "Close Ticket" button.
+  - Renamed the "Close Ticket with Reason" button to "Close Ticket" for clarity.
+  - Made the closing reason field in the confirmation modal optional.
+  This change ensures users always confirm ticket closures, preventing accidental or unintended closures.
 
 ---
 
