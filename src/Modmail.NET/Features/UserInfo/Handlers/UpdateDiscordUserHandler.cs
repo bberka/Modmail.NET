@@ -1,7 +1,7 @@
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
-using Modmail.NET.Extensions;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.UserInfo.Handlers;
 
@@ -20,9 +20,7 @@ public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand
     var dbData = await _dbContext.DiscordUserInfos.FindAsync([entity.Id], cancellationToken);
     if (dbData is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
-      var lastUpdate = dbData.UpdateDateUtc ?? dbData.RegisterDateUtc;
-      if (lastUpdate.AddHours(waitHoursAfterUpdate) > DateTime.Now) return default; //TODO: Check this handle it better
-      dbData.UpdateDateUtc = DateTime.UtcNow;
+      if (dbData.UpdateDateUtc.HasValue && dbData.UpdateDateUtc.Value.AddHours(waitHoursAfterUpdate) > UtilDate.GetNow()) return default; //TODO: Check this handle it better
       dbData.Username = entity.Username;
       dbData.AvatarUrl = entity.AvatarUrl;
       dbData.BannerUrl = entity.BannerUrl;
@@ -33,7 +31,7 @@ public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand
       return dbData;
     }
 
-    entity.RegisterDateUtc = DateTime.UtcNow;
+    entity.RegisterDateUtc = UtilDate.GetNow();
     _dbContext.DiscordUserInfos.Add(entity);
 
     return entity;

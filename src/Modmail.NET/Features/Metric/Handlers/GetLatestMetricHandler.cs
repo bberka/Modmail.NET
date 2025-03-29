@@ -24,20 +24,20 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
     var totalTickets = await _dbContext.Tickets
                                        .AsNoTracking()
                                        .Select(x => x.ClosedDateUtc.HasValue)
-                                       .ToListAsync(cancellationToken: cancellationToken);
+                                       .ToListAsync(cancellationToken);
 
 
     var activeTickets = totalTickets.Count(x => !x);
     var closedTickets = totalTickets.Count(x => x);
 
 
-    var totalMessages = await _dbContext.TicketMessages.CountAsync(cancellationToken: cancellationToken);
-    var teams = await _dbContext.GuildTeams.CountAsync(cancellationToken: cancellationToken);
-    var blacklist = await _dbContext.TicketBlacklists.CountAsync(cancellationToken: cancellationToken);
-    var ticketTypes = await _dbContext.TicketTypes.CountAsync(cancellationToken: cancellationToken);
+    var totalMessages = await _dbContext.TicketMessages.CountAsync(cancellationToken);
+    var teams = await _dbContext.GuildTeams.CountAsync(cancellationToken);
+    var blacklist = await _dbContext.TicketBlacklists.CountAsync(cancellationToken);
+    var ticketTypes = await _dbContext.TicketTypes.CountAsync(cancellationToken);
 
 
-    var teamMemberData = await _dbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync(cancellationToken: cancellationToken);
+    var teamMemberData = await _dbContext.GuildTeams.Where(x => x.IsEnabled).SelectMany(x => x.GuildTeamMembers).GroupBy(x => x.Type).ToListAsync(cancellationToken);
     var teamRoleCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.RoleId);
     var teamUserCount = teamMemberData.Count(x => x.Key == TeamMemberDataType.UserId);
 
@@ -47,7 +47,7 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
                                                     .OrderByDescending(x => x.Key)
                                                     .Take(metricsTakeDay)
                                                     .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
-                                                    .ToArrayAsync(cancellationToken: cancellationToken);
+                                                    .ToArrayAsync(cancellationToken);
 
     var closedTicketsChartDataArray = await _dbContext.Tickets
                                                       .Where(x => x.ClosedDateUtc.HasValue)
@@ -55,15 +55,24 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
                                                       .OrderByDescending(x => x.Key)
                                                       .Take(metricsTakeDay)
                                                       .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
-                                                      .ToArrayAsync(cancellationToken: cancellationToken);
+                                                      .ToArrayAsync(cancellationToken);
 
 
-    var messageCountChartDataArray = await _dbContext.TicketMessages
-                                                     .GroupBy(x => x.RegisterDateUtc.Date)
-                                                     .OrderByDescending(x => x.Key)
-                                                     .Take(metricsTakeDay)
-                                                     .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
-                                                     .ToArrayAsync(cancellationToken: cancellationToken);
+    var userMessageCountChartDataArray = await _dbContext.TicketMessages
+                                                         .Where(x => !x.SentByMod)
+                                                         .GroupBy(x => x.RegisterDateUtc.Date)
+                                                         .OrderByDescending(x => x.Key)
+                                                         .Take(metricsTakeDay)
+                                                         .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
+                                                         .ToArrayAsync(cancellationToken);
+
+    var modMessageCountChartDataArray = await _dbContext.TicketMessages
+                                                        .Where(x => x.SentByMod)
+                                                        .GroupBy(x => x.RegisterDateUtc.Date)
+                                                        .OrderByDescending(x => x.Key)
+                                                        .Take(metricsTakeDay)
+                                                        .Select(x => new ChartItemDto<DateTime, int>(x.Key, x.Count()))
+                                                        .ToArrayAsync(cancellationToken);
 
 
     var ticketTypeChartDataArray = await _dbContext.Tickets
@@ -73,15 +82,15 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
                                                                                                     : group.FirstOrDefault().TicketType.Name,
                                                                                                   group.Count()
                                                                                                  ))
-                                                   .ToArrayAsync(cancellationToken: cancellationToken);
+                                                   .ToArrayAsync(cancellationToken);
 
 
     var ticketPriorityChartDataArray = await _dbContext.Tickets
                                                        .GroupBy(x => x.Priority)
                                                        .Select(group => new ChartItemDto<string, int>(group.Key.ToString(),
-                                                                                                              group.Count()
-                                                                                                             ))
-                                                       .ToArrayAsync(cancellationToken: cancellationToken);
+                                                                                                      group.Count()
+                                                                                                     ))
+                                                       .ToArrayAsync(cancellationToken);
 
     return new MetricDto {
       Statistic = data,
@@ -96,9 +105,10 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
       TeamUserCount = teamUserCount,
       OpenedTicketsChartDataArray = openTicketsChartDataArray,
       ClosedTicketsChartDataArray = closedTicketsChartDataArray,
-      MessageCountChartDataArray = messageCountChartDataArray,
+      UserMessageCountChartDataArray = userMessageCountChartDataArray,
+      ModMessageCountChartDataArray = modMessageCountChartDataArray,
       TicketTypeChartDataArray = ticketTypeChartDataArray,
-      TicketPriorityChartDataArray = ticketPriorityChartDataArray,
+      TicketPriorityChartDataArray = ticketPriorityChartDataArray
     };
   }
 }

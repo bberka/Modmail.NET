@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Modmail.NET.Abstract;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Entities;
 
@@ -8,7 +9,7 @@ public class Ticket : IHasRegisterDate,
                       IEntity,
                       IGuidId
 {
-  public DateTime LastMessageDateUtc { get; set; } = DateTime.UtcNow;
+  public DateTime LastMessageDateUtc { get; set; } = UtilDate.GetNow();
   public DateTime? ClosedDateUtc { get; set; }
   public required ulong OpenerUserId { get; set; } //FK
   public ulong? CloserUserId { get; set; } //FK

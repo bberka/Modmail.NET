@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -15,7 +16,7 @@ public class GetTimedOutTicketListHandler : IRequestHandler<GetTimedOutTicketLis
   public async Task<List<Entities.Ticket>> Handle(GetTimedOutTicketListQuery request, CancellationToken cancellationToken) {
     var timeoutHours = request.TimeoutHours;
     if (timeoutHours < Const.TicketTimeoutMinAllowedHours) timeoutHours = Const.DefaultTicketTimeoutHours;
-    var timeoutDate = DateTime.UtcNow.AddHours(-timeoutHours);
+    var timeoutDate = UtilDate.GetNow().AddHours(-timeoutHours);
     var tickets = await _dbContext.Tickets
                                   .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)
                                   .ToListAsync(cancellationToken);

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Modmail.NET.Utils;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace Modmail.NET.Language;
 
@@ -11,7 +12,7 @@ public class LangProvider
 
   public LangProvider(IOptions<BotConfig> options) {
     var currentDir = Directory.GetCurrentDirectory();
-    var langDir = Path.Combine(currentDir, "Language", "Data");
+    var langDir = Path.Combine(currentDir, "wwwroot", "resources");
     if (!Directory.Exists(langDir))
       throw new DirectoryNotFoundException("Language data directory not found! Please make sure you have the correct directory structure. Expected directory : " + langDir);
 
@@ -44,6 +45,7 @@ public class LangProvider
     }
 
     _languages = dict;
+    Log.Information("Language data loaded successfully {SupportedLanguages}", string.Join(", ", dict.Keys));
   }
 
   public static LangProvider This => ServiceLocator.GetLangProvider();
@@ -70,7 +72,6 @@ public class LangProvider
     // throw new KeyNotFoundException("Translation not found for key : " + key);
 
     //try parse args to enum LangKeys and if exists replace with translation
-
     if (args.Length == 0) return translation;
     var newArgs = new List<object>();
     foreach (var arg in args)

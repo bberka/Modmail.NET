@@ -36,7 +36,7 @@ public class Statistic : IHasRegisterDate,
       AvgTicketsOpenedPerDay = 0,
       AvgTicketClosedSeconds = 0,
       FastestClosedTicketSeconds = 0,
-      SlowestClosedTicketSeconds = 0,
+      SlowestClosedTicketSeconds = 0
     };
   }
 }

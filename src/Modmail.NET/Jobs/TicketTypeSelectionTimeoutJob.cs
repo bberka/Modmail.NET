@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using Hangfire;
 using Modmail.NET.Abstract;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Jobs;
 
@@ -14,7 +15,7 @@ public class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
   public ConcurrentDictionary<DiscordMessage, DateTime> Messages { get; private set; }
 
   public void AddMessage(DiscordMessage message) {
-    Messages.TryAdd(message, DateTime.UtcNow);
+    Messages.TryAdd(message, UtilDate.GetNow());
   }
 
   public void RemoveMessage(DiscordMessage message) {
@@ -30,7 +31,7 @@ public class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
   public override async Task Execute() {
     var newDict = new ConcurrentDictionary<DiscordMessage, DateTime>();
     foreach (var message in Messages) {
-      if (DateTime.UtcNow - message.Value <= TimeSpan.FromMinutes(3)) {
+      if (UtilDate.GetNow() - message.Value <= TimeSpan.FromMinutes(3)) {
         newDict.TryAdd(message.Key, message.Value);
         continue;
       }

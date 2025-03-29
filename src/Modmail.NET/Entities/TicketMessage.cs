@@ -20,10 +20,10 @@ public class TicketMessage : IHasRegisterDate,
   public required Guid TicketId { get; set; }
 
   public required bool SentByMod { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
-  
+
   //FK
   public List<TicketMessageAttachment> Attachments { get; set; }
+  public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
     var id = Guid.CreateVersion7();
@@ -34,7 +34,7 @@ public class TicketMessage : IHasRegisterDate,
       TicketId = ticketId,
       Attachments = message.Attachments.Select(x => TicketMessageAttachment.MapFrom(x, id)).ToList(),
       MessageDiscordId = message.Id,
-      RegisterDateUtc = DateTime.UtcNow,
+      RegisterDateUtc = UtilDate.GetNow(),
       SentByMod = sentByMod
     };
   }

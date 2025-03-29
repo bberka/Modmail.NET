@@ -26,10 +26,8 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
 
     var team = new GuildTeam {
       Name = request.TeamName,
-      RegisterDateUtc = DateTime.UtcNow,
       IsEnabled = true,
       GuildTeamMembers = [],
-      UpdateDateUtc = null,
       PermissionLevel = request.PermissionLevel,
       PingOnNewMessage = request.PingOnTicketMessage,
       PingOnNewTicket = request.PingOnNewTicket,

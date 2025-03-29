@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading.Channels;
+using Modmail.NET.Utils;
 
 namespace Modmail.NET.Abstract;
 
@@ -15,7 +16,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
   }
 
   public async Task EnqueueMessage(TKey key, TValue message) {
-    _lastActiveTime[key] = DateTime.UtcNow;
+    _lastActiveTime[key] = UtilDate.GetNow();
     if (!_queues.TryGetValue(key, out var channel)) {
       // Create a new channel for the key and start processing
       channel = Channel.CreateUnbounded<TValue>();
@@ -39,7 +40,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
         break;
       }
 
-      if (DateTime.UtcNow - value >= _idleTimeout) {
+      if (UtilDate.GetNow() - value >= _idleTimeout) {
         Debug.WriteLine("Cancelled timeout");
         channel.Writer.Complete();
         return;

@@ -342,19 +342,32 @@
           </RadzenCard>
 
         </RadzenRow>
-        
-        
-        
-        
+
+
         <RadzenRow RowGap="4" class="rz-mt-5">
           <RadzenCard class="rz-shadow-7 w-100">
             <RadzenChart>
               <RadzenChartTooltipOptions Shared="true"/>
-              <RadzenLineSeries Smooth="true" Data="@_metricDto.MessageCountChartDataArray" CategoryProperty="Category"
-                                Title="Processed Messages" LineType="LineType.Dashed" ValueProperty="Value">
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.UserMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="User Messages"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
                 <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
                 <RadzenSeriesDataLabels Visible="false"/>
               </RadzenLineSeries>
+
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.ModMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="Mod Messages"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
               <RadzenCategoryAxis Padding="20"/>
               <RadzenValueAxis>
                 <RadzenGridLines Visible="true"/>
@@ -363,21 +376,26 @@
             </RadzenChart>
           </RadzenCard>
         </RadzenRow>
-        
-        
-        
+
+
         <RadzenRow RowGap="4" class="rz-mt-5">
           <RadzenCard class="rz-shadow-7 w-100">
             <RadzenChart>
-              <RadzenColumnSeries Data="@_metricDto.TicketTypeChartDataArray" CategoryProperty="Category" ValueProperty="Value" Title="Ticket Types"/>
+              <RadzenColumnSeries Data="@_metricDto.TicketTypeChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="Ticket Types"/>
             </RadzenChart>
           </RadzenCard>
         </RadzenRow>
-             
+
         <RadzenRow RowGap="4" class="rz-mt-5">
           <RadzenCard class="rz-shadow-7 w-100">
             <RadzenChart>
-              <RadzenColumnSeries Data="@_metricDto.TicketPriorityChartDataArray" CategoryProperty="Category" ValueProperty="Value" Title="Ticket Priority"/>
+              <RadzenColumnSeries Data="@_metricDto.TicketPriorityChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="Ticket Priority"/>
             </RadzenChart>
           </RadzenCard>
         </RadzenRow>
