@@ -14,13 +14,14 @@ public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand
   }
 
   public async Task<DiscordUserInfo> Handle(UpdateDiscordUserCommand request, CancellationToken cancellationToken) {
-    if (request.DiscordUser is null) return default; //TODO: Check this and handle it better
+    //TODO: handle null returns better
+    if (request.DiscordUser is null) return null;
     var entity = DiscordUserInfo.FromDiscordUser(request.DiscordUser);
 
     var dbData = await _dbContext.DiscordUserInfos.FindAsync([entity.Id], cancellationToken);
     if (dbData is not null) {
       const int waitHoursAfterUpdate = 24; //updates user information every 24 hours
-      if (dbData.UpdateDateUtc.HasValue && dbData.UpdateDateUtc.Value.AddHours(waitHoursAfterUpdate) > UtilDate.GetNow()) return default; //TODO: Check this handle it better
+      if (dbData.UpdateDateUtc.HasValue && dbData.UpdateDateUtc.Value.AddHours(waitHoursAfterUpdate) > UtilDate.GetNow()) return null;
       dbData.Username = entity.Username;
       dbData.AvatarUrl = entity.AvatarUrl;
       dbData.BannerUrl = entity.BannerUrl;

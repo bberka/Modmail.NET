@@ -23,7 +23,6 @@ public static class DiscordBotDependency
 
     builder.Services.AddCommandsExtension((_, extension) => {
       extension.AddCommands<ModmailCommands>();
-      //TODO: Enable disable commands option
       extension.AddCommands<BlacklistSlashCommands>();
       extension.AddCommands<TicketSlashCommands>();
 
