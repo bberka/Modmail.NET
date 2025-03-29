@@ -25,12 +25,8 @@ public static class TicketResponses
     var messageBuilder = new DiscordMessageBuilder()
                          .AddEmbed(embed)
                          .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger,
-                                                                   UtilInteraction.BuildKey("close_ticket", ticketId.ToString()),
-                                                                   LangKeys.CloseTicket.GetTranslation(),
-                                                                   emoji: new DiscordComponentEmoji("🔒")),
-                                        new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                    UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
-                                                                   LangKeys.CloseTicketWithReason.GetTranslation(),
+                                                                   LangKeys.CloseTicket.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒"))
                                        );
 

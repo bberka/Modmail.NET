@@ -20,13 +20,13 @@ public static class Modals
 
   public static DiscordInteractionResponseBuilder CreateCloseTicketWithReasonModal(Guid ticketId) {
     var modal = new DiscordInteractionResponseBuilder()
-                .WithTitle(LangKeys.CloseTicketWithReason.GetTranslation())
+                .WithTitle(LangKeys.CloseTicket.GetTranslation())
                 .WithCustomId(UtilInteraction.BuildKey("close_ticket_with_reason", ticketId))
                 .AddComponents(new DiscordTextInputComponent(LangKeys.Reason.GetTranslation(),
                                                              "reason",
                                                              LangKeys.EnterReasonForClosingThisTicket.GetTranslation(),
                                                              style: DiscordTextInputStyle.Paragraph,
-                                                             min_length: 10,
+                                                             required: false,
                                                              max_length: 500));
     return modal;
   }
