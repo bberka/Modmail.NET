@@ -11,7 +11,7 @@ namespace Modmail.NET.Static;
 /// </summary>
 public static class UserResponses
 {
-  public static DiscordEmbed FeedbackReceivedUpdateMessage(Ticket ticket) {
+  public static DiscordEmbedBuilder FeedbackReceivedUpdateMessage(Ticket ticket) {
     var feedbackDone = new DiscordEmbedBuilder()
                        .WithTitle(LangKeys.FeedbackReceived.GetTranslation())
                        .WithCustomTimestamp()
