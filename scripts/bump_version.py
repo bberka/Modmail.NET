@@ -3,6 +3,7 @@ import re
 core_project_path = "..\\src\\Modmail.NET\\Modmail.NET.csproj"
 blazor_project_path = "..\\src\\Modmail.NET.Web.Blazor\\Modmail.NET.Web.Blazor.csproj"
 
+
 def get_current_version(project_path):
     """
     Fetch the current version from the .csproj file.
@@ -21,31 +22,38 @@ def get_current_version(project_path):
     print(f"No version found in {project_path}. Defaulting to 0.0.0.")
     return "0.0.0"
 
+
 def compare_versions(current_version, new_version):
     """
     Compare two versions to ensure the new version is higher.
+    Handles prerelease versions correctly (e.g., beta10 > beta9).
     """
     print(f"Comparing current version ({current_version}) with new version ({new_version})...")
-    current_parts = re.split(r"[-\.]", current_version)
-    new_parts = re.split(r"[-\.]", new_version)
 
-    for i in range(min(len(current_parts), len(new_parts))):
-        try:
-            current_val = int(current_parts[i])
-            new_val = int(new_parts[i])
+    def version_tuple(version):
+        """
+        Convert version string to a tuple of (major, minor, patch, prerelease_type, prerelease_number)
+        """
+        match = re.match(r"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z]+)(\d+))?", version)
+        if not match:
+            return None  # Invalid version format
+        major, minor, patch, prerelease_type, prerelease_number = match.groups()
+        return (
+            int(major),
+            int(minor),
+            int(patch),
+            prerelease_type or "",  # Use empty string if no prerelease
+            int(prerelease_number) if prerelease_number else 0,  # 0 if no prerelease number
+        )
 
-            if new_val > current_val:
-                return True
-            elif new_val < current_val:
-                return False
-        except ValueError:
-            if new_parts[i] > current_parts[i]:
-                return True
-            elif new_parts[i] < current_parts[i]:
-                return False
+    current_tuple = version_tuple(current_version)
+    new_tuple = version_tuple(new_version)
 
-    # If all parts are equal, new version must have more parts
-    return len(new_parts) > len(current_parts)
+    if current_tuple is None or new_tuple is None:
+        print("Invalid version format in one or both versions.")
+        return False  # Or raise an exception
+
+    return new_tuple > current_tuple
 
 
 def update_version(project_path, version):
@@ -68,6 +76,7 @@ def update_version(project_path, version):
     else:
         print(f"Error: New version {version} is not higher than current version {current_version} in {project_path}.")
 
+
 def main():
     version = input("Enter the version number (e.g., 1.0.0 or 2.0.0-beta1): ")
     if not re.match(r"^\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?$", version):
@@ -88,6 +97,7 @@ def main():
     update_version(core_project_path, version)
     update_version(blazor_project_path, version)
     print("Version bump complete!")
+
 
 if __name__ == "__main__":
     main()

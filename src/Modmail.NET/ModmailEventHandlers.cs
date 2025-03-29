@@ -166,20 +166,7 @@ public class ModmailEventHandlers
                           args.Message?.Id);
           break;
         }
-        case "close_ticket": {
-          //close ticket with button
-          await args.Interaction.CreateResponseAsync(DiscordInteractionResponseType.UpdateMessage);
-          var ticketIdParam = parameters[0];
-          var ticketId = Guid.Parse(ticketIdParam);
-          await sender.Send(new ProcessCloseTicketCommand(ticketId, args.User.Id, null, args.Channel));
-          Log.Information(logMessage,
-                          args.Interaction?.Data?.CustomId,
-                          args.User?.Id,
-                          args.Channel?.Id,
-                          args.Interaction?.Id,
-                          args.Message?.Id);
-          break;
-        }
+        case "close_ticket": // This must stay due to deprecation and support for existing tickets (v2.0 beta)
         case "close_ticket_with_reason": {
           var ticketIdParam = parameters[0];
           var ticketId = Guid.Parse(ticketIdParam);

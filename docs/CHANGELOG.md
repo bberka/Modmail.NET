@@ -3,6 +3,7 @@
 ## **v2.0**
 
 ### **General Improvements**
+
 - Refactored the entire bot code to align with breaking changes and new features introduced in the updated **DSharpPlus v5.x.x-nightly** version.
 - Improved code structure and ensured compatibility with the latest DSharpPlus API.
 - Removed unused and empty files, classes, and projects to streamline the codebase.
@@ -22,6 +23,7 @@
 ---
 
 ### **Authentication and Authorization**
+
 - **Discord OAuth2 Authentication**:
   - Added cookie-based session management.
   - Configured access token storage in claims for session-based usage.
@@ -50,6 +52,7 @@
 ---
 
 ### **Features and Enhancements**
+
 - **Navigation and Pages**:
   - Moved the dashboard to `/dashboard` URI.
   - Added a landing page at `/` with a login button.
@@ -71,6 +74,7 @@
   - Increased caching duration for metrics to improve performance.
   - Improved statistic job performance by using `DefaultIfEmpty`, enabling direct DB average calculations.
   - Added default values to the statistic entity for use in the dashboard.
+  - Separated the message line chart into user and moderator messages for more granular insights.
 - **SmartEnum Integration**:
   - Converted `DbType` to a smart enum.
   - Enabled SmartEnum mapping for `DbContext`.
@@ -78,10 +82,18 @@
 - **GuidV7 Implementation**:
   - Replaced all usages of `Guid.NewGuid` with `Guid.CreateVersion7`.
   - Added a new database trigger to automatically set IDs for entities if not provided.
+- **Public Discord Transcript Page View:** Implemented a public page for viewing Discord transcripts.
+- **Ticket Closing Confirmation:**
+  - Enforced a confirmation dialog for all ticket closings initiated via button interactions in the initial ticket message.
+  - Removed the direct close functionality from the "Close Ticket" button.
+  - Renamed the "Close Ticket with Reason" button to "Close Ticket" for clarity.
+  - Made the closing reason field in the confirmation modal optional.
+  This change ensures users always confirm ticket closures, preventing accidental or unintended closures.
 
 ---
 
 ### **Bug Fixes**
+
 - Fixed authorization logic to properly handle failed authentication states.
 - Added a new error message for unauthorized access.
 - Fixed a bug where selecting a ticket type did not update the message correctly.
@@ -92,10 +104,14 @@
 - Fixed dashboard UI issues, typos, and separation of average stats.
 - Fixed ticket notes dialog width for better usability.
 - Fixed unnecessary guild option value assignment on the options page.
+- **Concurrency Issue with DB Context:** Fixed a concurrency issue that could occur with the database context.
+- **Stack Overflow Error with `GetNow` Custom Date Function:** Resolved a stack overflow error that could occur with the `GetNow` custom date function.
+- **Metric Response Mod Message Chart Data Assignment Issue:** Fixed an issue where metric response mod message chart data was not being assigned correctly.
 
 ---
 
 ### **UI and UX Improvements**
+
 - Updated the option page to make labels more descriptive.
 - Updated team management methods and UI to reflect new access control logic.
 - Improved UI consistency across the application.
@@ -108,9 +124,16 @@
 ---
 
 ### **Documentation**
+
 - Improved project documentation:
   - Separated some headers into their own markdown files for better organization.
   - Added direct links to the `img` folder instead of embedding images in markdown.
   - Created `ROADMAP.md` to outline future plans and features.
   - Created `COMMANDS.md` to document available commands.
   - Updated README.md with new details and images.
+  - **README.md Update:** Removed `ROADMAP.md` and moved all roadmap elements to GitHub Issues. This centralizes feature planning and tracking within GitHub's issue management system.
+
+### **Build and Automation**
+
+- **Automated Release Workflow:** Added and configured a `.NET Release` GitHub Actions workflow (`dotnet-release.yml`) to automatically create releases on commits to the `master` branch. The workflow uses the version specified in the `.csproj` file to generate the release. This automates the release process and ensures that releases are consistently versioned.
+- **Removed `commit cs proj` Script:** Removed the `commit cs proj` script, as the automated release workflow now handles version updates and release creation.
