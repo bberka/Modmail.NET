@@ -28,9 +28,6 @@ public class GuildOption : IHasRegisterDate,
   public long TicketTimeoutHours { get; set; } = Const.DefaultTicketTimeoutHours;
 
   public bool TakeFeedbackAfterClosing { get; set; }
-
-  //TODO: Implement ShowConfirmationWhenClosingTickets
-  public bool ShowConfirmationWhenClosingTickets { get; set; }
   public bool AlwaysAnonymous { get; set; }
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
   public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;

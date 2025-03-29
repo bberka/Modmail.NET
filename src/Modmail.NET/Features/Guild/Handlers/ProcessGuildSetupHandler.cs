@@ -30,7 +30,6 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
       IsEnabled = true,
       RegisterDateUtc = UtilDate.GetNow(),
       TakeFeedbackAfterClosing = false,
-      ShowConfirmationWhenClosingTickets = false,
       IconUrl = request.Guild.IconUrl,
       Name = request.Guild.Name,
       BannerUrl = request.Guild.BannerUrl,
