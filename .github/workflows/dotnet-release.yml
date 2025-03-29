@@ -93,6 +93,7 @@ jobs:
           draft: false
           prerelease: ${{ contains(env.VERSION, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          skipIfReleaseExists: true # Add this line
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
