@@ -1,0 +1,121 @@
+/* General body */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #fff;
+    background-color: #36393f;
+    margin: 0;
+    padding: 0;
+}
+
+/* General text */
+p {
+    margin-bottom: 15px;
+}
+
+/* Emphasized text */
+em {
+    font-style: italic;
+}
+
+/* Bold text */
+strong {
+    font-weight: bold;
+}
+
+/* Link styles */
+a {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0dcaf0;
+    text-decoration: underline;
+}
+
+/* Header styling */
+h1, h2, h3, h4, h5, h6 {
+    color: #eee;
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+h3 {
+    font-size: 1.75em;
+}
+
+h4 {
+    font-size: 1.5em;
+}
+
+h5 {
+    font-size: 1.25em;
+}
+
+h6 {
+    font-size: 1em;
+}
+
+/* List styles */
+ul, ol {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+/* Blockquote styles */
+blockquote {
+    margin: 15px 0;
+    padding: 10px 20px;
+    border-left: 5px solid #4CAF50;
+    background-color: #454b4d;
+    font-style: italic;
+}
+
+/* Code styles */
+code {
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    color: #ccc;
+}
+
+pre {
+    padding: 10px;
+    background-color: #2D2D2D;
+    border-radius: 5px;
+    overflow: auto;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    color: #f8f8f2;
+    margin-bottom: 15px;
+}
+
+/* Horizontal rule */
+hr {
+    border: none;
+    border-top: 3px double #4CAF50;
+    height: 3px;
+    padding: 0;
+    margin: 20px 0;
+}
+
+/* Image styling */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+

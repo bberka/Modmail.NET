@@ -20,6 +20,14 @@
 <script src="_framework/blazor.web.js"></script>
 
 <Scripts></Scripts>
+<script type="text/javascript">
+  window.scrollToBottom = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollTop = element.scrollHeight;
+    }
+  };
+</script>
 </body>
 </html>
 

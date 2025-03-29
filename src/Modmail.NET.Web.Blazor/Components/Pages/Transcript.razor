@@ -1,67 +1,122 @@
 @page "/transcript/{TicketId:guid}"
+@using CSharpVitamins
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Features.Guild
 @using Modmail.NET.Features.UserInfo
 @using Modmail.NET.Web.Blazor.Components.Layout
-@using Modmail.NET.Web.Blazor.Components.Shared.TicketMessage
+@using Path = Path
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject ISender Sender
+@inject IJSRuntime JsRuntime
 @layout EmptyLayout
 
+<PageTitle>
+    Ticket Transcript @_id
+</PageTitle>
+<HeadContent>
+    <link rel="stylesheet" href="css/markdown.css"/>
+</HeadContent>
+<RadzenCard class="rz-border-bottom sticky-top">
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-4 rx-mx-4 rz-ml-4">Ticket Transcript @_id
+    </RadzenText>
+</RadzenCard>
+<RadzenCard>
+    <RadzenDataList AllowVirtualization="false"
+                    PageSize="25"
+                    Data="@_queryable"
+                    WrapItems="false"
+                    TItem="TicketMessage"
+                    id="transcriptContainer"
+                    Style="max-height: 90vh;overflow:auto;">
+        <Template Context="message">
+            <RadzenStack Orientation="Orientation.Vertical">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenImage Path="@_users[message.SenderUserId].AvatarUrl"
+                                 Style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"
+                                 AlternateText="@_users[message.SenderUserId].Username"/>
 
-<div class="discord-messages-container">
-    <div class="rz-mx-auto">
-        <RadzenRow>
-            <RadzenColumn Size="12">
-                <RadzenRow>
-                    <RadzenColumn Size="12">
-                        <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
-                            Ticket Messages
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="2">
+                        <RadzenText TextStyle="TextStyle.Subtitle1" class=@(message.SentByMod
+                                                                                ? "rz-color-info rz-mr-2 "
+                                                                                : "rz-mr-2 ")>
+                            <strong>@_users[message.SenderUserId].Username</strong>
                         </RadzenText>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow RowGap="4" class="rz-mt-5">
-                    @if (_messages is null) {
-                        <Loading></Loading>
+                        <RadzenText TextStyle="TextStyle.Caption" Style="opacity: 0.7;">
+                            @message.RegisterDateUtc.ToString("MM/dd/yyyy HH:mm:ss")
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+
+
+                <RadzenMarkdown>
+                    @message.MessageContent
+                </RadzenMarkdown>
+
+            </RadzenStack>
+
+            @if (message.Attachments != null && message.Attachments.Any()) {
+                <div class="rz-mt-2">
+                    @foreach (var attachment in message.Attachments) {
+                        @if (IsImage(attachment.FileName)) {
+                            <RadzenImage Path="@attachment.Url" style="max-width: 200px; max-height: 200px;"
+                                         AlternateText="@attachment.FileName"/>
+                        }
+                        else {
+                            <RadzenButton Shade="Shade.Lighter"
+                                          Click=@(async () => await OpenInNewTab(attachment.Url))
+                                          Text="@attachment.FileName"
+                                          class="rz-mr-3"
+                                          Icon="download"
+                                          ButtonStyle="ButtonStyle.Light"/>
+                        }
                     }
-                    else {
-                        <div class="discord-messages-container">
-                            @foreach (var message in _messages) {
-                                <DiscordChatMessageView
-                                    MessageContent="@message.MessageContent"
-                                    RegisterDateUtc="@message.RegisterDateUtc"
-                                    Username="@_users[message.SenderUserId].Username"
-                                    AvatarUrl="@_users[message.SenderUserId].AvatarUrl"
-                                    Attachments="@message.Attachments"/>
-                            }
-                        </div>
-                    }
-                </RadzenRow>
-            </RadzenColumn>
-        </RadzenRow>
-    </div>
-</div>
+                </div>
+            }
+        </Template>
+        <EmptyTemplate>
+            <RadzenText>No messages found.</RadzenText>
+        </EmptyTemplate>
+        <LoadingTemplate>
+            <Loading></Loading>
+        </LoadingTemplate>
+    </RadzenDataList>
+
+
+</RadzenCard>
 
 @code {
 
     [Parameter]
     public Guid TicketId { get; set; }
 
-    private List<TicketMessage> _messages;
+    private IQueryable<TicketMessage> _queryable;
     private Dictionary<ulong, DiscordUserInfo> _users = new();
+    private string _id;
+    private ModmailDbContext _context;
 
     protected override async Task OnInitializedAsync() {
+        _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
-        await LoadMessagesAsync();
+        _context = await DbContextFactory.CreateDbContextAsync();
+        _queryable = _context.TicketMessages
+                             .Where(x => x.TicketId == TicketId)
+                             .Include(x => x.Attachments)
+                             .OrderBy(x => x.RegisterDateUtc)
+                             .AsQueryable();
+        //TODO: Allow virtualization, it can be enabled now but it does query the database too much and a bit clunky, also consider it must scroll to bottom or change order type
     }
 
-    private async Task LoadMessagesAsync() {
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        _messages = await dbContext.TicketMessages
-                                   .Include(x => x.Attachments)
-                                   .Where(x => x.TicketId == TicketId)
-                                   .OrderBy(x => x.RegisterDateUtc)
-                                   .ToListAsync();
+
+    private static bool IsImage(string fileName) {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext is ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp";
+    }
+
+    private async Task OpenInNewTab(string url) {
+        await JsRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        await JsRuntime.InvokeVoidAsync("scrollToBottom", "transcriptContainer");
     }
 
 }

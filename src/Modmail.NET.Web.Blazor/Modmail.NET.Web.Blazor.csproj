@@ -26,6 +26,8 @@
         <PackageReference Include="Hangfire" Version="1.8.18"/>
         <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18"/>
         <PackageReference Include="Hangfire.SqlServer" Version="1.8.18"/>
+        <PackageReference Include="Markdig" Version="0.40.0"/>
+        <PackageReference Include="Markdig.SyntaxHighlighting" Version="1.1.7"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
             <PrivateAssets>all</PrivateAssets>
@@ -80,6 +82,10 @@
 
     <ItemGroup>
         <Content Remove="Logs\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <_ContentIncludedByDefault Remove="Components\Shared\TicketMessage\DiscordChatMessageView.razor"/>
     </ItemGroup>
 
 </Project>
