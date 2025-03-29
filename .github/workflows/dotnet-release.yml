@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Needed to get all tags
+          fetch-depth: 0  # Needed to get all tags
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
@@ -55,9 +55,6 @@ jobs:
 
       - name: Create Release
         uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.check_tag.outputs.exists == 'false'
         with:
           tag_name: v${{ env.VERSION }}
           release_name: Release v${{ env.VERSION }}
@@ -65,10 +62,10 @@ jobs:
             ## What's New
             *   See CHANGELOG.md for details
           draft: false
-          prerelease: ${{ contains(env.VERSION, '-rc') || contains(env.VERSION, '-beta') || contains(env.VERSION, '-alpha') }}
+          prerelease: ${{ contains(env.VERSION, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
             name: publish
             path: ./publish
