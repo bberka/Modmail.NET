@@ -13,17 +13,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Needed to get all tags
+          fetch-depth: 0  # Needed to get all tags
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '9.0' # Replace with your .NET version
 
-      - name: Get Version
+      - name: Check if global.json Exists
+        id: check_global_json
+        run: |
+          if [ -f "./global.json" ]; then
+            echo "::set-output name=exists::true"
+            echo "global.json exists."
+          else
+            echo "::set-output name=exists::false"
+            echo "global.json does not exist."
+          fi
+
+      - name: Get Version from global.json
         id: get_version
+        if: steps.check_global_json.outputs.exists == 'true'
         run: |
           VERSION=$(jq -r .sdk.version ./global.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=version::$VERSION"
+        
+      - name: Get Version from csproj
+        id: get_version_csproj
+        if: steps.check_global_json.outputs.exists != 'true'
+        run: |
+          # Extract version from the .csproj file.
+          PROJECT_FILE="./src/Modmail.NET.Web.Blazor/Modmail.NET.Web.Blazor.csproj"
+          VERSION=$(grep -oP '<Version>\K[^<]+' $PROJECT_FILE)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "::set-output name=version::$VERSION"
 
