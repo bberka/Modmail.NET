@@ -28,9 +28,8 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
                          ? _bot.Client.CurrentUser.Id
                          : request.CloserUserId;
     var closeReason = request.CloseReason?.Trim();
-    if (string.IsNullOrEmpty(closeReason)) {
-      closeReason = null;
-    }
+    if (string.IsNullOrEmpty(closeReason)) closeReason = null;
+
     var closerUser = await _sender.Send(new GetDiscordUserInfoQuery(closerUserId), cancellationToken);
     ArgumentNullException.ThrowIfNull(closerUser);
 
