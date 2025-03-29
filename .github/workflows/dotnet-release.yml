@@ -83,16 +83,16 @@ jobs:
         run: dotnet publish -c Release -o ./publish
 
       - name: Create Release
-        uses: actions/create-release@v1.1.4 # Update the version here
+        uses: ncipollo/release-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: "v${{ env.VERSION }}"
-          release_name: "Release v${{ env.VERSION }}"
+          tag: "v${{ env.VERSION }}"
+          name: "Release v${{ env.VERSION }}"
           body: |
             ## What's New
             *   See CHANGELOG.md for details
           draft: false
           prerelease: ${{ contains(env.VERSION, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
