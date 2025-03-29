@@ -17,18 +17,18 @@
 <HeadContent>
     <link rel="stylesheet" href="css/markdown.css"/>
 </HeadContent>
-<RadzenCard class="rz-border-bottom sticky-top">
-    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-mb-4 rx-mx-4 rz-ml-4">Ticket Transcript @_id
+<RadzenCard class="rz-border-bottom sticky-top rz-m-0 rz-p-4 rz-p-lg-7" Style="height: 80px !important;">
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-py-0 rz-my-0 rz-ml-4">Ticket Transcript @_id
     </RadzenText>
 </RadzenCard>
-<RadzenCard>
+<RadzenCard class="rz-m-0 rz-p-0">
     <RadzenDataList AllowVirtualization="false"
                     PageSize="25"
                     Data="@_queryable"
                     WrapItems="false"
                     TItem="TicketMessage"
                     id="transcriptContainer"
-                    Style="max-height: 90vh;overflow:auto;">
+                    class="transcript-container">
         <Template Context="message">
             <RadzenStack Orientation="Orientation.Vertical">
                 <RadzenStack Orientation="Orientation.Horizontal">
