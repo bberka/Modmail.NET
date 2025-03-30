@@ -48,15 +48,17 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     _ = Task.Run(async () => {
-      var sendLinkToUser = Uri.TryCreate(_options.Value.Domain, UriKind.Absolute, out var uri) && guildOption.SendTranscriptLinkToUser;
       Uri transcriptUri = null;
-      if (sendLinkToUser)
-        try {
-          transcriptUri = new Uri(uri, "transcript/" + request.TicketId);
-        }
-        catch (UriFormatException) {
-          transcriptUri = null;
-        }
+      if (guildOption.SendTranscriptLinkToUser && guildOption.PublicTranscripts) {
+        var sendLinkToUser = Uri.TryCreate(_options.Value.Domain, UriKind.Absolute, out var uri);
+        if (sendLinkToUser)
+          try {
+            transcriptUri = new Uri(uri, "transcript/" + request.TicketId);
+          }
+          catch (UriFormatException) {
+            transcriptUri = null;
+          }
+      }
 
 
       var modChatChannel = request.ModChatChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
