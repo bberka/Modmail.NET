@@ -1,4 +1,6 @@
-﻿namespace Modmail.NET;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Modmail.NET;
 
 public class BotConfig
 {
@@ -13,4 +15,7 @@ public class BotConfig
   public string EncryptionKey { get; set; }
   public string DefaultLanguage { get; set; }
   public bool SensitiveEfCoreDataLog { get; set; }
+
+  [Url]
+  public string Domain { get; set; }
 }

@@ -1,5 +1,21 @@
 # **Changelogs**
 
+## **v2.1**
+
+### Features
+- Added a new guild option to enable/disable public access to ticket transcripts (`AllowPublicAccessToTranscripts`).
+- Added a new guild option to control whether the transcript link is sent to the user upon ticket closure (`SendTranscriptLinkToUser`).
+
+### Bug Fixes
+- Fixed a UI issue in the transcript page that caused a gap to appear at the bottom, ensuring the content area uses the available height correctly.
+
+### Improvements & Refactoring
+- Removed the character limit for ticket message content in the database, allowing for longer messages without truncation.
+- Standardized the return types of response static methods for improved code consistency and predictability.
+
+### Logging
+- Added a log message to the configured Discord log channel when a user is successfully removed from the blacklist.
+
 ## **v2.0**
 
 ### **General Improvements**

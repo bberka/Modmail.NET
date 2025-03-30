@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -11,9 +12,11 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250329204247_GuildOptionPublicTranscripts")]
+    partial class GuildOptionPublicTranscripts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,9 +112,6 @@ namespace Modmail.NET.Migrations
 
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("SendTranscriptLinkToUser")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("TakeFeedbackAfterClosing")
                         .HasColumnType("bit");
@@ -331,8 +331,8 @@ namespace Modmail.NET.Migrations
 
                     b.Property<string>("MessageContent")
                         .IsRequired()
-                        .HasMaxLength(2147483647)
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<decimal>("MessageDiscordId")
                         .HasColumnType("decimal(20,0)");

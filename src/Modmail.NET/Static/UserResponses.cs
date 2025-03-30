@@ -2,6 +2,7 @@
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
 using Modmail.NET.Utils;
+using DiscordMessageBuilder = DSharpPlus.Entities.DiscordMessageBuilder;
 
 namespace Modmail.NET.Static;
 
@@ -10,7 +11,7 @@ namespace Modmail.NET.Static;
 /// </summary>
 public static class UserResponses
 {
-  public static DiscordEmbed FeedbackReceivedUpdateMessage(Ticket ticket) {
+  public static DiscordEmbedBuilder FeedbackReceivedUpdateMessage(Ticket ticket) {
     var feedbackDone = new DiscordEmbedBuilder()
                        .WithTitle(LangKeys.FeedbackReceived.GetTranslation())
                        .WithCustomTimestamp()
@@ -22,21 +23,25 @@ public static class UserResponses
   }
 
 
-  public static DiscordEmbedBuilder YourTicketHasBeenClosed(Ticket ticket, GuildOption guildOption) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YourTicketHasBeenClosed.GetTranslation())
-                .WithDescription(LangKeys.YourTicketHasBeenClosedDescription.GetTranslation())
-                .WithGuildInfoFooter(guildOption)
-                .WithCustomTimestamp()
-                .WithColor(Colors.TicketClosedColor);
+  public static DiscordMessageBuilder YourTicketHasBeenClosed(Ticket ticket, GuildOption guildOption, Uri transcriptUri) {
+    var messageBuilder = new DiscordMessageBuilder();
+    var embedBuilder = new DiscordEmbedBuilder()
+                       .WithTitle(LangKeys.YourTicketHasBeenClosed.GetTranslation())
+                       .WithDescription(LangKeys.YourTicketHasBeenClosedDescription.GetTranslation())
+                       .WithGuildInfoFooter(guildOption)
+                       .WithCustomTimestamp()
+                       .WithColor(Colors.TicketClosedColor);
 
     var closingMessage = LangKeys.ClosingMessageDescription.GetTranslation();
 
-    if (!string.IsNullOrEmpty(closingMessage)) embed.WithDescription(closingMessage);
+    if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
 
-    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(LangKeys.CloseReason.GetTranslation(), ticket.CloseReason);
+    if (!string.IsNullOrEmpty(ticket.CloseReason)) embedBuilder.AddField(LangKeys.CloseReason.GetTranslation(), ticket.CloseReason);
 
-    return embed;
+    if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, LangKeys.Transcript.GetTranslation()));
+
+    messageBuilder.AddEmbed(embedBuilder);
+    return messageBuilder;
   }
 
   public static DiscordMessageBuilder GiveFeedbackMessage(Ticket ticket, GuildOption guildOption) {

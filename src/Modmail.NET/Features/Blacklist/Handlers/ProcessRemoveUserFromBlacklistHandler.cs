@@ -27,10 +27,15 @@ public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemo
     _ = Task.Run(async () => {
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
       var member = await _sender.Send(new GetDiscordMemberQuery(request.UserId), cancellationToken);
+      var memberInfo = DiscordUserInfo.FromDiscordMember(member);
       if (member is not null) {
         var dmEmbed = UserResponses.YouHaveBeenRemovedFromBlacklist(modUser);
         await member.SendMessageAsync(dmEmbed);
       }
+
+      var embedLog = LogResponses.BlacklistRemoved(modUser, memberInfo);
+      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
+      await logChannel.SendMessageAsync(embedLog);
     }, cancellationToken);
 
     return blacklist;
