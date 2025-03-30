@@ -61,10 +61,10 @@ jobs:
         run: |
           TAG="v${{ env.VERSION }}"
           if git show-ref --quiet "refs/tags/$TAG"; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::set-output name=exists::true"
             echo "Tag $TAG already exists."
           else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::set-output name=exists::false"
             echo "Tag $TAG does not exist."
           fi
 
@@ -81,7 +81,7 @@ jobs:
 
       - name: Publish
         run: dotnet publish -c Release -o ./publish
-    
+
       - name: Determine Prerelease
         id: determine_prerelease
         run: |
@@ -94,23 +94,16 @@ jobs:
       - name: Generate Release Notes
         id: generate_release_notes
         uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { Octokit } = require("@octokit/rest");
-
-            const octokit = new Octokit({
-              auth: process.env.GITHUB_TOKEN
-            });
-
-            const response = await octokit.repos.generateReleaseNotes({
+            const result = await github.rest.repos.generateReleaseNotes({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag_name: "${{ env.VERSION }}"
+              tag_name: "${{ env.VERSION }}",
+              previous_tag_name: "${{ github.event.before }}",
             });
-
-            core.setOutput('release_notes', response.data.body);
+            core.setOutput("release_notes", result.data.body);
 
       - name: Create Release
         uses: ncipollo/release-action@v1
@@ -129,3 +122,4 @@ jobs:
           name: publish
           path: ./publish
           retention-days: 7
+
