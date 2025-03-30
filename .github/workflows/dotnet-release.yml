@@ -81,23 +81,51 @@ jobs:
 
       - name: Publish
         run: dotnet publish -c Release -o ./publish
+    
+      - name: Determine Prerelease
+        id: determine_prerelease
+        run: |
+          if [[ "${{ env.VERSION }}" == *"-"* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate Release Notes
+        id: generate_release_notes
+        uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const { Octokit } = require("@octokit/rest");
+
+            const octokit = new Octokit({
+              auth: process.env.GITHUB_TOKEN
+            });
+
+            const response = await octokit.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "${{ env.VERSION }}"
+            });
+
+            core.setOutput('release_notes', response.data.body);
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           tag: "v${{ env.VERSION }}"
           name: "Release v${{ env.VERSION }}"
-          body: |
-            ## What's New
-            *   See CHANGELOG.md for details
+          body: ${{ steps.generate_release_notes.outputs.release_notes }}
           draft: false
-          prerelease: ${{ contains(env.VERSION, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+          prerelease: ${{ steps.determine_prerelease.outputs.is_prerelease == 'true' }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          skipIfReleaseExists: true # Add this line
+          skipIfReleaseExists: true
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: publish
           path: ./publish
-          retention-days: 7 # Keep artifacts for 7 days
+          retention-days: 7
