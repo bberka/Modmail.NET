@@ -31,6 +31,10 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
+      if (_guildOption.PublicTranscripts == false) {
+        _guildOption.SendTranscriptLinkToUser = false;
+      }
+
       DbContext.Update(_guildOption);
       var affected = await DbContext.SaveChangesAsync();
       if (affected == 0) {
@@ -63,7 +67,8 @@
           </RadzenText>
           @* <hr class="my-4"/> *@
           <p>
-            This page shows the list of options that can be configured for the bot. Updates may time some time to take effect.
+            This page shows the list of options that can be configured for the bot. Updates may time some time to take
+            effect.
           </p>
         </RadzenColumn>
       </RadzenRow>
@@ -101,12 +106,15 @@
                 </RadzenLabel>
               </RadzenRow>
 
-              <RadzenRow class="rz-my-4">
-                <RadzenSwitch Name="SendTranscriptLinkToUser" @bind-Value=@_guildOption.SendTranscriptLinkToUser/>
-                <RadzenLabel Component="SendTranscriptLinkToUser">
-                  Send transcript link to user when ticket closed
-                </RadzenLabel>
-              </RadzenRow>
+              @if (_guildOption.PublicTranscripts) {
+                <RadzenRow class="rz-my-4">
+                  <RadzenSwitch Name="SendTranscriptLinkToUser" @bind-Value=@_guildOption.SendTranscriptLinkToUser/>
+                  <RadzenLabel Component="SendTranscriptLinkToUser">
+                    Send transcript link to user when ticket closed
+                  </RadzenLabel>
+                </RadzenRow>
+              }
+
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
