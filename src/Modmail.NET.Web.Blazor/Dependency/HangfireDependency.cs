@@ -1,5 +1,6 @@
 using Hangfire;
 using Modmail.NET.Abstract;
+using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Providers;
 using Serilog;
 
@@ -20,7 +21,7 @@ public static class HangfireDependency
                                   .AsImplementedInterfaces()
                                   .WithSingletonLifetime());
 
-    builder.Services.AddHangfireServer();
+    builder.Services.AddHangfireServer(x => { x.Queues = HangfireQueueName.List.Select(y => y.Name).ToArray(); });
   }
 
   public static void Initialize(WebApplication app) {
