@@ -76,7 +76,9 @@ jobs:
           git push origin --tags
         
       - name: Restore dependencies
-        run: dotnet restore ./src/Modmail.NET/Modmail.NET.csproj # adjust the path to your .csproj or .sln
+        run: |
+          dotnet restore ./src/Modmail.NET/Modmail.NET.csproj
+          dotnet restore ./src/Modmail.NET.Web.Blazor/Modmail.NET.Web.Blazor.csproj
 
       - name: Build
         run: dotnet build --configuration Release
