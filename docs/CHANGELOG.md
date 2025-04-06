@@ -1,5 +1,52 @@
 # **Changelogs**
 
+## **v2.2**
+
+
+### Features
+
+- **Attachment Handling Overhaul:**
+  - Implemented full support for attachment uploads to tickets. Attachments are now downloaded to the server and then uploaded to Discord.
+  - The bot now reacts to mod messages containing attachments instead of deleting and resending the message, improving visual clarity.
+  - Attachment URLs are now served from the application's domain instead of Discord's, providing better control and security.
+- **Configurable Ticket Data Deletion:**
+  - Added the ability to automatically delete ticket data (including attachments) after a configurable period. This feature can be enabled and configured in the options UI.
+  - Introduced a daily job to handle the deletion process.
+- **Optional Ticket Timeout:**
+  - Ticket timeouts can now be disabled entirely. The default timeout value is now -1 (disabled). Existing tickets with a timeout value of -1 will not be automatically closed.
+- **Configurable Statistics Calculation Period:**
+  - Administrators can now configure the number of days used for calculating statistics. This setting is available in the options UI.
+- **Public Attachment Access:**
+  - Implemented a public API endpoint to serve attachment files based on their ID, enhancing accessibility.
+
+### Bug Fixes
+
+- **GuildOption Update Issue:** Resolved a bug where changes to `GuildOption` settings in the UI were affecting the cached reference without calling save changes. Caching has been disabled for the options page to ensure data consistency.
+- **Invalid Ticket ID Handling:** The web UI now correctly redirects to a 404 page when attempting to view a transcript for an invalid ticket ID.
+- **Blacklist Permission Check:** Fixed an issue where the `CheckUserBlacklistStatusQuery` incorrectly required user authorization.
+- **Ticket Timeout Logic:** Modified the ticket timeout processing to only consider tickets with valid (non-disabled) timeout values.
+- **Dependency Injection Issue:** Addressed a dependency injection issue with `AddHttpClient`.
+- **Database Migration Issues:** Corrected database migration issues related to required fields and constraint minimum values.
+
+### Improvements & Refactoring
+
+- **Performance Optimizations:**
+  - Optimized permission info retrieval by converting the result type to an array.
+  - Improved performance by moving shared code to a common method and using `using` statements for variable scope management.
+- **Codebase Cleanup:**
+  - Removed an unused encryption key.
+  - Removed the unused `MessageSent` color.
+- **Queue Handling:** Migrated ticket attachment downloads to a singleton service for better management and dependency injection.
+- **SmartEnum Naming:** Fixed the naming of the `HangfireQueueName` SmartEnum to comply with Hangfire's requirements (lowercase letters).
+- **Query Simplification:** Inlined the `GetTimedOutTicketListQuery` into the job class, simplifying the codebase.
+
+### Dependency Updates
+
+- Updated NuGet packages to the latest versions.
+- Added the `Microsoft.Extensions.Http` NuGet package for managing `HttpClient` instances.
+- Added the `EntityFrameworkCore.Exceptions` NuGet package for better exceptions.
+- Added the `EFCore.CheckConstraints` NuGet package for data validation.
+
 ## **v2.1**
 
 ### Features
