@@ -75,7 +75,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
           git push origin --tags
-
+          
+      - name: Dotnet Restore
+        run: dotnet restore
+        
       - name: Build
         run: dotnet build --configuration Release
 
