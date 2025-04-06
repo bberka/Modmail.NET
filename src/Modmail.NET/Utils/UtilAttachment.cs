@@ -16,4 +16,10 @@ public static class UtilAttachment
     var uri = new Uri(Const.AttachmentDownloadDirectory, UriKind.RelativeOrAbsolute);
     return uri + "/" + attachment.Id + Path.GetExtension(attachment.FileName);
   }
+
+  public static string[] GetAllFiles() {
+    return !Directory.Exists(Const.AttachmentDownloadDirectory)
+             ? []
+             : Directory.GetFiles(Const.AttachmentDownloadDirectory);
+  }
 }

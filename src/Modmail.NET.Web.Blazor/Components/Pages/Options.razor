@@ -15,11 +15,22 @@
 @code {
 
   private GuildOption _guildOption;
+  private bool _enableTicketAutoDelete;
+  private bool _enableTicketTimeout;
 
   protected override async Task OnInitializedAsync() {
     _guildOption = await Sender.Send(new GetGuildOptionQuery(true));
     if (_guildOption is null) {
       NavigationManager.NavigateTo("/setup");
+      return;
+    }
+
+    if (_guildOption.TicketDataDeleteWaitDays > 0) {
+      _enableTicketAutoDelete = true;
+    }
+
+    if (_guildOption.TicketTimeoutHours > 0) {
+      _enableTicketTimeout = true;
     }
   }
 
@@ -31,14 +42,33 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
+      if (_guildOption.TicketTimeoutHours is > Const.TicketTimeoutMaxAllowedHours or < Const.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Ticket Timeout Hours is not in valid range.");
+        return;
+      }
+
+      if (_guildOption.TicketDataDeleteWaitDays is > Const.TicketDataDeleteWaitDaysMax or < Const.TicketDataDeleteWaitDaysMin && _enableTicketAutoDelete) {
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Auto Delete Ticket Data Wait Days is not in valid range.");
+        return;
+      }
+
       if (_guildOption.PublicTranscripts == false) {
         _guildOption.SendTranscriptLinkToUser = false;
       }
 
+      if (!_enableTicketAutoDelete) {
+        _guildOption.TicketDataDeleteWaitDays = -1;
+      }
+
+      if (!_enableTicketTimeout) {
+        _guildOption.TicketTimeoutHours = -1;
+      }
+
+
       DbContext.Update(_guildOption);
       var affected = await DbContext.SaveChangesAsync();
       if (affected == 0) {
-        NotificationService.Notify(NotificationSeverity.Success, "Failed", "Guild options could not be updated");
+        NotificationService.Notify(NotificationSeverity.Error, "Failed", "Guild options could not be updated");
       }
 
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
@@ -77,7 +107,7 @@
           <Loading></Loading>
         }
         else {
-          <RadzenCard class="rz-shadow-7">
+          <RadzenCard class="rz-shadow-7" Style="min-width: 450px">
             <RadzenTemplateForm TItem="GuildOption" Data=@_guildOption Submit=@SubmitAsync>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="IsEnabled" @bind-Value=@_guildOption.IsEnabled/>
@@ -116,18 +146,53 @@
               }
 
 
+
+
+
               <RadzenRow class="rz-my-4">
-                <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
-                  <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"/>
-                </RadzenFormField>
-              </RadzenRow>
-              <RadzenRow>
-                <small class="text-secondary">
-                  The time to wait in hours before a inactive ticket is automatically closed.
-                </small>
+                <RadzenSwitch Name="_enableTicketTimeout" @bind-Value=@_enableTicketTimeout/>
+                <RadzenLabel Component="_enableTicketTimeout">
+                  Close inactive tickets
+                </RadzenLabel>
               </RadzenRow>
 
 
+              @if (_enableTicketTimeout) {
+                <RadzenRow class="rz-my-4">
+                  <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
+                    <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"
+                                   Min="Const.TicketTimeoutMinAllowedHours" Max="Const.TicketTimeoutMaxAllowedHours"/>
+                  </RadzenFormField>
+                </RadzenRow>
+                <RadzenRow>
+                  <small class="text-secondary">
+                    Set the number of hours (@Const.TicketTimeoutMinAllowedHours~@Const.TicketTimeoutMaxAllowedHours) a
+                    ticket can be inactive before it's automatically closed.
+                  </small>
+                </RadzenRow>
+              }
+
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="_enableTicketAutoDelete" @bind-Value=@_enableTicketAutoDelete/>
+                <RadzenLabel Component="_enableTicketAutoDelete">
+                  Automatically delete ticket data after certain days
+                </RadzenLabel>
+              </RadzenRow>
+
+              @if (_enableTicketAutoDelete) {
+                <RadzenRow class="rz-my-4">
+                  <RadzenFormField class="w-100" Text="Auto Delete Ticket Data Wait Days" Variant="Variant.Outlined">
+                    <RadzenNumeric @bind-Value="@_guildOption.TicketDataDeleteWaitDays"
+                                   Min="Const.TicketDataDeleteWaitDaysMin" Max="Const.TicketDataDeleteWaitDaysMax"/>
+                  </RadzenFormField>
+                </RadzenRow>
+                <RadzenRow>
+                  <small class="text-secondary">
+                    Set the number of days (@Const.TicketDataDeleteWaitDaysMin~@Const.TicketDataDeleteWaitDaysMax) after
+                    which ticket data is deleted.
+                  </small>
+                </RadzenRow>
+              }
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Ticket Access Level" Variant="Variant.Outlined">
