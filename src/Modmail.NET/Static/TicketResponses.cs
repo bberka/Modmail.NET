@@ -89,16 +89,18 @@ public static class TicketResponses
     return embed;
   }
 
-  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, PermissionInfo[] permissions = null) {
+  public static DiscordMessageBuilder MessageReceived(DiscordMessage message,
+                                                      TicketMessageAttachment[] attachments,
+                                                      PermissionInfo[] permissions = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()
                 .WithColor(Colors.MessageReceivedColor)
-                .AddAttachment(message.Attachments)
                 .WithUserAsAuthor(message.Author);
 
     var msgBuilder = new DiscordMessageBuilder()
-      .AddEmbed(embed);
+                     .AddEmbed(embed)
+                     .AddAttachments(attachments);
     if (permissions is not null && permissions.Length > 0) {
       var sb = new StringBuilder();
       foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) sb.AppendLine(permissionInfo.GetMention());
