@@ -1,3 +1,4 @@
+using EntityFramework.Exceptions.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Triggers;
@@ -45,6 +46,9 @@ public static class BusinessDependency
         options.EnableSensitiveDataLogging();
 
       options.UseLoggerFactory(new SerilogLoggerFactory(efCoreLogger));
+
+      options.UseExceptionProcessor();
+      options.UseValidationCheckConstraints();
     });
   }
 
