@@ -5,7 +5,7 @@
         <Nullable>disable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>13</LangVersion>
-        <Version>2.1.0</Version>
+        <Version>2.2.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -44,7 +44,7 @@
         <PackageReference Include="Polly.Core" Version="8.5.2"/>
         <PackageReference Include="Polly.Extensions" Version="8.5.2"/>
         <PackageReference Include="Polly.Extensions.Http" Version="3.0.0"/>
-        <PackageReference Include="Radzen.Blazor" Version="6.3.4"/>
+        <PackageReference Include="Radzen.Blazor" Version="6.4.0"/>
         <PackageReference Include="Scrutor" Version="6.0.1"/>
         <PackageReference Include="Serilog" Version="4.2.0"/>
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
