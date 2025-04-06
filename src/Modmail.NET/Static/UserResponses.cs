@@ -139,26 +139,20 @@ public static class UserResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder MessageSent(DiscordMessage message) {
+  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, TicketMessageAttachment[] attachments, bool anonymous) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
-                .WithColor(Colors.MessageSentColor)
-                .WithUserAsAuthor(message.Author)
-                .AddAttachment(message.Attachments);
-    return embed;
-  }
+                .WithColor(Colors.MessageReceivedColor);
 
-  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message, TicketMessageAttachment[] attachments, bool anonymous) {
-    var embed = new DiscordEmbedBuilder()
-                .WithDescription(message.Content)
-                .WithGuildInfoFooter()
-                .WithCustomTimestamp()
-                .WithColor(Colors.MessageReceivedColor)
-                .AddAttachment(attachments);
     if (!anonymous) embed.WithUserAsAuthor(message.Author);
 
-    return embed;
+    var msg = new DiscordMessageBuilder();
+
+    msg.AddEmbed(embed);
+    msg.AddAttachments(attachments);
+
+    return msg;
   }
 }
