@@ -54,7 +54,6 @@ public static class DiscordBotDependency
       eventHandlingBuilder.HandleGuildMemberAdded(ModmailEventHandlers.OnGuildMemberAdded);
       eventHandlingBuilder.HandleGuildMemberRemoved(ModmailEventHandlers.OnGuildMemberRemoved);
       eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
-      eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
       eventHandlingBuilder.HandleGuildBanRemoved(ModmailEventHandlers.OnGuildBanRemoved);
 
       eventHandlingBuilder.HandleUserUpdated(ModmailEventHandlers.OnUserUpdated);
