@@ -13,7 +13,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 
-  public StatisticsCalculatorJob(IServiceScopeFactory scopeFactory) : base("StatisticsCalculatorJob", Cron.Daily()) {
+  public StatisticsCalculatorJob(IServiceScopeFactory scopeFactory) : base("statistics-calculator-job", Cron.Daily()) {
     _scopeFactory = scopeFactory;
   }
 

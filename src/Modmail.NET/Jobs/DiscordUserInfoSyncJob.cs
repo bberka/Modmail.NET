@@ -6,7 +6,6 @@ using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Features.UserInfo;
-using Modmail.NET.Utils;
 using Serilog;
 
 namespace Modmail.NET.Jobs;
@@ -15,7 +14,7 @@ public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 
-  public DiscordUserInfoSyncJob(IServiceScopeFactory scopeFactory) : base("DiscordUserInfoSyncJob", Cron.Hourly()) {
+  public DiscordUserInfoSyncJob(IServiceScopeFactory scopeFactory) : base("discord-user-info-sync-job", Cron.Hourly()) {
     _scopeFactory = scopeFactory;
   }
 

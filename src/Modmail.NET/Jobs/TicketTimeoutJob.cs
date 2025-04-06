@@ -12,7 +12,7 @@ public class TicketTimeoutJob : HangfireRecurringJobBase
 {
   private readonly IServiceScopeFactory _scopeFactory;
 
-  public TicketTimeoutJob(IServiceScopeFactory scopeFactory) : base("TicketTimeoutJob", Cron.Hourly()) {
+  public TicketTimeoutJob(IServiceScopeFactory scopeFactory) : base("ticket-timeout-job", Cron.Hourly()) {
     _scopeFactory = scopeFactory;
   }
 
