@@ -7,6 +7,6 @@ public static class UtilAttachment
     if (string.IsNullOrEmpty(botConfig.Domain)) throw new InvalidOperationException();
 
     var uri = new Uri(botConfig.Domain, UriKind.Absolute);
-    return uri + "/attachments/" + id;
+    return uri + "attachments/" + id;
   }
 }
