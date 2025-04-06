@@ -65,7 +65,6 @@ jobs:
             echo "Tag $TAG already exists."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "Tag $TAG does not exist."
           fi
 
       - name: Create Tag
@@ -75,10 +74,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
           git push origin --tags
-          
-      - name: Dotnet Restore
-        run: dotnet restore
         
+      - name: Restore dependencies
+        run: dotnet restore ./src/Modmail.NET/Modmail.NET.csproj # adjust the path to your .csproj or .sln
+
       - name: Build
         run: dotnet build --configuration Release
 
