@@ -2,10 +2,13 @@
 using DSharpPlus.Entities;
 using DSharpPlus.Entities.AuditLogs;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Abstract;
 using Modmail.NET.Aspects;
+using Modmail.NET.Database;
 using Modmail.NET.Features.Ticket;
 using Modmail.NET.Features.UserInfo;
 using Modmail.NET.Models.Dto;
@@ -44,7 +47,131 @@ public class ModmailEventHandlers
   public static async Task OnMessageReactionAdded(DiscordClient client, MessageReactionAddedEventArgs args) {
     var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
     await sender.Send(new UpdateDiscordUserCommand(args?.User));
+
+    if (args is not null) {
+      if (args.User.IsBot) return;
+
+      if (args.Emoji.Name == Const.ProcessedReactionDiscordEmojiUnicode) return;
+
+      var isPrivate = args.Channel.IsPrivate;
+      if (isPrivate) {
+        var isAuthorBot = args.Message.Author?.Id == client.CurrentUser.Id;
+        if (isAuthorBot) return;
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => x.SentByMod && x.BotMessageId == args.Message.Id)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.OpenerUserId == args.User.Id && x.Id == messageEntity.TicketId && x.PrivateMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
+          var message = await ticketChannel.GetMessageAsync(messageEntity.MessageDiscordId);
+          await message.CreateReactionAsync(args.Emoji);
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+      else {
+        var topic = args.Channel.Topic;
+        var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(topic);
+        if (ticketId == Guid.Empty) return;
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => !x.SentByMod && x.BotMessageId == args.Message.Id && x.TicketId == ticketId)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.Id == ticketId && x.ModMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var pmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
+          var message = await pmChannel.GetMessageAsync(messageEntity.MessageDiscordId);
+          await message.CreateReactionAsync(args.Emoji);
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+    }
+  }
+
+  public static async Task OnMessageReactionRemoved(DiscordClient client, MessageReactionRemovedEventArgs args) {
+    var scope = client.ServiceProvider.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
+    await sender.Send(new UpdateDiscordUserCommand(args?.User));
+
+    if (args is not null) {
+      if (args.User.IsBot) return;
+
+      if (args.Emoji.Name == Const.ProcessedReactionDiscordEmojiUnicode) return;
+
+      var isPrivate = args.Channel.IsPrivate;
+      if (isPrivate) {
+        var isAuthorBot = args.Message.Author?.Id == client.CurrentUser.Id;
+        if (!isAuthorBot) return;
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => x.SentByMod && x.BotMessageId == args.Message.Id)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.OpenerUserId == args.User.Id && x.Id == messageEntity.TicketId && x.PrivateMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
+          var message = await ticketChannel.GetMessageAsync(messageEntity.MessageDiscordId);
+          await message.DeleteOwnReactionAsync(args.Emoji);
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+      else {
+        var topic = args.Channel.Topic;
+        var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(topic);
+        if (ticketId == Guid.Empty) return;
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => !x.SentByMod && x.BotMessageId == args.Message.Id && x.TicketId == ticketId)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.Id == ticketId && x.ModMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var pmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
+          var message = await pmChannel.GetMessageAsync(messageEntity.MessageDiscordId);
+          await message.DeleteOwnReactionAsync(args.Emoji);
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+    }
   }
 
   public static async Task OnMessageUpdated(DiscordClient client, MessageUpdatedEventArgs args) {

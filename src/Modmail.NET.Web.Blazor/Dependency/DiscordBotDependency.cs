@@ -47,6 +47,16 @@ public static class DiscordBotDependency
       eventHandlingBuilder.HandleMessageCreated(ModmailEventHandlers.OnMessageCreated);
       eventHandlingBuilder.HandleChannelDeleted(ModmailEventHandlers.OnChannelDeleted);
 
+      eventHandlingBuilder.HandleMessageReactionAdded(ModmailEventHandlers.OnMessageReactionAdded);
+      eventHandlingBuilder.HandleMessageReactionRemoved(ModmailEventHandlers.OnMessageReactionRemoved);
+
+      //TODO: investigate the need to implement handling of other reaction events
+      // eventHandlingBuilder.HandleMessageReactionsCleared();
+      // eventHandlingBuilder.HandleMessageReactionRemovedEmoji();
+
+      eventHandlingBuilder.HandleMessageDeleted(ModmailEventHandlers.OnMessageDeleted);
+      eventHandlingBuilder.HandleMessageUpdated(ModmailEventHandlers.OnMessageUpdated);
+
       eventHandlingBuilder.HandleInteractionCreated(ModmailEventHandlers.InteractionCreated);
       eventHandlingBuilder.HandleComponentInteractionCreated(ModmailEventHandlers.ComponentInteractionCreated);
       eventHandlingBuilder.HandleModalSubmitted(ModmailEventHandlers.ModalSubmitted);
@@ -58,10 +68,6 @@ public static class DiscordBotDependency
 
       eventHandlingBuilder.HandleUserUpdated(ModmailEventHandlers.OnUserUpdated);
       eventHandlingBuilder.HandleUserSettingsUpdated(ModmailEventHandlers.OnUserSettingsUpdated);
-
-      eventHandlingBuilder.HandleMessageReactionAdded(ModmailEventHandlers.OnMessageReactionAdded);
-      eventHandlingBuilder.HandleMessageDeleted(ModmailEventHandlers.OnMessageDeleted);
-      eventHandlingBuilder.HandleMessageUpdated(ModmailEventHandlers.OnMessageUpdated);
     });
   }
 }
