@@ -1,0 +1,33 @@
+name: Build on Push
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0"
+
+      - name: Restore dependencies
+        run: dotnet restore
+        continue-on-error: false
+
+      - name: Clean
+        run: dotnet clean
+        continue-on-error: false
+
+      - name: Build
+        run: dotnet build --configuration Release
+        continue-on-error: false
