@@ -20,6 +20,6 @@ public static class Const
   public const string ThemeCookieName = "Modmail.NET.Theme";
   public const string AttachmentDownloadDirectory = "AttachmentDownloads";
   public const int HttpClientDownloadTimeoutSeconds = 90;
-  public const string ProcessedReactionDiscordEmojiString = ":white_check_mark:";
+  public const string ProcessedReactionDiscordEmojiUnicode = "✅";
   public static readonly DiscordActivity DiscordActivity = new(LangProvider.This.GetTranslation(LangKeys.ModerationConcerns), DiscordActivityType.ListeningTo);
 }

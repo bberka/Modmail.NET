@@ -109,6 +109,6 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
     await logChannel.SendMessageAsync(newTicketCreatedLog);
 
-    await request.Message.CreateReactionAsync(DiscordEmoji.FromName(_bot.Client, Const.ProcessedReactionDiscordEmojiString, false));
+    await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(Const.ProcessedReactionDiscordEmojiUnicode));
   }
 }

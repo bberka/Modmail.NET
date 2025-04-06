@@ -49,6 +49,6 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    await request.Message.CreateReactionAsync(DiscordEmoji.FromName(_bot.Client, Const.ProcessedReactionDiscordEmojiString, false));
+    await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(Const.ProcessedReactionDiscordEmojiUnicode));
   }
 }
