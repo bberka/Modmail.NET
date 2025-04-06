@@ -1,8 +1,10 @@
+using Hangfire;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
 using Modmail.NET.Exceptions;
 using Modmail.NET.Features.Permission;
+using Modmail.NET.Queues;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -35,6 +37,7 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
+    foreach (var attachment in ticketMessage.Attachments) BackgroundJob.Enqueue(HangfireQueueName.AttachmentDownload.Name, () => TicketAttachmentDownloadQueueHandler.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName)));
 
     _ = Task.Run(async () => {
       var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
