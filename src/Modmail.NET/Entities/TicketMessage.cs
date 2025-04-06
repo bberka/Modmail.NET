@@ -23,6 +23,8 @@ public class TicketMessage : IHasRegisterDate,
 
   //FK
   public List<TicketMessageAttachment> Attachments { get; set; }
+
+  public ulong BotMessageId { get; set; }
   public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {
