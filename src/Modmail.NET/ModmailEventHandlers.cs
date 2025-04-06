@@ -42,6 +42,59 @@ public class ModmailEventHandlers
     var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     await sender.Send(new UpdateDiscordUserCommand(args?.Message.Author));
+
+    if (args is not null) {
+      if (args.Message.Author?.IsBot == true) return;
+      var isPrivate = args.Channel.IsPrivate;
+      if (isPrivate) {
+        // message deleted by user in dms 
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => !x.SentByMod && x.MessageDiscordId == args.Message.Id)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.Id == messageEntity.TicketId && x.PrivateMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
+          var message = await ticketChannel.GetMessageAsync(messageEntity.BotMessageId);
+          await message.DeleteAsync();
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+      else {
+        var topic = args.Channel.Topic;
+        var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(topic);
+        if (ticketId == Guid.Empty) return;
+        // message deleted by mod or other admin in ticket channel 
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+
+        var messageEntity = await dbContext.TicketMessages
+                                           .Where(x => x.SentByMod && x.TicketId == ticketId && x.MessageDiscordId == args.Message.Id)
+                                           .FirstOrDefaultAsync();
+        if (messageEntity is null) return;
+
+        var ticket = await dbContext.Tickets
+                                    .Where(x => !x.ClosedDateUtc.HasValue && x.Id == ticketId && x.ModMessageChannelId == args.Channel.Id)
+                                    .FirstOrDefaultAsync();
+        if (ticket is null) return;
+
+        try {
+          var dmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
+          var message = await dmChannel.GetMessageAsync(messageEntity.BotMessageId);
+          await message.DeleteAsync();
+        }
+        catch (NotFoundException) {
+          //ignored
+        }
+      }
+    }
   }
 
   public static async Task OnMessageReactionAdded(DiscordClient client, MessageReactionAddedEventArgs args) {
