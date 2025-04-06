@@ -13,7 +13,6 @@ public static class Colors
 
   //Message
   public static readonly DiscordColor MessageReceivedColor = DiscordColor.Blue;
-  public static readonly DiscordColor MessageSentColor = DiscordColor.Green;
 
   //Ticket
   public static readonly DiscordColor TicketCreatedColor = DiscordColor.Blue;
