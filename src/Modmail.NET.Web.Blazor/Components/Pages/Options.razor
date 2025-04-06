@@ -1,14 +1,15 @@
 ﻿@page "/options"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
 @using Modmail.NET.Abstract
-@using Modmail.NET.Features.Guild
 @using Modmail.NET.Static
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject NavigationManager NavigationManager
 @inject NotificationService NotificationService
 @rendermode InteractiveServer
-@inject ModmailDbContext DbContext
-@inject ISender Sender
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject IOptions<BotConfig> Config
 @attribute [AuthorizeTeam(nameof(AuthPolicy.Owner))]
 
 
@@ -19,7 +20,10 @@
   private bool _enableTicketTimeout;
 
   protected override async Task OnInitializedAsync() {
-    _guildOption = await Sender.Send(new GetGuildOptionQuery(true));
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    //TODO: Call cache query however create copy of the reference instead of the reference itself
+    //This causes UI to update the cached options currently fixed but now it calls DB on each page load
+    _guildOption = await dbContext.GuildOptions.FirstOrDefaultAsync(x => x.GuildId == Config.Value.MainServerId);
     if (_guildOption is null) {
       NavigationManager.NavigateTo("/setup");
       return;
@@ -65,8 +69,9 @@
       }
 
 
-      DbContext.Update(_guildOption);
-      var affected = await DbContext.SaveChangesAsync();
+      var dbContext = await DbContextFactory.CreateDbContextAsync();
+      dbContext.Update(_guildOption);
+      var affected = await dbContext.SaveChangesAsync();
       if (affected == 0) {
         NotificationService.Notify(NotificationSeverity.Error, "Failed", "Guild options could not be updated");
       }
