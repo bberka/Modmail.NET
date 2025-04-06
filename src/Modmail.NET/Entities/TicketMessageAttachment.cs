@@ -41,7 +41,8 @@ public class TicketMessageAttachment : IEntity,
       Width = attachment.Width,
       FileName = attachment.FileName,
       FileSize = attachment.FileSize,
-      MediaType = attachment.MediaType
+      MediaType = attachment.MediaType,
+      Id = Guid.CreateVersion7()
     };
   }
 }
