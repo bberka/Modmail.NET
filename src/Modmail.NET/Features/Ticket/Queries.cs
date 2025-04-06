@@ -14,6 +14,4 @@ public sealed record GetTicketByUserIdQuery(
   bool MustBeOpen = false,
   bool MustBeClosed = false) : IRequest<Entities.Ticket>;
 
-public sealed record GetTimedOutTicketListQuery(long TimeoutHours) : IRequest<List<Entities.Ticket>>;
-
 public sealed record GetTicketListByTypeQuery(Guid TicketTypeId) : IRequest<List<Entities.Ticket>>;
