@@ -1,4 +1,3 @@
-using Hangfire;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -98,7 +97,8 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     if (affected == 0) throw new DbInternalException();
 
 
-    foreach (var attachment in ticketMessage.Attachments) BackgroundJob.Enqueue(HangfireQueueName.AttachmentDownload.Name, () => TicketAttachmentDownloadQueueHandler.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName)));
+    foreach (var attachment in ticketMessage.Attachments)
+      TicketAttachmentDownloadQueueHandler.Enqueue(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
     _ = Task.Run(async () => {
       await mailChannel.SendMessageAsync(newTicketMessageBuilder);

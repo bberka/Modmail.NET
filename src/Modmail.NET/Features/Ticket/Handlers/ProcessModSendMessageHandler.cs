@@ -1,4 +1,3 @@
-using Hangfire;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -42,7 +41,8 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
 
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
 
-    foreach (var attachment in ticketMessage.Attachments) BackgroundJob.Enqueue(HangfireQueueName.AttachmentDownload.Name, () => TicketAttachmentDownloadQueueHandler.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName)));
+    foreach (var attachment in ticketMessage.Attachments)
+      TicketAttachmentDownloadQueueHandler.Enqueue(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
     _ = Task.Run(async () => {
       var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
