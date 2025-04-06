@@ -89,20 +89,6 @@ public static class TicketResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder MessageSent(DiscordMessage message, Guid[] attachmentIds, bool anonymous) {
-    var embed = new DiscordEmbedBuilder()
-                .WithDescription(message.Content)
-                .WithCustomTimestamp()
-                .WithColor(Colors.MessageSentColor)
-                .WithUserAsAuthor(message.Author)
-                .AddAttachment(message.Attachments);
-
-    if (anonymous) embed.WithFooter(LangKeys.ThisMessageSentAnonymously.GetTranslation());
-
-    return embed;
-  }
-
-
   public static DiscordMessageBuilder MessageReceived(DiscordMessage message, PermissionInfo[] permissions = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
@@ -113,7 +99,7 @@ public static class TicketResponses
 
     var msgBuilder = new DiscordMessageBuilder()
       .AddEmbed(embed);
-    if (permissions is not null) {
+    if (permissions is not null && permissions.Length > 0) {
       var sb = new StringBuilder();
       foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) sb.AppendLine(permissionInfo.GetMention());
 
