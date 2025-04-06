@@ -1,4 +1,5 @@
-﻿using DSharpPlus.Entities;
+﻿using System.Text;
+using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Features.Bot;
 using Modmail.NET.Utils;
@@ -9,8 +10,12 @@ public static class ExtEmbed
 {
   public static DiscordEmbedBuilder AddAttachment(this DiscordEmbedBuilder builder, TicketMessageAttachment[] attachments) {
     if (attachments == null || attachments.Length == 0) return builder;
+
+    var sb = new StringBuilder();
     foreach (var t in attachments)
-      builder.AddField($"{LangProvider.This.GetTranslation(LangKeys.Attachment)}", $"[{t.FileName}]({UtilAttachment.GetUri(t.Id)})");
+      sb.AppendLine($"[{t.FileName}]({UtilAttachment.GetUri(t.Id)})");
+
+    builder.AddField($"{LangProvider.This.GetTranslation(LangKeys.Attachment)}", sb.ToString());
 
     return builder;
   }
