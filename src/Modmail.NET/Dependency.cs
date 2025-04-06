@@ -39,4 +39,8 @@ public static class ServiceLocator
     var scope = _serviceProvider.CreateScope();
     return scope.ServiceProvider.GetRequiredService<ISender>();
   }
+
+  public static HttpClient CreateHttpClient() {
+    return _serviceProvider.GetRequiredService<HttpClient>();
+  }
 }
