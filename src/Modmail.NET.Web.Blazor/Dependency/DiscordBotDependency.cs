@@ -18,7 +18,7 @@ public static class DiscordBotDependency
                                       | DiscordIntents.GuildMessages
                                       | DiscordIntents.GuildMembers
                                       | DiscordIntents.DirectMessages
-                                      | DiscordIntents.GuildMessages
+                                      | DiscordIntents.GuildMessageReactions
                                       | DiscordIntents.DirectMessageReactions);
 
     builder.Services.AddCommandsExtension((_, extension) => {
