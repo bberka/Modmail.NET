@@ -40,9 +40,9 @@ public class TicketTimeoutJob : HangfireRecurringJobBase
     return;
 
     async Task<Ticket[]> GetTimeoutTickets() {
-      var timeoutHours = guildOption.TicketTimeoutHours;
-      if (timeoutHours < Const.TicketTimeoutMinAllowedHours) timeoutHours = Const.DefaultTicketTimeoutHours;
-      var timeoutDate = UtilDate.GetNow().AddHours(-timeoutHours);
+      if (guildOption.TicketTimeoutHours == -1) return [];
+
+      var timeoutDate = UtilDate.GetNow().AddHours(-guildOption.TicketTimeoutHours);
       var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
       return await dbContext.Tickets
                             .Where(x => !x.ClosedDateUtc.HasValue && x.LastMessageDateUtc < timeoutDate)
