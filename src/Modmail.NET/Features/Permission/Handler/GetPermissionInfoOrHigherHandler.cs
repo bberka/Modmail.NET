@@ -5,7 +5,7 @@ using Modmail.NET.Models;
 
 namespace Modmail.NET.Features.Permission.Handler;
 
-public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, List<PermissionInfo>>
+public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInfoOrHigherQuery, PermissionInfo[]>
 {
   private readonly ModmailDbContext _dbContext;
 
@@ -13,11 +13,11 @@ public class GetPermissionInfoOrHigherHandler : IRequestHandler<GetPermissionInf
     _dbContext = dbContext;
   }
 
-  public async Task<List<PermissionInfo>> Handle(GetPermissionInfoOrHigherQuery request, CancellationToken cancellationToken) {
+  public async Task<PermissionInfo[]> Handle(GetPermissionInfoOrHigherQuery request, CancellationToken cancellationToken) {
     return await _dbContext.GuildTeamMembers
                            .Include(x => x.GuildTeam)
                            .Where(x => x.GuildTeam!.IsEnabled && x.GuildTeam.PermissionLevel >= request.LevelOrHigher)
                            .Select(x => new PermissionInfo(x.GuildTeam!.PermissionLevel, x.Key, x.Type, x.GuildTeam.PingOnNewTicket, x.GuildTeam.PingOnNewMessage))
-                           .ToListAsync(cancellationToken);
+                           .ToArrayAsync(cancellationToken);
   }
 }

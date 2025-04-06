@@ -25,12 +25,19 @@ public class GuildOption : IHasRegisterDate,
   public bool IsEnabled { get; set; } = true;
 
   [Range(Const.TicketTimeoutMinAllowedHours, Const.TicketTimeoutMaxAllowedHours)]
-  public long TicketTimeoutHours { get; set; } = Const.DefaultTicketTimeoutHours;
+  public long TicketTimeoutHours { get; set; } = -1;
 
   public bool TakeFeedbackAfterClosing { get; set; }
   public bool AlwaysAnonymous { get; set; }
   public bool PublicTranscripts { get; set; }
   public bool SendTranscriptLinkToUser { get; set; }
+
+  [Range(-1, Const.TicketDataDeleteWaitDaysMax)]
+  public int TicketDataDeleteWaitDays { get; set; } = -1;
+
+  [Range(-1, Const.StatisticsCalculateDaysMax)]
+  public int StatisticsCalculateDays { get; set; } = Const.DefaultStatisticsCalculateDays;
+
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
   public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
   public TeamPermissionLevel ManageBlacklistMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;

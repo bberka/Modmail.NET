@@ -8,7 +8,7 @@ namespace Modmail.NET.Jobs;
 
 public class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
 {
-  public TicketTypeSelectionTimeoutJob() : base("TicketTypeSelectionTimeoutJob", Cron.Minutely()) {
+  public TicketTypeSelectionTimeoutJob() : base("ticket-type-selection-timeout-job", Cron.Minutely()) {
     Messages = new ConcurrentDictionary<DiscordMessage, DateTime>();
   }
 

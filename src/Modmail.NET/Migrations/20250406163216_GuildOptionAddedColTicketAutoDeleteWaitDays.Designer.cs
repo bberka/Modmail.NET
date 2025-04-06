@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -11,9 +12,11 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250406163216_GuildOptionAddedColTicketAutoDeleteWaitDays")]
+    partial class GuildOptionAddedColTicketAutoDeleteWaitDays
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,10 +59,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiscordUserInfos", t =>
-                        {
-                            t.HasCheckConstraint("CK_DiscordUserInfos_Username_MinLength", "LEN([Username]) >= 1");
-                        });
+                    b.ToTable("DiscordUserInfos");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.GuildOption", b =>
@@ -116,9 +116,6 @@ namespace Modmail.NET.Migrations
                     b.Property<bool>("SendTranscriptLinkToUser")
                         .HasColumnType("bit");
 
-                    b.Property<int>("StatisticsCalculateDays")
-                        .HasColumnType("int");
-
                     b.Property<bool>("TakeFeedbackAfterClosing")
                         .HasColumnType("bit");
 
@@ -133,14 +130,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("GuildOptions", t =>
-                        {
-                            t.HasCheckConstraint("CK_GuildOptions_Name_MinLength", "LEN([Name]) >= 1");
-
-                            t.HasCheckConstraint("CK_GuildOptions_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN -1 AND 365");
-
-                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN -1 AND 365");
-                        });
+                    b.ToTable("GuildOptions");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.GuildTeam", b =>
@@ -177,10 +167,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GuildTeams", t =>
-                        {
-                            t.HasCheckConstraint("CK_GuildTeams_Name_MinLength", "LEN([Name]) >= 1");
-                        });
+                    b.ToTable("GuildTeams");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.GuildTeamMember", b =>
@@ -352,6 +339,7 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<string>("MessageContent")
+                        .IsRequired()
                         .HasMaxLength(2147483647)
                         .HasColumnType("nvarchar(max)");
 
@@ -421,16 +409,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasIndex("TicketMessageId");
 
-                    b.ToTable("TicketMessageAttachments", t =>
-                        {
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_FileName_MinLength", "LEN([FileName]) >= 1");
-
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_MediaType_MinLength", "LEN([MediaType]) >= 1");
-
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_ProxyUrl_MinLength", "LEN([ProxyUrl]) >= 1");
-
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_Url_MinLength", "LEN([Url]) >= 1");
-                        });
+                    b.ToTable("TicketMessageAttachments");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketNote", b =>
@@ -457,10 +436,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketNotes", t =>
-                        {
-                            t.HasCheckConstraint("CK_TicketNotes_Content_MinLength", "LEN([Content]) >= 1");
-                        });
+                    b.ToTable("TicketNotes");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketType", b =>
@@ -510,14 +486,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TicketTypes", t =>
-                        {
-                            t.HasCheckConstraint("CK_TicketTypes_Description_MinLength", "LEN([Description]) >= 1");
-
-                            t.HasCheckConstraint("CK_TicketTypes_Key_MinLength", "LEN([Key]) >= 1");
-
-                            t.HasCheckConstraint("CK_TicketTypes_Name_MinLength", "LEN([Name]) >= 1");
-                        });
+                    b.ToTable("TicketTypes");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.GuildTeamMember", b =>

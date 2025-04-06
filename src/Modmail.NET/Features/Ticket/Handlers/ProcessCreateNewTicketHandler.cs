@@ -1,3 +1,4 @@
+using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -7,12 +8,14 @@ using Modmail.NET.Features.Guild;
 using Modmail.NET.Features.Permission;
 using Modmail.NET.Features.TicketType;
 using Modmail.NET.Jobs;
+using Modmail.NET.Services;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTicketCommand>
 {
+  private readonly TicketAttachmentDownloadService _attachmentDownloadService;
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
@@ -21,11 +24,13 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
   public ProcessCreateNewTicketHandler(ISender sender,
                                        ModmailBot bot,
                                        ModmailDbContext dbContext,
-                                       TicketTypeSelectionTimeoutJob ticketTypeSelectionTimeoutJob) {
+                                       TicketTypeSelectionTimeoutJob ticketTypeSelectionTimeoutJob,
+                                       TicketAttachmentDownloadService attachmentDownloadService) {
     _sender = sender;
     _bot = bot;
     _dbContext = dbContext;
     _ticketTypeSelectionTimeoutJob = ticketTypeSelectionTimeoutJob;
+    _attachmentDownloadService = attachmentDownloadService;
   }
 
   public async Task Handle(ProcessCreateNewTicketCommand request, CancellationToken cancellationToken) {
@@ -87,22 +92,23 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     _ticketTypeSelectionTimeoutJob.AddMessage(ticketCreatedMessage);
 
 
-    var dmTicketCreatedMessage = await request.PrivateChannel.SendMessageAsync(UserResponses.MessageSent(request.Message));
-
-    ticket.BotTicketCreatedMessageInDmId = dmTicketCreatedMessage.Id;
+    ticket.BotTicketCreatedMessageInDmId = ticketCreatedMessage.Id;
 
     _dbContext.Tickets.Add(ticket);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
+    foreach (var attachment in ticketMessage.Attachments)
+      await _attachmentDownloadService.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
-    _ = Task.Run(async () => {
-      await mailChannel.SendMessageAsync(newTicketMessageBuilder);
-      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message));
+    await mailChannel.SendMessageAsync(newTicketMessageBuilder);
+    var botMessage = await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray()));
+    ticketMessage.BotMessageId = botMessage.Id;
 
-      var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
-      var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
-      await logChannel.SendMessageAsync(newTicketCreatedLog);
-    }, cancellationToken);
+    var newTicketCreatedLog = LogResponses.NewTicketCreated(request.Message, mailChannel, ticket.Id);
+    var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
+    await logChannel.SendMessageAsync(newTicketCreatedLog);
+
+    await request.Message.CreateReactionAsync(DiscordEmoji.FromName(_bot.Client, Const.ProcessedReactionDiscordEmojiString, false));
   }
 }

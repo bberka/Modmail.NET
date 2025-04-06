@@ -23,7 +23,10 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
     _options = options;
   }
 
-  protected override async Task HandleMessageAsync(ulong userId, DiscordTicketMessageDto dto) {
+  protected override async Task Handle(ulong userId, DiscordTicketMessageDto dto) {
+    if (dto.Args.Message.Content.StartsWith(_options.Value.BotPrefix))
+      return;
+
     if (dto.Args.Channel.IsPrivate)
       await HandlePrivateTicketMessageAsync(dto.Args.Message, dto.Args.Channel, dto.Args.Author);
     else
@@ -32,14 +35,10 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 
   [PerformanceLoggerAspect]
   private async Task HandlePrivateTicketMessageAsync(DiscordMessage message, DiscordChannel channel, DiscordUser user) {
-    if (message.Content.StartsWith(_options.Value.BotPrefix))
-      return;
-    var scope = _scopeFactory.CreateScope();
-    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    var bot = scope.ServiceProvider.GetRequiredService<ModmailBot>();
-
+    using var scope = _scopeFactory.CreateScope();
     try {
-      if (await sender.Send(new CheckUserBlacklistStatusQuery(bot.Client.CurrentUser.Id, user.Id))) {
+      var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+      if (await sender.Send(new CheckUserBlacklistStatusQuery(user.Id))) {
         await channel.SendMessageAsync(UserResponses.YouHaveBeenBlacklisted());
         return;
       }
@@ -62,19 +61,13 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
 
   [PerformanceLoggerAspect]
   private async Task HandleGuildTicketMessageAsync(DiscordMessage message, DiscordChannel channel, DiscordUser modUser, DiscordGuild guild) {
-    if (message.Content.StartsWith(_options.Value.BotPrefix))
-      return;
-
-    var scope = _scopeFactory.CreateScope();
-    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-
-
+    using var scope = _scopeFactory.CreateScope();
     try {
       var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
       if (ticketId == Guid.Empty) return;
 
+      var sender = scope.ServiceProvider.GetRequiredService<ISender>();
       await sender.Send(new ProcessModSendMessageCommand(ticketId, modUser, message, channel, guild));
-
       Log.Information("[TicketMessageQueue] Processed guild message from {UserId}: {Message}", modUser.Id, message.Content);
     }
     catch (BotExceptionBase ex) {

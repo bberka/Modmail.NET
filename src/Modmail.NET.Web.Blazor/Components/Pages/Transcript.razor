@@ -105,7 +105,7 @@
     [Parameter]
     public Guid TicketId { get; set; }
 
-    private IEnumerable<TicketMessage> _data;
+    private TicketMessage[] _data;
     private Dictionary<ulong, DiscordUserInfo> _users = new();
     private string _id;
     private ModmailDbContext _context;
@@ -120,35 +120,39 @@
             }
         }
 
+        _context = await DbContextFactory.CreateDbContextAsync();
+        var ticketExists = await _context.Tickets.AnyAsync(x => x.Id == TicketId);
+        if (!ticketExists) {
+            Navi.NavigateTo("/404", true);
+        }
+
 
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
-        _context = await DbContextFactory.CreateDbContextAsync();
-        _context = await DbContextFactory.CreateDbContextAsync();
-        _data = _context.TicketMessages
-                        .Where(x => x.TicketId == TicketId)
-                        .Include(x => x.Attachments)
-                        .OrderBy(x => x.RegisterDateUtc)
-                        .GroupBy(x => new
-                        {
-                            x.RegisterDateUtc.Year,
-                            x.RegisterDateUtc.Month,
-                            x.RegisterDateUtc.Day,
-                            x.RegisterDateUtc.Hour,
-                            x.RegisterDateUtc.Minute,
-                            x.SenderUserId,
-                            x.SentByMod
-                        })
-                        .Select(g => new TicketMessage {
-                            RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
-                            SenderUserId = g.Key.SenderUserId,
-                            MessageContent = string.Join("<br/>", g.Select(x => x.MessageContent)),
-                            Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
-                            TicketId = TicketId,
-                            MessageDiscordId = 0,
-                            SentByMod = g.Key.SentByMod
-                        })
-                        .AsEnumerable();
+        _data = await _context.TicketMessages
+                              .Where(x => x.TicketId == TicketId)
+                              .Include(x => x.Attachments)
+                              .OrderBy(x => x.RegisterDateUtc)
+                              .GroupBy(x => new
+                              {
+                                  x.RegisterDateUtc.Year,
+                                  x.RegisterDateUtc.Month,
+                                  x.RegisterDateUtc.Day,
+                                  x.RegisterDateUtc.Hour,
+                                  x.RegisterDateUtc.Minute,
+                                  x.SenderUserId,
+                                  x.SentByMod
+                              })
+                              .Select(g => new TicketMessage {
+                                  RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
+                                  SenderUserId = g.Key.SenderUserId,
+                                  MessageContent = string.Join("<br/>", g.Select(x => x.MessageContent)),
+                                  Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
+                                  TicketId = TicketId,
+                                  MessageDiscordId = 0,
+                                  SentByMod = g.Key.SentByMod
+                              })
+                              .ToArrayAsync();
 
         //TODO: .Replace("\n", "\n\n") should be used for non code elements, not sure how to implement this 
         //Reason: \n values are normally managed by the bot and insert is fine, however the markdown renderer do not render single \n it must be \n\n to be rendered in next line

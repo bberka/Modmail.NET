@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
@@ -11,9 +12,11 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250406180146_GuildOptionAddedColStatisticsCalculateDays")]
+    partial class GuildOptionAddedColStatisticsCalculateDays
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,9 +140,9 @@ namespace Modmail.NET.Migrations
                         {
                             t.HasCheckConstraint("CK_GuildOptions_Name_MinLength", "LEN([Name]) >= 1");
 
-                            t.HasCheckConstraint("CK_GuildOptions_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN -1 AND 365");
+                            t.HasCheckConstraint("CK_GuildOptions_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN 30 AND 365");
 
-                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN -1 AND 365");
+                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN 1 AND 365");
                         });
                 });
 

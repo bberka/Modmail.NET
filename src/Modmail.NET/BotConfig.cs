@@ -12,7 +12,6 @@ public class BotConfig
   public ulong MainServerId { get; set; }
   public ulong[] OwnerUsers { get; set; }
   public string DbConnectionString { get; set; }
-  public string EncryptionKey { get; set; }
   public string DefaultLanguage { get; set; }
   public bool SensitiveEfCoreDataLog { get; set; }
 

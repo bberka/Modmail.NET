@@ -13,8 +13,7 @@ public class TicketMessage : IHasRegisterDate,
   public required ulong SenderUserId { get; set; }
 
   [MaxLength(DbLength.Message)]
-  [Required]
-  public required string MessageContent { get; set; }
+  public string MessageContent { get; set; }
 
   public required ulong MessageDiscordId { get; set; }
   public required Guid TicketId { get; set; }
@@ -23,6 +22,8 @@ public class TicketMessage : IHasRegisterDate,
 
   //FK
   public List<TicketMessageAttachment> Attachments { get; set; }
+
+  public ulong BotMessageId { get; set; }
   public DateTime RegisterDateUtc { get; set; }
 
   public static TicketMessage MapFrom(Guid ticketId, DiscordMessage message, bool sentByMod) {

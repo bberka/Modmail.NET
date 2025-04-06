@@ -29,7 +29,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
                                                        DontSendFeedbackMessage: true),
                          cancellationToken);
 
-    var activeBlock = await _sender.Send(new CheckUserBlacklistStatusQuery(request.AuthorizedUserId, request.UserId), cancellationToken);
+    var activeBlock = await _sender.Send(new CheckUserBlacklistStatusQuery(request.UserId), cancellationToken);
     if (activeBlock) throw new UserAlreadyBlacklistedException();
 
     var reason = string.IsNullOrEmpty(request.Reason)

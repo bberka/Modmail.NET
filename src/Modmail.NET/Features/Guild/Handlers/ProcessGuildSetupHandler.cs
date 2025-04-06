@@ -33,7 +33,6 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
       IconUrl = request.Guild.IconUrl,
       Name = request.Guild.Name,
       BannerUrl = request.Guild.BannerUrl,
-      TicketTimeoutHours = Const.DefaultTicketTimeoutHours
     };
 
     await _sender.Send(new ClearGuildOptionCommand(request.AuthorizedUserId), cancellationToken);

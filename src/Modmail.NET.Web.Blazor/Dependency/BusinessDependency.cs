@@ -1,8 +1,10 @@
+using EntityFramework.Exceptions.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Triggers;
 using Modmail.NET.Language;
 using Modmail.NET.Queues;
+using Modmail.NET.Services;
 using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Services;
 using Serilog;
@@ -26,6 +28,7 @@ public static class BusinessDependency
     builder.Services.AddSingleton<ModmailBot>();
     builder.Services.AddSingleton<ModmailEventHandlers>();
     builder.Services.AddSingleton<TicketMessageQueue>();
+    builder.Services.AddSingleton<TicketAttachmentDownloadService>();
     builder.Services.AddHostedService<ModmailHostedService>();
 
     builder.Services.AddDbContextFactory<ModmailDbContext>(options => {
@@ -43,6 +46,9 @@ public static class BusinessDependency
         options.EnableSensitiveDataLogging();
 
       options.UseLoggerFactory(new SerilogLoggerFactory(efCoreLogger));
+
+      options.UseExceptionProcessor();
+      options.UseValidationCheckConstraints();
     });
   }
 
