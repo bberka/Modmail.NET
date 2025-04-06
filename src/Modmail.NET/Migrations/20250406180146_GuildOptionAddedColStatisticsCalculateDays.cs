@@ -15,7 +15,7 @@ namespace Modmail.NET.Migrations
                 table: "GuildOptions",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: Const.DefaultStatisticsCalculateDays);
 
             migrationBuilder.AddCheckConstraint(
                 name: "CK_GuildOptions_StatisticsCalculateDays_Range",

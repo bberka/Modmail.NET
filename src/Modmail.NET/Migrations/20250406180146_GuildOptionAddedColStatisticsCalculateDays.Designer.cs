@@ -12,7 +12,7 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    [Migration("20250406174722_GuildOptionAddedColStatisticsCalculateDays")]
+    [Migration("20250406180146_GuildOptionAddedColStatisticsCalculateDays")]
     partial class GuildOptionAddedColStatisticsCalculateDays
     {
         /// <inheritdoc />
@@ -355,7 +355,6 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<string>("MessageContent")
-                        .IsRequired()
                         .HasMaxLength(2147483647)
                         .HasColumnType("nvarchar(max)");
 
@@ -380,10 +379,7 @@ namespace Modmail.NET.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketMessages", t =>
-                        {
-                            t.HasCheckConstraint("CK_TicketMessages_MessageContent_MinLength", "LEN([MessageContent]) >= 1");
-                        });
+                    b.ToTable("TicketMessages");
                 });
 
             modelBuilder.Entity("Modmail.NET.Entities.TicketMessageAttachment", b =>

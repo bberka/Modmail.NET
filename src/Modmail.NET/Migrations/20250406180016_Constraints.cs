@@ -10,6 +10,16 @@ namespace Modmail.NET.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "MessageContent",
+                table: "TicketMessages",
+                type: "nvarchar(max)",
+                maxLength: 2147483647,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldMaxLength: 2147483647);
+
             migrationBuilder.AddCheckConstraint(
                 name: "CK_TicketTypes_Description_MinLength",
                 table: "TicketTypes",
@@ -29,11 +39,6 @@ namespace Modmail.NET.Migrations
                 name: "CK_TicketNotes_Content_MinLength",
                 table: "TicketNotes",
                 sql: "LEN([Content]) >= 1");
-
-            migrationBuilder.AddCheckConstraint(
-                name: "CK_TicketMessages_MessageContent_MinLength",
-                table: "TicketMessages",
-                sql: "LEN([MessageContent]) >= 1");
 
             migrationBuilder.AddCheckConstraint(
                 name: "CK_TicketMessageAttachments_FileName_MinLength",
@@ -96,10 +101,6 @@ namespace Modmail.NET.Migrations
                 table: "TicketNotes");
 
             migrationBuilder.DropCheckConstraint(
-                name: "CK_TicketMessages_MessageContent_MinLength",
-                table: "TicketMessages");
-
-            migrationBuilder.DropCheckConstraint(
                 name: "CK_TicketMessageAttachments_FileName_MinLength",
                 table: "TicketMessageAttachments");
 
@@ -130,6 +131,18 @@ namespace Modmail.NET.Migrations
             migrationBuilder.DropCheckConstraint(
                 name: "CK_DiscordUserInfos_Username_MinLength",
                 table: "DiscordUserInfos");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "MessageContent",
+                table: "TicketMessages",
+                type: "nvarchar(max)",
+                maxLength: 2147483647,
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldMaxLength: 2147483647,
+                oldNullable: true);
         }
     }
 }
