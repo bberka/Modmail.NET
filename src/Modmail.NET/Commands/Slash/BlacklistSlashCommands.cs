@@ -105,7 +105,7 @@ public class BlacklistSlashCommands
     const string logMessage = $"[{nameof(BlacklistSlashCommands)}]{nameof(Status)}({{ContextUserId}},{{UserId}})";
     await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
     try {
-      var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(ctx.User.Id, user.Id));
+      var isBlocked = await _sender.Send(new CheckUserBlacklistStatusQuery(user.Id));
       await ctx.EditResponseAsync(Webhooks.Info(LangKeys.UserBlacklistStatus.GetTranslation(),
                                                 isBlocked
                                                   ? LangKeys.UserIsBlacklisted.GetTranslation()
