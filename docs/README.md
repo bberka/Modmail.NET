@@ -1,6 +1,6 @@
 # Modmail.NET
 
-**An Open-Source & Feature-Rich Modmail Discord Bot for .NET 9**
+**An Open-Source & Feature-Rich Modmail Discord Bot made with .NET 9**
 
 Modmail.NET provides a comprehensive solution for managing community communications within Discord servers. It's designed for easy setup and self-hosting, giving you complete control over your data and configuration.
 
