@@ -15,5 +15,6 @@ public static class Const
   public const int TicketTimeoutMaxAllowedHours = 24 * 7 * 4;
   public const string ThemeCookieName = "Modmail.NET.Theme";
   public const string AttachmentDownloadDirectory = "AttachmentDownloads";
+  public const int HttpClientDownloadTimeoutSeconds = 90;
   public static readonly DiscordActivity DiscordActivity = new(LangProvider.This.GetTranslation(LangKeys.ModerationConcerns), DiscordActivityType.ListeningTo);
 }
