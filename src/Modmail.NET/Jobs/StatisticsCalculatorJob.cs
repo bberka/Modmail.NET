@@ -52,7 +52,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetAvgResponseTimeSeconds(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.TicketMessages
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .Select(x => new {
                               x.TicketId,
                               x.RegisterDateUtc,
@@ -89,7 +89,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetAvgTicketsClosedPerDay(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.Tickets
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .Where(x => x.ClosedDateUtc.HasValue)
                             .GroupBy(x => x.ClosedDateUtc.Value.Date)
                             .Select(group => group.Count())
@@ -105,7 +105,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetAvgTicketsOpenedPerDay(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.Tickets
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .GroupBy(x => x.RegisterDateUtc.Date)
                             .Select(group => group.Count())
                             .DefaultIfEmpty()
@@ -120,7 +120,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetAvgTicketClosedSeconds(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.Tickets
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .Where(x => x.ClosedDateUtc.HasValue)
                             .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc.Value))
                             .DefaultIfEmpty()
@@ -135,7 +135,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetFastestClosedTicketSeconds(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.Tickets
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .Where(x => x.ClosedDateUtc.HasValue)
                             .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc.Value))
                             .DefaultIfEmpty()
@@ -150,7 +150,7 @@ public class StatisticsCalculatorJob : HangfireRecurringJobBase
   private static async Task<double?> GetSlowestClosedTicketSeconds(ModmailDbContext dbContext, DateTime statDate) {
     try {
       return await dbContext.Tickets
-                            .Where(x => x.RegisterDateUtc < statDate)
+                            .Where(x => x.RegisterDateUtc > statDate)
                             .Where(x => x.ClosedDateUtc.HasValue)
                             .Select(x => EF.Functions.DateDiffSecond(x.RegisterDateUtc, x.ClosedDateUtc.Value))
                             .DefaultIfEmpty()
