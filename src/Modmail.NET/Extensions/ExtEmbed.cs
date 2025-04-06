@@ -7,6 +7,14 @@ namespace Modmail.NET.Extensions;
 
 public static class ExtEmbed
 {
+  public static DiscordEmbedBuilder AddAttachment(this DiscordEmbedBuilder builder, TicketMessageAttachment[] attachments) {
+    if (attachments == null || attachments.Length == 0) return builder;
+    foreach (var t in attachments)
+      builder.AddField($"{LangProvider.This.GetTranslation(LangKeys.Attachment)}", $"[{t.FileName}]({UtilAttachment.GetUri(t.Id)})");
+
+    return builder;
+  }
+
   public static DiscordEmbedBuilder AddAttachment(this DiscordEmbedBuilder builder, IReadOnlyList<DiscordAttachment> discordAttachments) {
     if (discordAttachments == null || discordAttachments.Count == 0) return builder;
     for (var i = 0; i < discordAttachments.Count; i++)

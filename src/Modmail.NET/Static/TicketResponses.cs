@@ -89,7 +89,7 @@ public static class TicketResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder MessageSent(DiscordMessage message, bool anonymous) {
+  public static DiscordEmbedBuilder MessageSent(DiscordMessage message, Guid[] attachmentIds, bool anonymous) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()

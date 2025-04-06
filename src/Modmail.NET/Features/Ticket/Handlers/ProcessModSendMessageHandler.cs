@@ -1,3 +1,4 @@
+using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Database;
 using Modmail.NET.Entities;
@@ -41,19 +42,19 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
 
     var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
 
+
     foreach (var attachment in ticketMessage.Attachments)
       TicketAttachmentDownloadQueueHandler.Enqueue(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
+
 
     _ = Task.Run(async () => {
       var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
       var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-      var embed = UserResponses.MessageReceived(request.Message, anonymous);
+      var embed = UserResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), anonymous);
       await privateChannel.SendMessageAsync(embed);
 
-      var ticketChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      var embed2 = TicketResponses.MessageSent(request.Message, anonymous);
-      await ticketChannel.SendMessageAsync(embed2);
-      await request.Message.DeleteAsync();
+      var bot = ServiceLocator.GetModmailBot();
+      await request.Message.CreateReactionAsync(DiscordEmoji.FromName(bot.Client, Const.ProcessedReactionDiscordEmojiString, false));
     }, cancellationToken);
   }
 }

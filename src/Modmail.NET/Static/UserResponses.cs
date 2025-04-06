@@ -150,13 +150,13 @@ public static class UserResponses
     return embed;
   }
 
-  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message, bool anonymous) {
+  public static DiscordEmbedBuilder MessageReceived(DiscordMessage message, TicketMessageAttachment[] attachments, bool anonymous) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
                 .WithColor(Colors.MessageReceivedColor)
-                .AddAttachment(message.Attachments);
+                .AddAttachment(attachments);
     if (!anonymous) embed.WithUserAsAuthor(message.Author);
 
     return embed;
