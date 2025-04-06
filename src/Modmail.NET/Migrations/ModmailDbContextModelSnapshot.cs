@@ -329,6 +329,9 @@ namespace Modmail.NET.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("BotMessageId")
+                        .HasColumnType("decimal(20,0)");
+
                     b.Property<string>("MessageContent")
                         .IsRequired()
                         .HasMaxLength(2147483647)
