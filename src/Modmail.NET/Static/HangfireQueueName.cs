@@ -8,6 +8,5 @@ namespace Modmail.NET.Static;
 public sealed class HangfireQueueName : SmartEnum<HangfireQueueName>
 {
   public static readonly HangfireQueueName Default = new("default", 0); //do not change this
-  public static readonly HangfireQueueName AttachmentDownload = new("message-attachment-download-queue", 1);
   private HangfireQueueName(string name, int value) : base(name, value) { }
 }
