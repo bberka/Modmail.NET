@@ -72,14 +72,17 @@
 
     <ItemGroup>
         <Compile Remove="Logs\**"/>
+        <Compile Remove="AttachmentDownloads\**"/>
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Remove="Logs\**"/>
+        <EmbeddedResource Remove="AttachmentDownloads\**"/>
     </ItemGroup>
 
     <ItemGroup>
         <Content Remove="Logs\**"/>
+        <Content Remove="AttachmentDownloads\**"/>
     </ItemGroup>
 
     <ItemGroup>
