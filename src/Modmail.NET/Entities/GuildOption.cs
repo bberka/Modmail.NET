@@ -31,6 +31,7 @@ public class GuildOption : IHasRegisterDate,
   public bool AlwaysAnonymous { get; set; }
   public bool PublicTranscripts { get; set; }
   public bool SendTranscriptLinkToUser { get; set; }
+  public int TicketDataDeleteWaitDays { get; set; } = -1;
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
   public TeamPermissionLevel ManageTeamsMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
   public TeamPermissionLevel ManageBlacklistMinAccessLevel { get; set; } = TeamPermissionLevel.Admin;
