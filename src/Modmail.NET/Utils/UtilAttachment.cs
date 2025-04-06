@@ -1,3 +1,5 @@
+using Modmail.NET.Entities;
+
 namespace Modmail.NET.Utils;
 
 public static class UtilAttachment
@@ -8,5 +10,10 @@ public static class UtilAttachment
 
     var uri = new Uri(botConfig.Domain, UriKind.Absolute);
     return uri + "attachments/" + id;
+  }
+
+  public static string GetLocalPath(TicketMessageAttachment attachment) {
+    var uri = new Uri(Const.AttachmentDownloadDirectory, UriKind.RelativeOrAbsolute);
+    return uri + "/" + attachment.Id + Path.GetExtension(attachment.FileName);
   }
 }
