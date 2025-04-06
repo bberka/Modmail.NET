@@ -48,5 +48,6 @@ public static class AspNetDependency
     builder.Services.AddMemoryCache();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddControllers();
+    builder.Services.AddHttpClient();
   }
 }
