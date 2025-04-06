@@ -12,7 +12,7 @@ namespace Modmail.NET.Static;
 /// </summary>
 public static class TicketResponses
 {
-  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, List<PermissionInfo> permissionInfos) {
+  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, PermissionInfo[] permissionInfos) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.NewTicket.GetTranslation())
                 .WithCustomTimestamp()
@@ -103,7 +103,7 @@ public static class TicketResponses
   }
 
 
-  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, List<PermissionInfo> permissions = null) {
+  public static DiscordMessageBuilder MessageReceived(DiscordMessage message, PermissionInfo[] permissions = null) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()

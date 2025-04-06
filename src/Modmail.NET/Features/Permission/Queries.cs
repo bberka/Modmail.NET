@@ -5,9 +5,9 @@ namespace Modmail.NET.Features.Permission;
 
 public sealed record GetPermissionLevelQuery(ulong UserId, bool IncludeRole = false) : IRequest<TeamPermissionLevel?>;
 
-public sealed record GetPermissionInfoQuery : IRequest<List<PermissionInfo>>;
+public sealed record GetPermissionInfoQuery : IRequest<PermissionInfo[]>;
 
-public sealed record GetPermissionInfoOrHigherQuery(TeamPermissionLevel LevelOrHigher) : IRequest<List<PermissionInfo>>;
+public sealed record GetPermissionInfoOrHigherQuery(TeamPermissionLevel LevelOrHigher) : IRequest<PermissionInfo[]>;
 
 public sealed record CheckUserInAnyTeamQuery(ulong MemberId) : IRequest<bool>;
 

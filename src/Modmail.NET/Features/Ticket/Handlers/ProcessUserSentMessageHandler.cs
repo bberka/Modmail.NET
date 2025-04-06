@@ -38,10 +38,9 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
 
     _ = Task.Run(async () => {
       var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (mailChannel is not null) {
-        var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
-        await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, permissions));
-      }
+      var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
+      await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, permissions));
+
 
       var privateChannel = request.PrivateChannel ?? await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
       if (privateChannel is null) throw new NotFoundWithException(LangKeys.Channel, ticket.PrivateMessageChannelId);

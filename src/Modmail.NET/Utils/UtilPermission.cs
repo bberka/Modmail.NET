@@ -5,7 +5,7 @@ namespace Modmail.NET.Utils;
 
 public static class UtilPermission
 {
-  public static ( List<DiscordMember> members, List<DiscordRole> roles) ParsePermissionInfo(List<PermissionInfo> permissions,
+  public static ( List<DiscordMember> members, List<DiscordRole> roles) ParsePermissionInfo(PermissionInfo[] permissions,
                                                                                             IReadOnlyCollection<DiscordMember> members,
                                                                                             IReadOnlyDictionary<ulong, DiscordRole> roles) {
     var modRoleListForOverwrites = new List<DiscordRole>();
