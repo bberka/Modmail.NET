@@ -32,10 +32,10 @@ public class GuildOption : IHasRegisterDate,
   public bool PublicTranscripts { get; set; }
   public bool SendTranscriptLinkToUser { get; set; }
 
-  [Range(Const.TicketDataDeleteWaitDaysMin, Const.TicketDataDeleteWaitDaysMax)]
+  [Range(-1, Const.TicketDataDeleteWaitDaysMax)]
   public int TicketDataDeleteWaitDays { get; set; } = -1;
 
-  [Range(Const.StatisticsCalculateDaysMin, Const.StatisticsCalculateDaysMax)]
+  [Range(-1, Const.StatisticsCalculateDaysMax)]
   public int StatisticsCalculateDays { get; set; } = Const.DefaultStatisticsCalculateDays;
 
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
