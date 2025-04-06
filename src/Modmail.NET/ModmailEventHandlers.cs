@@ -73,7 +73,7 @@ public class ModmailEventHandlers
     if (args.Message.IsTTS) return;
 
     var ticketMessageQueue = scope.ServiceProvider.GetRequiredService<TicketMessageQueue>();
-    await ticketMessageQueue.EnqueueMessage(args.Author.Id, new DiscordTicketMessageDto(client, args));
+    await ticketMessageQueue.Enqueue(args.Author.Id, new DiscordTicketMessageDto(client, args));
   }
 
   public static async Task OnGuildBanAdded(DiscordClient client, GuildBanAddedEventArgs args) {

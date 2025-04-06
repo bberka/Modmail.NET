@@ -15,7 +15,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
     _idleTimeout = idleTimeout;
   }
 
-  public async Task EnqueueMessage(TKey key, TValue message) {
+  public async Task Enqueue(TKey key, TValue message) {
     _lastActiveTime[key] = UtilDate.GetNow();
     if (!_queues.TryGetValue(key, out var channel)) {
       // Create a new channel for the key and start processing
@@ -51,7 +51,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
   private async Task ProcessQueue(TKey key, Channel<TValue> channel) {
     await foreach (var message in channel.Reader.ReadAllAsync()) {
       Debug.WriteLine("handling message");
-      await HandleMessageAsync(key, message);
+      await Handle(key, message);
     }
 
     Debug.WriteLine("removing queue");
@@ -59,7 +59,7 @@ public abstract class BaseQueue<TKey, TValue> where TKey : notnull
     _lastActiveTime.TryRemove(key, out _);
   }
 
-  protected abstract Task HandleMessageAsync(TKey key, TValue message);
+  protected abstract Task Handle(TKey key, TValue message);
 
   public int GetChannelCount() {
     return _queues.Count;

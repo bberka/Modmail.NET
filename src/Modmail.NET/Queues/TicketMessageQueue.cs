@@ -23,7 +23,7 @@ public class TicketMessageQueue : BaseQueue<ulong, DiscordTicketMessageDto>
     _options = options;
   }
 
-  protected override async Task HandleMessageAsync(ulong userId, DiscordTicketMessageDto dto) {
+  protected override async Task Handle(ulong userId, DiscordTicketMessageDto dto) {
     if (dto.Args.Channel.IsPrivate)
       await HandlePrivateTicketMessageAsync(dto.Args.Message, dto.Args.Channel, dto.Args.Author);
     else
