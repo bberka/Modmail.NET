@@ -132,6 +132,18 @@ public static class TicketBotMessages
 
       return msg;
     }
+
+    public static DiscordEmbedBuilder MessageEdited(DiscordMessage message, bool anonymous) {
+      var embed = new DiscordEmbedBuilder()
+                  .WithDescription(message.Content)
+                  .WithGuildInfoFooter()
+                  .WithCustomTimestamp()
+                  .WithColor(ModmailColors.MessageReceivedColor);
+
+      if (!anonymous) embed.WithUserAsAuthor(message.Author);
+
+      return embed;
+    }
   }
 
   public static class Ticket
@@ -227,9 +239,7 @@ public static class TicketBotMessages
                   .WithDescription(message.Content)
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.MessageReceivedColor)
-                  .WithFooter(LangKeys.Edited.GetTranslation())
                   .WithUserAsAuthor(message.Author);
-
       return embed;
     }
   }

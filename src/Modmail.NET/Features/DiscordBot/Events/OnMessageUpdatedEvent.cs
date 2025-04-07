@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Guild.Queries;
 using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.User.Commands;
 using Serilog;
@@ -111,10 +112,12 @@ public static class OnMessageUpdatedEvent
 
     await UpdateMirroredMessage(
                                 client,
+                                scope,
                                 ticket.ModMessageChannelId,
                                 messageEntity.BotMessageId,
                                 args.MessageBefore,
-                                args.Message
+                                args.Message,
+                                ticket.Anonymous
                                );
   }
 
@@ -174,34 +177,34 @@ public static class OnMessageUpdatedEvent
 
     await UpdateMirroredMessage(
                                 client,
+                                scope,
                                 ticket.PrivateMessageChannelId,
                                 messageEntity.BotMessageId,
                                 args.MessageBefore,
-                                args.Message
+                                args.Message,
+                                ticket.Anonymous
                                );
   }
 
   private static async Task UpdateMirroredMessage(
     DiscordClient client,
-    ulong? channelId,
-    ulong? messageId,
+    IServiceScope scope,
+    ulong channelId,
+    ulong messageId,
     DiscordMessage oldMessage,
-    DiscordMessage updatedMessage
+    DiscordMessage updatedMessage,
+    bool anonymous
   ) {
-    if (!channelId.HasValue || !messageId.HasValue) {
-      Log.Warning(
-                  "[{Source}] Cannot update mirrored message. Invalid ChannelId or MessageId. ChannelId: {ChannelId}, MessageId: {MessageId}",
-                  nameof(OnMessageUpdatedEvent),
-                  channelId,
-                  messageId
-                 );
-      return;
-    }
-
     try {
-      var channel = await client.GetChannelAsync(channelId.Value);
-      var message = await channel.GetMessageAsync(messageId.Value);
-      var embed = TicketBotMessages.Ticket.MessageEdited(updatedMessage);
+      var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+      var option = await sender.Send(new GetGuildOptionQuery(false));
+
+      var channel = await client.GetChannelAsync(channelId);
+      var message = await channel.GetMessageAsync(messageId);
+      var embed =
+        updatedMessage.Channel!.IsPrivate
+          ? TicketBotMessages.Ticket.MessageEdited(updatedMessage)
+          : TicketBotMessages.User.MessageEdited(updatedMessage, option.AlwaysAnonymous || anonymous);
 
       //TODO: Add support for removing attachment files from message on message update event
       //Currently the library does not support removing single attachments, either we have to remove all of them 
