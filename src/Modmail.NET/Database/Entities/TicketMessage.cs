@@ -4,6 +4,7 @@ using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database.Abstract;
+using Modmail.NET.Features.Ticket.Static;
 
 namespace Modmail.NET.Database.Entities;
 
@@ -21,8 +22,11 @@ public class TicketMessage : IHasRegisterDate,
 
   public required bool SentByMod { get; set; }
 
+  public TicketMessageChangeStatus ChangeStatus { get; set; } = TicketMessageChangeStatus.None;
+
   //FK
-  public List<TicketMessageAttachment> Attachments { get; set; }
+  public virtual List<TicketMessageAttachment> Attachments { get; set; }
+  public virtual List<TicketMessageHistory> History { get; set; }
 
   public ulong BotMessageId { get; set; }
   public DateTime RegisterDateUtc { get; set; }
