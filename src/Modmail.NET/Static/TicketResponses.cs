@@ -1,8 +1,6 @@
-﻿using System.Text;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using Modmail.NET.Entities;
 using Modmail.NET.Extensions;
-using Modmail.NET.Models;
 using Modmail.NET.Utils;
 
 namespace Modmail.NET.Static;
@@ -12,7 +10,7 @@ namespace Modmail.NET.Static;
 /// </summary>
 public static class TicketResponses
 {
-  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId, PermissionInfo[] permissionInfos) {
+  public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId) {
     var embed = new DiscordEmbedBuilder()
                 .WithTitle(LangKeys.NewTicket.GetTranslation())
                 .WithCustomTimestamp()
@@ -29,11 +27,6 @@ public static class TicketResponses
                                                                    LangKeys.CloseTicket.GetTranslation(),
                                                                    emoji: new DiscordComponentEmoji("🔒"))
                                        );
-
-    var sb = new StringBuilder();
-    foreach (var permissionInfo in permissionInfos.Where(permissionInfo => permissionInfo.PingOnNewTicket)) sb.AppendLine(permissionInfo.GetMention());
-
-    messageBuilder.WithContent(sb.ToString());
     return messageBuilder;
   }
 
@@ -90,8 +83,7 @@ public static class TicketResponses
   }
 
   public static DiscordMessageBuilder MessageReceived(DiscordMessage message,
-                                                      TicketMessageAttachment[] attachments,
-                                                      PermissionInfo[] permissions = null) {
+                                                      TicketMessageAttachment[] attachments) {
     var embed = new DiscordEmbedBuilder()
                 .WithDescription(message.Content)
                 .WithCustomTimestamp()
@@ -101,13 +93,17 @@ public static class TicketResponses
     var msgBuilder = new DiscordMessageBuilder()
                      .AddEmbed(embed)
                      .AddAttachments(attachments);
-    if (permissions is not null && permissions.Length > 0) {
-      var sb = new StringBuilder();
-      foreach (var permissionInfo in permissions.Where(x => x.PingOnNewMessage)) sb.AppendLine(permissionInfo.GetMention());
-
-      msgBuilder.WithContent(sb.ToString());
-    }
-
     return msgBuilder;
+  }
+
+  public static DiscordEmbedBuilder MessageEdited(DiscordMessage message) {
+    var embed = new DiscordEmbedBuilder()
+                .WithDescription(message.Content)
+                .WithCustomTimestamp()
+                .WithColor(Colors.MessageReceivedColor)
+                .WithFooter(LangKeys.Edited.GetTranslation())
+                .WithUserAsAuthor(message.Author);
+
+    return embed;
   }
 }

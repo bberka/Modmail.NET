@@ -55,8 +55,9 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     if (member is null) return;
 
 
-    var newTicketMessageBuilder = TicketResponses.NewTicket(member, ticketId, permissions);
-
+    var pingOnNewTicket = permissions.Where(x => x.PingOnNewTicket).ToArray();
+    var msg = TicketResponses.NewTicket(member, ticketId);
+    msg.WithContent(UtilMention.GetMentionsMessageString(pingOnNewTicket));
 
     var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, false);
 
@@ -101,7 +102,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     foreach (var attachment in ticketMessage.Attachments)
       await _attachmentDownloadService.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
-    await mailChannel.SendMessageAsync(newTicketMessageBuilder);
+    await mailChannel.SendMessageAsync(msg);
     var botMessage = await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray()));
     ticketMessage.BotMessageId = botMessage.Id;
 

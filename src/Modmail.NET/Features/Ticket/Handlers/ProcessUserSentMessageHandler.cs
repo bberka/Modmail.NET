@@ -42,7 +42,11 @@ public class ProcessUserSentMessageHandler : IRequestHandler<ProcessUserSentMess
 
     var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
     var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
-    var botMessage = await mailChannel.SendMessageAsync(TicketResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), permissions));
+    var pingOnNewTicket = permissions.Where(x => x.PingOnNewMessage).ToArray();
+
+    var msg = TicketResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray());
+    msg.WithContent(UtilMention.GetMentionsMessageString(pingOnNewTicket));
+    var botMessage = await mailChannel.SendMessageAsync(msg);
 
     ticketMessage.BotMessageId = botMessage.Id;
     _dbContext.Add(ticketMessage);
