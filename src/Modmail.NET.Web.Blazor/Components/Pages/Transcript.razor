@@ -3,6 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Guild.Queries
+@using Modmail.NET.Features.Ticket.Static
 @using Modmail.NET.Features.User.Queries
 @using Modmail.NET.Web.Blazor.Components.Layout
 @using Path = Path
@@ -45,6 +46,18 @@
                         </RadzenText>
                         <RadzenText TextStyle="TextStyle.Caption" Style="opacity: 0.7;">
                             @message.RegisterDateUtc.ToString("MM/dd/yyyy HH:mm")
+                            <span class=@(message.ChangeStatus switch {
+                                TicketMessageChangeStatus.Updated => "rz-color-secondary",
+                                TicketMessageChangeStatus.Deleted => "rz-color-danger",
+                                _ => ""
+                            })>
+                                @(message.ChangeStatus switch {
+                                    TicketMessageChangeStatus.Updated => " - Edited",
+                                    TicketMessageChangeStatus.Deleted => " - Deleted",
+                                    _ => ""
+                                })
+                            </span>
+
                         </RadzenText>
                     </RadzenStack>
                 </RadzenStack>
@@ -128,6 +141,7 @@
         }
 
 
+        //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
         _data = await _context.TicketMessages
@@ -142,16 +156,18 @@
                                   x.RegisterDateUtc.Hour,
                                   x.RegisterDateUtc.Minute,
                                   x.SenderUserId,
-                                  x.SentByMod
+                                  x.SentByMod,
+                                  x.ChangeStatus
                               })
                               .Select(g => new TicketMessage {
                                   RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
                                   SenderUserId = g.Key.SenderUserId,
-                                  MessageContent = string.Join("<br/>", g.Select(x => x.MessageContent)),
+                                  MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc).Select(x => x.MessageContent)),
                                   Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
                                   TicketId = TicketId,
                                   MessageDiscordId = 0,
-                                  SentByMod = g.Key.SentByMod
+                                  SentByMod = g.Key.SentByMod,
+                                  ChangeStatus = g.Key.ChangeStatus
                               })
                               .ToArrayAsync();
 
