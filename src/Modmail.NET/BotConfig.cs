@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Modmail.NET.Common.Static;
 
 namespace Modmail.NET;
 

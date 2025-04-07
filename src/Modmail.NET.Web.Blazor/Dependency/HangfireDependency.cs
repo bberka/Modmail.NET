@@ -1,6 +1,6 @@
 using Hangfire;
 using Modmail.NET.Abstract;
-using Modmail.NET.Static;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Web.Blazor.Providers;
 using Serilog;
 

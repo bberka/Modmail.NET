@@ -1,12 +1,14 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Abstract
-@using Modmail.NET.Features.Ticket
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Features.Ticket.Commands
+@using Modmail.NET.Features.Ticket.Models
 @using Modmail.NET.Web.Blazor.Components.Shared.Tickets
 @using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
 @using Serilog
+@using TicketDtoMapper = Modmail.NET.Features.Ticket.Mappers.TicketDtoMapper
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject TooltipService TooltipService
 @inject DialogService DialogService
@@ -34,14 +36,13 @@
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    var query = dbContext.Tickets
-                         .AsNoTracking()
-                         .Include(x => x.OpenerUser)
-                         .Include(x => x.CloserUser)
-                         .Include(x => x.TicketType)
-                         .OrderByDescending(x => x.RegisterDateUtc)
-                         .ProjectToDto()
-                         .AsQueryable();
+    var query = TicketDtoMapper.ProjectToDto(dbContext.Tickets
+                                                      .AsNoTracking()
+                                                      .Include(x => x.OpenerUser)
+                                                      .Include(x => x.CloserUser)
+                                                      .Include(x => x.TicketType)
+                                                      .OrderByDescending(x => x.RegisterDateUtc))
+                               .AsQueryable();
 
     switch (_filterTicketType) {
       case TicketFilterType.All:
@@ -116,7 +117,7 @@
         NotificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
         await ReloadDataAsync();
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         ex.NotifyException(NotificationService);
         Log.Warning(ex, logMessage, _forceCloseReason);
       }

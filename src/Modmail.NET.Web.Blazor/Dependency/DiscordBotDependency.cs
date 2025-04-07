@@ -3,9 +3,8 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
-using Modmail.NET.Commands;
-using Modmail.NET.Commands.Slash;
-using Modmail.NET.Events;
+using Modmail.NET.Features.DiscordBot.Events;
+using Modmail.NET.Features.DiscordCommands.Handlers;
 using Serilog;
 
 namespace Modmail.NET.Web.Blazor.Dependency;

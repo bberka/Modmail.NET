@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Modmail.NET.Abstract;
+using Modmail.NET.Common.Exceptions;
 using Serilog;
 
 namespace Modmail.NET.Pipeline;
@@ -13,7 +13,7 @@ public class LoggerPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
       Log.Verbose("[MEDIATR] [{ReqName}] RUN FINISHED", reqName);
       return response;
     }
-    catch (BotExceptionBase ex) {
+    catch (ModmailBotException ex) {
       Log.Verbose(ex, "[MEDIATR] [{ReqName}] ERROR", reqName);
       throw;
     }

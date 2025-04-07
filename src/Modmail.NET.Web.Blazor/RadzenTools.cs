@@ -1,5 +1,5 @@
 ﻿using System.Linq.Dynamic.Core;
-using Modmail.NET.Abstract;
+using Modmail.NET.Common.Exceptions;
 using Radzen;
 
 namespace Modmail.NET.Web.Blazor;
@@ -34,7 +34,7 @@ public static class RadzenTools
   }
 
   public static void NotifyException<T>(this T exception, NotificationService service, bool showExceptionMessage = false) where T : Exception {
-    if (exception is BotExceptionBase botException) {
+    if (exception is ModmailBotException botException) {
       service.Notify(NotificationSeverity.Warning, "Failed", botException.TitleMessage);
       return;
     }

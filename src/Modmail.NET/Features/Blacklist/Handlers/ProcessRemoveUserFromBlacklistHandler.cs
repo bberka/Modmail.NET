@@ -1,9 +1,13 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Entities;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Bot;
-using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Database.Entities;
+using Modmail.NET.Features.Blacklist.Commands;
+using Modmail.NET.Features.Blacklist.Queries;
+using Modmail.NET.Features.Blacklist.Static;
+using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.User.Queries;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
@@ -29,11 +33,11 @@ public class ProcessRemoveUserFromBlacklistHandler : IRequestHandler<ProcessRemo
       var member = await _sender.Send(new GetDiscordMemberQuery(request.UserId), cancellationToken);
       var memberInfo = DiscordUserInfo.FromDiscordMember(member);
       if (member is not null) {
-        var dmEmbed = UserResponses.YouHaveBeenRemovedFromBlacklist(modUser);
+        var dmEmbed = BlacklistBotMessages.YouHaveBeenRemovedFromBlacklist(modUser);
         await member.SendMessageAsync(dmEmbed);
       }
 
-      var embedLog = LogResponses.BlacklistRemoved(modUser, memberInfo);
+      var embedLog = LogBotMessages.BlacklistRemoved(modUser, memberInfo);
       var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(embedLog);
     }, cancellationToken);

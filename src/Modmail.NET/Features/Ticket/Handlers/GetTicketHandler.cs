@@ -1,10 +1,12 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
-public class GetTicketHandler : IRequestHandler<GetTicketQuery, Entities.Ticket>
+public class GetTicketHandler : IRequestHandler<GetTicketQuery, Database.Entities.Ticket>
 {
   private readonly ModmailDbContext _dbContext;
 
@@ -12,7 +14,7 @@ public class GetTicketHandler : IRequestHandler<GetTicketQuery, Entities.Ticket>
     _dbContext = dbContext;
   }
 
-  public async Task<Entities.Ticket> Handle(GetTicketQuery request, CancellationToken cancellationToken) {
+  public async Task<Database.Entities.Ticket> Handle(GetTicketQuery request, CancellationToken cancellationToken) {
     var ticket = await _dbContext.Tickets.FindAsync([request.Id], cancellationToken);
     if (ticket is null) {
       if (!request.AllowNull) throw new NotFoundException(LangKeys.Ticket);

@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
-using Modmail.NET.Models;
+using Modmail.NET.Features.Permission.Models;
+using Modmail.NET.Features.Permission.Queries;
 
 namespace Modmail.NET.Features.Permission.Handler;
 

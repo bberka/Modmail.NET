@@ -1,8 +1,12 @@
 ﻿@page "/options"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@using Modmail.NET.Abstract
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Metric.Static
+@using Modmail.NET.Features.Permission.Static
+@using Modmail.NET.Features.Ticket.Static
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject NavigationManager NavigationManager
@@ -46,12 +50,12 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
-      if (_guildOption.TicketTimeoutHours is > Const.TicketTimeoutMaxAllowedHours or < Const.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
+      if (_guildOption.TicketTimeoutHours is > TicketConstants.TicketTimeoutMaxAllowedHours or < TicketConstants.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
         NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Ticket Timeout Hours is not in valid range.");
         return;
       }
 
-      if (_guildOption.TicketDataDeleteWaitDays is > Const.TicketDataDeleteWaitDaysMax or < Const.TicketDataDeleteWaitDaysMin && _enableTicketAutoDelete) {
+      if (_guildOption.TicketDataDeleteWaitDays is > TicketConstants.TicketDataDeleteWaitDaysMax or < TicketConstants.TicketDataDeleteWaitDaysMin && _enableTicketAutoDelete) {
         NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Auto Delete Ticket Data Wait Days is not in valid range.");
         return;
       }
@@ -78,7 +82,7 @@
 
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
-    catch (BotExceptionBase ex) {
+    catch (ModmailBotException ex) {
       ex.NotifyException(NotificationService);
       Log.Warning(ex, logMessage);
     }
@@ -166,12 +170,14 @@
                 <RadzenRow class="rz-my-4">
                   <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
                     <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"
-                                   Min="Const.TicketTimeoutMinAllowedHours" Max="Const.TicketTimeoutMaxAllowedHours"/>
+                                   Min="TicketConstants.TicketTimeoutMinAllowedHours"
+                                   Max="TicketConstants.TicketTimeoutMaxAllowedHours"/>
                   </RadzenFormField>
                 </RadzenRow>
                 <RadzenRow>
                   <small class="text-secondary">
-                    Set the number of hours (@Const.TicketTimeoutMinAllowedHours~@Const.TicketTimeoutMaxAllowedHours) a
+                    Set the number of hours
+                    (@TicketConstants.TicketTimeoutMinAllowedHours~@TicketConstants.TicketTimeoutMaxAllowedHours) a
                     ticket can be inactive before it's automatically closed.
                   </small>
                 </RadzenRow>
@@ -188,12 +194,14 @@
                 <RadzenRow class="rz-my-4">
                   <RadzenFormField class="w-100" Text="Auto Delete Ticket Data Wait Days" Variant="Variant.Outlined">
                     <RadzenNumeric @bind-Value="@_guildOption.TicketDataDeleteWaitDays"
-                                   Min="Const.TicketDataDeleteWaitDaysMin" Max="Const.TicketDataDeleteWaitDaysMax"/>
+                                   Min="TicketConstants.TicketDataDeleteWaitDaysMin"
+                                   Max="TicketConstants.TicketDataDeleteWaitDaysMax"/>
                   </RadzenFormField>
                 </RadzenRow>
                 <RadzenRow>
                   <small class="text-secondary">
-                    Set the number of days (@Const.TicketDataDeleteWaitDaysMin~@Const.TicketDataDeleteWaitDaysMax) after
+                    Set the number of days
+                    (@TicketConstants.TicketDataDeleteWaitDaysMin~@TicketConstants.TicketDataDeleteWaitDaysMax) after
                     which ticket data is deleted.
                   </small>
                 </RadzenRow>
@@ -202,13 +210,14 @@
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Statistics Calculate Days" Variant="Variant.Outlined">
                   <RadzenNumeric @bind-Value="@_guildOption.StatisticsCalculateDays"
-                                 Min="Const.StatisticsCalculateDaysMin" Max="Const.StatisticsCalculateDaysMax"/>
+                                 Min="MetricConstants.StatisticsCalculateDaysMin"
+                                 Max="MetricConstants.StatisticsCalculateDaysMax"/>
                 </RadzenFormField>
               </RadzenRow>
               <RadzenRow>
                 <small class="text-secondary">
                   Days to include in statistics calculation
-                  (@Const.StatisticsCalculateDaysMin~@Const.StatisticsCalculateDaysMax).
+                  (@MetricConstants.StatisticsCalculateDaysMin~@MetricConstants.StatisticsCalculateDaysMax).
                 </small>
               </RadzenRow>
 

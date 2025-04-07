@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
+using Modmail.NET.Features.Guild.Commands;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 

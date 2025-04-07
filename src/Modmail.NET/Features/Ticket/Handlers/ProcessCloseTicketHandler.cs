@@ -1,10 +1,14 @@
 using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Options;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Bot;
-using Modmail.NET.Features.Guild;
-using Modmail.NET.Utils;
+using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -65,15 +69,15 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
       await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TicketClosed));
       try {
         var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-        await pmChannel.SendMessageAsync(UserResponses.YourTicketHasBeenClosed(ticket, guildOption, transcriptUri));
-        if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(UserResponses.GiveFeedbackMessage(ticket, guildOption));
+        await pmChannel.SendMessageAsync(TicketBotMessages.User.YourTicketHasBeenClosed(ticket, guildOption, transcriptUri));
+        if (guildOption.TakeFeedbackAfterClosing && !request.DontSendFeedbackMessage) await pmChannel.SendMessageAsync(TicketBotMessages.User.GiveFeedbackMessage(ticket, guildOption));
       }
       catch (NotFoundException) {
         //ignored
       }
 
       var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
-      await logChannel.SendMessageAsync(LogResponses.TicketClosed(ticket));
+      await logChannel.SendMessageAsync(LogBotMessages.TicketClosed(ticket));
     }, cancellationToken);
   }
 }

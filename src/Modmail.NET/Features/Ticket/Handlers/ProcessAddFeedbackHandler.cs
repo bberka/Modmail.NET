@@ -1,7 +1,10 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -34,6 +37,6 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    _ = Task.Run(async () => { await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(ticket)); }); }, cancellationToken);
+    _ = Task.Run(async () => { await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(TicketBotMessages.User.FeedbackReceivedUpdateMessage(ticket)); }); }, cancellationToken);
   }
 }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
-using Modmail.NET.Static;
+using Modmail.NET.Features.Ticket.Services;
 
 namespace Modmail.NET.Web.Blazor.Controllers;
 
@@ -27,7 +27,7 @@ public class AttachmentController : Controller
     if (attachment is null) return NotFound();
 
     var extension = Path.GetExtension(attachment.FileName) ?? throw new NullReferenceException("extension"); //starts with .
-    var filePath = Path.Combine(Const.AttachmentDownloadDirectory, id + extension);
+    var filePath = Path.Combine(TicketAttachmentDownloadService.AttachmentDownloadDirectory, id + extension);
     var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
     return new FileStreamResult(stream, attachment.MediaType);
   }

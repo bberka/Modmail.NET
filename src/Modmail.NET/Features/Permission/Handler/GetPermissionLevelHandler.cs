@@ -2,7 +2,10 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Bot;
+using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Permission.Queries;
+using Modmail.NET.Features.Permission.Static;
+using Modmail.NET.Features.Teams.Static;
 
 namespace Modmail.NET.Features.Permission.Handler;
 

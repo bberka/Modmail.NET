@@ -1,10 +1,11 @@
 ﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Abstract
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.Bot
-@using Modmail.NET.Features.Teams
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.DiscordBot.Queries
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Features.Teams.Static
+@using Modmail.NET.Web.Blazor.Extensions
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject NotificationService NotificationService
@@ -60,7 +61,7 @@
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
       DialogService.Close(true);
     }
-    catch (BotExceptionBase ex) {
+    catch (ModmailBotException ex) {
       Log.Warning(logMessage, _selectedRoleId);
       ex.NotifyException(NotificationService);
     }

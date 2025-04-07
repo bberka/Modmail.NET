@@ -1,7 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Blacklist.Queries;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 

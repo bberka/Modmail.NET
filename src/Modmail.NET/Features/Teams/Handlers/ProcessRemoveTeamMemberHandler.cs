@@ -1,7 +1,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Teams.Commands;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 

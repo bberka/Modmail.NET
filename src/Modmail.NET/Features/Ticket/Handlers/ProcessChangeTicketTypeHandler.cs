@@ -1,10 +1,13 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.TicketType;
-using Modmail.NET.Features.UserInfo;
-using Modmail.NET.Jobs;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Jobs;
+using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Features.User.Queries;
+using Modmail.NET.Language;
 using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -52,7 +55,7 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
       var userInfo = await _sender.Send(new GetDiscordUserInfoQuery(userId),
                                         cancellationToken);
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketResponses.TicketTypeChanged(userInfo, ticketType));
+      if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketBotMessages.Ticket.TicketTypeChanged(userInfo, ticketType));
 
       if (ticket.BotTicketCreatedMessageInDmId != 0) {
         try {

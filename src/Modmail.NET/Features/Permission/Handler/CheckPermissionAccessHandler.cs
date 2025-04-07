@@ -1,7 +1,10 @@
 using MediatR;
 using Microsoft.Extensions.Options;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Permission.Queries;
+using Modmail.NET.Features.Permission.Static;
 
 namespace Modmail.NET.Features.Permission.Handler;
 

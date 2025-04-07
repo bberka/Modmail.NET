@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Entities;
+using Modmail.NET.Database.Entities;
 using SmartEnum.EFCore;
 
 namespace Modmail.NET.Database;
