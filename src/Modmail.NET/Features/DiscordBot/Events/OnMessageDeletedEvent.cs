@@ -1,12 +1,15 @@
 using DSharpPlus;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
+using Modmail.NET.Database.Entities;
+using Modmail.NET.Features.Ticket.Static;
 using Serilog;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.DiscordBot.Events;
 
@@ -78,6 +81,8 @@ public static class OnMessageDeletedEvent
 
     await DeleteMirroredMessage(
                                 client,
+                                messageEntity,
+                                dbContext,
                                 ticket.ModMessageChannelId,
                                 messageEntity.BotMessageId
                                );
@@ -131,8 +136,11 @@ public static class OnMessageDeletedEvent
       return;
     }
 
+
     await DeleteMirroredMessage(
                                 client,
+                                messageEntity,
+                                dbContext,
                                 ticket.PrivateMessageChannelId,
                                 messageEntity.BotMessageId
                                );
@@ -140,22 +148,19 @@ public static class OnMessageDeletedEvent
 
   private static async Task DeleteMirroredMessage(
     DiscordClient client,
-    ulong? channelId,
-    ulong? botMessageId
+    TicketMessage messageEntity,
+    ModmailDbContext dbContext,
+    ulong channelId,
+    ulong botMessageId
   ) {
-    if (!channelId.HasValue || !botMessageId.HasValue) {
-      Log.Warning(
-                  "[{Source}] Cannot delete mirrored message. Invalid ChannelId or BotMessageId. ChannelId: {ChannelId}, BotMessageId: {BotMessageId}",
-                  nameof(OnMessageDeletedEvent),
-                  channelId,
-                  botMessageId
-                 );
-      return;
-    }
-
     try {
-      var channel = await client.GetChannelAsync(channelId.Value);
-      var message = await channel.GetMessageAsync(botMessageId.Value);
+      messageEntity.ChangeStatus = TicketMessageChangeStatus.Deleted;
+      dbContext.Update(messageEntity);
+      var affected = await dbContext.SaveChangesAsync();
+      if (affected == 0) throw new DbInternalException();
+
+      var channel = await client.GetChannelAsync(channelId);
+      var message = await channel.GetMessageAsync(botMessageId);
       await message.DeleteAsync();
       Log.Information(
                       "[{Source}] Processed message deleted {ChannelId} {MessageId} " +

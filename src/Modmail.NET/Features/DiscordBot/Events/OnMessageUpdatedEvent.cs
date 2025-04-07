@@ -1,17 +1,20 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
+using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.Guild.Queries;
 using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Features.User.Commands;
 using Serilog;
+using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.DiscordBot.Events;
 
@@ -112,6 +115,8 @@ public static class OnMessageUpdatedEvent
 
     await UpdateMirroredMessage(
                                 client,
+                                messageEntity,
+                                dbContext,
                                 scope,
                                 ticket.ModMessageChannelId,
                                 messageEntity.BotMessageId,
@@ -177,6 +182,8 @@ public static class OnMessageUpdatedEvent
 
     await UpdateMirroredMessage(
                                 client,
+                                messageEntity,
+                                dbContext,
                                 scope,
                                 ticket.PrivateMessageChannelId,
                                 messageEntity.BotMessageId,
@@ -188,6 +195,8 @@ public static class OnMessageUpdatedEvent
 
   private static async Task UpdateMirroredMessage(
     DiscordClient client,
+    TicketMessage messageEntity,
+    ModmailDbContext dbContext,
     IServiceScope scope,
     ulong channelId,
     ulong messageId,
@@ -196,6 +205,20 @@ public static class OnMessageUpdatedEvent
     bool anonymous
   ) {
     try {
+      var newMessageHistory = new TicketMessageHistory {
+        TicketMessageId = messageEntity.Id,
+        MessageContentBefore = messageEntity.MessageContent,
+        MessageContentAfter = updatedMessage.Content
+      };
+
+      messageEntity.ChangeStatus = TicketMessageChangeStatus.Updated;
+      messageEntity.MessageContent = updatedMessage.Content;
+      dbContext.Update(messageEntity);
+      dbContext.Add(newMessageHistory);
+
+      var affected = await dbContext.SaveChangesAsync();
+      if (affected == 0) throw new DbInternalException();
+
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
       var option = await sender.Send(new GetGuildOptionQuery(false));
 
@@ -207,9 +230,7 @@ public static class OnMessageUpdatedEvent
           : TicketBotMessages.User.MessageEdited(updatedMessage, option.AlwaysAnonymous || anonymous);
 
       //TODO: Add support for removing attachment files from message on message update event
-      //Currently the library does not support removing single attachments, either we have to remove all of them 
-      //Or only remove if new message has zero attachemnts but if it went from 4 to 3 then we do nothing 
-      //The only workaround for this is to upload remaining files to discord again which is unnecessary work
+      //Currently discord API or library does not support attachment removal from sent message
       await message.ModifyAsync(x => {
         x.ClearEmbeds();
         x.AddEmbed(embed);
