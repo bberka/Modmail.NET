@@ -6,6 +6,7 @@ using Modmail.NET.Abstract;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Ticket.Static;
 using Serilog;
 
 namespace Modmail.NET.Features.Ticket.Jobs;
@@ -24,7 +25,7 @@ public class TicketDataDeleteJob : HangfireRecurringJobBase
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
     var guildOption = await sender.Send(new GetGuildOptionQuery(false)) ?? throw new NullReferenceException();
-    if (guildOption.TicketDataDeleteWaitDays == -1) return;
+    if (guildOption.TicketDataDeleteWaitDays < TicketConstants.TicketDataDeleteWaitDaysMin) return;
 
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     var timeoutDate = UtilDate.GetNow().AddDays(-guildOption.TicketDataDeleteWaitDays);
