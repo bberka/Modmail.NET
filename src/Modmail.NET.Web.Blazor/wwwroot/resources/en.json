@@ -200,5 +200,7 @@
   "ErrorNotFound": "Page you looking for doesnt exist or moved",
   "NotJoinedMainServer": "Bot is not added to main server",
   "TicketPriority": "Ticket Priority",
-  "Transcript": "Transcript"
+  "Transcript": "Transcript",
+  "MessageEdited": "Message Edited",
+  "Edited": "Edited"
 }

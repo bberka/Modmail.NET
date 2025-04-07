@@ -203,5 +203,7 @@ public enum LangKeys
   ErrorNotFound,
   NotJoinedMainServer,
   TicketPriority,
-  Transcript
+  Transcript,
+  MessageEdited,
+  Edited
 }
