@@ -5,6 +5,7 @@ using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
 using Modmail.NET.Commands;
 using Modmail.NET.Commands.Slash;
+using Modmail.NET.Events;
 using Serilog;
 
 namespace Modmail.NET.Web.Blazor.Dependency;
@@ -44,30 +45,31 @@ public static class DiscordBotDependency
 
 
     builder.Services.ConfigureEventHandlers(eventHandlingBuilder => {
-      eventHandlingBuilder.HandleMessageCreated(ModmailEventHandlers.OnMessageCreated);
-      eventHandlingBuilder.HandleChannelDeleted(ModmailEventHandlers.OnChannelDeleted);
+      eventHandlingBuilder.HandleMessageCreated(OnMessageCreatedEvent.OnMessageCreated);
+      eventHandlingBuilder.HandleMessageDeleted(OnMessageDeletedEvent.OnMessageDeleted);
+      eventHandlingBuilder.HandleMessageUpdated(OnMessageUpdatedEvent.OnMessageUpdated);
 
-      eventHandlingBuilder.HandleMessageReactionAdded(ModmailEventHandlers.OnMessageReactionAdded);
-      eventHandlingBuilder.HandleMessageReactionRemoved(ModmailEventHandlers.OnMessageReactionRemoved);
+      eventHandlingBuilder.HandleMessageReactionAdded(OnMessageReactionAddedEvent.OnMessageReactionAdded);
+      eventHandlingBuilder.HandleMessageReactionRemoved(OnMessageReactionRemovedEvent.OnMessageReactionRemoved);
+
+      eventHandlingBuilder.HandleChannelDeleted(OnChannelDeletedEvent.OnChannelDeleted);
+
+      eventHandlingBuilder.HandleComponentInteractionCreated(ComponentInteractionCreatedEvent.ComponentInteractionCreated);
+
+      eventHandlingBuilder.HandleModalSubmitted(ModalSubmittedEvent.ModalSubmitted);
 
       //TODO: investigate the need to implement handling of other reaction events
       // eventHandlingBuilder.HandleMessageReactionsCleared();
       // eventHandlingBuilder.HandleMessageReactionRemovedEmoji();
 
-      eventHandlingBuilder.HandleMessageDeleted(ModmailEventHandlers.OnMessageDeleted);
-      eventHandlingBuilder.HandleMessageUpdated(ModmailEventHandlers.OnMessageUpdated);
-
-      eventHandlingBuilder.HandleInteractionCreated(ModmailEventHandlers.InteractionCreated);
-      eventHandlingBuilder.HandleComponentInteractionCreated(ModmailEventHandlers.ComponentInteractionCreated);
-      eventHandlingBuilder.HandleModalSubmitted(ModmailEventHandlers.ModalSubmitted);
-
-      eventHandlingBuilder.HandleGuildMemberAdded(ModmailEventHandlers.OnGuildMemberAdded);
-      eventHandlingBuilder.HandleGuildMemberRemoved(ModmailEventHandlers.OnGuildMemberRemoved);
-      eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
-      eventHandlingBuilder.HandleGuildBanRemoved(ModmailEventHandlers.OnGuildBanRemoved);
-
-      eventHandlingBuilder.HandleUserUpdated(ModmailEventHandlers.OnUserUpdated);
-      eventHandlingBuilder.HandleUserSettingsUpdated(ModmailEventHandlers.OnUserSettingsUpdated);
+      //User update
+      eventHandlingBuilder.HandleInteractionCreated(UserUpdateEvents.InteractionCreated);
+      eventHandlingBuilder.HandleGuildMemberAdded(UserUpdateEvents.OnGuildMemberAdded);
+      eventHandlingBuilder.HandleGuildMemberRemoved(UserUpdateEvents.OnGuildMemberRemoved);
+      eventHandlingBuilder.HandleGuildBanAdded(UserUpdateEvents.OnGuildBanAdded);
+      eventHandlingBuilder.HandleGuildBanRemoved(UserUpdateEvents.OnGuildBanRemoved);
+      eventHandlingBuilder.HandleUserUpdated(UserUpdateEvents.OnUserUpdated);
+      eventHandlingBuilder.HandleUserSettingsUpdated(UserUpdateEvents.OnUserSettingsUpdated);
     });
   }
 }
