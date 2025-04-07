@@ -26,7 +26,6 @@ public static class BusinessDependency
     builder.Services.Configure<BotConfig>(botConfig);
     builder.Services.AddSingleton<LangProvider>();
     builder.Services.AddSingleton<ModmailBot>();
-    builder.Services.AddSingleton<ModmailEventHandlers>();
     builder.Services.AddSingleton<TicketMessageQueue>();
     builder.Services.AddSingleton<TicketAttachmentDownloadService>();
     builder.Services.AddHostedService<ModmailHostedService>();
