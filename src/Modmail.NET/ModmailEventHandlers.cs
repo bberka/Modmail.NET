@@ -63,6 +63,7 @@ public class ModmailEventHandlers
           var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
           var message = await ticketChannel.GetMessageAsync(messageEntity.BotMessageId);
           await message.DeleteAsync();
+          Log.Information("[OnMessageDeleted] Processed message deleted {ChannelId} {MessageId} {MessageAuthor}", ticketChannel.Id, message.Id, message.Author?.Id);
         }
         catch (NotFoundException) {
           //ignored
@@ -89,6 +90,7 @@ public class ModmailEventHandlers
           var dmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
           var message = await dmChannel.GetMessageAsync(messageEntity.BotMessageId);
           await message.DeleteAsync();
+          Log.Information("[OnMessageDeleted] Processed message deleted {ChannelId} {MessageId} {MessageAuthor}", dmChannel.Id, message.Id, message.Author?.Id);
         }
         catch (NotFoundException) {
           //ignored
@@ -128,6 +130,7 @@ public class ModmailEventHandlers
           var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
           var message = await ticketChannel.GetMessageAsync(messageEntity.MessageDiscordId);
           await message.CreateReactionAsync(args.Emoji);
+          Log.Information("[OnMessageReactionAdded] Processed reaction added {ChannelId} {MessageId} {MessageAuthor} {Emoji}", ticketChannel.Id, message.Id, message.Author?.Id, args.Emoji);
         }
         catch (NotFoundException) {
           //ignored
@@ -154,6 +157,7 @@ public class ModmailEventHandlers
           var pmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
           var message = await pmChannel.GetMessageAsync(messageEntity.MessageDiscordId);
           await message.CreateReactionAsync(args.Emoji);
+          Log.Information("[OnMessageReactionAdded] Processed reaction added {ChannelId} {MessageId} {MessageAuthor} {Emoji}", pmChannel.Id, message.Id, message.Author?.Id, args.Emoji);
         }
         catch (NotFoundException) {
           //ignored
@@ -193,6 +197,7 @@ public class ModmailEventHandlers
           var ticketChannel = await client.GetChannelAsync(ticket.ModMessageChannelId);
           var message = await ticketChannel.GetMessageAsync(messageEntity.MessageDiscordId);
           await message.DeleteOwnReactionAsync(args.Emoji);
+          Log.Information("[OnMessageReactionRemoved] Processed reaction added {ChannelId} {MessageId} {MessageAuthor} {Emoji}", ticketChannel.Id, message.Id, message.Author?.Id, args.Emoji);
         }
         catch (NotFoundException) {
           //ignored
@@ -219,6 +224,7 @@ public class ModmailEventHandlers
           var pmChannel = await client.GetChannelAsync(ticket.PrivateMessageChannelId);
           var message = await pmChannel.GetMessageAsync(messageEntity.MessageDiscordId);
           await message.DeleteOwnReactionAsync(args.Emoji);
+          Log.Information("[OnMessageReactionRemoved] Processed reaction added {ChannelId} {MessageId} {MessageAuthor} {Emoji}", pmChannel.Id, message.Id, message.Author?.Id, args.Emoji);
         }
         catch (NotFoundException) {
           //ignored
