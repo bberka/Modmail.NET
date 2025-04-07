@@ -27,11 +27,6 @@ public static class ModalSubmittedEvent
               args.Interaction.Id
              );
 
-    await args.Interaction.CreateResponseAsync(
-                                               DiscordInteractionResponseType.ChannelMessageWithSource,
-                                               new DiscordInteractionResponseBuilder().AsEphemeral()
-                                                                                      .WithContent(LangProvider.This.GetTranslation(LangKeys.ThankYouForFeedback))
-                                              );
 
     using var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
@@ -45,8 +40,17 @@ public static class ModalSubmittedEvent
       switch (interactionName) {
         case "feedback":
           await ProcessFeedback(sender, args, parameters);
+          await args.Interaction.CreateResponseAsync(
+                                                     DiscordInteractionResponseType.ChannelMessageWithSource,
+                                                     new DiscordInteractionResponseBuilder().AsEphemeral()
+                                                                                            .WithContent(LangProvider.This.GetTranslation(LangKeys.ThankYouForFeedback))
+                                                    );
           break;
         case "close_ticket_with_reason":
+          await args.Interaction.CreateResponseAsync(
+                                                     DiscordInteractionResponseType.DeferredMessageUpdate
+                                                    );
+
           await ProcessCloseTicketWithReason(sender, args, parameters);
           break;
         default:
