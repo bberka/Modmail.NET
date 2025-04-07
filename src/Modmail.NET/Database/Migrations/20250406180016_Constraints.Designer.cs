@@ -137,7 +137,7 @@ namespace Modmail.NET.Migrations
                         {
                             t.HasCheckConstraint("CK_GuildOptions_Name_MinLength", "LEN([Name]) >= 1");
 
-                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN 1 AND 365");
+                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN -1 AND 365");
                         });
                 });
 

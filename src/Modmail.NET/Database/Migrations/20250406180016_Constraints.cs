@@ -73,7 +73,7 @@ namespace Modmail.NET.Migrations
             migrationBuilder.AddCheckConstraint(
                 name: "CK_GuildOptions_TicketDataDeleteWaitDays_Range",
                 table: "GuildOptions",
-                sql: "[TicketDataDeleteWaitDays] BETWEEN 1 AND 365");
+                sql: "[TicketDataDeleteWaitDays] BETWEEN -1 AND 365");
 
             migrationBuilder.AddCheckConstraint(
                 name: "CK_DiscordUserInfos_Username_MinLength",
