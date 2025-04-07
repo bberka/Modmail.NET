@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
 #nullable disable
 
-namespace Modmail.NET.Migrations
+namespace Modmail.NET.Database.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250407174400_TicketMessageHistoryTableAdded")]
+    partial class TicketMessageHistoryTableAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -351,9 +354,6 @@ namespace Modmail.NET.Migrations
                     b.Property<decimal>("BotMessageId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<int>("ChangeStatus")
-                        .HasColumnType("int");
-
                     b.Property<string>("MessageContent")
                         .HasMaxLength(2147483647)
                         .HasColumnType("nvarchar(max)");
@@ -631,7 +631,7 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessageHistory", b =>
                 {
                     b.HasOne("Modmail.NET.Database.Entities.TicketMessage", "TicketMessage")
-                        .WithMany("History")
+                        .WithMany()
                         .HasForeignKey("TicketMessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -672,8 +672,6 @@ namespace Modmail.NET.Migrations
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessage", b =>
                 {
                     b.Navigation("Attachments");
-
-                    b.Navigation("History");
                 });
 #pragma warning restore 612, 618
         }
