@@ -202,5 +202,6 @@
   "TicketPriority": "Ticket Priority",
   "Transcript": "Transcript",
   "MessageEdited": "Message Edited",
-  "Edited": "Edited"
+  "Edited": "Edited",
+  "NoFeedbackProvided": "No feedback provided"
 }

@@ -15,4 +15,6 @@ public class TicketDto
   public DiscordUserInfo AssignedUser { get; set; }
   public TicketType TicketType { get; set; }
   public string CloseReason { get; set; }
+  public int? FeedbackStar { get; set; }
+  public string FeedbackMessage { get; set; }
 }

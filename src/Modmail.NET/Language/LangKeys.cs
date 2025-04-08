@@ -205,5 +205,6 @@ public enum LangKeys
   TicketPriority,
   Transcript,
   MessageEdited,
-  Edited
+  Edited,
+  NoFeedbackProvided
 }
