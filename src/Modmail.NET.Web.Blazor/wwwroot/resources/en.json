@@ -207,5 +207,8 @@
   "FeedbackAlreadySubmitted": "Feedback already submitted",
   "Tag": "Tag",
   "TagWithSameNameAlreadyExists": "Tag with same name already exists",
-  "TagDoesntExists": "Tag doesnt exists"
+  "TagDoesntExists": "Tag doesnt exists",
+  "TagCreatedSuccessfully": "Tag created successfully",
+  "TagRemovedSuccessfully": "Tag removed successfully",
+  "TagUpdatedSuccessfully": "Tag updated successfully"
 }

@@ -210,5 +210,8 @@ public enum LangKeys
   FeedbackAlreadySubmitted,
   Tag,
   TagWithSameNameAlreadyExists,
-  TagDoesntExists
+  TagDoesntExists,
+  TagCreatedSuccessfully,
+  TagRemovedSuccessfully,
+  TagUpdatedSuccessfully
 }
