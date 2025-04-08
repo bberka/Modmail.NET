@@ -97,3 +97,12 @@ This set of commands allows moderators or higher-level users to manage the black
 - **Parameters**:
   - `user`: The user to check.
 - **Usage**: `/blacklist status [user]`
+
+## Tag Slash Commands
+
+### `/tag`
+
+- **Description**: Get tag content.
+- **Parameters**:
+  - `name`: Tag name.
+- **Usage**: `/tag [name]`
