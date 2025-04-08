@@ -1,4 +1,5 @@
 ﻿@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Tag.Commands
 @using Modmail.NET.Web.Blazor.Extensions
@@ -18,6 +19,12 @@
 
   bool IsUpdate => Tag != null;
   string _name = "";
+
+  private string FixedName {
+    get => _name;
+    set => _name = value.Trim().Replace(" ", "-");
+  }
+
   string _title = "";
   string _content = "";
 
@@ -87,6 +94,7 @@
     }
   }
 
+
 }
 
 
@@ -94,13 +102,13 @@
   <RadzenColumn>
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Name" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="name" @bind-Value="@_name"/>
+        <RadzenTextBox Name="name" @bind-Value="@FixedName" Trim="true" MaxLength="DbLength.TagName"/>
       </RadzenFormField>
     </RadzenRow>
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Title" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="Title" @bind-Value="@_title"></RadzenTextBox>
+        <RadzenTextBox Name="Title" @bind-Value="@_title" MaxLength="DbLength.TagTitle"></RadzenTextBox>
       </RadzenFormField>
     </RadzenRow>
 
