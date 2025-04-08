@@ -203,5 +203,6 @@
   "Transcript": "Transcript",
   "MessageEdited": "Message Edited",
   "Edited": "Edited",
-  "NoFeedbackProvided": "No feedback provided"
+  "NoFeedbackProvided": "No feedback provided",
+  "FeedbackAlreadySubmitted": "Feedback already submitted"
 }

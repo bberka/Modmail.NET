@@ -206,5 +206,6 @@ public enum LangKeys
   Transcript,
   MessageEdited,
   Edited,
-  NoFeedbackProvided
+  NoFeedbackProvided,
+  FeedbackAlreadySubmitted
 }
