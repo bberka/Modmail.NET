@@ -1,5 +1,38 @@
 # **Changelogs**
 
+## **v2.3**
+### Features
+
+- **Tag System Implementation:** Introduced a tag system, allowing users to trigger pre-defined responses from the bot using a 'tag' slash command.
+  - Implemented web UI and database infrastructure for managing tags (create, view, update, delete).
+  - Added command handlers for tag retrieval and execution.
+  - Implemented a `TagProvider` class to dynamically generate slash commands for available tags.
+  - Implemented a `TagBotMessages` helper class to centralize the creation of messages sent by the bot when using tags.
+
+- **Enhanced User Engagement with Mirrored Reactions:** Reactions added by moderators in ticket channels are now automatically mirrored to the corresponding user's direct messages, and vice versa, creating a more interactive communication experience.
+
+- **Implement mirrored message deletion** The bot now removes original user messages from DMs after they are removed to maintain organization and clarity of communications.
+
+-  **Feedback implementation:** The feedback submission system is improved and a data list has been added to improve visibility of user interaction.
+
+- **Automatic Ticket Data Deletion and Optional Timeout**: Added support for automatically deleting timeout tickets.
+
+- **Add preliminary permission policies (currently inactive)** Added the configuration for authorization to be tested and applied by admins once the implementation is finished.
+
+- **Enhance Guild Option UI with visual separators and descriptions:** the visual clarity is improved by seperating groups of guild options through horizontal lines.
+
+### Bug Fixes
+
+- Fixed minor UI text issues
+- Fixed incorrect metric calculation
+- Fixed bot intents
+- Fixed multiple feedback submissions
+### Dependency Updates
+
+- Updated DSharpPlus to the latest NuGet nightly version.
+
+
+
 ## **v2.2**
 
 
