@@ -1,4 +1,5 @@
 ﻿using DSharpPlus.Entities;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Language;
 
@@ -14,8 +15,8 @@ public static class TicketModals
                                                              "feedback",
                                                              LangKeys.PleaseTellUsReasonsForYourRating.GetTranslation(),
                                                              style: DiscordTextInputStyle.Paragraph,
-                                                             min_length: 10,
-                                                             max_length: 500));
+                                                             required: false,
+                                                             max_length: DbLength.FeedbackMessage));
     return modal;
   }
 
@@ -28,7 +29,7 @@ public static class TicketModals
                                                              LangKeys.EnterReasonForClosingThisTicket.GetTranslation(),
                                                              style: DiscordTextInputStyle.Paragraph,
                                                              required: false,
-                                                             max_length: 500));
+                                                             max_length: DbLength.Reason));
     return modal;
   }
 }
