@@ -66,7 +66,9 @@
                            : _emoji;
 
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to create new ticket type ?",
+    var dialogResult = await DialogService.Confirm(IsUpdate
+                                                     ? "Are you sure you want to update this ticket type ?"
+                                                     : "Are you sure you want to create new ticket type ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",

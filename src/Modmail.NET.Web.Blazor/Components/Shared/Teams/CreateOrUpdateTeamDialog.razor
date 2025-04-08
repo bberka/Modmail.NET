@@ -71,7 +71,9 @@
       return;
     }
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to create new team ?",
+    var dialogResult = await DialogService.Confirm(IsUpdate
+                                                     ? "Are you sure you want to update this team ?"
+                                                     : "Are you sure you want to create new team ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",

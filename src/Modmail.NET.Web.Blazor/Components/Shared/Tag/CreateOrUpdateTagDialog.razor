@@ -54,7 +54,9 @@
       return;
     }
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to create new tag ?",
+    var dialogResult = await DialogService.Confirm(IsUpdate
+                                                     ? "Are you sure you want to update this tag ?"
+                                                     : "Are you sure you want to create new tag ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
