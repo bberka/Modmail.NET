@@ -25,6 +25,7 @@ public static class DiscordBotDependency
       extension.AddCommands<ModmailCommands>();
       extension.AddCommands<BlacklistSlashCommands>();
       extension.AddCommands<TicketSlashCommands>();
+      extension.AddCommands<TagSlashCommands>();
 
       extension.AddChecks(typeof(ModmailBotProjectMarker).Assembly);
       TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration {
