@@ -33,12 +33,22 @@
       return;
     }
 
+    InitGuildOptionValues();
+  }
+
+  private void InitGuildOptionValues() {
     if (_guildOption.TicketDataDeleteWaitDays > 0) {
       _enableTicketAutoDelete = true;
+    }
+    else {
+      _guildOption.TicketDataDeleteWaitDays = TicketConstants.TicketDataDeleteWaitDaysMax;
     }
 
     if (_guildOption.TicketTimeoutHours > 0) {
       _enableTicketTimeout = true;
+    }
+    else {
+      _guildOption.TicketTimeoutHours = TicketConstants.TicketTimeoutMaxAllowedHours;
     }
   }
 
@@ -73,11 +83,14 @@
       }
 
 
+
       var dbContext = await DbContextFactory.CreateDbContextAsync();
       dbContext.Update(_guildOption);
       var affected = await dbContext.SaveChangesAsync();
+      InitGuildOptionValues();
       if (affected == 0) {
         NotificationService.Notify(NotificationSeverity.Error, "Failed", "Guild options could not be updated");
+        return;
       }
 
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
@@ -125,19 +138,33 @@
                 </RadzenLabel>
               </RadzenRow>
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
                   Take feedback from user
                 </RadzenLabel>
               </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  After ticket is closed a message is sent to user to take text and star feedback
+                </small>
+              </RadzenRow>
+
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_guildOption.AlwaysAnonymous/>
                 <RadzenLabel Component="AlwaysAnonymous">
                   Force anonymous messages
                 </RadzenLabel>
               </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Forces anonymous messages for all tickets, ignoring the tickets anonymous option
+                </small>
+              </RadzenRow>
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="PublicTranscripts" @bind-Value=@_guildOption.PublicTranscripts/>
                 <RadzenLabel Component="PublicTranscripts">
@@ -155,9 +182,7 @@
               }
 
 
-
-
-
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="_enableTicketTimeout" @bind-Value=@_enableTicketTimeout/>
                 <RadzenLabel Component="_enableTicketTimeout">
@@ -183,6 +208,7 @@
                 </RadzenRow>
               }
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="_enableTicketAutoDelete" @bind-Value=@_enableTicketAutoDelete/>
                 <RadzenLabel Component="_enableTicketAutoDelete">
@@ -207,6 +233,8 @@
                 </RadzenRow>
               }
 
+              <hr class="rz-my-7"/>
+
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Statistics Calculate Days" Variant="Variant.Outlined">
                   <RadzenNumeric @bind-Value="@_guildOption.StatisticsCalculateDays"
@@ -220,6 +248,8 @@
                   (@MetricConstants.StatisticsCalculateDaysMin~@MetricConstants.StatisticsCalculateDaysMax).
                 </small>
               </RadzenRow>
+
+              <hr class="rz-my-7"/>
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Ticket Access Level" Variant="Variant.Outlined">
