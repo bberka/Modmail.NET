@@ -1,14 +1,26 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Common.Static;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Common.Exceptions;
 
-public abstract class ModmailBotException : Exception
+public class ModmailBotException : Exception
 {
+  [Obsolete("String message constructor is obsolete and will be removed, use constructors that takes Language keys")]
   protected ModmailBotException(string titleMessage, string contentMessage = null) {
     TitleMessage = titleMessage;
     ContentMessage = contentMessage;
   }
+
+  public ModmailBotException(LangKeys titleMessage) {
+    TitleMessage = titleMessage.GetTranslation();
+  }
+
+  public ModmailBotException(LangKeys titleMessage, LangKeys contentMessage) {
+    TitleMessage = titleMessage.GetTranslation();
+    ContentMessage = contentMessage.GetTranslation();
+  }
+
 
   public string TitleMessage { get; }
   public string ContentMessage { get; }
