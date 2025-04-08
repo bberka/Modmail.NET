@@ -28,7 +28,7 @@ public class GuildOption : IHasRegisterDate,
   public required ulong CategoryId { get; set; }
   public bool IsEnabled { get; set; } = true;
 
-  [Range(TicketConstants.TicketTimeoutMinAllowedHours, TicketConstants.TicketTimeoutMaxAllowedHours)]
+  [Range(-1, TicketConstants.TicketTimeoutMaxAllowedHours)]
   public long TicketTimeoutHours { get; set; } = -1;
 
   public bool TakeFeedbackAfterClosing { get; set; }
@@ -39,7 +39,7 @@ public class GuildOption : IHasRegisterDate,
   [Range(-1, TicketConstants.TicketDataDeleteWaitDaysMax)]
   public int TicketDataDeleteWaitDays { get; set; } = -1;
 
-  [Range(-1, MetricConstants.StatisticsCalculateDaysMax)]
+  [Range(MetricConstants.StatisticsCalculateDaysMin, MetricConstants.StatisticsCalculateDaysMax)]
   public int StatisticsCalculateDays { get; set; } = MetricConstants.DefaultStatisticsCalculateDays;
 
   public TeamPermissionLevel ManageTicketMinAccessLevel { get; set; } = TeamPermissionLevel.Moderator;
