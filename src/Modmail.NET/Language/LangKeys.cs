@@ -207,5 +207,8 @@ public enum LangKeys
   MessageEdited,
   Edited,
   NoFeedbackProvided,
-  FeedbackAlreadySubmitted
+  FeedbackAlreadySubmitted,
+  Tag,
+  TagWithSameNameAlreadyExists,
+  TagDoesntExists
 }

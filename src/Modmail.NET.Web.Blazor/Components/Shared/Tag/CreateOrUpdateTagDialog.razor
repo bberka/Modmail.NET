@@ -1,0 +1,121 @@
+﻿@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Tag.Commands
+@using Modmail.NET.Web.Blazor.Extensions
+@using Serilog
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject ISender Sender
+
+@code {
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
+  [Parameter]
+  public Tag Tag { get; set; }
+
+  bool IsUpdate => Tag != null;
+  string _name = "";
+  string _title = "";
+  string _content = "";
+
+  protected override Task OnInitializedAsync() {
+    if (Tag is not null) {
+      _name = Tag.Name;
+      _title = Tag.Title;
+      _content = Tag.Content;
+    }
+
+    return base.OnInitializedAsync();
+  }
+
+  private async Task SubmitAsync() {
+    if (string.IsNullOrEmpty(_name)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
+      return;
+    }
+
+    // if (string.IsNullOrEmpty(_title)) {
+    //   NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a title.");
+    //   return;
+    // }
+
+    if (string.IsNullOrEmpty(_content)) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a content.");
+      return;
+    }
+
+    var dialogResult = await DialogService.Confirm("Are you sure you want to create new tag ?",
+                                                   options: new ConfirmOptions {
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No",
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true
+                                                   });
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(CreateOrUpdateTagDialog)}]{nameof(SubmitAsync)}({{Name}})";
+      try {
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+
+        if (IsUpdate && Tag is not null) {
+          await Sender.Send(new ProcessUpdateTagCommand(userId, Tag.Id, _name, _title, _content));
+          Log.Information(logMessage, _name);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Tag updated successfully.");
+        }
+        else {
+          await Sender.Send(new ProcessCreateTagCommand(userId,
+                                                        _name,
+                                                        _title,
+                                                        _content));
+          Log.Information(logMessage, _name);
+          NotificationService.Notify(NotificationSeverity.Success, "Success", "Tag created successfully.");
+        }
+
+        DialogService.Close(true);
+      }
+      catch (ModmailBotException ex) {
+        Log.Warning(ex, logMessage, _name);
+        ex.NotifyException(NotificationService);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex, logMessage, _name);
+        ex.NotifyException(NotificationService);
+      }
+    }
+  }
+
+}
+
+
+<RadzenRow>
+  <RadzenColumn>
+    <RadzenRow class="rz-my-4">
+      <RadzenFormField Text="Name" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="name" @bind-Value="@_name"/>
+      </RadzenFormField>
+    </RadzenRow>
+
+    <RadzenRow class="rz-my-4">
+      <RadzenFormField Text="Title" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="Title" @bind-Value="@_title"></RadzenTextBox>
+      </RadzenFormField>
+    </RadzenRow>
+
+    <RadzenRow class="rz-my-4">
+      <RadzenFormField Text="Description" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextArea Name="Description" @bind-Value="@_content" Style="min-height: 200px"></RadzenTextArea>
+      </RadzenFormField>
+    </RadzenRow>
+
+
+    <RadzenRow class="rz-my-4">
+      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
+                                                                                               ? "Update"
+                                                                                               : "Create")"
+                    Click="SubmitAsync"/>
+    </RadzenRow>
+  </RadzenColumn>
+</RadzenRow>

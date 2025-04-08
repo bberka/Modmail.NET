@@ -16,5 +16,6 @@ public static class DbLength
   public const int KeyString = 128;
   public const int Emoji = 100;
   public const int Description = 1000;
-  public const int Tag = 32;
+  public const int TagName = 32;
+  public const int TagTitle = 64;
 }

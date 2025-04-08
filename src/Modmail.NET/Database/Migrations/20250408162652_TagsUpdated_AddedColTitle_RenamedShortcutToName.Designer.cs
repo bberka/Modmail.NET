@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modmail.NET.Database;
 
 #nullable disable
 
-namespace Modmail.NET.Migrations
+namespace Modmail.NET.Database.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    partial class ModmailDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408162652_TagsUpdated_AddedColTitle_RenamedShortcutToName")]
+    partial class TagsUpdated_AddedColTitle_RenamedShortcutToName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,11 +256,9 @@ namespace Modmail.NET.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
@@ -273,15 +274,8 @@ namespace Modmail.NET.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Tags", t =>
                         {
-                            t.HasCheckConstraint("CK_Tags_Content_MinLength", "LEN([Content]) >= 1");
-
-                            t.HasCheckConstraint("CK_Tags_Name_MinLength", "LEN([Name]) >= 1");
-
                             t.HasCheckConstraint("CK_Tags_Title_MinLength", "LEN([Title]) >= 0");
                         });
                 });

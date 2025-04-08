@@ -75,12 +75,4 @@
         <Content Remove="C:\Users\Administrator\.nuget\packages\metran\2.0.0\contentFiles\any\net9.0\README.md"/>
         <Content Remove="C:\Users\Administrator\.nuget\packages\metran\2.0.0\contentFiles\any\net9.0\LICENSE"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Features\Tag\"/>
-        <Folder Include="Features\TicketType\Commands\"/>
-        <Folder Include="Features\TicketType\Handlers\"/>
-        <Folder Include="Features\TicketType\Jobs\"/>
-        <Folder Include="Features\TicketType\Queries\"/>
-    </ItemGroup>
 </Project>
