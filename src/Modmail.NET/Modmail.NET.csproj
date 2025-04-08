@@ -77,6 +77,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Features\Tag\"/>
         <Folder Include="Features\TicketType\Commands\"/>
         <Folder Include="Features\TicketType\Handlers\"/>
         <Folder Include="Features\TicketType\Jobs\"/>

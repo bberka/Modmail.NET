@@ -20,6 +20,7 @@ public class ModmailDbContext : DbContext
   public DbSet<TicketBlacklist> TicketBlacklists { get; set; } = null!;
   public DbSet<TicketType> TicketTypes { get; set; } = null!;
   public DbSet<Statistic> Statistics { get; set; } = null!;
+  public DbSet<Tag> Tags { get; set; } = null!;
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
