@@ -13,6 +13,7 @@ public static class ModmailColors
 
   //Message
   public static readonly DiscordColor MessageReceivedColor = DiscordColor.Blue;
+  public static readonly DiscordColor TagReceivedColor = DiscordColor.Blue;
 
   //Ticket
   public static readonly DiscordColor TicketCreatedColor = DiscordColor.Blue;
