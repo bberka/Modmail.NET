@@ -1,7 +1,8 @@
 ﻿@using DSharpPlus.Entities
-@using Modmail.NET.Abstract
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.TicketType
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Ticket.Commands
+@using Modmail.NET.Web.Blazor.Extensions
 @using Serilog
 @inject DialogService DialogService
 @inject NotificationService NotificationService
@@ -65,7 +66,9 @@
                            : _emoji;
 
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to create new ticket type ?",
+    var dialogResult = await DialogService.Confirm(IsUpdate
+                                                     ? "Are you sure you want to update this ticket type ?"
+                                                     : "Are you sure you want to create new ticket type ?",
                                                    options: new ConfirmOptions {
                                                      OkButtonText = "Yes",
                                                      CancelButtonText = "No",
@@ -104,7 +107,7 @@
 
         DialogService.Close(true);
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         Log.Warning(ex, logMessage, _name);
         ex.NotifyException(NotificationService);
       }

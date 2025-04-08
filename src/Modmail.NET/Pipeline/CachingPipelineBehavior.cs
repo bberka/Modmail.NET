@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Modmail.NET.Attributes;
-using Modmail.NET.Utils;
+using Modmail.NET.Common.Utils;
 using Serilog;
 
 namespace Modmail.NET.Pipeline;

@@ -1,8 +1,12 @@
 ﻿@page "/options"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@using Modmail.NET.Abstract
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Metric.Static
+@using Modmail.NET.Features.Permission.Static
+@using Modmail.NET.Features.Ticket.Static
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject NavigationManager NavigationManager
@@ -29,12 +33,22 @@
       return;
     }
 
+    InitGuildOptionValues();
+  }
+
+  private void InitGuildOptionValues() {
     if (_guildOption.TicketDataDeleteWaitDays > 0) {
       _enableTicketAutoDelete = true;
+    }
+    else {
+      _guildOption.TicketDataDeleteWaitDays = TicketConstants.TicketDataDeleteWaitDaysMax;
     }
 
     if (_guildOption.TicketTimeoutHours > 0) {
       _enableTicketTimeout = true;
+    }
+    else {
+      _guildOption.TicketTimeoutHours = TicketConstants.TicketTimeoutMaxAllowedHours;
     }
   }
 
@@ -46,12 +60,12 @@
         throw new InvalidOperationException("Guild option is null");
       }
 
-      if (_guildOption.TicketTimeoutHours is > Const.TicketTimeoutMaxAllowedHours or < Const.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
+      if (_guildOption.TicketTimeoutHours is > TicketConstants.TicketTimeoutMaxAllowedHours or < TicketConstants.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
         NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Ticket Timeout Hours is not in valid range.");
         return;
       }
 
-      if (_guildOption.TicketDataDeleteWaitDays is > Const.TicketDataDeleteWaitDaysMax or < Const.TicketDataDeleteWaitDaysMin && _enableTicketAutoDelete) {
+      if (_guildOption.TicketDataDeleteWaitDays is > TicketConstants.TicketDataDeleteWaitDaysMax or < TicketConstants.TicketDataDeleteWaitDaysMin && _enableTicketAutoDelete) {
         NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Auto Delete Ticket Data Wait Days is not in valid range.");
         return;
       }
@@ -69,16 +83,19 @@
       }
 
 
+
       var dbContext = await DbContextFactory.CreateDbContextAsync();
       dbContext.Update(_guildOption);
       var affected = await dbContext.SaveChangesAsync();
+      InitGuildOptionValues();
       if (affected == 0) {
         NotificationService.Notify(NotificationSeverity.Error, "Failed", "Guild options could not be updated");
+        return;
       }
 
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Guild options updated successfully.");
     }
-    catch (BotExceptionBase ex) {
+    catch (ModmailBotException ex) {
       ex.NotifyException(NotificationService);
       Log.Warning(ex, logMessage);
     }
@@ -121,19 +138,33 @@
                 </RadzenLabel>
               </RadzenRow>
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_guildOption.TakeFeedbackAfterClosing/>
                 <RadzenLabel Component="TakeFeedbackAfterClosing">
                   Take feedback from user
                 </RadzenLabel>
               </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  After ticket is closed a message is sent to user to take text and star feedback
+                </small>
+              </RadzenRow>
+
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_guildOption.AlwaysAnonymous/>
                 <RadzenLabel Component="AlwaysAnonymous">
                   Force anonymous messages
                 </RadzenLabel>
               </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Forces anonymous messages for all tickets, ignoring the tickets anonymous option
+                </small>
+              </RadzenRow>
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="PublicTranscripts" @bind-Value=@_guildOption.PublicTranscripts/>
                 <RadzenLabel Component="PublicTranscripts">
@@ -151,9 +182,7 @@
               }
 
 
-
-
-
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="_enableTicketTimeout" @bind-Value=@_enableTicketTimeout/>
                 <RadzenLabel Component="_enableTicketTimeout">
@@ -166,17 +195,20 @@
                 <RadzenRow class="rz-my-4">
                   <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
                     <RadzenNumeric @bind-Value="@_guildOption.TicketTimeoutHours"
-                                   Min="Const.TicketTimeoutMinAllowedHours" Max="Const.TicketTimeoutMaxAllowedHours"/>
+                                   Min="TicketConstants.TicketTimeoutMinAllowedHours"
+                                   Max="TicketConstants.TicketTimeoutMaxAllowedHours"/>
                   </RadzenFormField>
                 </RadzenRow>
                 <RadzenRow>
                   <small class="text-secondary">
-                    Set the number of hours (@Const.TicketTimeoutMinAllowedHours~@Const.TicketTimeoutMaxAllowedHours) a
+                    Set the number of hours
+                    (@TicketConstants.TicketTimeoutMinAllowedHours~@TicketConstants.TicketTimeoutMaxAllowedHours) a
                     ticket can be inactive before it's automatically closed.
                   </small>
                 </RadzenRow>
               }
 
+              <hr class="rz-my-7"/>
               <RadzenRow class="rz-my-4">
                 <RadzenSwitch Name="_enableTicketAutoDelete" @bind-Value=@_enableTicketAutoDelete/>
                 <RadzenLabel Component="_enableTicketAutoDelete">
@@ -188,29 +220,36 @@
                 <RadzenRow class="rz-my-4">
                   <RadzenFormField class="w-100" Text="Auto Delete Ticket Data Wait Days" Variant="Variant.Outlined">
                     <RadzenNumeric @bind-Value="@_guildOption.TicketDataDeleteWaitDays"
-                                   Min="Const.TicketDataDeleteWaitDaysMin" Max="Const.TicketDataDeleteWaitDaysMax"/>
+                                   Min="TicketConstants.TicketDataDeleteWaitDaysMin"
+                                   Max="TicketConstants.TicketDataDeleteWaitDaysMax"/>
                   </RadzenFormField>
                 </RadzenRow>
                 <RadzenRow>
                   <small class="text-secondary">
-                    Set the number of days (@Const.TicketDataDeleteWaitDaysMin~@Const.TicketDataDeleteWaitDaysMax) after
+                    Set the number of days
+                    (@TicketConstants.TicketDataDeleteWaitDaysMin~@TicketConstants.TicketDataDeleteWaitDaysMax) after
                     which ticket data is deleted.
                   </small>
                 </RadzenRow>
               }
 
+              <hr class="rz-my-7"/>
+
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Statistics Calculate Days" Variant="Variant.Outlined">
                   <RadzenNumeric @bind-Value="@_guildOption.StatisticsCalculateDays"
-                                 Min="Const.StatisticsCalculateDaysMin" Max="Const.StatisticsCalculateDaysMax"/>
+                                 Min="MetricConstants.StatisticsCalculateDaysMin"
+                                 Max="MetricConstants.StatisticsCalculateDaysMax"/>
                 </RadzenFormField>
               </RadzenRow>
               <RadzenRow>
                 <small class="text-secondary">
                   Days to include in statistics calculation
-                  (@Const.StatisticsCalculateDaysMin~@Const.StatisticsCalculateDaysMax).
+                  (@MetricConstants.StatisticsCalculateDaysMin~@MetricConstants.StatisticsCalculateDaysMax).
                 </small>
               </RadzenRow>
+
+              <hr class="rz-my-7"/>
 
               <RadzenRow class="rz-my-4">
                 <RadzenFormField class="w-100" Text="Manage Ticket Access Level" Variant="Variant.Outlined">

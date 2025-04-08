@@ -1,10 +1,11 @@
 ﻿@page "/ticket-types"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Abstract
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.TicketType
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Ticket.Commands
 @using Modmail.NET.Web.Blazor.Components.Shared.TicketType
+@using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -94,7 +95,7 @@
 
         await ReloadDataAsync();
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         Log.Warning(ex,
                     logMessage,
                     ticketType);

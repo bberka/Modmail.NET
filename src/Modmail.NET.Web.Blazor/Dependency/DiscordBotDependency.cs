@@ -3,8 +3,8 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.TextCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
-using Modmail.NET.Commands;
-using Modmail.NET.Commands.Slash;
+using Modmail.NET.Features.DiscordBot.Events;
+using Modmail.NET.Features.DiscordCommands.Handlers;
 using Serilog;
 
 namespace Modmail.NET.Web.Blazor.Dependency;
@@ -18,13 +18,14 @@ public static class DiscordBotDependency
                                       | DiscordIntents.GuildMessages
                                       | DiscordIntents.GuildMembers
                                       | DiscordIntents.DirectMessages
-                                      | DiscordIntents.GuildMessages
+                                      | DiscordIntents.GuildMessageReactions
                                       | DiscordIntents.DirectMessageReactions);
 
     builder.Services.AddCommandsExtension((_, extension) => {
       extension.AddCommands<ModmailCommands>();
       extension.AddCommands<BlacklistSlashCommands>();
       extension.AddCommands<TicketSlashCommands>();
+      extension.AddCommands<TagSlashCommands>();
 
       extension.AddChecks(typeof(ModmailBotProjectMarker).Assembly);
       TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration {
@@ -44,25 +45,31 @@ public static class DiscordBotDependency
 
 
     builder.Services.ConfigureEventHandlers(eventHandlingBuilder => {
-      eventHandlingBuilder.HandleMessageCreated(ModmailEventHandlers.OnMessageCreated);
-      eventHandlingBuilder.HandleChannelDeleted(ModmailEventHandlers.OnChannelDeleted);
+      eventHandlingBuilder.HandleMessageCreated(OnMessageCreatedEvent.OnMessageCreated);
+      eventHandlingBuilder.HandleMessageDeleted(OnMessageDeletedEvent.OnMessageDeleted);
+      eventHandlingBuilder.HandleMessageUpdated(OnMessageUpdatedEvent.OnMessageUpdated);
 
-      eventHandlingBuilder.HandleInteractionCreated(ModmailEventHandlers.InteractionCreated);
-      eventHandlingBuilder.HandleComponentInteractionCreated(ModmailEventHandlers.ComponentInteractionCreated);
-      eventHandlingBuilder.HandleModalSubmitted(ModmailEventHandlers.ModalSubmitted);
+      eventHandlingBuilder.HandleMessageReactionAdded(OnMessageReactionAddedEvent.OnMessageReactionAdded);
+      eventHandlingBuilder.HandleMessageReactionRemoved(OnMessageReactionRemovedEvent.OnMessageReactionRemoved);
 
-      eventHandlingBuilder.HandleGuildMemberAdded(ModmailEventHandlers.OnGuildMemberAdded);
-      eventHandlingBuilder.HandleGuildMemberRemoved(ModmailEventHandlers.OnGuildMemberRemoved);
-      eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
-      eventHandlingBuilder.HandleGuildBanAdded(ModmailEventHandlers.OnGuildBanAdded);
-      eventHandlingBuilder.HandleGuildBanRemoved(ModmailEventHandlers.OnGuildBanRemoved);
+      eventHandlingBuilder.HandleChannelDeleted(OnChannelDeletedEvent.OnChannelDeleted);
 
-      eventHandlingBuilder.HandleUserUpdated(ModmailEventHandlers.OnUserUpdated);
-      eventHandlingBuilder.HandleUserSettingsUpdated(ModmailEventHandlers.OnUserSettingsUpdated);
+      eventHandlingBuilder.HandleComponentInteractionCreated(ComponentInteractionCreatedEvent.ComponentInteractionCreated);
 
-      eventHandlingBuilder.HandleMessageReactionAdded(ModmailEventHandlers.OnMessageReactionAdded);
-      eventHandlingBuilder.HandleMessageDeleted(ModmailEventHandlers.OnMessageDeleted);
-      eventHandlingBuilder.HandleMessageUpdated(ModmailEventHandlers.OnMessageUpdated);
+      eventHandlingBuilder.HandleModalSubmitted(ModalSubmittedEvent.ModalSubmitted);
+
+      //TODO: investigate the need to implement handling of other reaction events
+      // eventHandlingBuilder.HandleMessageReactionsCleared();
+      // eventHandlingBuilder.HandleMessageReactionRemovedEmoji();
+
+      //User update
+      eventHandlingBuilder.HandleInteractionCreated(UserUpdateEvents.InteractionCreated);
+      eventHandlingBuilder.HandleGuildMemberAdded(UserUpdateEvents.OnGuildMemberAdded);
+      eventHandlingBuilder.HandleGuildMemberRemoved(UserUpdateEvents.OnGuildMemberRemoved);
+      eventHandlingBuilder.HandleGuildBanAdded(UserUpdateEvents.OnGuildBanAdded);
+      eventHandlingBuilder.HandleGuildBanRemoved(UserUpdateEvents.OnGuildBanRemoved);
+      eventHandlingBuilder.HandleUserUpdated(UserUpdateEvents.OnUserUpdated);
+      eventHandlingBuilder.HandleUserSettingsUpdated(UserUpdateEvents.OnUserSettingsUpdated);
     });
   }
 }

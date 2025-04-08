@@ -2,7 +2,8 @@ using System.Reflection;
 using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Attributes;
-using Modmail.NET.Features.Permission;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Permission.Queries;
 
 namespace Modmail.NET.Pipeline;
 

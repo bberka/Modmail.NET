@@ -1,6 +1,6 @@
 using Modmail.NET;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Language;
-using Modmail.NET.Utils;
 using Modmail.NET.Web.Blazor.Components;
 using Modmail.NET.Web.Blazor.Dependency;
 using Serilog;

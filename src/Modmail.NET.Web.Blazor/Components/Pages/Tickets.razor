@@ -1,8 +1,11 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Abstract
-@using Modmail.NET.Features.Ticket
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Features.Ticket.Commands
+@using Modmail.NET.Features.Ticket.Mappers
+@using Modmail.NET.Features.Ticket.Models
+@using Modmail.NET.Language
 @using Modmail.NET.Web.Blazor.Components.Shared.Tickets
 @using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
@@ -116,7 +119,7 @@
         NotificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
         await ReloadDataAsync();
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         ex.NotifyException(NotificationService);
         Log.Warning(ex, logMessage, _forceCloseReason);
       }
@@ -152,7 +155,43 @@
 
   // private Task ShowAddNoteDialog(TicketDto ticketDto) {
   //   throw new NotImplementedException();
-  // }
+  // }                                                    @* @ticketDto.FeedbackStar  *@
+
+
+  private async Task ShowFeedback(TicketDto ticketDto) {
+    _ = await DialogService.OpenAsync("Ticket Feedback",
+                                      _ =>
+                                        @<div class="rz-mx-auto">
+                                          <RadzenRow>
+                                            <RadzenColumn Size="12">
+                                              <RadzenRow class="rz-mb-4">
+                                                @for (var i = 0; i < ticketDto.FeedbackStar; i++) {
+                                                  <RadzenIcon Icon="stars" IconStyle="IconStyle.Warning"></RadzenIcon>
+                                                }
+                                                @for (var i = 0; i < 5 - ticketDto.FeedbackStar; i++) {
+                                                  <RadzenIcon Icon="stars" IconStyle="IconStyle.Base"></RadzenIcon>
+                                                }
+                                              </RadzenRow>
+                                              <RadzenRow class="rz-mt-4">
+                                                <RadzenMarkdown>
+                                                  @if (string.IsNullOrEmpty(ticketDto.FeedbackMessage)) {
+                                                    @LangKeys.NoFeedbackProvided.GetTranslation()
+                                                  }
+                                                  else {
+                                                    @ticketDto.FeedbackMessage
+                                                  }
+                                                </RadzenMarkdown>
+                                              </RadzenRow>
+                                            </RadzenColumn>
+                                          </RadzenRow>
+                                        </div>,
+                                      new DialogOptions {
+                                        Width = "500px",
+                                        CloseDialogOnEsc = true,
+                                        CloseDialogOnOverlayClick = true
+                                      });
+  }
+
 
 }
 
@@ -308,6 +347,19 @@
                       MouseEnter="@(args => TooltipService.Open(args, "Show Notes"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
+                    @if (data.FeedbackStar.HasValue) {
+                      <RadzenButton
+                        ButtonStyle="ButtonStyle.Info"
+                        Icon="reviews"
+                        Variant="Variant.Flat"
+                        Shade="Shade.Lighter"
+                        Size="ButtonSize.Medium"
+                        class="rz-my-1 rz-ms-1"
+                        Click="@(async () => await ShowFeedback(data))"
+                        MouseEnter="@(args => TooltipService.Open(args, "Show Feedback"))"
+                        @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
                     @* <RadzenButton *@
                     @*   ButtonStyle="ButtonStyle.Success" *@
                     @*   Icon="add_notes" *@

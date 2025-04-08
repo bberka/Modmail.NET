@@ -203,5 +203,15 @@ public enum LangKeys
   ErrorNotFound,
   NotJoinedMainServer,
   TicketPriority,
-  Transcript
+  Transcript,
+  MessageEdited,
+  Edited,
+  NoFeedbackProvided,
+  FeedbackAlreadySubmitted,
+  Tag,
+  TagWithSameNameAlreadyExists,
+  TagDoesntExists,
+  TagCreatedSuccessfully,
+  TagRemovedSuccessfully,
+  TagUpdatedSuccessfully
 }

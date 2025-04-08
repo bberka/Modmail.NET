@@ -1,10 +1,16 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Bot;
-using Modmail.NET.Features.Permission;
-using Modmail.NET.Utils;
+using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Guild.Commands;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Guild.Static;
+using Modmail.NET.Features.Permission.Queries;
+using Modmail.NET.Features.Permission.Static;
+using Modmail.NET.Features.Teams.Static;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
@@ -42,10 +48,10 @@ public class ProcessCreateLogChannelHandlers : IRequestHandler<ProcessCreateLogC
       category = await guild.GetChannelAsync(guildOption.CategoryId);
     }
     catch (NotFoundException) {
-      category = await guild.CreateChannelCategoryAsync(Const.CategoryName, permissionOverwrites);
+      category = await guild.CreateChannelCategoryAsync(GuildConstants.CategoryName, permissionOverwrites);
     }
 
-    var logChannel = await guild.CreateTextChannelAsync(Const.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.ModmailLogChannelTopic), permissionOverwrites);
+    var logChannel = await guild.CreateTextChannelAsync(GuildConstants.LogChannelName, category, LangProvider.This.GetTranslation(LangKeys.ModmailLogChannelTopic), permissionOverwrites);
     guildOption.LogChannelId = logChannel.Id;
     guildOption.CategoryId = category.Id;
 

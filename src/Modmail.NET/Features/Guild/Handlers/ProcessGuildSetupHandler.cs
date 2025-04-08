@@ -1,8 +1,10 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Entities;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Utils;
+using Modmail.NET.Database.Entities;
+using Modmail.NET.Features.Guild.Commands;
+using Modmail.NET.Features.Guild.Queries;
 
 namespace Modmail.NET.Features.Guild.Handlers;
 
@@ -32,7 +34,7 @@ public class ProcessGuildSetupHandler : IRequestHandler<ProcessGuildSetupCommand
       TakeFeedbackAfterClosing = false,
       IconUrl = request.Guild.IconUrl,
       Name = request.Guild.Name,
-      BannerUrl = request.Guild.BannerUrl,
+      BannerUrl = request.Guild.BannerUrl
     };
 
     await _sender.Send(new ClearGuildOptionCommand(request.AuthorizedUserId), cancellationToken);

@@ -1,6 +1,9 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -30,7 +33,7 @@ public class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonym
 
     _ = Task.Run(async () => {
       var ticketChannel = request.TicketChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketResponses.AnonymousToggled(ticket));
+      if (ticketChannel is not null) await ticketChannel.SendMessageAsync(TicketBotMessages.Ticket.AnonymousToggled(ticket));
     }, cancellationToken);
   }
 }

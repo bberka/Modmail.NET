@@ -1,11 +1,15 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Entities;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
-using Modmail.NET.Services;
-using Modmail.NET.Utils;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Features.Ticket.Services;
+using Modmail.NET.Features.Ticket.Static;
+using TicketMessage = Modmail.NET.Database.Entities.TicketMessage;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -48,7 +52,7 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
 
     var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
     var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-    var embed = UserResponses.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), anonymous);
+    var embed = TicketBotMessages.User.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), anonymous);
     var botMessage = await privateChannel.SendMessageAsync(embed);
 
     ticketMessage.BotMessageId = botMessage.Id;
@@ -57,6 +61,6 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    await request.Message.CreateReactionAsync(DiscordEmoji.FromName(_bot.Client, Const.ProcessedReactionDiscordEmojiString, false));
+    await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(TicketConstants.ProcessedReactionDiscordEmojiUnicode));
   }
 }

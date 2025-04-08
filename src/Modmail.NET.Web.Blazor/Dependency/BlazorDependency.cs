@@ -1,4 +1,4 @@
-using Modmail.NET.Static;
+using Modmail.NET.Common.Static;
 using Radzen;
 
 namespace Modmail.NET.Web.Blazor.Dependency;

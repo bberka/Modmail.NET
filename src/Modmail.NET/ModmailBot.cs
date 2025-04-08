@@ -2,9 +2,11 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
-using Modmail.NET.Features.UserInfo;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Guild.Commands;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.User.Commands;
 using Serilog;
 
 namespace Modmail.NET;

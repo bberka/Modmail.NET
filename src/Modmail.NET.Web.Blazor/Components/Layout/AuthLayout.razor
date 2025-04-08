@@ -1,7 +1,7 @@
-﻿@using Modmail.NET.Extensions
-@using Modmail.NET.Features.Permission
-@using Modmail.NET.Static
+﻿@using Modmail.NET.Common.Static
+@using Modmail.NET.Features.Permission.Queries
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
@@ -36,9 +36,17 @@
   <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
       <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard"/>
+
+      @* <RadzenPanelMenuItem Text="Analytics" Icon="analytics" Path="/analytics"/> *@
+
       @if (_hasAccessTickets) {
         <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
       }
+      <RadzenPanelMenuItem Text="Feedbacks" Icon="reviews" Path="/feedback"/>
+
+      <RadzenPanelMenuItem Text="Tags" Icon="label" Path="/tags"/>
+
+
       @if (_hasAccessBlacklist) {
         <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
       }
@@ -47,13 +55,15 @@
       }
 
       @if (_hasAccessTeams) {
+        @* <RadzenPanelMenuItem Text="Permissions" Icon="security" Path="/permissions"/> *@
+
         <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
       }
       @if (_isOwner) {
         <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
       }
       @if (_hasAccessHangfire) {
-        <RadzenPanelMenuItem Text="Hangfire Dashboard" Icon="grid_view" Path="/hangfire"/>
+        <RadzenPanelMenuItem Text="Hangfire" Icon="grid_view" Path="/hangfire"/>
       }
     </RadzenPanelMenu>
     @* <div class="rz-p-4"> *@

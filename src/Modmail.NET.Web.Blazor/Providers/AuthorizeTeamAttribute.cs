@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using Modmail.NET.Static;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Permission.Static;
 
 namespace Modmail.NET.Web.Blazor.Providers;
 

@@ -1,17 +1,18 @@
 ﻿@page "/dashboard"
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.Guild
-@using Modmail.NET.Features.Metric
-@using Modmail.NET.Features.Permission
-@using Modmail.NET.Queues
-@using Modmail.NET.Static
-@using Modmail.NET.Utils
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Common.Utils
+@using Modmail.NET.Features.Guild.Queries
+@using Modmail.NET.Features.Metric.Models
+@using Modmail.NET.Features.Metric.Queries
+@using Modmail.NET.Features.Permission.Queries
+@using Modmail.NET.Features.Ticket.Services
+@using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @inject NavigationManager NavigationManager
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject ModmailBot Bot
-@inject TicketMessageQueue TicketMessageQueue
+@inject TicketMessage TicketMessage
 @inject IServiceScopeFactory ScopeFactory
 @attribute [AuthorizeTeam]
 
@@ -235,7 +236,7 @@
           <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
             <RadzenCard class="rz-shadow-7">
               <RadzenText TextStyle="TextStyle.H3">
-                @(UtilReadable.ConvertNumberToReadableString(TicketMessageQueue.GetChannelCount()))
+                @(UtilReadable.ConvertNumberToReadableString(TicketMessage.GetChannelCount()))
               </RadzenText>
               <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
                 Processing Message Queues

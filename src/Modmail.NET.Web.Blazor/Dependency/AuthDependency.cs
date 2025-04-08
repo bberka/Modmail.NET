@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
-using Modmail.NET.Abstract;
-using Modmail.NET.Features.Permission;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Permission.Queries;
 using Modmail.NET.Language;
-using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Providers;
 using Serilog;
 
@@ -79,7 +79,7 @@ public static class AuthDependency
                  Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, context.Principal.FindFirst(ClaimTypes.Name), permission.ToString());
                  context.Success();
                }
-               catch (BotExceptionBase ex) {
+               catch (ModmailBotException ex) {
                  Log.Warning(ex, "Discord.OAuth Access failed {UserId}", userId);
                  context.Fail(ex.TitleMessage + " : " + ex.ContentMessage);
                }

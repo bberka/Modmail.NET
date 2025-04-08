@@ -1,8 +1,9 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Options
-@using Modmail.NET.Abstract
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.Blacklist
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Blacklist.Commands
+@using Modmail.NET.Web.Blazor.Extensions
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject NotificationService NotificationService
@@ -67,7 +68,7 @@
                         _reason);
         DialogService.Close(true);
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         ex.NotifyException(NotificationService);
         Log.Warning(logMessage,
                     _selectedUserId,

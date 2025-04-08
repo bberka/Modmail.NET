@@ -1,7 +1,10 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Guild;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -26,7 +29,7 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
     if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.GuildId);
 
     var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeClosed: true), cancellationToken);
-
+    if (ticket.FeedbackStar.HasValue) throw new FeedbackAlreadySubmittedException();
 
     ticket.FeedbackStar = request.StarCount;
     ticket.FeedbackMessage = request.TextInput;
@@ -34,6 +37,10 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
-    _ = Task.Run(async () => { await request.FeedbackMessage.ModifyAsync(x => { x.AddEmbed(UserResponses.FeedbackReceivedUpdateMessage(ticket)); }); }, cancellationToken);
+    await request.FeedbackMessage.ModifyAsync(x => {
+      x.Clear();
+      x.AddEmbed(TicketBotMessages.User.FeedbackReceivedUpdateMessage(ticket));
+    });
+    // _ = Task.Run(async () => {  }); }, cancellationToken);
   }
 }

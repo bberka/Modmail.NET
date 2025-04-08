@@ -1,6 +1,6 @@
 using EntityFrameworkCore.Triggered;
-using Modmail.NET.Abstract;
-using Modmail.NET.Utils;
+using Modmail.NET.Common.Utils;
+using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Triggers;
 

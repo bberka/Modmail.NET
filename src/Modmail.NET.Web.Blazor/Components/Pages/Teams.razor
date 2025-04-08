@@ -1,10 +1,11 @@
 ﻿@page "/teams"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Abstract
-@using Modmail.NET.Extensions
-@using Modmail.NET.Features.Teams
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
 @using Modmail.NET.Web.Blazor.Components.Shared.Teams
+@using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
@@ -224,7 +225,7 @@
 
         await ReloadDataAsync();
       }
-      catch (BotExceptionBase ex) {
+      catch (ModmailBotException ex) {
         Log.Warning(ex,
                     logMessage,
                     team.Name);

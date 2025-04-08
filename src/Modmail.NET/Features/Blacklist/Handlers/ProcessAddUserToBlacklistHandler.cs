@@ -1,11 +1,17 @@
 using MediatR;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Entities;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Features.Bot;
-using Modmail.NET.Features.Ticket;
-using Modmail.NET.Features.UserInfo;
-using Modmail.NET.Utils;
+using Modmail.NET.Database.Entities;
+using Modmail.NET.Features.Blacklist.Commands;
+using Modmail.NET.Features.Blacklist.Queries;
+using Modmail.NET.Features.Blacklist.Static;
+using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Features.Ticket.Helpers;
+using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Features.User.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
 
@@ -51,13 +57,13 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
       var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.AuthorizedUserId), cancellationToken);
 
-      var embedLog = LogResponses.BlacklistAdded(modUser, user, reason);
+      var embedLog = LogBotMessages.BlacklistAdded(modUser, user, reason);
       var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
       await logChannel.SendMessageAsync(embedLog);
 
       var member = await _sender.Send(new GetDiscordMemberQuery(user.Id), cancellationToken);
       if (member is not null) {
-        var dmEmbed = UserResponses.YouHaveBeenBlacklisted(reason);
+        var dmEmbed = BlacklistBotMessages.YouHaveBeenBlacklisted(reason);
         await member.SendMessageAsync(dmEmbed);
       }
     }, cancellationToken);

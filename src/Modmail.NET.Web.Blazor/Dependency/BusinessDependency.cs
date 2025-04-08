@@ -1,11 +1,10 @@
 using EntityFramework.Exceptions.SqlServer;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Triggers;
+using Modmail.NET.Features.Ticket.Services;
 using Modmail.NET.Language;
-using Modmail.NET.Queues;
-using Modmail.NET.Services;
-using Modmail.NET.Static;
 using Modmail.NET.Web.Blazor.Services;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -26,8 +25,7 @@ public static class BusinessDependency
     builder.Services.Configure<BotConfig>(botConfig);
     builder.Services.AddSingleton<LangProvider>();
     builder.Services.AddSingleton<ModmailBot>();
-    builder.Services.AddSingleton<ModmailEventHandlers>();
-    builder.Services.AddSingleton<TicketMessageQueue>();
+    builder.Services.AddSingleton<TicketMessage>();
     builder.Services.AddSingleton<TicketAttachmentDownloadService>();
     builder.Services.AddHostedService<ModmailHostedService>();
 

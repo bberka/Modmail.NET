@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
-using Modmail.NET.Utils;
+using Modmail.NET.Common.Utils;
 using Newtonsoft.Json;
 using Serilog;
 
