@@ -13,13 +13,13 @@ public static class StringInterpolationMgr
                              ulong? modUserId = null,
                              ulong? channelId = null,
                              ulong? guildId = null,
-                             string userName = null,
-                             string modUserName = null,
-                             string channelName = null,
-                             string guildName = null,
-                             string roleName = null,
-                             string teamName = null,
-                             string ticketId = null
+                             string? userName = null,
+                             string? modUserName = null,
+                             string? channelName = null,
+                             string? guildName = null,
+                             string? roleName = null,
+                             string? teamName = null,
+                             string? ticketId = null
   ) {
     var sb = new StringBuilder(text);
     return sb.Replace("{UserId}", userId?.ToString() ?? "Unknown")
@@ -39,12 +39,12 @@ public static class StringInterpolationMgr
 
 
   public static string Build(string text,
-                             DiscordGuild guild = null,
-                             DiscordUser user = null,
-                             DiscordUser modUser = null,
-                             DiscordChannel channel = null,
-                             DiscordRole role = null,
-                             GuildTeam team = null
+                             DiscordGuild? guild = null,
+                             DiscordUser? user = null,
+                             DiscordUser? modUser = null,
+                             DiscordChannel? channel = null,
+                             DiscordRole? role = null,
+                             Team? team = null
   ) {
     return Build(text,
                  user?.Id,
@@ -60,18 +60,18 @@ public static class StringInterpolationMgr
   }
 
   public static string Build(string text,
-                             GuildOption guild = null,
-                             DiscordUserInfo user = null,
-                             DiscordUserInfo modUser = null,
-                             DiscordChannel channel = null,
-                             DiscordRole role = null,
-                             GuildTeam team = null
+                             Option? guild = null,
+                             UserInformation? user = null,
+                             UserInformation? modUser = null,
+                             DiscordChannel? channel = null,
+                             DiscordRole? role = null,
+                             Team? team = null
   ) {
     return Build(text,
                  user?.Id,
                  modUser?.Id,
                  channel?.Id,
-                 guild?.GuildId,
+                 guild?.ServerId,
                  user?.Username,
                  modUser?.Username,
                  channel?.Name,

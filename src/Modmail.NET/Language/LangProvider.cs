@@ -8,7 +8,7 @@ namespace Modmail.NET.Language;
 
 public class LangProvider
 {
-  private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<LangKeys, string>> _languages;
+  private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<Lang, string>> _languages;
 
   public LangProvider(IOptions<BotConfig> options) {
     var currentDir = Directory.GetCurrentDirectory();
@@ -19,16 +19,16 @@ public class LangProvider
     var files = Directory.GetFiles(langDir, "*.json");
     if (files.Length == 0) throw new FileNotFoundException("No language files found in the directory! Please make sure you have the correct directory structure. Expected directory : " + langDir);
 
-    var dict = new Dictionary<string, IReadOnlyDictionary<LangKeys, string>>();
+    var dict = new Dictionary<string, IReadOnlyDictionary<Lang, string>>();
     foreach (var file in files) {
       var lang = Path.GetFileNameWithoutExtension(file);
       var data = File.ReadAllText(file);
       if (string.IsNullOrEmpty(data)) throw new JsonException("Failed to read language data for language : " + lang);
 
-      var langData = JsonConvert.DeserializeObject<Dictionary<LangKeys, string>>(data);
+      var langData = JsonConvert.DeserializeObject<Dictionary<Lang, string>>(data);
       if (langData == null) throw new JsonException("Failed to deserialize language data for language : " + lang);
 
-      var processLangData = new Dictionary<LangKeys, string>();
+      var processLangData = new Dictionary<Lang, string>();
       foreach (var kp in langData) {
         var newValue = new StringBuilder(kp.Value)
                        .Replace("{NewLine}", Environment.NewLine)
@@ -51,7 +51,7 @@ public class LangProvider
   public static LangProvider This => ServiceLocator.GetLangProvider();
 
 
-  private IReadOnlyDictionary<LangKeys, string> GetLanguage(string lang) {
+  private IReadOnlyDictionary<Lang, string> GetLanguage(string lang) {
     if (!_languages.TryGetValue(lang, out var language))
       throw new KeyNotFoundException("Language not found : " + lang);
 
@@ -62,7 +62,7 @@ public class LangProvider
     return ServiceLocator.GetBotConfig().DefaultLanguage;
   }
 
-  public string GetTranslation(LangKeys key, params object[] args) {
+  public string GetTranslation(Lang key, params string[] args) {
     var lang = GetLanguage();
     if (lang.Contains('-')) lang = lang.Split('-')[0];
 
@@ -71,14 +71,15 @@ public class LangProvider
       return key.ToString();
     // throw new KeyNotFoundException("Translation not found for key : " + key);
 
-    //try parse args to enum LangKeys and if exists replace with translation
+    //try parse args to enum Lang and if exists replace with translation
     if (args.Length == 0) return translation;
-    var newArgs = new List<object>();
+    var newArgs = new List<string>();
     foreach (var arg in args)
-      newArgs.Add(Enum.TryParse<LangKeys>(arg.ToString(), out var newArg)
+      newArgs.Add(Enum.TryParse<Lang>(arg, out var newArg)
                     ? GetTranslation(newArg)
                     : arg);
 
-    return string.Format(translation, newArgs);
+    var text = string.Format(translation, [..newArgs]);
+    return text;
   }
 }
