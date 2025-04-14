@@ -2,10 +2,9 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Tag.Helpers;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Language;
 using TicketMessage = Modmail.NET.Database.Entities.TicketMessage;
 
@@ -30,25 +29,24 @@ public class ProcessTagSendMessageHandler : IRequestHandler<ProcessTagSendMessag
     ArgumentNullException.ThrowIfNull(request.Channel);
     ArgumentNullException.ThrowIfNull(request.Guild);
 
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotOpen();
     ticket.LastMessageDateUtc = UtilDate.GetNow();
 
     _dbContext.Update(ticket);
 
-
     var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-
     var tag = await _dbContext.Tags.FindAsync([request.TagId], cancellationToken);
-    if (tag is null) throw new ModmailBotException(LangKeys.TagDoesntExists);
+    if (tag is null) throw new ModmailBotException(Lang.TagDoesntExists);
 
     var ticketMessage = new TicketMessage {
       SenderUserId = request.ModUser.Id,
       MessageDiscordId = 0,
       TicketId = request.TicketId,
       SentByMod = true,
-      MessageContent = "TagCommand:" + tag.Name //TODO: Find a way to render tags or directly insert tag content to ticket message logs
+      TagId = tag.Id //TODO: Handle this in transcript UI
     };
 
     var tagMessage = TagBotMessages.TagReceivedToTicket(tag, request.ModUser, ticket.Anonymous || guildOption.AlwaysAnonymous);

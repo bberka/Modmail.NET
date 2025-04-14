@@ -4,10 +4,9 @@ using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Features.DiscordBot.Queries;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -30,8 +29,8 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
   }
 
   public async Task Handle(ProcessCloseTicketCommand request, CancellationToken cancellationToken) {
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId,
-                                                       MustBeOpen: true), cancellationToken);
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotOpen();
 
     var closerUserId = request.CloserUserId == 0
                          ? _bot.Client.CurrentUser.Id
@@ -40,7 +39,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
     if (string.IsNullOrEmpty(closeReason)) closeReason = null;
 
 
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
 
     ticket.ClosedDateUtc = UtilDate.GetNow();
@@ -48,14 +47,14 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
     ticket.CloserUserId = closerUserId;
 
 
-    _dbContext.Tickets.Update(ticket);
+    _dbContext.Update(ticket);
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     _ = Task.Run(async () => {
-      Uri transcriptUri = null;
+      Uri? transcriptUri = null;
       if (guildOption.SendTranscriptLinkToUser && guildOption.PublicTranscripts) {
         var sendLinkToUser = Uri.TryCreate(_options.Value.Domain, UriKind.Absolute, out var uri);
-        if (sendLinkToUser)
+        if (sendLinkToUser && uri is not null)
           try {
             transcriptUri = new Uri(uri, "transcript/" + request.TicketId);
           }
@@ -66,7 +65,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 
 
       var modChatChannel = request.ModChatChannel ?? await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(LangKeys.TicketClosed));
+      await modChatChannel.DeleteAsync(LangProvider.This.GetTranslation(Lang.TicketClosed));
       try {
         var pmChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
         await pmChannel.SendMessageAsync(TicketBotMessages.User.YourTicketHasBeenClosed(ticket, guildOption, transcriptUri));

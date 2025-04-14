@@ -5,5 +5,5 @@ namespace Modmail.NET.Features.Ticket.Commands;
 
 public sealed record ProcessToggleAnonymousCommand(
   Guid TicketId,
-  DiscordChannel TicketChannel = null
+  DiscordChannel? TicketChannel = null
 ) : IRequest;

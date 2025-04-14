@@ -14,38 +14,39 @@ public static class TicketBotMessages
   {
     public static DiscordEmbedBuilder FeedbackReceivedUpdateMessage(Database.Entities.Ticket ticket) {
       var feedbackDone = new DiscordEmbedBuilder()
-                         .WithTitle(LangKeys.FeedbackReceived.GetTranslation())
+                         .WithTitle(Lang.FeedbackReceived.Translate())
                          .WithCustomTimestamp()
                          .WithGuildInfoFooter()
-                         .AddField(LangKeys.Star.GetTranslation(), LangKeys.StarEmoji.GetTranslation() + ticket.FeedbackStar)
-                         .AddField(LangKeys.Feedback.GetTranslation(), ticket.FeedbackMessage)
+                         .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
                          .WithColor(ModmailColors.FeedbackColor);
+      if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDone.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);
+
       return feedbackDone;
     }
 
 
-    public static DiscordMessageBuilder YourTicketHasBeenClosed(Database.Entities.Ticket ticket, GuildOption guildOption, Uri transcriptUri) {
+    public static DiscordMessageBuilder YourTicketHasBeenClosed(Database.Entities.Ticket ticket, Option option, Uri? transcriptUri) {
       var messageBuilder = new DiscordMessageBuilder();
       var embedBuilder = new DiscordEmbedBuilder()
-                         .WithTitle(LangKeys.YourTicketHasBeenClosed.GetTranslation())
-                         .WithDescription(LangKeys.YourTicketHasBeenClosedDescription.GetTranslation())
-                         .WithGuildInfoFooter(guildOption)
+                         .WithTitle(Lang.YourTicketHasBeenClosed.Translate())
+                         .WithDescription(Lang.YourTicketHasBeenClosedDescription.Translate())
+                         .WithGuildInfoFooter(option)
                          .WithCustomTimestamp()
                          .WithColor(ModmailColors.TicketClosedColor);
 
-      var closingMessage = LangKeys.ClosingMessageDescription.GetTranslation();
+      var closingMessage = Lang.ClosingMessageDescription.Translate();
 
       if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
 
-      if (!string.IsNullOrEmpty(ticket.CloseReason)) embedBuilder.AddField(LangKeys.CloseReason.GetTranslation(), ticket.CloseReason);
+      if (!string.IsNullOrEmpty(ticket.CloseReason)) embedBuilder.AddField(Lang.CloseReason.Translate(), ticket.CloseReason);
 
-      if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, LangKeys.Transcript.GetTranslation()));
+      if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, Lang.Transcript.Translate()));
 
       messageBuilder.AddEmbed(embedBuilder);
       return messageBuilder;
     }
 
-    public static DiscordMessageBuilder GiveFeedbackMessage(Database.Entities.Ticket ticket, GuildOption guildOption) {
+    public static DiscordMessageBuilder GiveFeedbackMessage(Database.Entities.Ticket ticket, Option option) {
       var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
       var starList = new List<DiscordComponent> {
         new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, ticket.Id), "1", false, new DiscordComponentEmoji("⭐")),
@@ -56,10 +57,10 @@ public static class TicketBotMessages
       };
 
       var ticketFeedbackEmbed = new DiscordEmbedBuilder()
-                                .WithTitle(LangKeys.Feedback.GetTranslation())
-                                .WithDescription(LangKeys.FeedbackDescription.GetTranslation())
+                                .WithTitle(Lang.Feedback.Translate())
+                                .WithDescription(Lang.FeedbackDescription.Translate())
                                 .WithCustomTimestamp()
-                                .WithGuildInfoFooter(guildOption)
+                                .WithGuildInfoFooter(option)
                                 .WithColor(ModmailColors.FeedbackColor);
 
       var response = ticketFeedbackMsgToUser
@@ -68,30 +69,30 @@ public static class TicketBotMessages
       return response;
     }
 
-    public static DiscordEmbedBuilder TicketPriorityChanged(GuildOption guildOption, DiscordUserInfo info, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
+    public static DiscordEmbedBuilder TicketPriorityChanged(Option option, UserInformation information, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
       var embed = new DiscordEmbedBuilder()
-                  .WithGuildInfoFooter(guildOption)
-                  .WithTitle(LangKeys.TicketPriorityChanged.GetTranslation())
+                  .WithGuildInfoFooter(option)
+                  .WithTitle(Lang.TicketPriorityChanged.Translate())
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.TicketPriorityChangedColor)
-                  .AddField(LangKeys.OldPriority.GetTranslation(), oldPriority.ToString(), true)
-                  .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true);
-      if (!ticket.Anonymous) embed.WithUserAsAuthor(info);
+                  .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
+                  .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true);
+      if (!ticket.Anonymous) embed.WithUserAsAuthor(information);
       // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
       return embed;
     }
 
 
     public static DiscordMessageBuilder YouHaveCreatedNewTicket(DiscordGuild guild,
-                                                                GuildOption option,
+                                                                Option option,
                                                                 List<TicketType> ticketTypes,
                                                                 Guid ticketId) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(LangKeys.YouHaveCreatedNewTicket.GetTranslation())
+                  .WithTitle(Lang.YouHaveCreatedNewTicket.Translate())
                   .WithFooter(guild.Name, guild.IconUrl)
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.TicketCreatedColor);
-      var greetingMessage = LangKeys.GreetingMessageDescription.GetTranslation();
+      var greetingMessage = Lang.GreetingMessageDescription.Translate();
       if (!string.IsNullOrEmpty(greetingMessage))
         embed.WithDescription(greetingMessage);
 
@@ -100,14 +101,16 @@ public static class TicketBotMessages
 
       if (ticketTypes.Count > 0) {
         var selectBox = new DiscordSelectComponent(UtilInteraction.BuildKey("ticket_type", ticketId.ToString()),
-                                                   LangKeys.PleaseSelectATicketType.GetTranslation(),
-                                                   ticketTypes.Select(x => new DiscordSelectComponentOption(x.Name,
-                                                                                                            x.Key.ToString(),
-                                                                                                            x.Description,
-                                                                                                            false,
-                                                                                                            !string.IsNullOrWhiteSpace(x.Emoji)
-                                                                                                              ? new DiscordComponentEmoji(x.Emoji)
-                                                                                                              : null))
+                                                   Lang.PleaseSelectATicketType.Translate(),
+                                                   ticketTypes.Select(x => string.IsNullOrWhiteSpace(x.Emoji)
+                                                                             ? new DiscordSelectComponentOption(x.Name,
+                                                                                                                x.Key.ToString(),
+                                                                                                                x.Description)
+                                                                             : new DiscordSelectComponentOption(x.Name,
+                                                                                                                x.Key.ToString(),
+                                                                                                                x.Description,
+                                                                                                                false,
+                                                                                                                new DiscordComponentEmoji(x.Emoji)))
                                                               .ToList());
         builder.AddComponents(selectBox);
       }
@@ -123,7 +126,7 @@ public static class TicketBotMessages
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.MessageReceivedColor);
 
-      if (!anonymous) embed.WithUserAsAuthor(message.Author);
+      if (!anonymous && message.Author is not null) embed.WithUserAsAuthor(message.Author);
 
       var msg = new DiscordMessageBuilder();
 
@@ -140,7 +143,7 @@ public static class TicketBotMessages
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.MessageReceivedColor);
 
-      if (!anonymous) embed.WithUserAsAuthor(message.Author);
+      if (!anonymous && message.Author is not null) embed.WithUserAsAuthor(message.Author);
 
       return embed;
     }
@@ -150,27 +153,27 @@ public static class TicketBotMessages
   {
     public static DiscordMessageBuilder NewTicket(DiscordUser member, Guid ticketId) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(LangKeys.NewTicket.GetTranslation())
+                  .WithTitle(Lang.NewTicket.Translate())
                   .WithCustomTimestamp()
-                  .WithDescription(LangKeys.NewTicketDescriptionMessage.GetTranslation())
+                  .WithDescription(Lang.NewTicketDescriptionMessage.Translate())
                   .WithAuthor(member.GetUsername(), iconUrl: member.AvatarUrl)
-                  .AddField(LangKeys.User.GetTranslation(), member.Mention, true)
-                  .AddField(LangKeys.TicketId.GetTranslation(), ticketId.ToString().ToUpper(), true)
+                  .AddField(Lang.User.Translate(), member.Mention, true)
+                  .AddField(Lang.TicketId.Translate(), ticketId.ToString().ToUpper(), true)
                   .WithColor(ModmailColors.TicketCreatedColor);
 
       var messageBuilder = new DiscordMessageBuilder()
                            .AddEmbed(embed)
                            .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger,
                                                                      UtilInteraction.BuildKey("close_ticket_with_reason", ticketId.ToString()),
-                                                                     LangKeys.CloseTicket.GetTranslation(),
+                                                                     Lang.CloseTicket.Translate(),
                                                                      emoji: new DiscordComponentEmoji("🔒"))
                                          );
       return messageBuilder;
     }
 
-    public static DiscordEmbedBuilder NoteAdded(TicketNote note, DiscordUserInfo user) {
+    public static DiscordEmbedBuilder NoteAdded(TicketNote note, UserInformation user) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(LangKeys.NoteAdded.GetTranslation())
+                  .WithTitle(Lang.NoteAdded.Translate())
                   .WithDescription(note.Content)
                   .WithColor(ModmailColors.NoteAddedColor)
                   .WithCustomTimestamp()
@@ -181,13 +184,13 @@ public static class TicketBotMessages
     public static DiscordEmbedBuilder AnonymousToggled(Database.Entities.Ticket ticket) {
       var embed2 = new DiscordEmbedBuilder()
                    .WithTitle(ticket.Anonymous
-                                ? LangKeys.AnonymousModOn.GetTranslation()
-                                : LangKeys.AnonymousModOff.GetTranslation())
+                                ? Lang.AnonymousModOn.Translate()
+                                : Lang.AnonymousModOff.Translate())
                    .WithColor(ModmailColors.AnonymousToggledColor)
                    .WithCustomTimestamp()
                    .WithDescription(ticket.Anonymous
-                                      ? LangKeys.TicketSetAnonymousDescription.GetTranslation()
-                                      : LangKeys.TicketSetNotAnonymousDescription.GetTranslation());
+                                      ? Lang.TicketSetAnonymousDescription.Translate()
+                                      : Lang.TicketSetNotAnonymousDescription.Translate());
 
       if (ticket.OpenerUser is not null) embed2.WithUserAsAuthor(ticket.OpenerUser);
 
@@ -195,27 +198,27 @@ public static class TicketBotMessages
       return embed2;
     }
 
-    public static DiscordEmbedBuilder TicketTypeChanged(DiscordUserInfo user, TicketType ticketType) {
+    public static DiscordEmbedBuilder TicketTypeChanged(UserInformation user, TicketType? ticketType) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(LangKeys.TicketTypeChanged.GetTranslation())
+                  .WithTitle(Lang.TicketTypeChanged.Translate())
                   .WithUserAsAuthor(user)
                   .WithCustomTimestamp()
                   .WithColor(ModmailColors.TicketTypeChangedColor);
       if (ticketType is not null)
-        embed.WithDescription(string.Format(LangKeys.TicketTypeSet.GetTranslation(), ticketType.Emoji, ticketType.Name));
+        embed.WithDescription(string.Format(Lang.TicketTypeSet.Translate(), ticketType.Emoji, ticketType.Name));
       else
-        embed.WithDescription(LangKeys.TicketTypeRemoved.GetTranslation());
+        embed.WithDescription(Lang.TicketTypeRemoved.Translate());
 
       return embed;
     }
 
-    public static DiscordEmbedBuilder TicketPriorityChanged(DiscordUserInfo modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
+    public static DiscordEmbedBuilder TicketPriorityChanged(UserInformation modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
       var embed = new DiscordEmbedBuilder()
-                  .WithTitle(LangKeys.TicketPriorityChanged.GetTranslation())
+                  .WithTitle(Lang.TicketPriorityChanged.Translate())
                   .WithColor(ModmailColors.TicketPriorityChangedColor)
                   .WithCustomTimestamp()
-                  .AddField(LangKeys.OldPriority.GetTranslation(), oldPriority.ToString(), true)
-                  .AddField(LangKeys.NewPriority.GetTranslation(), newPriority.ToString(), true)
+                  .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
+                  .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true)
                   .WithUserAsAuthor(modUser);
       return embed;
     }
@@ -225,8 +228,9 @@ public static class TicketBotMessages
       var embed = new DiscordEmbedBuilder()
                   .WithDescription(message.Content)
                   .WithCustomTimestamp()
-                  .WithColor(ModmailColors.MessageReceivedColor)
-                  .WithUserAsAuthor(message.Author);
+                  .WithColor(ModmailColors.MessageReceivedColor);
+
+      if (message.Author is not null) embed.WithUserAsAuthor(message.Author);
 
       var msgBuilder = new DiscordMessageBuilder()
                        .AddEmbed(embed)
@@ -238,8 +242,10 @@ public static class TicketBotMessages
       var embed = new DiscordEmbedBuilder()
                   .WithDescription(message.Content)
                   .WithCustomTimestamp()
-                  .WithColor(ModmailColors.MessageReceivedColor)
-                  .WithUserAsAuthor(message.Author);
+                  .WithColor(ModmailColors.MessageReceivedColor);
+
+      if (message.Author is not null) embed.WithUserAsAuthor(message.Author);
+
       return embed;
     }
   }

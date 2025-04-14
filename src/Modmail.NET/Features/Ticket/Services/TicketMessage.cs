@@ -1,16 +1,17 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Abstract;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
-using Modmail.NET.Features.Blacklist.Queries;
+using Modmail.NET.Database;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Blacklist.Static;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Queries;
 using Serilog;
 
 namespace Modmail.NET.Features.Ticket.Services;
@@ -60,9 +61,10 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 
     using var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
     try {
-      if (await sender.Send(new CheckUserBlacklistStatusQuery(user.Id))) {
+      if (await dbContext.Blacklists.FilterByUserId(user.Id).AnyAsync()) {
         Log.Information(
                         "[{Source}] User is blacklisted, sending rejection message. UserId: {UserId}",
                         nameof(TicketMessage),
@@ -72,7 +74,12 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
         return;
       }
 
-      var activeTicket = await sender.Send(new GetTicketByUserIdQuery(user.Id, true, true));
+
+      var activeTicket = await dbContext.Tickets
+                                        .FilterActive()
+                                        .FilterByOpenerUserId(user.Id)
+                                        .FirstOrDefaultAsync();
+
       if (activeTicket is not null) {
         Log.Debug(
                   "[{Source}] Active ticket found, processing user message. TicketId: {TicketId}, UserId: {UserId}",

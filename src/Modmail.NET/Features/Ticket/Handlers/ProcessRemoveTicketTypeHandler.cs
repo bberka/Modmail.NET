@@ -1,26 +1,29 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessRemoveTicketTypeHandler : IRequestHandler<ProcessRemoveTicketTypeCommand, TicketType>
 {
   private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
 
-  public ProcessRemoveTicketTypeHandler(ModmailDbContext dbContext,
-                                        ISender sender) {
+  public ProcessRemoveTicketTypeHandler(ModmailDbContext dbContext) {
     _dbContext = dbContext;
-    _sender = sender;
   }
 
   public async Task<TicketType> Handle(ProcessRemoveTicketTypeCommand request, CancellationToken cancellationToken) {
-    var ticketType = await _sender.Send(new GetTicketTypeQuery(request.Id), cancellationToken);
-    var allTicketsByType = await _sender.Send(new GetTicketListByTypeQuery(ticketType.Id), cancellationToken);
+    var ticketType = await _dbContext.TicketTypes.FindAsync([request.Id], cancellationToken)
+                     ?? throw new ModmailBotException(Lang.TicketTypeNotFound);
+
+    var allTicketsByType = await _dbContext.Tickets
+                                           .FilterByTypeId(request.Id)
+                                           .ToListAsync(cancellationToken);
 
     if (allTicketsByType.Count > 0) {
       foreach (var ticket in allTicketsByType) {

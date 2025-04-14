@@ -2,6 +2,7 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Ticket.Commands;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -17,7 +18,7 @@ public class ProcessUpdateTicketTypeHandler : IRequestHandler<ProcessUpdateTicke
 
   public async Task Handle(ProcessUpdateTicketTypeCommand request, CancellationToken cancellationToken) {
     var type = await _dbContext.TicketTypes.FindAsync([request.TicketType.Id], cancellationToken);
-    if (type is null) throw new TicketTypeNotExistsException();
+    if (type is null) throw new ModmailBotException(Lang.TicketTypeNotExists);
 
     var newType = request.TicketType;
     type.Name = newType.Name;

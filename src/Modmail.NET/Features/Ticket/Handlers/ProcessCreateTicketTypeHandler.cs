@@ -5,6 +5,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -21,11 +22,11 @@ public class ProcessCreateTicketTypeHandler : IRequestHandler<ProcessCreateTicke
   }
 
   public async Task Handle(ProcessCreateTicketTypeCommand request, CancellationToken cancellationToken) {
-    if (string.IsNullOrEmpty(request.Name)) throw new InvalidNameException(request.Name);
+    if (string.IsNullOrEmpty(request.Name)) throw new ModmailBotException(Lang.InvalidName);
 
 
     var exists = await _sender.Send(new CheckTicketTypeExistsQuery(request.Name), cancellationToken);
-    if (exists) throw new TicketTypeAlreadyExistsException(request.Name);
+    if (exists) throw new ModmailBotException(Lang.TicketTypeAlreadyExists);
 
     var id = Guid.CreateVersion7();
     var idClean = id.ToString().Replace("-", "");

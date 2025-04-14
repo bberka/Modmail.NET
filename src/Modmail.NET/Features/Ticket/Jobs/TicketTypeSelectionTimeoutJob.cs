@@ -24,7 +24,7 @@ public class TicketTypeSelectionTimeoutJob : HangfireRecurringJobBase
 
   public void RemoveMessage(ulong id) {
     var message = Messages.FirstOrDefault(x => x.Key.Id == id);
-    if (message.Key != null) Messages.TryRemove(message.Key, out _);
+    if (message.Key is not null) Messages.TryRemove(message.Key, out _);
   }
 
 

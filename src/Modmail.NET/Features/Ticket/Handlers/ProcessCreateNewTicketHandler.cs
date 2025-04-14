@@ -1,15 +1,15 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Features.DiscordBot.Queries;
-using Modmail.NET.Features.Guild.Queries;
-using Modmail.NET.Features.Permission.Queries;
+using Modmail.NET.Features.Server.Queries;
+using Modmail.NET.Features.Teams.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.Ticket.Jobs;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Features.Ticket.Services;
 using Modmail.NET.Features.Ticket.Static;
 using TicketMessage = Modmail.NET.Database.Entities.TicketMessage;
@@ -37,30 +37,27 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
   }
 
   public async Task Handle(ProcessCreateNewTicketCommand request, CancellationToken cancellationToken) {
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
-    var guild = await _sender.Send(new GetDiscordMainGuildQuery(), cancellationToken);
+    var guild = await _sender.Send(new GetDiscordMainServerQuery(), cancellationToken);
     //make new privateChannel
     var channelName = string.Format(TicketConstants.TicketNameTemplate, request.User.Username.Trim());
     var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
     var ticketId = Guid.CreateVersion7();
 
-    var permissions = await _sender.Send(new GetPermissionInfoQuery(), cancellationToken);
+    var permissions = await _sender.Send(new GetUserTeamInformationQuery(), cancellationToken);
     var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
-    var roles = guild.Roles;
 
-    var (modMemberListForOverwrites, modRoleListForOverwrites) = UtilPermission.ParsePermissionInfo(permissions, members, roles);
-    var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites, modRoleListForOverwrites);
+    var modMemberListForOverwrites = UtilPermission.ParsePermissionInfo(permissions, members);
+    var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites);
     var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
     var member = await _sender.Send(new GetDiscordMemberQuery(request.User.Id), cancellationToken);
     if (member is null) return;
 
-
-    var pingOnNewTicket = permissions.Where(x => x.PingOnNewTicket).ToArray();
     var msg = TicketBotMessages.Ticket.NewTicket(member, ticketId);
-    msg.WithContent(UtilMention.GetMentionsMessageString(pingOnNewTicket));
+    msg.WithContent(UtilMention.GetNewTicketPingText(permissions));
 
     var ticketMessage = TicketMessage.MapFrom(ticketId, request.Message, false);
 
@@ -86,7 +83,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     };
 
 
-    var ticketTypes = await _sender.Send(new GetTicketTypeListQuery(true), cancellationToken);
+    var ticketTypes = await _dbContext.TicketTypes.ToListAsync(cancellationToken);
 
     var ticketCreatedMessage = await request.PrivateChannel.SendMessageAsync(TicketBotMessages.User.YouHaveCreatedNewTicket(guild,
                                                                                                                             guildOption,
@@ -98,7 +95,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 
     ticket.BotTicketCreatedMessageInDmId = ticketCreatedMessage.Id;
 
-    _dbContext.Tickets.Add(ticket);
+    _dbContext.Add(ticket);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
 
@@ -109,7 +106,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
     var botMessage = await mailChannel.SendMessageAsync(TicketBotMessages.Ticket.MessageReceived(request.Message, ticketMessage.Attachments.ToArray()));
     ticketMessage.BotMessageId = botMessage.Id;
 
-    var newTicketCreatedLog = LogBotMessages.NewTicketCreated(request.Message, mailChannel, ticket.Id);
+    var newTicketCreatedLog = LogBotMessages.NewTicketCreated(request.Message, ticket.Id);
     var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
     await logChannel.SendMessageAsync(newTicketCreatedLog);
 

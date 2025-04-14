@@ -1,9 +1,11 @@
 using MediatR;
-using Modmail.NET.Attributes;
+using Modmail.NET.Abstract;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Entities;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;
 
-[PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))]
-public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, TicketType TicketType) : IRequest;
+[RequireModmailPermission(nameof(AuthPolicy.ManageTicketTypes))]
+public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, TicketType TicketType) : IRequest,
+                                                                                                     IPermissionCheck;

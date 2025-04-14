@@ -1,4 +1,3 @@
-using Modmail.NET.Common.Static;
 using Serilog;
 
 namespace Modmail.NET.Features.Ticket.Services;
@@ -7,7 +6,7 @@ public class TicketAttachmentDownloadService
 {
   public const string AttachmentDownloadDirectory = "AttachmentDownloads";
   public const int HttpClientDownloadTimeoutSeconds = 90;
-  
+
   private readonly IHttpClientFactory _httpClientFactory;
 
   public TicketAttachmentDownloadService(IHttpClientFactory httpClientFactory) {

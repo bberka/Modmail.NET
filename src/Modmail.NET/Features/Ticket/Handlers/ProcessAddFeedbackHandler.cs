@@ -1,10 +1,10 @@
 using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.Ticket.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -25,11 +25,12 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
     if (string.IsNullOrEmpty(request.TextInput)) throw new InvalidOperationException("Feedback messageContent is empty");
     if (request.FeedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
 
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
-    if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.GuildId);
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
+    if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.ServerId);
 
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeClosed: true), cancellationToken);
-    if (ticket.FeedbackStar.HasValue) throw new FeedbackAlreadySubmittedException();
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotClosed();
+    if (ticket.FeedbackStar.HasValue) throw new ModmailBotException(Lang.FeedbackAlreadySubmitted);
 
     ticket.FeedbackStar = request.StarCount;
     ticket.FeedbackMessage = request.TextInput;

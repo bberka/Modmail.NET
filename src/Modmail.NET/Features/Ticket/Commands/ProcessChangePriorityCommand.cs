@@ -8,4 +8,4 @@ public sealed record ProcessChangePriorityCommand(
   Guid TicketId,
   ulong ModUserId,
   TicketPriority NewPriority,
-  DiscordChannel TicketChannel = null) : IRequest;
+  DiscordChannel? TicketChannel = null) : IRequest;

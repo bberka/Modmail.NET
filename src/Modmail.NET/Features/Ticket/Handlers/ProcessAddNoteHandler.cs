@@ -4,7 +4,6 @@ using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Features.User.Queries;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -24,13 +23,14 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
   }
 
   public async Task Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotOpen();
     var noteEntity = new TicketNote {
       TicketId = ticket.Id,
       Content = request.Note,
-      DiscordUserId = request.UserId
+      UserId = request.UserId
     };
-    _dbContext.TicketNotes.Add(noteEntity);
+    _dbContext.Add(noteEntity);
     await _dbContext.SaveChangesAsync(cancellationToken);
     _ = Task.Run(async () => {
       try {

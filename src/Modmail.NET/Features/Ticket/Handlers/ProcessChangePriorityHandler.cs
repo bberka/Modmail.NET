@@ -2,12 +2,12 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.DiscordBot.Queries;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Features.User.Queries;
+using Modmail.NET.Language;
 using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -27,23 +27,23 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
   }
 
   public async Task Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken) {
-    if (request.ModUserId == 0) throw new InvalidUserIdException();
+    if (request.ModUserId == 0) throw new ModmailBotException(Lang.InvalidUser);
 
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId), cancellationToken);
-    if (ticket.ClosedDateUtc.HasValue) throw new TicketAlreadyClosedException();
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotOpen();
 
     var oldPriority = ticket.Priority;
     ticket.Priority = request.NewPriority;
 
 
-    _dbContext.Tickets.Update(ticket);
+    _dbContext.Update(ticket);
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     _ = Task.Run(async () => {
       var modUser = await _sender.Send(new GetDiscordUserInfoQuery(request.ModUserId), cancellationToken);
 
       try {
-        var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+        var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
         var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
         await privateChannel.SendMessageAsync(TicketBotMessages.User.TicketPriorityChanged(guildOption, modUser, ticket, oldPriority, request.NewPriority));
       }

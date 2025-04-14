@@ -3,10 +3,9 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Features.Ticket.Services;
 using Modmail.NET.Features.Ticket.Static;
 using TicketMessage = Modmail.NET.Database.Entities.TicketMessage;
@@ -37,13 +36,14 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
     ArgumentNullException.ThrowIfNull(request.Guild);
 
 
-    var ticket = await _sender.Send(new GetTicketQuery(request.TicketId, MustBeOpen: true), cancellationToken);
+    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+    ticket.ThrowIfNotOpen();
     ticket.LastMessageDateUtc = UtilDate.GetNow();
 
     _dbContext.Update(ticket);
 
 
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken);
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
     var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
 
