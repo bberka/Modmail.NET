@@ -4,9 +4,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modmail.NET", "src\Modmail.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modmail.NET.Web.Blazor", "src\Modmail.NET.Web.Blazor\Modmail.NET.Web.Blazor.csproj", "{DFFBA4E9-FE91-4585-B46C-F1EED63674DE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{988D7DB3-8AF9-4ABC-A905-8087C1BB48C7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. App Core", "1. App Core", "{988D7DB3-8AF9-4ABC-A905-8087C1BB48C7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interface", "Interface", "{21689EEF-7CF6-4634-8023-FCE71D21ACDE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Blazor Interface", "2. Blazor Interface", "{21689EEF-7CF6-4634-8023-FCE71D21ACDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
