@@ -12,24 +12,24 @@ using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.DiscordBot.Handlers;
 
-public class GetDiscordMainGuildHandler : IRequestHandler<GetDiscordMainGuildQuery, DiscordGuild>
+public class GetDiscordMainServerHandler : IRequestHandler<GetDiscordMainServerQuery, DiscordGuild>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
   private readonly IOptions<BotConfig> _options;
   private readonly ISender _sender;
 
-  public GetDiscordMainGuildHandler(ModmailBot bot,
-                                    ISender sender,
-                                    ModmailDbContext dbContext,
-                                    IOptions<BotConfig> options) {
+  public GetDiscordMainServerHandler(ModmailBot bot,
+                                     ISender sender,
+                                     ModmailDbContext dbContext,
+                                     IOptions<BotConfig> options) {
     _bot = bot;
     _sender = sender;
     _dbContext = dbContext;
     _options = options;
   }
 
-  public async Task<DiscordGuild> Handle(GetDiscordMainGuildQuery request, CancellationToken cancellationToken) {
+  public async Task<DiscordGuild> Handle(GetDiscordMainServerQuery request, CancellationToken cancellationToken) {
     var guildId = _options.Value.MainServerId;
     DiscordGuild guild;
     try {
@@ -37,10 +37,10 @@ public class GetDiscordMainGuildHandler : IRequestHandler<GetDiscordMainGuildQue
     }
     catch (NotFoundException) {
       Log.Error("Main guild not found: {GuildId}", guildId);
-      throw new Common.Exceptions.NotFoundException(LangKeys.MainGuild);
+      throw new ModmailBotException(Lang.MainGuildNotFound);
     }
 
-    var guildOption = await _sender.Send(new GetGuildOptionQuery(false), cancellationToken) ?? throw new NullReferenceException();
+    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
     var isSame = guildOption.Name == guild.Name && guildOption.IconUrl == guild.IconUrl && guildOption.BannerUrl == guild.BannerUrl;
     if (isSame) return guild;
 

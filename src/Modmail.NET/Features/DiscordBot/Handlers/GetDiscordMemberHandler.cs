@@ -6,7 +6,7 @@ using Modmail.NET.Features.User.Commands;
 
 namespace Modmail.NET.Features.DiscordBot.Handlers;
 
-public class GetDiscordMemberHandler : IRequestHandler<GetDiscordMemberQuery, DiscordMember>
+public class GetDiscordMemberHandler : IRequestHandler<GetDiscordMemberQuery, DiscordMember?>
 {
   private readonly ModmailBot _bot;
   private readonly ISender _sender;
@@ -17,7 +17,7 @@ public class GetDiscordMemberHandler : IRequestHandler<GetDiscordMemberQuery, Di
     _sender = sender;
   }
 
-  public async Task<DiscordMember> Handle(GetDiscordMemberQuery request, CancellationToken cancellationToken) {
+  public async Task<DiscordMember?> Handle(GetDiscordMemberQuery request, CancellationToken cancellationToken) {
     foreach (var guild in _bot.Client.Guilds) {
       try {
         var member = await guild.Value.GetMemberAsync(request.UserId);

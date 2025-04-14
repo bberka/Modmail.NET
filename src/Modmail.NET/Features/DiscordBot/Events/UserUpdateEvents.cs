@@ -9,7 +9,9 @@ namespace Modmail.NET.Features.DiscordBot.Events;
 
 public static class UserUpdateEvents
 {
-  public static async Task UpdateUser(DiscordClient client, DiscordUser user) {
+  public static async Task UpdateUser(DiscordClient client, DiscordUser? user) {
+    if (user is null) return;
+
     var scope = client.ServiceProvider.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
     await sender.Send(new UpdateDiscordUserCommand(user));

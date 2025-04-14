@@ -9,6 +9,7 @@ using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Guild.Queries;
 using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.Ticket.Static;
@@ -25,14 +26,6 @@ public static class OnMessageUpdatedEvent
     DiscordClient client,
     MessageUpdatedEventArgs args
   ) {
-    if (args is null) {
-      Log.Debug(
-                "[{Source}] MessageUpdatedEventArgs is null, exiting",
-                nameof(OnMessageUpdatedEvent)
-               );
-      return;
-    }
-
     if (args.Author.IsBot) {
       Log.Debug(
                 "[{Source}] Ignoring message update from bot. UserId: {UserId}, MessageId: {MessageId}",
@@ -85,10 +78,11 @@ public static class OnMessageUpdatedEvent
     }
 
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
-    var messageEntity = await dbContext.TicketMessages
-                                       .FirstOrDefaultAsync(x =>
-                                                              !x.SentByMod && x.MessageDiscordId == args.Message.Id &&
-                                                              x.SenderUserId == args.Message.Author.Id);
+    var messageEntity = await dbContext.Messages
+                                       .FirstOrDefaultAsync(x => !x.SentByMod
+                                                                 && x.MessageDiscordId == args.Message.Id
+                                                                 && args.Message.Author != null
+                                                                 && x.SenderUserId == args.Message.Author.Id);
     if (messageEntity is null) {
       Log.Debug(
                 "[{Source}] No matching TicketMessage found for update in private channel. ChannelId: {ChannelId}, MessageId: {MessageId}",
@@ -99,9 +93,11 @@ public static class OnMessageUpdatedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.Id == messageEntity.TicketId &&
-                                                               x.PrivateMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterActive()
+                                .FilterById(messageEntity.TicketId)
+                                .FilterByPrivateChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for update in private channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",
@@ -120,7 +116,6 @@ public static class OnMessageUpdatedEvent
                                 scope,
                                 ticket.ModMessageChannelId,
                                 messageEntity.BotMessageId,
-                                args.MessageBefore,
                                 args.Message,
                                 ticket.Anonymous
                                );
@@ -152,9 +147,10 @@ public static class OnMessageUpdatedEvent
 
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
-    var messageEntity = await dbContext.TicketMessages.FirstOrDefaultAsync(x =>
-                                                                             x.SentByMod && x.MessageDiscordId == args.Message.Id &&
-                                                                             x.SenderUserId == args.Message.Author.Id);
+    var messageEntity = await dbContext.Messages.FirstOrDefaultAsync(x => x.SentByMod
+                                                                          && x.MessageDiscordId == args.Message.Id
+                                                                          && args.Message.Author != null
+                                                                          && x.SenderUserId == args.Message.Author.Id);
     if (messageEntity is null) {
       Log.Debug(
                 "[{Source}] No matching TicketMessage found for update in ticket channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",
@@ -166,9 +162,11 @@ public static class OnMessageUpdatedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.Id == ticketId &&
-                                                               x.ModMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterById(ticketId)
+                                .FilterActive()
+                                .FilterByModChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for update in ticket channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",
@@ -187,7 +185,6 @@ public static class OnMessageUpdatedEvent
                                 scope,
                                 ticket.PrivateMessageChannelId,
                                 messageEntity.BotMessageId,
-                                args.MessageBefore,
                                 args.Message,
                                 ticket.Anonymous
                                );
@@ -200,7 +197,6 @@ public static class OnMessageUpdatedEvent
     IServiceScope scope,
     ulong channelId,
     ulong messageId,
-    DiscordMessage oldMessage,
     DiscordMessage updatedMessage,
     bool anonymous
   ) {
@@ -220,7 +216,7 @@ public static class OnMessageUpdatedEvent
       if (affected == 0) throw new DbInternalException();
 
       var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-      var option = await sender.Send(new GetGuildOptionQuery(false));
+      var option = await sender.Send(new GetOptionQuery());
 
       var channel = await client.GetChannelAsync(channelId);
       var message = await channel.GetMessageAsync(messageId);

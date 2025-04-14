@@ -23,11 +23,11 @@ public static class ComponentInteractionCreatedEvent
     Log.Debug(
               "[{Source}] Component interaction created. CustomId: {CustomId}, UserId: {UserId}, ChannelId: {ChannelId}, InteractionId: {InteractionId}, MessageId: {MessageId}",
               nameof(ComponentInteractionCreatedEvent),
-              args.Interaction?.Data?.CustomId,
-              args.User?.Id,
-              args.Channel?.Id,
-              args.Interaction?.Id,
-              args.Message?.Id
+              args.Interaction.Data.CustomId,
+              args.User.Id,
+              args.Channel.Id,
+              args.Interaction.Id,
+              args.Message.Id
              );
 
     using var scope = client.ServiceProvider.CreateScope();
@@ -36,27 +36,27 @@ public static class ComponentInteractionCreatedEvent
     try {
       await sender.Send(new UpdateDiscordUserCommand(args.User));
 
-      var key = args.Interaction?.Data?.CustomId;
-      var (interactionName, parameters) = UtilInteraction.ParseKey(key);
+      var key = args.Interaction.Data.CustomId;
+      var (interactionName, _) = UtilInteraction.ParseKey(key);
       var messageId = args.Message.Id;
 
       switch (interactionName) {
         case "star":
-          await ProcessStarInteraction(sender, args, messageId);
+          await ProcessStarInteraction(args, messageId);
           break;
         case "ticket_type":
           await ProcessTicketTypeInteraction(sender, args, messageId);
           break;
         case "close_ticket": // This must stay due to deprecation and support for existing tickets (v2.0 beta)
         case "close_ticket_with_reason":
-          await ProcessCloseTicketInteraction(sender, args, messageId);
+          await ProcessCloseTicketInteraction(args);
           break;
         default:
           Log.Warning(
                       "[{Source}] Unknown interaction name: {InteractionName}, CustomId: {CustomId}",
                       nameof(ComponentInteractionCreatedEvent),
                       interactionName,
-                      args.Interaction?.Data?.CustomId
+                      args.Interaction.Data.CustomId
                      );
           break;
       }
@@ -66,11 +66,11 @@ public static class ComponentInteractionCreatedEvent
                   ex,
                   "[{Source}] ModmailBotException: Error processing component interaction. CustomId: {CustomId}, UserId: {UserId}, ChannelId: {ChannelId}, InteractionId: {InteractionId}, MessageId: {MessageId}",
                   nameof(ComponentInteractionCreatedEvent),
-                  args.Interaction?.Data?.CustomId,
-                  args.User?.Id,
-                  args.Channel?.Id,
-                  args.Interaction?.Id,
-                  args.Message?.Id
+                  args.Interaction.Data.CustomId,
+                  args.User.Id,
+                  args.Channel.Id,
+                  args.Interaction.Id,
+                  args.Message.Id
                  );
     }
     catch (Exception ex) {
@@ -78,23 +78,21 @@ public static class ComponentInteractionCreatedEvent
                 ex,
                 "[{Source}] Unhandled exception processing component interaction. CustomId: {CustomId}, UserId: {UserId}, ChannelId: {ChannelId}, InteractionId: {InteractionId}, MessageId: {MessageId}",
                 nameof(ComponentInteractionCreatedEvent),
-                args.Interaction?.Data?.CustomId,
-                args.User?.Id,
-                args.Channel?.Id,
-                args.Interaction?.Id,
-                args.Message?.Id
+                args.Interaction.Data.CustomId,
+                args.User.Id,
+                args.Channel.Id,
+                args.Interaction.Id,
+                args.Message.Id
                );
     }
   }
 
-  private static async Task ProcessStarInteraction(
-    ISender sender,
-    ComponentInteractionCreatedEventArgs args,
-    ulong messageId
+  private static async Task ProcessStarInteraction(ComponentInteractionCreatedEventArgs args,
+                                                   ulong messageId
   ) {
-    var key = args.Interaction?.Data?.CustomId;
+    var key = args.Interaction.Data.CustomId;
     try {
-      var (interactionName, parameters) = UtilInteraction.ParseKey(key);
+      var (_, parameters) = UtilInteraction.ParseKey(key);
       //feedback process show modal
       var starParam = parameters[0];
       var ticketIdParam = parameters[1];
@@ -122,7 +120,7 @@ public static class ComponentInteractionCreatedEvent
                 ex,
                 "[{Source}] Error processing star interaction submission. CustomId: {CustomId}, InteractionId: {InteractionId}",
                 nameof(ComponentInteractionCreatedEvent),
-                args.Interaction?.Data?.CustomId,
+                args.Interaction.Data.CustomId,
                 args.Interaction?.Id
                );
     }
@@ -133,12 +131,12 @@ public static class ComponentInteractionCreatedEvent
     ComponentInteractionCreatedEventArgs args,
     ulong messageId
   ) {
-    var key = args.Interaction?.Data?.CustomId;
+    var key = args.Interaction.Data.CustomId;
     try {
       await args.Interaction.CreateResponseAsync(
                                                  DiscordInteractionResponseType.UpdateMessage
                                                 );
-      var (interactionName, parameters) = UtilInteraction.ParseKey(key);
+      var (_, parameters) = UtilInteraction.ParseKey(key);
 
       var ticketIdParam = parameters[0];
       var ticketId = Guid.Parse(ticketIdParam);
@@ -175,20 +173,17 @@ public static class ComponentInteractionCreatedEvent
                 ex,
                 "[{Source}] Error processing process ticket type interaction. CustomId: {CustomId}, InteractionId: {InteractionId}",
                 nameof(ComponentInteractionCreatedEvent),
-                args.Interaction?.Data?.CustomId,
+                args.Interaction.Data.CustomId,
                 args.Interaction?.Id
                );
     }
   }
 
-  private static async Task ProcessCloseTicketInteraction(
-    ISender sender,
-    ComponentInteractionCreatedEventArgs args,
-    ulong messageId
+  private static async Task ProcessCloseTicketInteraction(ComponentInteractionCreatedEventArgs args
   ) {
-    var key = args.Interaction?.Data?.CustomId;
+    var key = args.Interaction.Data.CustomId;
     try {
-      var (interactionName, parameters) = UtilInteraction.ParseKey(key);
+      var (_, parameters) = UtilInteraction.ParseKey(key);
 
       var ticketIdParam = parameters[0];
       var ticketId = Guid.Parse(ticketIdParam);
@@ -210,7 +205,7 @@ public static class ComponentInteractionCreatedEvent
                 ex,
                 "[{Source}] Error processing  process close ticket interaction. CustomId: {CustomId}, InteractionId: {InteractionId}",
                 nameof(ComponentInteractionCreatedEvent),
-                args.Interaction?.Data?.CustomId,
+                args.Interaction.Data.CustomId,
                 args.Interaction?.Id
                );
     }

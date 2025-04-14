@@ -5,4 +5,4 @@ using Modmail.NET.Attributes;
 namespace Modmail.NET.Features.DiscordBot.Queries;
 
 [CachePolicy("GetMainGuildQuery", 300)]
-public sealed record GetDiscordMainGuildQuery : IRequest<DiscordGuild>;
+public sealed record GetDiscordMainServerQuery : IRequest<DiscordGuild>;

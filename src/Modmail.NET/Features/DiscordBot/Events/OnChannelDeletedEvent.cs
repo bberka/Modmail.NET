@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
+using Modmail.NET.Database;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Features.User.Commands;
 using Modmail.NET.Language;
 using Serilog;
@@ -54,7 +54,9 @@ public static class OnChannelDeletedEvent
                );
       await sender.Send(new UpdateDiscordUserCommand(user));
 
-      var ticket = await sender.Send(new GetTicketQuery(ticketId, true));
+      var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+      var ticket = await dbContext.Tickets.FindAsync(ticketId);
+
       if (ticket is null) {
         Log.Warning(
                     "[{Source}] Could not retrieve ticket information, possibly already deleted. TicketId: {TicketId}, ChannelId: {ChannelId}",
@@ -78,7 +80,7 @@ public static class OnChannelDeletedEvent
       await sender.Send(new ProcessCloseTicketCommand(
                                                       ticketId,
                                                       user.Id,
-                                                      langData.GetTranslation(LangKeys.ChannelWasDeleted),
+                                                      langData.GetTranslation(Lang.ChannelWasDeleted),
                                                       args.Channel
                                                      ));
 

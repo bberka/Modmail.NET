@@ -1,6 +1,8 @@
 using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Attributes;
 
 namespace Modmail.NET.Features.DiscordBot.Queries;
 
-public sealed record GetDiscordMemberQuery(ulong UserId) : IRequest<DiscordMember>;
+[CachePolicy("GetDiscordMemberQuery", 5)]
+public sealed record GetDiscordMemberQuery(ulong UserId) : IRequest<DiscordMember?>;

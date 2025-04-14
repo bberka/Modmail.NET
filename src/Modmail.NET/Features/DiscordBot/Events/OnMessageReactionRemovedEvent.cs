@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Features.User.Commands;
 using Serilog;
@@ -21,14 +22,6 @@ public static class OnMessageReactionRemovedEvent
     DiscordClient client,
     MessageReactionRemovedEventArgs args
   ) {
-    if (args is null) {
-      Log.Debug(
-                "[{Source}] MessageReactionRemovedEventArgs is null, exiting",
-                nameof(OnMessageReactionRemovedEvent)
-               );
-      return;
-    }
-
     if (args.User.IsBot) {
       Log.Debug(
                 "[{Source}] Ignoring reaction removed by bot. UserId: {UserId}",
@@ -92,7 +85,7 @@ public static class OnMessageReactionRemovedEvent
 
 
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
-    var messageEntity = await dbContext.TicketMessages
+    var messageEntity = await dbContext.Messages
                                        .FirstOrDefaultAsync(x => x.SentByMod && x.BotMessageId == args.Message.Id);
     if (messageEntity is null) {
       Log.Debug(
@@ -104,9 +97,12 @@ public static class OnMessageReactionRemovedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.OpenerUserId == args.User.Id &&
-                                                               x.Id == messageEntity.TicketId && x.PrivateMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterActive()
+                                .FilterByOpenerUserId(args.User.Id)
+                                .FilterById(messageEntity.TicketId)
+                                .FilterByPrivateChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for reaction removal in private channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",
@@ -153,8 +149,8 @@ public static class OnMessageReactionRemovedEvent
 
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
-    var messageEntity = await dbContext.TicketMessages.FirstOrDefaultAsync(x =>
-                                                                             !x.SentByMod && x.BotMessageId == args.Message.Id && x.TicketId == ticketId);
+    var messageEntity = await dbContext.Messages.FirstOrDefaultAsync(x =>
+                                                                       !x.SentByMod && x.BotMessageId == args.Message.Id && x.TicketId == ticketId);
     if (messageEntity is null) {
       Log.Debug(
                 "[{Source}] No matching TicketMessage found for reaction removal in ticket channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",
@@ -166,9 +162,11 @@ public static class OnMessageReactionRemovedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.Id == ticketId &&
-                                                               x.ModMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterActive()
+                                .FilterById(ticketId)
+                                .FilterByModChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for reaction removal in ticket channel. ChannelId: {ChannelId}, MessageId: {MessageId}, TicketId: {TicketId}",

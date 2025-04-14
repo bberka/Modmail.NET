@@ -7,6 +7,7 @@ using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Static;
 using Serilog;
 using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
@@ -53,7 +54,7 @@ public static class OnMessageDeletedEvent
               args.Channel.Id
              );
 
-    var messageEntity = await dbContext.TicketMessages
+    var messageEntity = await dbContext.Messages
                                        .FirstOrDefaultAsync(
                                                             x => !x.SentByMod && x.MessageDiscordId == args.Message.Id
                                                            );
@@ -66,9 +67,11 @@ public static class OnMessageDeletedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.Id == messageEntity.TicketId &&
-                                                               x.PrivateMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterById(messageEntity.TicketId)
+                                .FilterActive()
+                                .FilterByPrivateChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for deleted private message. MessageId: {MessageId}, TicketId: {TicketId}",
@@ -111,8 +114,8 @@ public static class OnMessageDeletedEvent
       return;
     }
 
-    var messageEntity = await dbContext.TicketMessages.FirstOrDefaultAsync(x =>
-                                                                             x.SentByMod && x.TicketId == ticketId && x.MessageDiscordId == args.Message.Id);
+    var messageEntity = await dbContext.Messages.FirstOrDefaultAsync(x =>
+                                                                       x.SentByMod && x.TicketId == ticketId && x.MessageDiscordId == args.Message.Id);
     if (messageEntity is null) {
       Log.Debug(
                 "[{Source}] No TicketMessage entity found for deleted ticket channel message. MessageId: {MessageId}, TicketId: {TicketId}",
@@ -123,9 +126,11 @@ public static class OnMessageDeletedEvent
       return;
     }
 
-    var ticket = await dbContext.Tickets.FirstOrDefaultAsync(x =>
-                                                               !x.ClosedDateUtc.HasValue && x.Id == ticketId &&
-                                                               x.ModMessageChannelId == args.Channel.Id);
+    var ticket = await dbContext.Tickets
+                                .FilterActive()
+                                .FilterById(ticketId)
+                                .FilterByModChannelId(args.Channel.Id)
+                                .FirstOrDefaultAsync();
     if (ticket is null) {
       Log.Warning(
                   "[{Source}] No active ticket found for deleted ticket channel message. MessageId: {MessageId}, TicketId: {TicketId}",
