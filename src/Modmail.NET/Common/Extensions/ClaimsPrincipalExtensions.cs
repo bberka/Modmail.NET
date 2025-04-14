@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
-using Modmail.NET.Features.Teams.Static;
 
 namespace Modmail.NET.Common.Extensions;
 

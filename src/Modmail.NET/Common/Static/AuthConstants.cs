@@ -1,4 +1,4 @@
-namespace Modmail.NET.Features.Teams.Static;
+namespace Modmail.NET.Common.Static;
 
 public static class AuthConstants
 {
