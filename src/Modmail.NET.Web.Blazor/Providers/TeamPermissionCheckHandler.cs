@@ -1,7 +1,5 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Modmail.NET.Features.Permission.Queries;
-using Modmail.NET.Features.Permission.Static;
+using Modmail.NET.Features.Teams.Queries;
 using Modmail.NET.Web.Blazor.Extensions;
 
 namespace Modmail.NET.Web.Blazor.Providers;
@@ -15,26 +13,15 @@ public class TeamPermissionCheckHandler : AuthorizationHandler<TeamPermissionChe
   }
 
   protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TeamPermissionCheckRequirement req) {
-    var roleClaim = context.User.FindFirst(ClaimTypes.Role);
-    if (roleClaim == null) {
-      context.Fail();
-      return;
-    }
-
-    if (!Enum.TryParse<TeamPermissionLevel>(roleClaim.Value, out _)) {
-      context.Fail();
-      return;
-    }
-
     var userId = context.User.GetUserId();
-    var scope = _scopeFactory.CreateScope();
+    using var scope = _scopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    var allowed = await sender.Send(new CheckPermissionAccessQuery(userId, req.Policy));
-    if (!allowed) {
-      context.Fail();
+    var canAccess = await sender.Send(new CheckPermissionAccessQuery(userId, req.Policy));
+    if (canAccess) {
+      context.Succeed(req);
       return;
     }
 
-    context.Succeed(req);
+    context.Fail();
   }
 }
