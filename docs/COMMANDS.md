@@ -2,21 +2,6 @@
 
 Parameter types with '*' are required
 
-Default prefix is '!!'
-
-## Modmail Group Commands
-
-Requires TeamPermissionLevel.Admin or higher
-
-Only available for main server id in configuration
-
-### `modmail setup`
-
-- **Description**: Setup the modmail bot.
-- **Usage**: `!!modmail setup`
-- **Note**: This command should be run in the main server. Only bot owner can run this command. This command will create
-  the necessary channels and roles for the modmail bot.
-
 ## Ticket Group Slash Commands
 
 Only available in main server id set in configuration
@@ -33,7 +18,7 @@ Requires a team member or created user if enabled in options
 - **Parameters**:
   - `reason`: Ticket closing reason. (Optional)
 
-### `/ticket set-priority`
+### `/ticket priority`
 
 Requires TeamPermissionLevel.Support or higher
 
@@ -41,7 +26,7 @@ Requires TeamPermissionLevel.Support or higher
 - **Parameters**:
   - `priority`: Priority of the ticket.
 
-### `/ticket add-note`
+### `/ticket note`
 
 Requires TeamPermissionLevel.Support or higher
 
@@ -49,26 +34,19 @@ Requires TeamPermissionLevel.Support or higher
 - **Parameters**:
   - `note`: Note to add.
 
-### `/ticket toggle-anonymous`
+### `/ticket anonymous`
 
 Requires TeamPermissionLevel.Moderator or higher
 
 - **Description**: Toggle anonymous mode for a ticket.
 
-### `/ticket set-type`
+### `/ticket type`
 
 Requires TeamPermissionLevel.Support or higher
 
 - **Description**: Set the type of a ticket.
 - **Parameters**:
   - `type`: Type of the ticket.
-
-### `/ticket get-type`
-
-Requires TeamPermissionLevel.Support or higher
-
-- **Description**: Gets the ticket type for the current ticket channel.
-- **Usage**: `/ticket-type get`
 
 ## Blacklist Group Slash Commands
 
