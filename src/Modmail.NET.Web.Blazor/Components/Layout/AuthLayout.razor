@@ -1,6 +1,7 @@
 ﻿@using Modmail.NET.Common.Static
-@using Modmail.NET.Features.Permission.Queries
+@using Modmail.NET.Features.Teams.Queries
 @using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@using Modmail.NET.Web.Blazor.Components.Pages.Auth.Shared
 @using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @inherits LayoutComponentBase
@@ -36,39 +37,55 @@
   <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
       <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard"/>
+      @* @if (_canAccessAnalytics) { *@
+      @*   <RadzenPanelMenuItem Text="Analytics" Icon="analytics" Path="/analytics"/> *@
+      @* } *@
 
-      @* <RadzenPanelMenuItem Text="Analytics" Icon="analytics" Path="/analytics"/> *@
 
-      @if (_hasAccessTickets) {
-        <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
-      }
-      <RadzenPanelMenuItem Text="Feedbacks" Icon="reviews" Path="/feedback"/>
+
+
 
       <RadzenPanelMenuItem Text="Tags" Icon="label" Path="/tags"/>
 
+      <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
+      <RadzenPanelMenuItem Text="Users" Icon="group" Path="/users"/>
 
-      @if (_hasAccessBlacklist) {
-        <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
-      }
-      @if (_hasAccessTicketTypes) {
-        <RadzenPanelMenuItem Text="Ticket Types" Icon="stacks" Path="/ticket-types"/>
+      <RadzenPanelMenuItem Text="Ticket" Icon="confirmation_number">
+        <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
+
+        @if (_canViewTicketFeedbacks) {
+          <RadzenPanelMenuItem Text="Feedbacks" Icon="reviews" Path="/feedback"/>
+        }
+
+        <RadzenPanelMenuItem Text="Types" Icon="stacks" Path="/ticket-types"/>
+
+      </RadzenPanelMenuItem>
+
+
+
+
+      @if (_canAccessTeams) {
+        <RadzenPanelMenuItem Text="Panel Access" Icon="security">
+          <RadzenPanelMenuItem Text="Permissions" Icon="lock_open" Path="/permissions"/>
+          <RadzenPanelMenuItem Text="Teams" Icon="manage_accounts" Path="/teams"/>
+        </RadzenPanelMenuItem>
       }
 
-      @if (_hasAccessTeams) {
-        @* <RadzenPanelMenuItem Text="Permissions" Icon="security" Path="/permissions"/> *@
 
-        <RadzenPanelMenuItem Text="Teams" Icon="group" Path="/teams"/>
+
+      @if (_canAccessOptions || _canAccessHangfire) {
+        <RadzenPanelMenuItem Text="Advanced" Icon="tune">
+
+          @if (_canAccessOptions) {
+            <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
+          }
+          @if (_canAccessHangfire) {
+            <RadzenPanelMenuItem Text="Hangfire" Icon="grid_view" Path="/hangfire"/>
+          }
+        </RadzenPanelMenuItem>
       }
-      @if (_isOwner) {
-        <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
-      }
-      @if (_hasAccessHangfire) {
-        <RadzenPanelMenuItem Text="Hangfire" Icon="grid_view" Path="/hangfire"/>
-      }
+
     </RadzenPanelMenu>
-    @* <div class="rz-p-4"> *@
-    @*   Sidebar *@
-    @* </div> *@
   </RadzenSidebar>
   <RadzenBody>
     @Body
@@ -84,15 +101,14 @@
   bool _sidebarExpanded = true;
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   private bool _isAuth;
-  private bool _hasAccessTickets;
-  private bool _hasAccessTicketTypes;
-  private bool _isOwner;
-  private bool _hasAccessHangfire;
-  private bool _hasAccessTeams;
-  private bool _hasAccessBlacklist;
+  private bool _canAccessHangfire;
+  private bool _canAccessOptions;
+  private bool _canAccessAnalytics;
+  private bool _canViewTicketFeedbacks;
+  private bool _canAccessTeams;
 
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;
@@ -103,20 +119,18 @@
     }
 
     var userId = state.User.GetUserId();
-    _hasAccessTickets = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageTickets));
-    _hasAccessTicketTypes = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageTicketTypes));
-    _hasAccessBlacklist = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageBlacklist));
-    _hasAccessHangfire = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageHangfire));
-    _hasAccessTeams = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageTeams));
-    _isOwner = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
+
+    _canAccessHangfire = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageHangfire));
+    _canAccessOptions = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageOptions));
+    _canAccessTeams = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageAccessPermissions));
+    _canAccessAnalytics = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ViewAnalytics));
+    _canViewTicketFeedbacks = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ViewTicketFeedbacks));
   }
 
   private async Task ShowAccountDialog() {
     await DialogService.OpenAsync("Account",
                                   _ =>
-                                    @<div>
-                                      <AccountDialog></AccountDialog>
-                                    </div>,
+                                    @<AccountDialogComponent></AccountDialogComponent>,
                                   new DialogOptions {
                                     Width = "450px",
                                     CloseDialogOnOverlayClick = true
