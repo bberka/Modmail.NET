@@ -1,12 +1,11 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Common.Exceptions
-@using Modmail.NET.Common.Static
 @using Modmail.NET.Features.Ticket.Commands
 @using Modmail.NET.Features.Ticket.Mappers
 @using Modmail.NET.Features.Ticket.Models
-@using Modmail.NET.Language
-@using Modmail.NET.Web.Blazor.Components.Shared.Tickets
+@using Modmail.NET.Web.Blazor.Components.Pages.Ticket.Shared
+@using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
 @using Serilog
@@ -16,25 +15,20 @@
 @inject NotificationService NotificationService
 @inject NavigationManager Navi
 @inject ISender Sender
-@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTickets))]
-
+@attribute [AuthorizeTeam]
 
 @code {
 
-  private IQueryable<TicketDto> _data;
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+  private IQueryable<TicketDto>? _data;
 
   bool _isLoading;
 
-  async Task ShowLoading() {
+
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     _isLoading = true;
-
-    await Task.Yield();
-
-    _isLoading = false;
-  }
-
-  private async Task ReloadDataAsync(LoadDataArgs args = null) {
-    await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.Tickets
@@ -59,9 +53,7 @@
         throw new ArgumentOutOfRangeException();
     }
 
-    if (args is not null) {
-      query = query.ApplyDataGridFilter(args);
-    }
+    query = query.ApplyDataGridFilter(args);
 
     _count = await query.CountAsync();
 
@@ -69,12 +61,14 @@
               ? query.ApplyPagination(args)
               : query.Skip(0).Take(10).AsQueryable();
 
+    _isLoading = false;
     StateHasChanged();
   }
 
-  protected override async Task OnInitializedAsync() {
-    await base.OnInitializedAsync();
 
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    _ = state.User.GetUserId();
     await ReloadDataAsync();
   }
 
@@ -85,38 +79,21 @@
 
   private int _count;
 
-  private readonly string _forceCloseReason = null;
+  private readonly string? _forceCloseReason = null;
 
   private async Task ForceCloseAsync(TicketDto ticketDto) {
-    @* var customDialogResult = await dialogService.OpenAsync("Are you sure you want to force close this ticket ?", *@
-    @*                                                   value => @<div> *@
-    @*                                                              <RadzenLabel Text="Reason" class="rz-mb-2"></RadzenLabel> *@
-    @*                                                              <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
-    @*                                                            </div>, *@
-    @*                                                   new DialogOptions() { *@
-    @*                                                     Width = "400px", *@
-    @*                                                     Height = "200px", *@
-    @*                                                   } *@
-    @*                                                   ); *@
-
-
-    @* ChildContent = value => *@
-    @*   @<div> *@
-    @*     <RadzenLabel Text="Reason" class="rz-mb-2"></RadzenLabel> *@
-    @*     <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
-    @*   </div> *@
     //TODO: Add reason textbox with custom component dialog
-    var dialogResult = await DialogService.Confirm("Are you sure you want to force close this ticket ? This action is not recommended and can not be undone.",
+    var dialogResult = await DialogService.Confirm(Lang.TicketForceCloseWarning.Translate(),
                                                    options: new ConfirmOptions {
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No"
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate()
                                                    });
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{reason}})";
       try {
         await Sender.Send(new ProcessCloseTicketCommand(ticketDto.Id));
         Log.Information(logMessage, _forceCloseReason);
-        NotificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
+        NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TicketClosedSuccessfully.Translate());
         await ReloadDataAsync();
       }
       catch (ModmailBotException ex) {
@@ -132,20 +109,16 @@
 
   private TicketFilterType _filterTicketType = TicketFilterType.All;
 
-  private void ShowMessages(TicketDto ticketDto) {
-    Navi.NavigateTo("tickets/messages/" + ticketDto.Id);
-  }
-
-
   private void ShowTranscript(TicketDto ticketDto) {
     Navi.NavigateTo("transcript/" + ticketDto.Id);
   }
 
 
   private async Task ShowNotes(TicketDto ticketDto) {
-    _ = await DialogService.OpenAsync("Ticket Notes",
+    _ = await DialogService.OpenAsync(Lang.TicketNotes.Translate(),
                                       _ =>
-                                        @<TicketNotes TicketId="ticketDto.Id"></TicketNotes>,
+                                        @<TicketNotesDialogComponent
+                                          TicketId="ticketDto.Id"></TicketNotesDialogComponent>,
                                       new DialogOptions {
                                         Width = "900px",
                                         CloseDialogOnEsc = true,
@@ -153,13 +126,8 @@
                                       });
   }
 
-  // private Task ShowAddNoteDialog(TicketDto ticketDto) {
-  //   throw new NotImplementedException();
-  // }                                                    @* @ticketDto.FeedbackStar  *@
-
-
   private async Task ShowFeedback(TicketDto ticketDto) {
-    _ = await DialogService.OpenAsync("Ticket Feedback",
+    _ = await DialogService.OpenAsync(Lang.TicketFeedback.Translate(),
                                       _ =>
                                         @<div class="rz-mx-auto">
                                           <RadzenRow>
@@ -175,7 +143,7 @@
                                               <RadzenRow class="rz-mt-4">
                                                 <RadzenMarkdown>
                                                   @if (string.IsNullOrEmpty(ticketDto.FeedbackMessage)) {
-                                                    @LangKeys.NoFeedbackProvided.GetTranslation()
+                                                    @Lang.NoFeedbackProvided.Translate()
                                                   }
                                                   else {
                                                     @ticketDto.FeedbackMessage
@@ -201,7 +169,7 @@
       <RadzenRow>
         <RadzenColumn Size="12">
           <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
-            Tickets
+            @Lang.Tickets.Translate()
           </RadzenText>
         </RadzenColumn>
       </RadzenRow>
@@ -213,7 +181,6 @@
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="true"
                             Density="Density.Default"
-
                             AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
                             FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
@@ -221,8 +188,7 @@
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
                             Data="@_data" TItem="TicketDto" ColumnWidth="180px"
                             LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            IsLoading=@_isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
-                            Filter="@ShowLoading">
+                            IsLoading=@_isLoading>
               <HeaderTemplate>
                 <RadzenDropDown Style="user-select: none"
                                 Multiple="false"
@@ -232,13 +198,14 @@
                                 Change="() => ReloadDataAsync()"
                                 class="w-100"
                                 TValue="TicketFilterType"
-                                Placeholder="Filter Tickets"
+                                Placeholder=@Lang.FilterTickets.Translate()
                                 AllowFiltering="false"/>
               </HeaderTemplate>
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false" Title="ID"
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)" Filterable="false"
+                                      Title=@Lang.Id.Translate()
                                       TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false"
+                <RadzenDataGridColumn Title=@Lang.OpenerUserAvatar.Translate() Sortable="false" Filterable="false"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
@@ -247,7 +214,7 @@
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="OpenerUser.Username" Title="Opener User" Sortable="true"
+                <RadzenDataGridColumn Property="OpenerUser.Username" Title=@Lang.OpenerUser.Translate() Sortable="true"
                                       SortProperty="@nameof(TicketDto.OpenerUser)"
                                       Filterable="true" TextAlign="TextAlign.Center">
                   <Template Context="data">
@@ -258,7 +225,7 @@
                   </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Title="Closer User Avatar" Sortable="false" Filterable="false"
+                <RadzenDataGridColumn Title="@Lang.CloserUserAvatar.Translate()" Sortable="false" Filterable="false"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
@@ -269,7 +236,7 @@
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true"
+                <RadzenDataGridColumn Title="@Lang.CloserUser.Translate()" Sortable="true" Filterable="true"
                                       Property="CloserUser.Username"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
@@ -280,12 +247,13 @@
                   </Template>
                 </RadzenDataGridColumn>
 
-                <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)" Title="Register Date UTC"/>
+                <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)"
+                                      Title=@Lang.RegisterDateUtc.Translate()/>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)"
                                       Title="Last Message Date UTC"/>
                 <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)" Title="Close Date UTC"/>
                 <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason"/>
-                <RadzenDataGridColumn Title="Ticket Type" Sortable="true" Filterable="true"
+                <RadzenDataGridColumn Title=@Lang.TicketType.Translate() Sortable="true" Filterable="true"
                                       Property="TicketType.Name"
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
@@ -324,18 +292,6 @@
                       MouseEnter="@(args => TooltipService.Open(args, "Transcript"))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
-                    @* *@
-                    @* <RadzenButton *@
-                    @*   ButtonStyle="ButtonStyle.Info" *@
-                    @*   Icon="chat" *@
-                    @*   Variant="Variant.Flat" *@
-                    @*   Shade="Shade.Lighter" *@
-                    @*   Size="ButtonSize.Medium" *@
-                    @*   class="rz-my-1 rz-ms-1" *@
-                    @*   Click="@(() => ShowMessages(data))" *@
-                    @*   MouseEnter="@(args => TooltipService.Open(args, "Show Messages"))" *@
-                    @*   @onclick:stopPropagation="true"> *@
-                    @* </RadzenButton> *@
                     <RadzenButton
                       ButtonStyle="ButtonStyle.Info"
                       Icon="description"

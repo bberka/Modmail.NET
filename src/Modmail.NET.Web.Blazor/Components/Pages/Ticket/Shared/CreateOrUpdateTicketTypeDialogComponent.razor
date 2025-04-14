@@ -3,28 +3,29 @@
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Ticket.Commands
 @using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject ModmailBot Bot
 @inject ISender Sender
+@attribute [AuthorizeTeam]
 
 @code {
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   [Parameter]
-  public TicketType TicketType { get; set; }
+  public required TicketType? TicketType { get; set; }
 
   bool IsUpdate => TicketType != null;
   string _name = "";
-  string _emoji = "";
+  string? _emoji = "";
   string _description = "";
   int _order = 0;
-  bool _isEnabled = true;
-  string _embedMessageTitle = null;
-  string _embedMessageContent = null;
+  string? _embedMessageTitle = null;
+  string? _embedMessageContent = null;
 
   protected override Task OnInitializedAsync() {
     if (TicketType is not null) {
@@ -32,7 +33,6 @@
       _emoji = TicketType.Emoji;
       _description = TicketType.Description;
       _order = TicketType.Order;
-      _isEnabled = TicketType.IsEnabled;
       _embedMessageTitle = TicketType.EmbedMessageTitle;
       _embedMessageContent = TicketType.EmbedMessageContent;
     }
@@ -51,8 +51,8 @@
       return;
     }
 
-    var fromUnicode = DiscordEmoji.TryFromUnicode(_emoji, out var unicodeEmoji);
-    var fromName = DiscordEmoji.TryFromName(Bot.Client, _emoji, out var nameEmoji);
+    var fromUnicode = DiscordEmoji.TryFromUnicode(_emoji ?? string.Empty, out var unicodeEmoji);
+    var fromName = DiscordEmoji.TryFromName(Bot.Client, _emoji ?? string.Empty, out var nameEmoji);
     var anySuccessEmojiParse = fromUnicode || fromName;
     if (!anySuccessEmojiParse) {
       NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
@@ -61,22 +61,20 @@
 
     var emojiUnicode = fromUnicode
                          ? unicodeEmoji.Name
-                         : fromName
-                           ? nameEmoji
-                           : _emoji;
+                         : nameEmoji;
 
 
     var dialogResult = await DialogService.Confirm(IsUpdate
                                                      ? "Are you sure you want to update this ticket type ?"
                                                      : "Are you sure you want to create new ticket type ?",
                                                    options: new ConfirmOptions {
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No",
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
                                                      CloseDialogOnOverlayClick = true,
                                                      CloseDialogOnEsc = true
                                                    });
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialog)}]{nameof(SubmitAsync)}({{Name}})";
+      const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialogComponent)}]{nameof(SubmitAsync)}({{Name}})";
       try {
         var state = await AuthContext;
         var userId = state.User.GetUserId();
@@ -88,7 +86,6 @@
           TicketType.Order = _order;
           TicketType.EmbedMessageTitle = _embedMessageTitle;
           TicketType.EmbedMessageContent = _embedMessageContent;
-          TicketType.IsEnabled = _isEnabled;
           await Sender.Send(new ProcessUpdateTicketTypeCommand(userId, TicketType));
           Log.Information(logMessage, _name);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
@@ -123,15 +120,6 @@
 
 <RadzenRow>
   <RadzenColumn>
-    @if (IsUpdate) {
-      <RadzenRow class="rz-my-4">
-        <RadzenSwitch Name="isEnabled" @bind-Value=@_isEnabled/>
-        <RadzenLabel Component="isEnabled">
-          Is Enabled
-        </RadzenLabel>
-      </RadzenRow>
-    }
-
 
     <RadzenRow class="rz-my-4">
       <RadzenFormField Text="Name" class="w-100" Variant="Variant.Outlined">

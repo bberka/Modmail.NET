@@ -3,8 +3,9 @@
 @using Modmail.NET.Common.Exceptions
 @using Modmail.NET.Common.Static
 @using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Queries
 @using Modmail.NET.Features.Ticket.Commands
-@using Modmail.NET.Web.Blazor.Components.Shared.TicketType
+@using Modmail.NET.Web.Blazor.Components.Pages.Ticket.Shared
 @using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @using Serilog
@@ -13,69 +14,52 @@
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
-@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTicketTypes))]
-
+@attribute [AuthorizeTeam]
 
 @code {
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
-  private IQueryable<TicketType> _data;
+  private IQueryable<TicketType>? _data;
 
+  private bool _hasPermissionToManage;
   bool _isLoading;
-  private int _count;
 
-  async Task ShowLoading() {
+  private async Task LoadDataAsync(LoadDataArgs? args = null) {
     _isLoading = true;
-
-    await Task.Yield();
-
-    _isLoading = false;
-  }
-
-  private async Task ReloadDataAsync(LoadDataArgs args = null) {
-    await ShowLoading();
-
     var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.TicketTypes
                          .AsNoTracking()
                          .OrderByDescending(x => x.RegisterDateUtc)
                          .AsQueryable();
 
-    if (args is not null) {
-      query = query.ApplyDataGridFilter(args);
-    }
-
-    _count = await query.CountAsync();
+    query = query.ApplyDataGridFilter(args);
 
 
     _data = args is not null
               ? query.ApplyPagination(args)
               : query.Skip(0).Take(10).AsQueryable();
 
+    _isLoading = false;
     StateHasChanged();
   }
 
 
   protected override async Task OnInitializedAsync() {
-    await base.OnInitializedAsync();
-
-    await ReloadDataAsync();
-  }
-
-
-  private async Task LoadDataAsync(LoadDataArgs args) {
-    await ReloadDataAsync(args);
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    _hasPermissionToManage = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageTicketTypes));
+    await LoadDataAsync();
   }
 
 
   private async Task RemoveAsync(TicketType ticketType) {
-    var dialogResult = await DialogService.Confirm("By deleting this ticket type, all tickets associated with it will lose ticket type data. This action cannot be undone.",
-                                                   "Are you sure you want to delete this ticket type ?",
+    var dialogResult = await DialogService.Confirm(Lang.TicketTypeDeletionWarning.Translate(),
+                                                   Lang.AreYouSure.Translate(),
                                                    new ConfirmOptions {
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No",
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
                                                      CloseDialogOnOverlayClick = true,
                                                      CloseDialogOnEsc = true
                                                    });
@@ -90,10 +74,9 @@
         await Sender.Send(new ProcessRemoveTicketTypeCommand(userId, ticketType.Id));
         Log.Information(logMessage,
                         ticketType);
-        NotificationService.Notify(NotificationSeverity.Success,
-                                   "Ticket Type deleted successfully");
+        NotificationService.Notify(NotificationSeverity.Success, Lang.TicketTypeDeletedSuccessfully.Translate());
 
-        await ReloadDataAsync();
+        await LoadDataAsync();
       }
       catch (ModmailBotException ex) {
         Log.Warning(ex,
@@ -111,29 +94,27 @@
   }
 
   private async Task ShowAddDialog() {
-    var dialog = await DialogService.OpenAsync("Create Ticket Type",
+    var dialog = await DialogService.OpenAsync(Lang.CreateTicketType.Translate(),
                                                _ =>
-                                                 @<div>
-                                                   <CreateOrUpdateTicketTypeDialog></CreateOrUpdateTicketTypeDialog>
-                                                 </div>,
+                                                 @<CreateOrUpdateTicketTypeDialogComponent></CreateOrUpdateTicketTypeDialogComponent>,
                                                new DialogOptions {
                                                  Width = "450px"
                                                });
     if (dialog is true) {
-      await ReloadDataAsync();
+      await LoadDataAsync();
     }
   }
 
   private async Task ShowEditDialog(TicketType ticketType) {
-    var dialog = await DialogService.OpenAsync("Edit Ticket Type",
+    var dialog = await DialogService.OpenAsync(Lang.EditTicketType.Translate(),
                                                _ =>
-                                                 @<CreateOrUpdateTicketTypeDialog
-                                                   TicketType="ticketType"></CreateOrUpdateTicketTypeDialog>,
+                                                 @<CreateOrUpdateTicketTypeDialogComponent
+                                                   TicketType="ticketType"></CreateOrUpdateTicketTypeDialogComponent>,
                                                new DialogOptions {
                                                  Width = "450px"
                                                });
     if (dialog is true) {
-      await ReloadDataAsync();
+      await LoadDataAsync();
     }
   }
 
@@ -146,11 +127,11 @@
       <RadzenRow>
         <RadzenColumn Size="12">
           <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
-            Ticket Types
+            @Lang.TicketTypes.Translate()
           </RadzenText>
           @* <hr class="my-4"/> *@
           <p>
-            Ticket types is used to categorize tickets, and can be used to filter tickets based on their type.
+            @Lang.TicketTypePageDescription.Translate()
           </p>
         </RadzenColumn>
       </RadzenRow>
@@ -160,66 +141,63 @@
         }
         else {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
-            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="true"
+            <RadzenDataGrid Responsive="true" LoadData="LoadDataAsync" AllowColumnPicking="true"
                             Density="Density.Default"
-
                             AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
                             FilterMode="FilterMode.SimpleWithMenu"
                             AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
                             PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
-                            Data="@_data" TItem="TicketType" ColumnWidth="150px"
-                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            IsLoading=@_isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
-                            Filter="@ShowLoading">
+                            Data="@_data"
+                            ColumnWidth="150px"
+                            IsLoading="@_isLoading"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true">
               <HeaderTemplate>
                 <RadzenRow>
                   <RadzenColumn Size="12">
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                  Icon="add"
-                                  Variant="Variant.Filled"
-                                  Shade="Shade.Lighter"
-                                  Size="ButtonSize.Medium"
-                                  class="rz-my-1 rz-ms-1"
-                                  Click="@ShowAddDialog">
-                      Create Ticket Type
-                    </RadzenButton>
+                    @if (_hasPermissionToManage) {
+                      <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                    Icon="add"
+                                    Variant="Variant.Filled"
+                                    Shade="Shade.Lighter"
+                                    Size="ButtonSize.Medium"
+                                    class="rz-my-1 rz-ms-1"
+                                    Click="@ShowAddDialog">
+                        @Lang.CreateTicketType.Translate()
+                      </RadzenButton>
+                    }
                   </RadzenColumn>
                 </RadzenRow>
               </HeaderTemplate>
               <Columns>
-                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketType.Id)" Filterable="false" Title="ID"
+                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketType.Id)" Filterable="false"
+                                      Title="@Lang.Id.Translate()"
                                       TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.Name)" Filterable="true" Title="Name"
+                <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.Name)" Filterable="true"
+                                      Title="@Lang.Name.Translate()"
                                       TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.Emoji)" Width="90px" Filterable="true"
-                                      Title="Emoji" TextAlign="TextAlign.Center"/>
+                                      Title="@Lang.Emoji.Translate()"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.Description)" Filterable="true"
-                                      Title="Description" TextAlign="TextAlign.Center"/>
+                                      Title="@Lang.Description.Translate()" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.Order)" Width="120px"
-                                      Filterable="true" Title="Order" TextAlign="TextAlign.Center"/>
+                                      Filterable="true" Title="@Lang.Order.Translate()" TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.EmbedMessageTitle)" Width="120px"
-                                      Filterable="true" Title="Embed Message Title" TextAlign="TextAlign.Center"/>
+                                      Filterable="true" Title="@Lang.EmbedMessageTitle.Translate()"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="true" Property="@nameof(TicketType.EmbedMessageContent)" Width="120px"
-                                      Filterable="true" Title="Embed Message Content" TextAlign="TextAlign.Center"/>
+                                      Filterable="true" Title="@Lang.EmbedMessageContent.Translate()"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketType.RegisterDateUtc)" Width="120px"
-                                      Filterable="true" Title="Register Date UTC" TextAlign="TextAlign.Center"/>
+                                      Filterable="true" Title="@Lang.RegisterDateUtc.Translate()"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketType.UpdateDateUtc)" Width="120px"
-                                      Filterable="true" Title="Update Date UTC" TextAlign="TextAlign.Center"/>
+                                      Filterable="true" Title="@Lang.UpdateDateUtc.Translate()"
+                                      TextAlign="TextAlign.Center"/>
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
-                                      Title="Actions">
+                                      Title=@Lang.Actions.Translate()>
                   <Template Context="data">
-                    @* <RadzenButton ButtonStyle="ButtonStyle.Primary" *@
-                    @*               Icon="info" *@
-                    @*               Variant="Variant.Flat" *@
-                    @*               Shade="Shade.Lighter" *@
-                    @*               Size="ButtonSize.Medium" *@
-                    @*               class="rz-my-1 rz-ms-1" *@
-                    @*               Click="@(async () => await ShowDetailsDialog(data))" *@
-                    @*               MouseEnter="@(args => tooltipService.Open(args, "Details", new TooltipOptions() { Style = "background: var(--rz-primary);" }))" *@
-                    @*               @onclick:stopPropagation="true"> *@
-                    @* </RadzenButton> *@
-                    @* *@
                     <RadzenButton ButtonStyle="ButtonStyle.Info"
                                   Icon="edit"
                                   Variant="Variant.Flat"
@@ -227,7 +205,7 @@
                                   Size="ButtonSize.Medium"
                                   class="rz-my-1 rz-ms-1"
                                   Click="@(async () => await ShowEditDialog(data))"
-                                  MouseEnter="@(args => TooltipService.Open(args, "Edit Ticket Type", new TooltipOptions { Style = "background: var(--rz-info);" }))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.Edit.Translate(), new TooltipOptions { Style = "background: var(--rz-info);" }))"
                                   @onclick:stopPropagation="true">
                     </RadzenButton>
                     <RadzenButton ButtonStyle="ButtonStyle.Danger"
@@ -236,7 +214,7 @@
                                   Shade="Shade.Lighter"
                                   Size="ButtonSize.Medium"
                                   class="rz-my-1 rz-ms-1"
-                                  MouseEnter="@(args => TooltipService.Open(args, "Delete Ticket Type", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.Delete.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                                   Click="@(async () => await RemoveAsync(data))"
                                   @onclick:stopPropagation="true">
                     </RadzenButton>

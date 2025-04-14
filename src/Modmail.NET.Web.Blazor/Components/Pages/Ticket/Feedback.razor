@@ -1,45 +1,33 @@
 ﻿@page "/feedback"
 @using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Database.Extensions
 @using Modmail.NET.Features.Ticket.Mappers
 @using Modmail.NET.Features.Ticket.Models
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
-
-@* @attribute [AuthorizeTeam(nameof(AuthPolicy.ViewFeedbacks))] *@
+@attribute [AuthorizeTeam]
 
 @code {
 
-//TODO: Feedback page authentication
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
-  private IQueryable<TicketFeedbackDto> _data;
+  private IQueryable<TicketFeedbackDto>? _data;
 
   bool _isLoading;
 
-  async Task ShowLoading() {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     _isLoading = true;
-
-    await Task.Yield();
-
-    _isLoading = false;
-  }
-
-
-  private async Task ReloadDataAsync(LoadDataArgs args = null) {
-    await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
     var query = dbContext.Tickets
                          .AsNoTracking()
                          .OrderByDescending(x => x.ClosedDateUtc)
-                         .Where(x => x.FeedbackStar.HasValue)
-                         .AsQueryable()
+                         .FilterWithFeedback()
                          .ProjectToFeedbackDto();
 
-
-    if (args is not null) {
-      query = query.ApplyDataGridFilter(args);
-    }
+    query = query.ApplyDataGridFilter(args);
 
     _count = await query.CountAsync();
 
@@ -47,12 +35,15 @@
               ? query.ApplyPagination(args)
               : query.Skip(0).Take(10).AsQueryable();
 
+    _isLoading = false;
     StateHasChanged();
   }
 
 
   protected override async Task OnInitializedAsync() {
-    await base.OnInitializedAsync();
+    var state = await AuthContext;
+    _ = state.User.GetUserId();
+
     await ReloadDataAsync();
   }
 
@@ -96,8 +87,7 @@
                             PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
                             Data="@_data" TItem="TicketFeedbackDto" ColumnWidth="180px"
                             LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
-                            IsLoading=@_isLoading Sort="@ShowLoading" Page="@ShowLoading" Group="@ShowLoading"
-                            Filter="@ShowLoading">
+                            IsLoading=@_isLoading>
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketFeedbackDto.Id)" Filterable="false"
                                       Title="ID" Width="120px" TextAlign="TextAlign.Center"/>

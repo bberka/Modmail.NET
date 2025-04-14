@@ -2,7 +2,8 @@
 @using CSharpVitamins
 @using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Database.Entities
-@using Modmail.NET.Features.Guild.Queries
+@using Modmail.NET.Database.Extensions
+@using Modmail.NET.Features.Server.Queries
 @using Modmail.NET.Features.Ticket.Static
 @using Modmail.NET.Features.User.Queries
 @using Modmail.NET.Web.Blazor.Components.Layout
@@ -14,13 +15,14 @@
 @inject NavigationManager Navi
 
 <PageTitle>
-    Ticket Transcript @_id
+    @Lang.TicketTranscript.Translate() @_id
 </PageTitle>
 <HeadContent>
     <link rel="stylesheet" href="css/markdown.css"/>
 </HeadContent>
 <RadzenCard class="rz-border-bottom sticky-top rz-m-0 rz-p-4 rz-p-lg-7" Style="height: 80px !important;">
-    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-py-0 rz-my-0 rz-ml-4">Ticket Transcript
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-py-0 rz-my-0 rz-ml-4">
+        @Lang.TicketTranscript.Translate()
     </RadzenText>
 </RadzenCard>
 <RadzenCard class="rz-m-0 rz-p-0">
@@ -52,8 +54,8 @@
                                 _ => ""
                             })>
                                 @(message.ChangeStatus switch {
-                                    TicketMessageChangeStatus.Updated => " - Edited",
-                                    TicketMessageChangeStatus.Deleted => " - Deleted",
+                                    TicketMessageChangeStatus.Updated => " - " + Lang.Edited.Translate(),
+                                    TicketMessageChangeStatus.Deleted => " - " + Lang.Deleted.Translate(),
                                     _ => ""
                                 })
                             </span>
@@ -69,7 +71,7 @@
 
             </RadzenStack>
 
-            @if (message.Attachments != null && message.Attachments.Any()) {
+            @if (message.Attachments.Any()) {
                 var array = message.Attachments.Select(x => new {
                     Attachment = x,
                     IsImage = IsImage(x.FileName)
@@ -101,7 +103,9 @@
             }
         </Template>
         <EmptyTemplate>
-            <RadzenText>No messages found.</RadzenText>
+            <RadzenText>
+                @Lang.NoMessages.Translate()
+            </RadzenText>
         </EmptyTemplate>
         <LoadingTemplate>
             <Loading></Loading>
@@ -114,18 +118,17 @@
 @code {
 
     [CascadingParameter]
-    public Task<AuthenticationState> AuthContext { get; set; }
+    public required Task<AuthenticationState> AuthContext { get; set; }
 
     [Parameter]
     public Guid TicketId { get; set; }
 
-    private TicketMessage[] _data;
-    private Dictionary<ulong, DiscordUserInfo> _users = new();
-    private string _id;
-    private ModmailDbContext _context;
+    private TicketMessage[]? _data;
+    private Dictionary<ulong, UserInformation> _users = new();
+    private string? _id;
 
     protected override async Task OnInitializedAsync() {
-        var option = await Sender.Send(new GetGuildOptionQuery(false));
+        var option = await Sender.Send(new GetOptionQuery());
         if (!option.PublicTranscripts) {
             var authState = await AuthContext;
             if (authState.User.Identity?.IsAuthenticated == false) {
@@ -134,8 +137,8 @@
             }
         }
 
-        _context = await DbContextFactory.CreateDbContextAsync();
-        var ticketExists = await _context.Tickets.AnyAsync(x => x.Id == TicketId);
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var ticketExists = await dbContext.Tickets.FilterById(TicketId).AnyAsync();
         if (!ticketExists) {
             Navi.NavigateTo("/404", true);
         }
@@ -144,32 +147,32 @@
         //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
-        _data = await _context.TicketMessages
-                              .Where(x => x.TicketId == TicketId)
-                              .Include(x => x.Attachments)
-                              .OrderBy(x => x.RegisterDateUtc)
-                              .GroupBy(x => new
-                              {
-                                  x.RegisterDateUtc.Year,
-                                  x.RegisterDateUtc.Month,
-                                  x.RegisterDateUtc.Day,
-                                  x.RegisterDateUtc.Hour,
-                                  x.RegisterDateUtc.Minute,
-                                  x.SenderUserId,
-                                  x.SentByMod,
-                                  x.ChangeStatus
-                              })
-                              .Select(g => new TicketMessage {
-                                  RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
-                                  SenderUserId = g.Key.SenderUserId,
-                                  MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc).Select(x => x.MessageContent)),
-                                  Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
-                                  TicketId = TicketId,
-                                  MessageDiscordId = 0,
-                                  SentByMod = g.Key.SentByMod,
-                                  ChangeStatus = g.Key.ChangeStatus
-                              })
-                              .ToArrayAsync();
+        _data = await dbContext.Messages
+                               .Where(x => x.TicketId == TicketId)
+                               .Include(x => x.Attachments)
+                               .OrderBy(x => x.RegisterDateUtc)
+                               .GroupBy(x => new
+                               {
+                                   x.RegisterDateUtc.Year,
+                                   x.RegisterDateUtc.Month,
+                                   x.RegisterDateUtc.Day,
+                                   x.RegisterDateUtc.Hour,
+                                   x.RegisterDateUtc.Minute,
+                                   x.SenderUserId,
+                                   x.SentByMod,
+                                   x.ChangeStatus
+                               })
+                               .Select(g => new TicketMessage {
+                                   RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
+                                   SenderUserId = g.Key.SenderUserId,
+                                   MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc).Select(x => x.MessageContent)),
+                                   Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
+                                   TicketId = TicketId,
+                                   MessageDiscordId = 0,
+                                   SentByMod = g.Key.SentByMod,
+                                   ChangeStatus = g.Key.ChangeStatus
+                               })
+                               .ToArrayAsync();
 
         //TODO: .Replace("\n", "\n\n") should be used for non code elements, not sure how to implement this 
         //Reason: \n values are normally managed by the bot and insert is fine, however the markdown renderer do not render single \n it must be \n\n to be rendered in next line

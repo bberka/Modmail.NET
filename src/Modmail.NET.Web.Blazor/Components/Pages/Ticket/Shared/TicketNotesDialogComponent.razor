@@ -1,8 +1,10 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.User.Queries
+@using Modmail.NET.Web.Blazor.Providers
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject ISender Sender
+@attribute [AuthorizeTeam]
 
 @code {
 
@@ -19,11 +21,11 @@
     _isLoading = false;
   }
 
-  private IQueryable<TicketNote> _data;
-  private Dictionary<ulong, DiscordUserInfo> _users = new();
+  private IQueryable<TicketNote>? _data;
+  private Dictionary<ulong, UserInformation> _users = new();
   private int _count = 0;
 
-  private async Task ReloadDataAsync(LoadDataArgs args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
     await ShowLoading();
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -32,10 +34,7 @@
                          .OrderByDescending(x => x.RegisterDateUtc)
                          .AsQueryable();
 
-
-    if (args is not null) {
-      query = query.ApplyDataGridFilter(args);
-    }
+    query = query.ApplyDataGridFilter(args);
 
     _count = await query.CountAsync();
 
@@ -83,7 +82,8 @@
               <Columns>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketNote.Id)" Filterable="false" Title="ID"
                                       TextAlign="TextAlign.Center"/>
-                <RadzenDataGridColumn Property="@nameof(TicketNote.RegisterDateUtc)" Title="Register Date UTC"/>
+                <RadzenDataGridColumn Property="@nameof(TicketNote.RegisterDateUtc)"
+                                      Title=@Lang.RegisterDateUtc.Translate()/>
                 <RadzenDataGridColumn Property="@nameof(TicketNote.Content)" Title="Note Content"/>
 
                 <RadzenDataGridColumn Title="From User Avatar" Sortable="false" Filterable="false"
@@ -91,7 +91,7 @@
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
                       <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px"
-                                   Path="@_users[data.DiscordUserId].AvatarUrl" AlternateText=""/>
+                                   Path="@_users[data.UserId].AvatarUrl" AlternateText=""/>
                     </RadzenStack>
                   </Template>
                 </RadzenDataGridColumn>
@@ -99,7 +99,7 @@
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenText Text="@_users[data.DiscordUserId].Username" TextAlign="TextAlign.Center"
+                      <RadzenText Text="@_users[data.UserId].Username" TextAlign="TextAlign.Center"
                                   class="fw-bold"></RadzenText>
                     </RadzenStack>
                   </Template>
