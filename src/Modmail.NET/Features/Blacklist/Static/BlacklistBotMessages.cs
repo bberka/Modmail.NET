@@ -8,26 +8,25 @@ namespace Modmail.NET.Features.Blacklist.Static;
 
 public static class BlacklistBotMessages
 {
-  public static DiscordEmbedBuilder YouHaveBeenBlacklisted(string reason = null) {
+  public static DiscordEmbedBuilder YouHaveBeenBlacklisted(string? reason = null) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YouHaveBeenBlacklisted.GetTranslation())
-                .WithDescription(LangKeys.YouHaveBeenBlacklistedDescription.GetTranslation())
+                .WithTitle(Lang.YouHaveBeenBlacklisted.Translate())
+                .WithDescription(Lang.YouHaveBeenBlacklistedDescription.Translate())
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
                 .WithColor(ModmailColors.ErrorColor);
 
-    if (!string.IsNullOrEmpty(reason)) embed.AddField(LangKeys.Reason.GetTranslation(), reason);
+    if (!string.IsNullOrEmpty(reason)) embed.AddField(Lang.Reason.Translate(), reason);
 
     return embed;
   }
 
-  public static DiscordEmbedBuilder YouHaveBeenRemovedFromBlacklist(DiscordUserInfo user) {
+  public static DiscordEmbedBuilder YouHaveBeenRemovedFromBlacklist(UserInformation user) {
     var embed = new DiscordEmbedBuilder()
-                .WithTitle(LangKeys.YouHaveBeenRemovedFromBlacklist.GetTranslation())
-                .WithDescription(LangKeys.YouHaveBeenRemovedFromBlacklistDescription.GetTranslation())
+                .WithTitle(Lang.YouHaveBeenRemovedFromBlacklist.Translate())
+                .WithDescription(Lang.YouHaveBeenRemovedFromBlacklistDescription.Translate())
                 .WithGuildInfoFooter()
                 .WithCustomTimestamp()
-                .WithUserAsAuthor(user)
                 .WithColor(ModmailColors.SuccessColor);
     return embed;
   }
