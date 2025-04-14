@@ -1,5 +1,4 @@
 @page "/result/{Message}"
-@using Modmail.NET.Language
 @using Modmail.NET.Web.Blazor.Components.Layout
 @inject NavigationManager Navigation
 @layout EmptyLayout
@@ -29,16 +28,16 @@
 @code {
 
     [CascadingParameter]
-    public Task<AuthenticationState> AuthContext { get; set; }
+    public required Task<AuthenticationState> AuthContext { get; set; }
 
     private bool _showLogoutButton;
 
     [Parameter]
-    public string Message { get; set; }
+    public required string Message { get; set; }
 
     protected override async Task OnInitializedAsync() {
-        if (Enum.TryParse<LangKeys>(Message, out var langKeys)) {
-            Message = langKeys.GetTranslation();
+        if (Enum.TryParse<Lang>(Message, out var langKeys)) {
+            Message = langKeys.Translate();
         }
 
         var state = await AuthContext;
