@@ -1,0 +1,136 @@
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject ISender Sender
+@inject IOptions<BotConfig> Options
+@attribute [AuthorizeTeam]
+
+@code {
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthContext { get; set; }
+
+    [Parameter]
+    public required Team Team { get; set; }
+
+    bool _isLoading = false;
+    private AuthPolicy[]? _data;
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadDataAsync();
+    }
+
+    private async Task LoadDataAsync(LoadDataArgs obj) {
+        await ReloadDataAsync(obj);
+    }
+
+    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+        _isLoading = true;
+
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.TeamPermissions
+                             .Where(x => x.TeamId == Team.Id)
+                             .OrderByDescending(x => x.RegisterDateUtc)
+                             .Select(x => x.AuthPolicy)
+                             .AsQueryable();
+
+        query = query.ApplyDataGridFilter(args);
+
+        // _data = args is not null
+        //           ? query.ApplyPagination(args).ToArray()
+        //           : query.Skip(0).Take(25).ToArray();
+
+        _data = query.ToArray();
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+
+    private async Task RemoveAsync(AuthPolicy teamPermission) {
+        const string logMessage = $"[{nameof(TeamPermissionsDialogComponent)}]{nameof(RemoveAsync)}({{@Member}})";
+        try {
+            var state = await AuthContext;
+            var userId = state.User.GetUserId();
+            await Sender.Send(new ProcessRemoveTeamPermissionCommand(userId, teamPermission));
+            Log.Information(logMessage, teamPermission);
+            NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), detail: Lang.TeamPermissionRemovedSuccessfully.Translate());
+            await ReloadDataAsync();
+        }
+        catch (ModmailBotException ex) {
+            Log.Warning(ex, logMessage, teamPermission);
+            ex.NotifyException(NotificationService);
+        }
+        catch (Exception ex) {
+            Log.Fatal(ex, logMessage, teamPermission);
+            ex.NotifyException(NotificationService);
+        }
+    }
+
+}
+
+@if (_data is null) {
+    <Loading></Loading>
+}
+else {
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenText TextStyle="TextStyle.Subtitle1">
+                If you add @AuthPolicy.SuperUser.Name permission, this team will have access to everything and rest of
+                the
+                permissions will be ignored.
+            </RadzenText>
+
+            @if (_data.Length == 0) {
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-on-secondary-lighter">
+                    @Lang.TeamHasNoPermissions.Translate()
+                </RadzenText>
+            }
+            <RadzenDataGrid Responsive="true" LoadData="LoadDataAsync" AllowColumnPicking="false"
+                            Density="Density.Default"
+                            AllowFiltering="false" AllowColumnResize="false" AllowAlternatingRows="false"
+                            FilterMode="FilterMode.SimpleWithMenu"
+                            AllowGrouping="false" AllowSorting="false" PageSize="20" AllowPaging="false"
+                            PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
+                            PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                            Data="@_data" TItem="AuthPolicy" ColumnWidth="180px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+
+                            IsLoading=@_isLoading>
+                <Columns>
+                    <RadzenDataGridColumn Property="@nameof(AuthPolicy.Value)"
+                                          Title=@Lang.PermissionId.Translate()/>
+
+                    <RadzenDataGridColumn Property="@nameof(AuthPolicy.Name)"
+                                          Title=@Lang.PermissionName.Translate()/>
+                    <RadzenDataGridColumn Title=@Lang.Actions.Translate()>
+                        <Template Context="perm">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                          Icon="delete"
+                                          Variant="Variant.Flat"
+                                          Shade="Shade.Lighter"
+                                          Size="ButtonSize.Medium"
+                                          class="rz-my-1 rz-ms-1"
+                                          MouseEnter="@(args => TooltipService.Open(args, Lang.RemovePermission.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                          Click="@(async () => await RemoveAsync(perm))"
+                                          @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+
+
+        </RadzenColumn>
+    </RadzenRow>
+}

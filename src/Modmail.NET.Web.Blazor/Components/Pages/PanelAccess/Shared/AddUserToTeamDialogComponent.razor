@@ -2,47 +2,45 @@
 @using Modmail.NET.Common.Exceptions
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Teams.Commands
-@using Modmail.NET.Features.Teams.Static
 @using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 @inject ModmailBot Bot
 @inject ISender Sender
+@attribute [AuthorizeTeam]
 
 @code {
 
   [Parameter]
-  public required GuildTeam GuildTeam { get; set; }
+  public required Team Team { get; set; }
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
-  private List<DiscordUserInfo> _users;
+  private UserInformation[]? _users;
 
   private ulong _selectedUserId = 0;
 
   protected override async Task OnInitializedAsync() {
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    var teamMemberIds = dbContext.GuildTeamMembers
-                                 .Where(x => x.GuildTeamId == GuildTeam.Id && x.Type == TeamMemberDataType.UserId)
-                                 .Select(x => x.Key)
-                                 .ToList();
+    var teamMemberIds = dbContext.TeamUsers
+                                 .Select(x => x.UserId)
+                                 .ToArray();
 
-    _users = await dbContext.DiscordUserInfos
-                            .GroupJoin(dbContext.TicketBlacklists,
+    _users = await dbContext.UserInformation
+                            .GroupJoin(dbContext.Blacklists,
                                        user => user.Id,
-                                       blacklist => blacklist.DiscordUserId,
+                                       blacklist => blacklist.UserId,
                                        (user, blacklists) => new { user, blacklists })
                             .SelectMany(x => x.blacklists.DefaultIfEmpty(),
                                         (x, blacklist) => new { x.user, blacklist })
-                            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
+                            .Where(x => x.blacklist == null && x.user.Id != Bot.Client.CurrentUser.Id && !teamMemberIds.Contains(x.user.Id)) // Only take users that are not in blacklist
                             .OrderBy(x => x.user.Username)
-                            .Where(x => x.user.Id != Bot.Client.CurrentUser.Id) // Exclude bot
-                            .Where(x => teamMemberIds.All(y => y != x.user.Id)) // Exclude team members
                             .Select(x => x.user)
-                            .ToListAsync();
+                            .ToArrayAsync();
   }
 
   private async Task SubmitAsync(MouseEventArgs obj) {
@@ -51,13 +49,13 @@
       return;
     }
 
-    const string logMessage = $"[{nameof(AddUserToTeamDialog)}]{nameof(SubmitAsync)}({{UserId}})";
+    const string logMessage = $"[{nameof(AddUserToTeamDialogComponent)}]{nameof(SubmitAsync)}({{UserId}})";
 
     try {
       var state = await AuthContext;
       var userId = state.User.GetUserId();
 
-      await Sender.Send(new ProcessAddTeamMemberCommand(userId, GuildTeam.Id, _selectedUserId));
+      await Sender.Send(new ProcessAddTeamUserCommand(userId, Team.Id, _selectedUserId));
       Log.Information(logMessage, _selectedUserId);
       NotificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");
       DialogService.Close(true);
@@ -81,11 +79,14 @@ else {
   <RadzenRow>
     <RadzenColumn>
       <RadzenRow class="rz-my-4">
+          <RadzenText TextStyle="TextStyle.Subtitle1">
+              Once user is added to team, that user will have all the permissions this team is assigned.
+          </RadzenText>
         <RadzenDropDown Style="user-select: none"
                         Name="user-dropdown"
                         Data="@_users" class="w-100"
-                        TextProperty="@nameof(DiscordUserInfo.Username)"
-                        ValueProperty="@nameof(DiscordUserInfo.Id)"
+                        TextProperty="@nameof(UserInformation.Username)"
+                        ValueProperty="@nameof(UserInformation.Id)"
                         TValue="ulong"
                         @bind-Value="_selectedUserId"
                         Placeholder="Select User"

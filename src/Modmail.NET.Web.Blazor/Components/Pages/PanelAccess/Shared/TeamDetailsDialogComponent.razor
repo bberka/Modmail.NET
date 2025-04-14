@@ -1,0 +1,155 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject TooltipService TooltipService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject ISender Sender
+@inject IOptions<BotConfig> Options
+@attribute [AuthorizeTeam]
+
+@code {
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthContext { get; set; }
+
+    [Parameter]
+    public required Team Team { get; set; }
+
+    private UserInformation[]? _members;
+
+    protected override async Task OnInitializedAsync() {
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        _members = await dbContext.UserInformation.ToArrayAsync();
+        await ReloadDataAsync();
+    }
+
+    bool _isLoading = false;
+    private TeamUser[]? _data;
+
+    async Task ShowLoading() {
+        _isLoading = true;
+
+        await Task.Yield();
+
+        _isLoading = false;
+    }
+
+    private async Task LoadDataAsync(LoadDataArgs obj) {
+        await ReloadDataAsync(obj);
+    }
+
+    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+        await ShowLoading();
+
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.TeamUsers
+                             .Where(x => x.TeamId == Team.Id)
+                             .OrderByDescending(x => x.RegisterDateUtc)
+                             .AsQueryable();
+
+        query = query.ApplyDataGridFilter(args);
+
+        _data = args is not null
+                        ? query.ApplyPagination(args).ToArray()
+                        : query.Skip(0).Take(5).ToArray();
+
+        StateHasChanged();
+    }
+
+
+    private async Task RemoveAsync(TeamUser teamPermission) {
+        const string logMessage = $"[{nameof(TeamDetailsDialogComponent)}]{nameof(RemoveAsync)}({{@Member}})";
+        try {
+            var state = await AuthContext;
+            var userId = state.User.GetUserId();
+            await Sender.Send(new ProcessRemoveTeamMemberCommand(userId, teamPermission.UserId));
+            Log.Information(logMessage, teamPermission);
+            NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TeamMemberRemoved.Translate());
+            await ReloadDataAsync();
+        }
+        catch (ModmailBotException ex) {
+            Log.Warning(ex, logMessage, teamPermission);
+            ex.NotifyException(NotificationService);
+        }
+        catch (Exception ex) {
+            Log.Fatal(ex, logMessage, teamPermission);
+            ex.NotifyException(NotificationService);
+        }
+    }
+
+}
+
+@if (_data is null || _members is null) {
+    <Loading></Loading>
+}
+else {
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenText TextStyle="TextStyle.Subtitle1">
+                You can not remove users that are assigned to this team through role sync, or from bot config file.
+            </RadzenText>
+
+            @if (Team.SuperUserTeam) {
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-warning">
+                    This team is automatically created from bot config file and can not be changed.
+                </RadzenText>
+            }
+
+            @if (_data.Length == 0) {
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-on-secondary-lighter">
+                    @Lang.TeamHasNoMembers.Translate()
+                </RadzenText>
+            }
+
+            <RadzenDataList
+                    LoadData="LoadDataAsync"
+                    PageSize="5"
+                    AllowPaging="true"
+                    PagerPosition="PagerPosition.Bottom"
+                    PagerAlwaysVisible="false"
+                    IsLoading=@_isLoading
+                    WrapItems="true"
+                    Data="@_data"
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+
+                    ShowPagingSummary="true">
+                <Template Context="member">
+                    <RadzenCard Variant="Variant.Outlined" class="rz-mt-4 rz-p-0 rz-m-0"
+                                Style="width: 100%; overflow: hidden;">
+                        <RadzenRow Gap="0">
+                            <RadzenColumn Size="10" SizeLG="10" class="rz-p-4 product-title">
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5"
+                                                class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.UserId)?.Username ?? $"Id:{member.UserId}")</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body2">User</RadzenText>
+                                </RadzenColumn>
+                            </RadzenColumn>
+                            <RadzenColumn Size="2" SizeLG="2" class="rz-p-4">
+                                @if (!Team.SuperUserTeam) {
+                                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                                  Icon="delete"
+                                                  Variant="Variant.Flat"
+                                                  Shade="Shade.Lighter"
+                                                  Size="ButtonSize.Medium"
+                                                  class="rz-my-1 rz-ms-1"
+                                                  MouseEnter="@(args => TooltipService.Open(args, Lang.RemoveUser.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                                  Click="@(async () => await RemoveAsync(member))"
+                                                  @onclick:stopPropagation="true">
+                                    </RadzenButton>
+                                }
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenCard>
+                </Template>
+            </RadzenDataList>
+
+        </RadzenColumn>
+    </RadzenRow>
+}

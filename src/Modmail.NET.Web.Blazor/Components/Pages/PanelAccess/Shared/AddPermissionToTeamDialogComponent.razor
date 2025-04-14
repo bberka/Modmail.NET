@@ -1,0 +1,136 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Features.Teams.Queries
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
+@inject IOptions<BotConfig> Options
+@attribute [AuthorizeTeam]
+
+@code {
+
+    [Parameter]
+    public required Team Team { get; set; }
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthContext { get; set; }
+
+    private AuthPolicy[]? _data;
+
+    private IEnumerable<int> _selectedPermissions = [];
+    private ulong _userId;
+
+    private async Task LoadAsync() {
+        var permissions = await Sender.Send(new GetUserPermissionsQuery(_userId));
+
+        var isSuperUser = permissions.Contains(AuthPolicy.SuperUser);
+        var isConfigSuperUser = Options.Value.SuperUsers.Contains(_userId);
+        if (isConfigSuperUser) {
+            _data = AuthPolicy.List.ToArray();
+        }
+        else if (isSuperUser) {
+            _data = AuthPolicy.List.Where(x => x != AuthPolicy.SuperUser).ToArray();
+        }
+        else {
+            _data = permissions;
+        }
+
+        //Clear permissions from selection if team already has them
+
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+        var teamPermissions = await dbContext.TeamPermissions.Where(x => x.TeamId == Team.Id).Select(x => x.AuthPolicy).ToArrayAsync();
+        _data = teamPermissions.Any(x => x == AuthPolicy.SuperUser)
+                        ? []
+                        : _data.Where(x => teamPermissions.All(y => y != x)).OrderBy(x => x.Value).ToArray();
+    }
+
+    protected override async Task OnInitializedAsync() {
+        var state = await AuthContext;
+        _userId = state.User.GetUserId();
+        await LoadAsync();
+    }
+
+    private async Task SubmitAsync(MouseEventArgs obj) {
+        var validPermissions = _selectedPermissions
+                               .Select(x => AuthPolicy.TryFromValue(x, out var permission)
+                                                    ? permission
+                                                    : null)
+                               .Where(x => x != null)
+                               .Select(x => x!)
+                               .ToArray();
+        if (validPermissions.Length == 0) {
+            NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission.");
+            return;
+        }
+
+
+        const string logMessage = $"[{nameof(AddPermissionToTeamDialogComponent)}]{nameof(SubmitAsync)}({{@Permission}})";
+
+        try {
+            var state = await AuthContext;
+            var userId = state.User.GetUserId();
+
+            await Sender.Send(new ProcessAddPermissionToTeamCommand(userId, Team.Id, validPermissions));
+            Log.Information(logMessage, _selectedPermissions);
+            NotificationService.Notify(NotificationSeverity.Success, "Success", Lang.PermissionAddedSuccessfully.Translate());
+            DialogService.Close(true);
+        }
+        catch (ModmailBotException ex) {
+            Log.Warning(logMessage, validPermissions.First());
+            ex.NotifyException(NotificationService);
+        }
+        catch (Exception ex) {
+            Log.Fatal(logMessage, validPermissions.First());
+            ex.NotifyException(NotificationService);
+        }
+    }
+
+}
+
+@if (_data == null) {
+    <Loading></Loading>
+}
+else if (_data.Length == 0) {
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenText TextStyle="TextStyle.Subtitle1">
+                This team already has all the permissions.
+            </RadzenText>
+        </RadzenColumn>
+    </RadzenRow>
+}
+else {
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenRow class="rz-my-4">
+                <RadzenText TextStyle="TextStyle.Subtitle1">
+                    Once user is added to team, that user will have all the permissions this team is assigned.
+                </RadzenText>
+                <RadzenDropDown Style="user-select: none"
+                                Name="user-dropdown"
+                                Data="@_data" class="w-100"
+                                TextProperty="@nameof(AuthPolicy.Name)"
+                                ValueProperty="@nameof(AuthPolicy.Value)"
+                                @bind-Value="_selectedPermissions"
+                                Multiple="true"
+                                AllowClear="true"
+                                Placeholder="Select Permission"
+                                AllowFiltering="true"/>
+            </RadzenRow>
+            <RadzenRow class="rz-my-4">
+                <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Add"
+                              Click="SubmitAsync"/>
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+}

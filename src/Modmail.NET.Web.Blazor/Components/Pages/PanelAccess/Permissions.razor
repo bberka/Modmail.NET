@@ -1,0 +1,134 @@
+@page "/permissions"
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Features.Teams.Queries
+@using Modmail.NET.Web.Blazor.Components.Pages.PanelAccess.Shared
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@inject TooltipService TooltipService
+@inject DialogService DialogService
+@inject ISender Sender
+@attribute [AuthorizeTeam]
+
+<div class="container rz-mx-auto">
+  <RadzenRow>
+    <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            @Lang.Permissions.Translate()
+          </RadzenText>
+        </RadzenColumn>
+      </RadzenRow>
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        @if (_data is null) {
+          <Loading></Loading>
+        }
+        else {
+          <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
+            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="false"
+                            Density="Density.Default"
+                            AllowFiltering="true" AllowColumnResize="false" AllowAlternatingRows="false"
+                            FilterMode="FilterMode.SimpleWithMenu"
+                            AllowGrouping="false" AllowSorting="true" PageSize="25" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
+                            PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                            Data="@_data" TItem="AuthPolicy" ColumnWidth="150px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            IsLoading=@_isLoading>
+              <Columns>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(AuthPolicy.Value)" Filterable="false" Title="ID"
+                                      Width="40px"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(AuthPolicy.Name)" Filterable="true" Title="Name"
+                                      Width="100px"
+                                      TextAlign="TextAlign.Center"/>
+
+                <RadzenDataGridColumn Visible="true" Property="@nameof(AuthPolicy.Description)" Filterable="true"
+                                      Title="Description"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
+                                      Title="Actions">
+                  <Template Context="data">
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="group"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ViewUsersWithThisPermission(data))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.ViewUsers.Translate(), new TooltipOptions { Style = "background: var(--rz-success);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+
+                  </Template>
+                </RadzenDataGridColumn>
+              </Columns>
+            </RadzenDataGrid>
+          </RadzenCard>
+        }
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+</div>
+
+
+@code {
+
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+  private IQueryable<AuthPolicy>? _data;
+
+  bool _isLoading;
+
+  private void ReloadData(LoadDataArgs? args = null) {
+    _isLoading = true;
+
+    var query = AuthPolicy.List.OrderBy(x => x.Value).AsQueryable();
+
+    query = query.ApplyDataGridFilter(args);
+
+    _count = query.Count();
+
+    _data = args is not null
+              ? query.ApplyPagination(args)
+              : query.Skip(0).Take(25).AsQueryable();
+
+    _isLoading = false;
+    StateHasChanged();
+  }
+
+
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    var hasPermission = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageAccessPermissions));
+    if (!hasPermission) {
+      throw new ModmailBotException(Lang.UnauthorizedAccess);
+    }
+
+    ReloadData();
+  }
+
+
+  private void LoadDataAsync(LoadDataArgs args) {
+    ReloadData(args);
+  }
+
+  private int _count;
+
+
+  private async Task ViewUsersWithThisPermission(AuthPolicy data) {
+    _ = await DialogService.OpenAsync(Lang.UsersWithXPermission.Translate(data.Name),
+                                      _ =>
+                                        @<UsersWithPermissionComponent Policy="data"></UsersWithPermissionComponent>,
+                                      new DialogOptions {
+                                        Width = "900px",
+                                        CloseDialogOnEsc = true,
+                                        CloseDialogOnOverlayClick = true
+                                      });
+  }
+
+}
+

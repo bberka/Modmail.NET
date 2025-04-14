@@ -1,0 +1,351 @@
+﻿@page "/teams"
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Features.Teams.Queries
+@using Modmail.NET.Web.Blazor.Components.Pages.PanelAccess.Shared
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ISender Sender
+@attribute [AuthorizeTeam]
+
+<div class="container-xxl rz-mx-auto">
+  <RadzenRow>
+    <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            @Lang.Teams.Translate()
+          </RadzenText>
+        </RadzenColumn>
+      </RadzenRow>
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        @if (_data is null) {
+          <Loading></Loading>
+        }
+        else {
+          <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
+            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="true"
+                            Density="Density.Default"
+                            AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
+                            FilterMode="FilterMode.SimpleWithMenu"
+                            AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
+                            PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                            Data="@_data" TItem="Team" ColumnWidth="150px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            IsLoading=@_isLoading>
+              <HeaderTemplate>
+                <RadzenRow>
+                  <RadzenColumn Size="12">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add" Variant="Variant.Filled"
+                                  Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1"
+                                  Click="@ShowAddDialog">
+                      @Lang.CreateTeam.Translate()
+                    </RadzenButton>
+                  </RadzenColumn>
+                </RadzenRow>
+              </HeaderTemplate>
+              <Columns>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(Team.Id)" Filterable="false"
+                                      Title="@Lang.Id.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(Team.Name)" Filterable="true"
+                                      Title="@Lang.Name.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(Team.RegisterDateUtc)" Width="120px"
+                                      Filterable="true" Title="@Lang.RegisterDateUtc.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(Team.UpdateDateUtc)" Width="120px"
+                                      Filterable="true" Title="@Lang.UpdateDateUtc.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(Team.PingOnNewTicket)" Width="120px"
+                                      Filterable="true" Title="@Lang.PingOnNewTicket.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Visible="true" Property="@nameof(Team.PingOnNewMessage)" Width="120px"
+                                      Filterable="true" Title="@Lang.PingOnNewMessage.Translate()"
+                                      TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
+                                      Title="@Lang.Actions.Translate()">
+                  <Template Context="data">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="info"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowDetailsDialog(data))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.Details.Translate(), new TooltipOptions { Style = "background: var(--rz-primary);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    @if (!data.SuperUserTeam) {
+                      <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                    Icon="person_add"
+                                    Variant="Variant.Flat"
+                                    Shade="Shade.Lighter"
+                                    Size="ButtonSize.Medium"
+                                    class="rz-my-1 rz-ms-1"
+                                    Click="@(async () => await ShowAddUserDialog(data))"
+                                    MouseEnter="@(args => TooltipService.Open(args, Lang.AddUser.Translate(), new TooltipOptions { Style = "background: var(--rz-success);" }))"
+                                    @onclick:stopPropagation="true">
+                      </RadzenButton>
+                      @* <RadzenButton ButtonStyle="ButtonStyle.Success" *@
+                      @*               Icon="group_add" *@
+                      @*               Variant="Variant.Flat" *@
+                      @*               Shade="Shade.Lighter" *@
+                      @*               Size="ButtonSize.Medium" *@
+                      @*               class="rz-my-1 rz-ms-1" *@
+                      @*               Click="@(async () => await ShowAddRoleDialog(data))" *@
+                      @*               MouseEnter="@(args => TooltipService.Open(args, Lang.AddRole.Translate(), new TooltipOptions { Style = "background: var(--rz-success);" }))" *@
+                      @*               @onclick:stopPropagation="true"> *@
+                      @* </RadzenButton> *@
+                    }
+                    <RadzenButton ButtonStyle="ButtonStyle.Info"
+                                  Icon="edit"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowEditDialog(data))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.Edit.Translate(), new TooltipOptions { Style = "background: var(--rz-info);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Warning"
+                                  Icon="security"
+                                  Variant="Variant.Flat"
+                                  Shade="Shade.Lighter"
+                                  Size="ButtonSize.Medium"
+                                  class="rz-my-1 rz-ms-1"
+                                  Click="@(async () => await ShowPermissionsDialog(data))"
+                                  MouseEnter="@(args => TooltipService.Open(args, Lang.Permissions.Translate(), new TooltipOptions { Style = "background: var(--rz-warning);" }))"
+                                  @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    @if (!data.SuperUserTeam) {
+                      <RadzenButton ButtonStyle="ButtonStyle.Warning"
+                                    Icon="health_and_safety"
+                                    Variant="Variant.Flat"
+                                    Shade="Shade.Lighter"
+                                    Size="ButtonSize.Medium"
+                                    class="rz-my-1 rz-ms-1"
+                                    Click="@(async () => await ShowAddPermission(data))"
+                                    MouseEnter="@(args => TooltipService.Open(args, Lang.AddPermission.Translate(), new TooltipOptions { Style = "background: var(--rz-warning);" }))"
+                                    @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
+                    @if (!data.SuperUserTeam) {
+                      <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                    Icon="delete"
+                                    Variant="Variant.Flat"
+                                    Shade="Shade.Lighter"
+                                    Size="ButtonSize.Medium"
+                                    class="rz-my-1 rz-ms-1"
+                                    MouseEnter="@(args => TooltipService.Open(args, Lang.Delete.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                    Click="@(async () => await RemoveAsync(data))"
+                                    @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
+
+                  </Template>
+                </RadzenDataGridColumn>
+
+              </Columns>
+            </RadzenDataGrid>
+          </RadzenCard>
+        }
+
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+</div>
+
+
+@code {
+
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+
+  private IQueryable<Team>? _data;
+
+  bool _isLoading;
+
+
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+    _isLoading = true;
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    var query = dbContext.Teams
+                         .Include(x => x.Permissions)
+                         .OrderByDescending(x => x.RegisterDateUtc)
+                         .AsQueryable();
+
+    query = query.ApplyDataGridFilter(args);
+
+    _count = await query.CountAsync();
+
+
+    _data = args is not null
+              ? query.ApplyPagination(args)
+              : query.Skip(0).Take(10).AsQueryable();
+
+    _isLoading = false;
+    StateHasChanged();
+  }
+
+
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    var hasPermission = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageAccessPermissions));
+    if (!hasPermission) {
+      throw new ModmailBotException(Lang.UnauthorizedAccess);
+    }
+
+    await ReloadDataAsync();
+  }
+
+
+  private async Task LoadDataAsync(LoadDataArgs args) {
+    await ReloadDataAsync(args);
+  }
+
+  private int _count;
+
+  private async Task RemoveAsync(Team team) {
+    var dialogResult = await DialogService.Confirm(Lang.YouAreDeletingATeam.Translate(),
+                                                   Lang.AreYouSure.Translate(),
+                                                   options: new ConfirmOptions {
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true
+                                                   });
+
+
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(Teams)}]{nameof(RemoveAsync)}({{TeamName}})";
+      try {
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+
+        await Sender.Send(new ProcessRemoveTeamCommand(userId, team.Id));
+        Log.Information(logMessage,
+                        team.Name);
+        NotificationService.Notify(NotificationSeverity.Success,
+                                   Lang.TeamDeletedSuccessfully.Translate());
+
+        await ReloadDataAsync();
+      }
+      catch (ModmailBotException ex) {
+        Log.Warning(ex,
+                    logMessage,
+                    team.Name);
+        ex.NotifyException(NotificationService);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex,
+                  logMessage,
+                  team.Name);
+        ex.NotifyException(NotificationService);
+      }
+    }
+  }
+
+  private async Task ShowAddDialog() {
+    var dialog = await DialogService.OpenAsync(Lang.CreateTeam.Translate(),
+                                               _ =>
+                                                 @<CreateOrUpdateTeamDialogComponent></CreateOrUpdateTeamDialogComponent>,
+                                               new DialogOptions {
+                                                 Width = "450px"
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+  private async Task ShowEditDialog(Team team) {
+    var dialog = await DialogService.OpenAsync(Lang.EditTeam.Translate(),
+                                               _ =>
+                                                 @<CreateOrUpdateTeamDialogComponent
+                                                   Team="team"></CreateOrUpdateTeamDialogComponent>,
+                                               new DialogOptions {
+                                                 Width = "450px"
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+  private async Task ShowAddUserDialog(Team team) {
+    var dialog = await DialogService.OpenAsync(Lang.AddUserToTeam.Translate(),
+                                               _ =>
+                                                 @<AddUserToTeamDialogComponent
+                                                   Team="team"></AddUserToTeamDialogComponent>,
+                                               new DialogOptions {
+                                                 Width = "450px"
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+  @* private async Task ShowAddRoleDialog(Team team) { *@
+  @*   var dialog = await DialogService.OpenAsync("Add Role to Team", *@
+  @*                                              _ => *@
+  @*                                                @<AddRoleToTeamDialogComponent *@
+  @*                                                  Team="team"></AddRoleToTeamDialogComponent>, *@
+  @*                                              new DialogOptions { *@
+  @*                                                Width = "450px" *@
+  @*                                              }); *@
+  @*   if (dialog is true) { *@
+  @*     await ReloadDataAsync(); *@
+  @*   } *@
+  @* } *@
+
+  private async Task ShowDetailsDialog(Team team) {
+    var dialog = await DialogService.OpenAsync(Lang.TeamDetails.Translate(),
+                                               _ =>
+                                                 @<TeamDetailsDialogComponent Team="team"></TeamDetailsDialogComponent>,
+                                               new DialogOptions() {
+                                                 CloseDialogOnOverlayClick = true,
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+  private async Task ShowPermissionsDialog(Team team) {
+    var dialog = await DialogService.OpenAsync(Lang.TeamPermissions.Translate(),
+                                               _ =>
+                                                 @<TeamPermissionsDialogComponent
+                                                   Team="team"></TeamPermissionsDialogComponent>,
+                                               new DialogOptions() {
+                                                 CloseDialogOnOverlayClick = true,
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+  private async Task ShowAddPermission(Team team) {
+    var dialog = await DialogService.OpenAsync(Lang.AddPermission.Translate(),
+                                               _ =>
+                                                 @<AddPermissionToTeamDialogComponent
+                                                   Team="team"></AddPermissionToTeamDialogComponent>,
+                                               new DialogOptions() {
+                                                 CloseDialogOnOverlayClick = false,
+                                               });
+    if (dialog is true) {
+      await ReloadDataAsync();
+    }
+  }
+
+}
+
+

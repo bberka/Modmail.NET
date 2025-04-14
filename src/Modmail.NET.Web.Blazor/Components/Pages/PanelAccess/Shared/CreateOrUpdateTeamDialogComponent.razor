@@ -2,10 +2,9 @@
 @using Microsoft.Extensions.Options
 @using Modmail.NET.Common.Exceptions
 @using Modmail.NET.Database.Entities
-@using Modmail.NET.Features.Permission.Queries
-@using Modmail.NET.Features.Permission.Static
 @using Modmail.NET.Features.Teams.Commands
 @using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject NotificationService NotificationService
@@ -13,25 +12,22 @@
 @inject ModmailBot Bot
 @inject ISender Sender
 @inject IOptions<BotConfig> Options
+@attribute [AuthorizeTeam]
 
 @code {
 
 
-  private List<DiscordUserInfo> _users;
+    private UserInformation[]? _users = null;
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   [Parameter]
-  public GuildTeam Team { get; set; }
+  public required Team? Team { get; set; }
 
-  private TeamPermissionLevel? _permissionLevel;
   private bool _pingOnNewTicket = false;
   private bool _pingOnTicketMessage = false;
-  private bool _allowAccessToWebPanel = false;
-  private string _teamName;
-  private bool _isEnabled = true;
-  private TeamPermissionLevel _userPermissionLevel;
+    private string? _teamName;
 
   private bool IsUpdate => Team is not null;
 
@@ -39,25 +35,19 @@
     await base.OnInitializedAsync();
     var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-    _users = await dbContext.DiscordUserInfos
+    _users = await dbContext.UserInformation
                             .OrderBy(x => x.Username)
-                            .Where(x => x.Id != Bot.Client.CurrentUser.Id && Options.Value.OwnerUsers.Contains(x.Id))
-                            .ToListAsync();
+                            .Where(x => x.Id != Bot.Client.CurrentUser.Id && Options.Value.SuperUsers.Contains(x.Id))
+                            .ToArrayAsync();
 
-    _permissionLevel = IsUpdate
-                         ? Team!.PermissionLevel
-                         : null;
     _teamName = IsUpdate
                   ? Team?.Name
                   : null;
     _pingOnNewTicket = IsUpdate && Team!.PingOnNewTicket;
     _pingOnTicketMessage = IsUpdate && (Team?.PingOnNewMessage ?? false);
-    _isEnabled = IsUpdate && Team!.IsEnabled;
-    _allowAccessToWebPanel = Team?.AllowAccessToWebPanel ?? false;
 
     var state = await AuthContext;
-    var userId = state.User.GetUserId();
-    _userPermissionLevel = await Sender.Send(new GetPermissionLevelQuery(userId, true)) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
+    _ = state.User.GetUserId();
   }
 
   private async Task SubmitAsync() {
@@ -66,45 +56,40 @@
       return;
     }
 
-    if (_permissionLevel is null) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission level.");
-      return;
-    }
-
     var dialogResult = await DialogService.Confirm(IsUpdate
                                                      ? "Are you sure you want to update this team ?"
                                                      : "Are you sure you want to create new team ?",
                                                    options: new ConfirmOptions {
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No",
+                                                           OkButtonText = Lang.Yes.Translate(),
+                                                           CancelButtonText = Lang.No.Translate(),
                                                      CloseDialogOnOverlayClick = true,
                                                      CloseDialogOnEsc = true
                                                    });
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(CreateOrUpdateTeamDialog)}]{nameof(SubmitAsync)}({{TeamName}},{{PermissionLevel}})";
+        const string logMessage = $"[{nameof(CreateOrUpdateTeamDialogComponent)}]{nameof(SubmitAsync)}({{TeamName}})";
       var state = await AuthContext;
       var userId = state.User.GetUserId();
 
       try {
         if (IsUpdate && Team is not null) {
-          await Sender.Send(new ProcessUpdateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _isEnabled, _allowAccessToWebPanel));
-          Log.Information(logMessage, _teamName, _permissionLevel);
+            await Sender.Send(new ProcessUpdateTeamCommand(userId, Team.Id, _teamName, _pingOnNewTicket, _pingOnTicketMessage));
+            Log.Information(logMessage, _teamName);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team updated successfully.");
         }
         else {
-          await Sender.Send(new ProcessCreateTeamCommand(userId, _teamName, _permissionLevel.Value, _pingOnNewTicket, _pingOnTicketMessage, _allowAccessToWebPanel));
-          Log.Information(logMessage, _teamName, _permissionLevel);
+            await Sender.Send(new ProcessCreateTeamCommand(userId, _teamName, _pingOnNewTicket, _pingOnTicketMessage));
+            Log.Information(logMessage, _teamName);
           NotificationService.Notify(NotificationSeverity.Success, "Success", "Team created successfully.");
         }
 
         DialogService.Close(true);
       }
       catch (ModmailBotException ex) {
-        Log.Warning(ex, logMessage, _teamName, _permissionLevel);
+          Log.Warning(ex, logMessage, _teamName);
         ex.NotifyException(NotificationService);
       }
       catch (Exception ex) {
-        Log.Fatal(ex, logMessage, _teamName, _permissionLevel);
+          Log.Fatal(ex, logMessage, _teamName);
         ex.NotifyException(NotificationService);
       }
     }
@@ -119,28 +104,12 @@
 else {
   <RadzenRow>
     <RadzenColumn>
-      @if (IsUpdate) {
-        <RadzenRow class="rz-my-4">
-          <RadzenSwitch Name="isEnabled" @bind-Value=@_isEnabled/>
-          <RadzenLabel Component="isEnabled">
-            Is Enabled
-          </RadzenLabel>
-        </RadzenRow>
-      }
-
-
       <RadzenRow class="rz-my-4">
         <RadzenFormField Text="Team Name" class="w-100" Variant="Variant.Outlined">
           <RadzenTextBox Name="team-name" @bind-Value="@_teamName"/>
         </RadzenFormField>
       </RadzenRow>
 
-      <RadzenRow class="rz-my-4">
-        <RadzenDropDown Style="user-select: none" Name="permission-level"
-                        Data="Enum.GetValues<TeamPermissionLevel>().Where(x => (int)x  <= (int)_userPermissionLevel)"
-                        class="w-100" TValue="TeamPermissionLevel?" @bind-Value="_permissionLevel"
-                        Placeholder="Select Permission Level" AllowFiltering="false"/>
-      </RadzenRow>
       <RadzenRow class="rz-my-4">
         <RadzenSwitch Name="pingOnNewTicket" @bind-Value=@_pingOnNewTicket/>
         <RadzenLabel Component="pingOnNewTicket">
@@ -155,17 +124,6 @@ else {
         </RadzenLabel>
 
       </RadzenRow>
-
-      @if (_permissionLevel is not TeamPermissionLevel.Owner) {
-        <RadzenRow class="rz-my-4">
-          <RadzenSwitch Name="pingOnTicketMessage" @bind-Value=@_allowAccessToWebPanel/>
-          <RadzenLabel Component="pingOnTicketMessage">
-            Allow Access To Web Panel
-          </RadzenLabel>
-        </RadzenRow>
-      }
-
-
 
       <RadzenRow class="rz-my-4">
         <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
