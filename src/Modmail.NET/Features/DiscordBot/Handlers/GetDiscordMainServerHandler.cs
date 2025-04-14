@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.DiscordBot.Queries;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.User.Commands;
 using Modmail.NET.Language;
 using Serilog;

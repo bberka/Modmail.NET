@@ -1,6 +1,6 @@
-namespace Modmail.NET.Features.Guild.Static;
+namespace Modmail.NET.Features.Server.Static;
 
-public static class GuildConstants
+public static class ServerConstants
 {
   public const string CategoryName = "Modmail";
   public const string LogChannelName = "📄modmail-logs";

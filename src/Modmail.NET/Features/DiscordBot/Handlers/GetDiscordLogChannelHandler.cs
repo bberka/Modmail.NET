@@ -1,8 +1,8 @@
 using DSharpPlus.Entities;
 using MediatR;
 using Modmail.NET.Features.DiscordBot.Queries;
-using Modmail.NET.Features.Guild.Commands;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Commands;
+using Modmail.NET.Features.Server.Queries;
 using Serilog;
 using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 

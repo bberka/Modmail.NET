@@ -10,7 +10,7 @@ using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Database.Extensions;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Features.User.Commands;
