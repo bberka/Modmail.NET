@@ -8,7 +8,7 @@ namespace Modmail.NET.Common.Extensions;
 public static class EmbedExtensions
 {
   public static DiscordMessageBuilder AddAttachments(this DiscordMessageBuilder builder, TicketMessageAttachment[] attachments) {
-    if (attachments == null || attachments.Length == 0) return builder;
+    if (attachments.Length == 0) return builder;
 
     foreach (var attachment in attachments) {
       var path = UtilAttachment.GetLocalPath(attachment);
@@ -24,12 +24,12 @@ public static class EmbedExtensions
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder) {
     var sender = ServiceLocator.CreateSender();
-    var guildInfo = sender.Send(new GetDiscordMainGuildQuery()).GetAwaiter().GetResult(); // TODO: Find a better way to handle this
+    var guildInfo = sender.Send(new GetDiscordMainServerQuery()).GetAwaiter().GetResult(); // TODO: Find a better way to handle this
     return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
   }
 
-  public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, GuildOption guildInfo) {
-    return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
+  public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, Option info) {
+    return builder.WithFooter(info.Name, info.IconUrl);
   }
 
   public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, DiscordGuild guildInfo) {
@@ -40,7 +40,7 @@ public static class EmbedExtensions
     return builder.WithAuthor(user.GetUsername(), iconUrl: user.AvatarUrl);
   }
 
-  public static DiscordEmbedBuilder WithUserAsAuthor(this DiscordEmbedBuilder builder, DiscordUserInfo user) {
+  public static DiscordEmbedBuilder WithUserAsAuthor(this DiscordEmbedBuilder builder, UserInformation user) {
     return builder.WithAuthor(user.Username, iconUrl: user.AvatarUrl);
   }
 }

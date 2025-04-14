@@ -22,24 +22,24 @@ public static class ExceptionExtensions
   public static DiscordWebhookBuilder ToWebhookResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return ModmailWebhooks.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return ModmailWebhooks.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred), exception.Message);
 
-    return ModmailWebhooks.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
+    return ModmailWebhooks.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred));
   }
 
   public static DiscordEmbedBuilder ToEmbedResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return ModmailEmbeds.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return ModmailEmbeds.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred), exception.Message);
 
-    return ModmailEmbeds.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
+    return ModmailEmbeds.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred));
   }
 
   public static DiscordInteractionResponseBuilder ToInteractionResponse(this Exception exception) {
     var config = ServiceLocator.GetBotConfig();
 
-    if (config.Environment == EnvironmentType.Development) return ModmailInteractions.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred), exception.Message);
+    if (config.Environment == EnvironmentType.Development) return ModmailInteractions.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred), exception.Message);
 
-    return ModmailInteractions.Error(LangProvider.This.GetTranslation(LangKeys.AnExceptionOccurred));
+    return ModmailInteractions.Error(LangProvider.This.GetTranslation(Lang.AnExceptionOccurred));
   }
 }
