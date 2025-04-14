@@ -30,7 +30,10 @@ public static class BusinessDependency
     builder.Services.AddHostedService<ModmailHostedService>();
 
     builder.Services.AddDbContextFactory<ModmailDbContext>(options => {
-      options.UseSqlServer(botConfig.GetValue<string>("DbConnectionString"));
+      var connString = botConfig.GetValue<string>("DbConnectionString")
+                       ?? throw new Exception("DbConnectionString is null");
+      ;
+      options.UseSqlServer(connString);
       options.UseTriggers(triggerOptions => {
         triggerOptions.AddTrigger<RegisterDateTrigger>();
         triggerOptions.AddTrigger<UpdateDateTrigger>();
@@ -47,6 +50,8 @@ public static class BusinessDependency
 
       options.UseExceptionProcessor();
       options.UseValidationCheckConstraints();
+
+      // options.ConfigureWarnings(x => x.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
     });
   }
 
@@ -54,20 +59,11 @@ public static class BusinessDependency
     using var scope = app.Services.CreateScope();
     await using var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     try {
-      await dbContext.Database.EnsureCreatedAsync();
-      Log.Information("Database ensure created");
-    }
-    catch (Exception ex) {
-      Log.Error(ex, "Failed to setup server: Ensure created failed");
-    }
-
-    try {
       await dbContext.Database.MigrateAsync();
       Log.Information("Database migration completed!");
     }
     catch (Exception ex) {
       Log.Error(ex, "Failed to setup server: Database migration failed");
-      throw;
     }
   }
 }
