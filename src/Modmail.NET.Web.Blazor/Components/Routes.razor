@@ -1,16 +1,16 @@
-﻿@using Modmail.NET.Language
-@using Modmail.NET.Web.Blazor.Components.Layout
+﻿@using Modmail.NET.Web.Blazor.Components.Layout
+@using Modmail.NET.Web.Blazor.Components.Pages.Auth.Shared
 <CascadingAuthenticationState>
   <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
       <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AuthLayout)">
         <NotAuthorized>
           @if (context.User.Identity?.IsAuthenticated != true) {
-            <RedirectToLogin/>
+            <RedirectToLoginComponent/>
           }
           else {
             <RadzenText TextStyle="TextStyle.Subtitle1">
-              @LangKeys.ErrorAuthForbidden.GetTranslation()
+              @Lang.ErrorAuthForbidden.Translate()
             </RadzenText>
           }
         </NotAuthorized>
@@ -19,7 +19,7 @@
     <NotFound>
       <LayoutView Layout="@typeof(AuthLayout)">
         <RadzenText TextStyle="TextStyle.Subtitle1">
-          @LangKeys.ErrorNotFound.GetTranslation()
+          @Lang.ErrorNotFound.Translate()
         </RadzenText>
       </LayoutView>
     </NotFound>
@@ -29,7 +29,7 @@
 @code {
 
   [CascadingParameter]
-  private Task<AuthenticationState> Context { get; set; }
+  public required Task<AuthenticationState> Context { get; set; }
 
 }
 
