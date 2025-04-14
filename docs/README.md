@@ -28,11 +28,7 @@ Moderators can toggle anonymous mode for responding to tickets.
 
 ### Team-Based Access
 
-Set up teams, assign roles, and manage team members for efficient ticket handling.
-
-### Event-Driven User Caching
-
-User information is automatically cached during key Discord events.
+Set up teams, assign permissions, and manage teams for efficient ticket handling.
 
 ### Blacklisting
 
@@ -54,17 +50,25 @@ Moderators can communicate privately within ticket channels using a bot prefix.
 
 Configure bot settings, manage teams, and view bot statistics through an intuitive web interface.
 
-###  Logging
+### Transcript Management
 
-Logs messages and transcripts to a database and ticket actions to discord log channel.
+Ticket transcripts are can easily be accessed by moderators through web ui.
+
+### Permission Management
+
+Control access to ticket channels, web ui and commands.
+
+### Tag System
+
+Create tags, basically snippets for frequently used messages, to streamline communication.
+
+### Metrics and Analytics
+
+Monitor bot usage and performance with built-in metrics and analytics.
 
 ## Getting Started
 
-1.  **Prerequisites:** Install the [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0).
-2.  **Download & Build:** Download the project source code and build/publish it for your desired platform. You can also grab a pre-built release from the [GitHub Releases](link-to-releases-when-available)  *(Currently not available)*.
-3.  **Discord Application:** Create a new application on the [Discord Developer Portal](https://discord.com/developers/applications).
-4.  **Configuration:** Configure the bot's settings in `appsettings.json`.
-5.  **Run:** Start the application on your server.
+Check installation guide [here](INSTALL.md).
 
 ## Using the Bot Across Multiple Discord Servers
 
@@ -79,8 +83,8 @@ To use Modmail.NET on multiple servers, simply invite the bot to each server. Ti
 ## Explore the Documentation
 
 *   [Discord Commands](COMMANDS.md) - Learn about the available bot commands and their usage.
-*   [Changelog](CHANGELOG.md) - See what's new in the latest releases.
 *   [Web UI Images](img) - Get a visual overview of the web interface.
+*   [Configuration](CONFIG.md) - Understand the configuration options available for Modmail.NET.
 
 ## Important: Please Read!
 
