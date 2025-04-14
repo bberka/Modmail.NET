@@ -13,7 +13,7 @@ public static class UtilVersion
   public static string GetProductVersion() {
     var fileVersionInfo = FileVersionInfo.GetVersionInfo(typeof(UtilVersion).Assembly.Location);
     var version = fileVersionInfo.ProductVersion;
-    return version;
+    return version ?? "Unknown";
   }
 
   public static string GetReadableProductVersion() {
@@ -25,6 +25,6 @@ public static class UtilVersion
       return first;
     }
 
-    return version;
+    return version ?? "Unknown";
   }
 }
