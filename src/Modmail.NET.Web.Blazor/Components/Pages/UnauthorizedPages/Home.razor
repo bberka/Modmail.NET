@@ -1,0 +1,40 @@
+﻿@page "/"
+@using Modmail.NET.Web.Blazor.Components.Layout
+@inject NavigationManager NavigationManager
+
+@code {
+
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthContext { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        var state = await AuthContext;
+        if (state.User.Identity?.IsAuthenticated == true) {
+            NavigationManager.NavigateTo("/dashboard", false);
+        }
+    }
+
+    private void NavigateToLogin() {
+        NavigationManager.NavigateTo("/auth/login", true);
+    }
+
+}
+
+@rendermode InteractiveServer
+@layout EmptyLayout
+
+<div class="container rz-mx-auto" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <RadzenRow Class="rz-justify-content-center">
+        <RadzenColumn Size="12" Class="rz-text-center">
+            <div style="text-align: center;">
+                <RadzenText TextStyle="TextStyle.H3" Class="fw-bold">
+                    Modmail.NET
+                </RadzenText>
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" Click="NavigateToLogin">
+                    <RadzenIcon Icon="login"></RadzenIcon>
+                    @Lang.LoginWithDiscord.Translate()
+                </RadzenButton>
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+</div>
