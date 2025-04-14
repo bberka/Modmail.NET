@@ -18,7 +18,7 @@ public class AttachmentController : Controller
   public async Task<IActionResult> Get(Guid id) {
     if (id == Guid.Empty) return NotFound();
 
-    var attachment = await _dbContext.TicketMessageAttachments.Where(x => x.Id == id)
+    var attachment = await _dbContext.MessageAttachments.Where(x => x.Id == id)
                                      .Select(x => new {
                                        x.MediaType,
                                        x.FileName
