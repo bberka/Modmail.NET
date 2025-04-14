@@ -17,7 +17,7 @@ public class ProcessRemoveTagHandler : IRequestHandler<ProcessRemoveTagCommand, 
   public async Task<Database.Entities.Tag> Handle(ProcessRemoveTagCommand request, CancellationToken cancellationToken) {
     var entity = await _dbContext.Tags.FindAsync([request.Id], cancellationToken);
 
-    if (entity is null) throw new NotFoundException(LangKeys.Tag);
+    if (entity is null) throw new ModmailBotException(Lang.TagNotFound);
 
     _dbContext.Remove(entity);
 

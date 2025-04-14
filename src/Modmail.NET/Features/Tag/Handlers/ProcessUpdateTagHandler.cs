@@ -20,18 +20,18 @@ public class ProcessUpdateTagHandler : IRequestHandler<ProcessUpdateTagCommand, 
 
     var entity = await _dbContext.Tags.Where(x => x.Name == fixedName).FirstOrDefaultAsync(cancellationToken: cancellationToken);
     if (entity is null) {
-      throw new ModmailBotException(LangKeys.TagDoesntExists);
+      throw new ModmailBotException(Lang.TagDoesntExists);
     }
 
     var isNameSame = fixedName.Equals(entity.Name, StringComparison.InvariantCultureIgnoreCase);
     if (!isNameSame) {
       var exists = await _dbContext.Tags.Where(x => x.Name == fixedName).AnyAsync(cancellationToken: cancellationToken);
       if (exists) {
-        throw new ModmailBotException(LangKeys.TagWithSameNameAlreadyExists);
+        throw new ModmailBotException(Lang.TagWithSameNameAlreadyExists);
       }
     }
 
-    entity.Title = request.Title.Trim();
+    entity.Title = request.Title?.Trim();
     entity.Content = request.Content.Trim();
     entity.Name = fixedName;
 

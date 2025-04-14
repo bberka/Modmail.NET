@@ -20,12 +20,12 @@ public class ProcessCreateTagHandler : IRequestHandler<ProcessCreateTagCommand, 
 
     var exists = await _dbContext.Tags.Where(x => x.Name == fixedName).AnyAsync(cancellationToken: cancellationToken);
     if (exists) {
-      throw new ModmailBotException(LangKeys.TagWithSameNameAlreadyExists);
+      throw new ModmailBotException(Lang.TagWithSameNameAlreadyExists);
     }
 
     var entity = new Database.Entities.Tag {
       Name = fixedName,
-      Title = request.Title.Trim(),
+      Title = request.Title?.Trim(),
       Content = request.Content.Trim(),
     };
     _dbContext.Add(entity);
