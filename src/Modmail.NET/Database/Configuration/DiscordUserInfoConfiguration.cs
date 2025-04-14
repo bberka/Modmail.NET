@@ -4,9 +4,9 @@ using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public class DiscordUserInfoConfiguration : IEntityTypeConfiguration<DiscordUserInfo>
+public class DiscordUserInfoConfiguration : IEntityTypeConfiguration<UserInformation>
 {
-  public void Configure(EntityTypeBuilder<DiscordUserInfo> builder) {
+  public void Configure(EntityTypeBuilder<UserInformation> builder) {
     builder.HasKey(x => x.Id);
 
     builder.Property(x => x.Id)

@@ -7,7 +7,7 @@ using Modmail.NET.Features.Ticket.Static;
 
 namespace Modmail.NET.Database.Entities;
 
-public class Ticket : IHasRegisterDate,
+public class Ticket : IRegisterDateUtc,
                       IEntity,
                       IGuidId
 {
@@ -23,13 +23,13 @@ public class Ticket : IHasRegisterDate,
   public required TicketPriority Priority { get; set; }
 
   [MaxLength(DbLength.Reason)]
-  public string CloseReason { get; set; }
+  public string? CloseReason { get; set; }
 
   public bool IsForcedClosed { get; set; }
   public int? FeedbackStar { get; set; }
 
   [MaxLength(DbLength.FeedbackMessage)]
-  public string FeedbackMessage { get; set; }
+  public string? FeedbackMessage { get; set; }
 
   public bool Anonymous { get; set; }
 
@@ -37,13 +37,43 @@ public class Ticket : IHasRegisterDate,
   public Guid? TicketTypeId { get; set; }
 
   //FK
-
-  public DiscordUserInfo OpenerUser { get; set; }
-  public DiscordUserInfo CloserUser { get; set; }
-  public DiscordUserInfo AssignedUser { get; set; }
-  public TicketType TicketType { get; set; }
-  public List<TicketMessage> Messages { get; set; } = [];
-  public List<TicketNote> TicketNotes { get; set; } = [];
+  public virtual UserInformation? OpenerUser { get; set; }
+  public virtual UserInformation? CloserUser { get; set; }
+  public virtual UserInformation? AssignedUser { get; set; }
+  public virtual TicketType? TicketType { get; set; }
+  public virtual ICollection<TicketMessage> Messages { get; set; } = [];
+  public virtual ICollection<TicketNote> Notes { get; set; } = [];
   public Guid Id { get; set; }
   public DateTime RegisterDateUtc { get; set; }
+
+  public bool IsClosed() {
+    return ClosedDateUtc.HasValue;
+  }
+
+  public bool IsOpen() {
+    return !ClosedDateUtc.HasValue;
+  }
+
+  public bool IsAssigned() {
+    return AssignedUserId.HasValue;
+  }
+
+  public bool HasFeedback() {
+    return FeedbackStar.HasValue;
+  }
+
+
+  /// <summary>
+  /// </summary>
+  /// <exception cref="InvalidOperationException"></exception>
+  public void ThrowIfNotClosed() {
+    if (!IsClosed()) throw new InvalidOperationException("Ticket is not closed");
+  }
+
+  /// <summary>
+  /// </summary>
+  /// <exception cref="InvalidOperationException"></exception>
+  public void ThrowIfNotOpen() {
+    if (!IsOpen()) throw new InvalidOperationException("Ticket is not open");
+  }
 }

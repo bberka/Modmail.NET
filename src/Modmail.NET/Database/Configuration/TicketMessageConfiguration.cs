@@ -12,7 +12,7 @@ public class TicketMessageConfiguration : IEntityTypeConfiguration<TicketMessage
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
 
-    builder.HasOne<DiscordUserInfo>()
+    builder.HasOne<UserInformation>()
            .WithMany()
            .HasForeignKey(x => x.SenderUserId)
            .OnDelete(DeleteBehavior.Restrict);

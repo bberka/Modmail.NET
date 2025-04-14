@@ -4,12 +4,12 @@ using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public class GuildOptionConfiguration : IEntityTypeConfiguration<GuildOption>
+public class OptionConfiguration : IEntityTypeConfiguration<Option>
 {
-  public void Configure(EntityTypeBuilder<GuildOption> builder) {
-    builder.HasKey(x => x.GuildId);
+  public void Configure(EntityTypeBuilder<Option> builder) {
+    builder.HasKey(x => x.ServerId);
 
-    builder.Property(x => x.GuildId)
+    builder.Property(x => x.ServerId)
            .ValueGeneratedNever();
   }
 }

@@ -13,7 +13,7 @@ public class TicketNoteConfiguration : IEntityTypeConfiguration<TicketNote>
            .ValueGeneratedOnAdd();
 
     builder.HasOne<Ticket>()
-           .WithMany(x => x.TicketNotes)
+           .WithMany(x => x.Notes)
            .HasForeignKey(x => x.TicketId)
            .OnDelete(DeleteBehavior.Cascade);
   }

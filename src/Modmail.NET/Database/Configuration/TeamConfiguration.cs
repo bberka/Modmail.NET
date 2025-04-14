@@ -4,17 +4,17 @@ using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public class GuildTeamConfiguration : IEntityTypeConfiguration<GuildTeam>
+public class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
-  public void Configure(EntityTypeBuilder<GuildTeam> builder) {
+  public void Configure(EntityTypeBuilder<Team> builder) {
     builder.HasKey(x => x.Id);
 
     builder.Property(x => x.Id)
            .ValueGeneratedOnAdd();
 
-    builder.HasMany(x => x.GuildTeamMembers)
-           .WithOne(x => x.GuildTeam)
-           .HasForeignKey(x => x.GuildTeamId)
+    builder.HasMany(x => x.Users)
+           .WithOne(x => x.Team)
+           .HasForeignKey(x => x.TeamId)
            .OnDelete(DeleteBehavior.Cascade);
   }
 }

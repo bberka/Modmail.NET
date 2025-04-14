@@ -8,19 +8,20 @@ public class ModmailDbContext : DbContext
 {
   public ModmailDbContext() { }
   public ModmailDbContext(DbContextOptions<ModmailDbContext> options) : base(options) { }
-  public DbSet<Ticket> Tickets { get; set; } = null!;
-  public DbSet<TicketMessageAttachment> TicketMessageAttachments { get; set; } = null!;
-  public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
-  public DbSet<TicketMessageHistory> TicketMessageHistory { get; set; } = null!;
-  public DbSet<GuildOption> GuildOptions { get; set; } = null!;
-  public DbSet<GuildTeam> GuildTeams { get; set; } = null!;
-  public DbSet<GuildTeamMember> GuildTeamMembers { get; set; } = null!;
-  public DbSet<TicketNote> TicketNotes { get; set; } = null!;
-  public DbSet<DiscordUserInfo> DiscordUserInfos { get; set; } = null!;
-  public DbSet<TicketBlacklist> TicketBlacklists { get; set; } = null!;
-  public DbSet<TicketType> TicketTypes { get; set; } = null!;
-  public DbSet<Statistic> Statistics { get; set; } = null!;
-  public DbSet<Tag> Tags { get; set; } = null!;
+  public required DbSet<Ticket> Tickets { get; set; }
+  public required DbSet<TicketMessageAttachment> MessageAttachments { get; set; }
+  public required DbSet<TicketMessage> Messages { get; set; }
+  public required DbSet<TicketMessageHistory> MessageHistory { get; set; }
+  public required DbSet<Option> Options { get; set; }
+  public required DbSet<Team> Teams { get; set; }
+  public required DbSet<TeamUser> TeamUsers { get; set; }
+  public required DbSet<TeamPermission> TeamPermissions { get; set; }
+  public required DbSet<TicketNote> TicketNotes { get; set; }
+  public required DbSet<UserInformation> UserInformation { get; set; }
+  public required DbSet<Blacklist> Blacklists { get; set; }
+  public required DbSet<TicketType> TicketTypes { get; set; }
+  public required DbSet<Statistic> Statistics { get; set; }
+  public required DbSet<Tag> Tags { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder) {
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);

@@ -3,7 +3,7 @@ using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
 
-public class Statistic : IHasRegisterDate,
+public class Statistic : IRegisterDateUtc,
                          IEntity,
                          IGuidId
 {
@@ -26,7 +26,6 @@ public class Statistic : IHasRegisterDate,
   public required double SlowestClosedTicketSeconds { get; set; }
 
   public Guid Id { get; set; }
-
   public DateTime RegisterDateUtc { get; set; }
 
   public static Statistic Default() {

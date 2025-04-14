@@ -6,41 +6,42 @@ using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
 
-public class DiscordUserInfo : IHasRegisterDate,
-                               IHasUpdateDate,
+public class UserInformation : IRegisterDateUtc,
+                               IUpdateDateUtc,
+                               IUlongId,
                                IEntity
 {
-  /// <summary>
-  ///   Users Discord Id
-  /// </summary>
-  public required ulong Id { get; set; }
-
   [MaxLength(DbLength.Name)]
-  [Required]
-  public required string Username { get; set; }
+  public string Username { get; set; } = null!;
 
   [MaxLength(DbLength.Url)]
-  public required string AvatarUrl { get; set; }
+  public string? AvatarUrl { get; set; }
 
   [MaxLength(DbLength.Url)]
-  public required string BannerUrl { get; set; }
+  public string? BannerUrl { get; set; }
 
   [MaxLength(DbLength.Email)]
-  public required string Email { get; set; }
+  public string? Email { get; set; }
 
   [MaxLength(DbLength.Locale)]
-  public required string Locale { get; set; } = string.Empty;
+  public string? Locale { get; set; }
 
-  public List<Ticket> OpenedTickets { get; set; } = [];
-  public List<Ticket> ClosedTickets { get; set; } = [];
-  public List<Ticket> AssignedTickets { get; set; } = [];
+  public virtual ICollection<Ticket> OpenedTickets { get; set; } = [];
+  public virtual ICollection<Ticket> ClosedTickets { get; set; } = [];
+  public virtual ICollection<Ticket> AssignedTickets { get; set; } = [];
 
   public DateTime RegisterDateUtc { get; set; }
 
+  /// <summary>
+  ///   Users Discord Id
+  /// </summary>
+  [Range(1, long.MaxValue)]
+  public ulong Id { get; set; }
+
   public DateTime? UpdateDateUtc { get; set; }
 
-  public static DiscordUserInfo FromDiscordUser(DiscordUser user) {
-    return new DiscordUserInfo {
+  public static UserInformation FromDiscordUser(DiscordUser user) {
+    return new UserInformation {
       Id = user.Id,
       Username = user.GetUsername(),
       AvatarUrl = user.AvatarUrl,
@@ -50,8 +51,8 @@ public class DiscordUserInfo : IHasRegisterDate,
     };
   }
 
-  public static DiscordUserInfo FromDiscordMember(DiscordMember member) {
-    return new DiscordUserInfo {
+  public static UserInformation FromDiscordMember(DiscordMember member) {
+    return new UserInformation {
       Id = member.Id,
       Username = member.GetUsername(),
       AvatarUrl = member.AvatarUrl,
