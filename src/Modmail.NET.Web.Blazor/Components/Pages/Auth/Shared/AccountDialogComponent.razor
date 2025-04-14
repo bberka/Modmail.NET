@@ -1,30 +1,29 @@
 @using System.Security.Claims
-@using Modmail.NET.Features.Permission.Static
-@using Modmail.NET.Language
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
 @inject NavigationManager NavigationManager
+@attribute [AuthorizeTeam]
 
 @code {
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   private bool _isLoading = true;
   private ulong _userId;
-  private string _username;
-  private TeamPermissionLevel _role;
+  private string _username = string.Empty;
 
 
   protected override async Task OnInitializedAsync() {
     var auth = await AuthContext;
-    _userId = ulong.Parse(auth.User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-    _username = auth.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+    _userId = auth.User.GetUserId();
+    _username = auth.User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty; //TODO: Move these to extension methods
     var roleStr = auth.User.FindFirst(ClaimTypes.Role)?.Value;
     if (string.IsNullOrEmpty(roleStr)) {
-      NavigationManager.NavigateTo("result/" + LangKeys.ErrorRoleIsNull);
+      NavigationManager.NavigateTo("result/" + Lang.ErrorRoleIsNull);
       return;
     }
 
-    _role = Enum.Parse<TeamPermissionLevel>(roleStr);
     _isLoading = false;
   }
 
@@ -58,16 +57,6 @@
         </RadzenColumn>
         <RadzenColumn>
           @_username
-        </RadzenColumn>
-      </RadzenRow>
-
-
-      <RadzenRow class="rz-my-4">
-        <RadzenColumn>
-          <RadzenLabel>Team Permission Level</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn>
-          @_role.ToString()
         </RadzenColumn>
       </RadzenRow>
 
