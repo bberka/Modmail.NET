@@ -1,0 +1,92 @@
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Web.Blazor.Providers
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject ISender Sender
+@attribute [AuthorizeTeam]
+
+@code {
+
+    [Parameter]
+    public required ulong UserId { get; set; }
+
+    bool _isLoading = false;
+
+    private IQueryable<AuthPolicy>? _data;
+    private int _count = 0;
+
+    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+        _isLoading = true;
+        var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var query = dbContext.TeamUsers
+                             .Include(x => x.Team)
+                             .ThenInclude(x => x!.Permissions)
+                             .Where(x => x.UserId == UserId)
+                             .OrderByDescending(x => x.RegisterDateUtc)
+                             .SelectMany(x => x.Team!.Permissions)
+                             .Select(x => x.AuthPolicy)
+                             .AsQueryable();
+
+        query = query.ApplyDataGridFilter(args);
+
+        _count = await query.CountAsync();
+
+        // _data = args is not null
+        //           ? query.ApplyPagination(args)
+        //           : query.Skip(0).Take(20).AsQueryable();
+
+        _data = query;
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadDataAsync();
+    }
+
+
+    private async Task LoadDataAsync(LoadDataArgs args) {
+        await ReloadDataAsync(args);
+    }
+
+
+}
+
+<div class="rz-mx-auto">
+    <RadzenRow>
+        <RadzenColumn Size="12">
+            <RadzenRow RowGap="4" class="rz-mt-5">
+                @if (_data is null) {
+                    <Loading></Loading>
+                }
+                else {
+                    <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
+                        <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync"
+                                        AllowColumnPicking="false"
+                                        Density="Density.Default"
+                                        AllowFiltering="false" AllowColumnResize="false" AllowAlternatingRows="false"
+                                        FilterMode="FilterMode.SimpleWithMenu"
+                                        AllowGrouping="false" AllowSorting="false" PageSize="20" AllowPaging="false"
+                                        PagerHorizontalAlign="HorizontalAlign.Left"
+                                        PagerPosition="PagerPosition.TopAndBottom"
+                                        PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                                        Data="@_data" TItem="AuthPolicy" ColumnWidth="180px"
+                                        LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                                        IsLoading=@_isLoading>
+                            <Columns>
+                                <RadzenDataGridColumn Property="@nameof(AuthPolicy.Value)"
+                                                      Title=@Lang.PermissionId.Translate()/>
+
+                                <RadzenDataGridColumn Property="@nameof(AuthPolicy.Name)"
+                                                      Title=@Lang.PermissionName.Translate()/>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenCard>
+                }
+
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+</div>

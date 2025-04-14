@@ -1,0 +1,314 @@
+@page "/users"
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Database.Extensions
+@using Modmail.NET.Features.Blacklist.Commands
+@using Modmail.NET.Web.Blazor.Components.Pages.Users.Shared
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
+@inject ISender Sender
+@attribute [AuthorizeTeam]
+
+@code {
+
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+  private IQueryable<UserViewModel>? _data;
+
+  private bool _isLoading;
+
+  private sealed record UserViewModel(
+    UserInformation User,
+    bool IsBlocked,
+    bool IsTeamUser,
+    bool HasOpenTicket,
+    bool OpenedAnyTicket);
+
+  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+    _isLoading = true;
+
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+
+    _blocked = await dbContext.Blacklists
+                              .Select(x => x.UserId)
+                              .Distinct()
+                              .ToArrayAsync();
+
+
+    var query = dbContext.UserInformation
+                         .AsNoTracking()
+                         .OrderBy(x => x.Id)
+                         .Where(x => _teamUsers.Contains(x.Id) ||
+                                     _usersWithOpenTickets.Contains(x.Id) ||
+                                     _usersThatOpenedTickets.Contains(x.Id))
+                         .Select(x => new UserViewModel(
+                                                        x,
+                                                        _blocked.Contains(x.Id),
+                                                        _teamUsers.Contains(x.Id),
+                                                        _usersWithOpenTickets.Contains(x.Id),
+                                                        _usersThatOpenedTickets.Contains(x.Id)
+                                                       ))
+                         .AsQueryable();
+
+    query = query.ApplyDataGridFilter(args);
+
+    _count = await query.CountAsync();
+
+    _data = args is not null
+              ? query.ApplyPagination(args)
+              : query.Skip(0).Take(20).AsQueryable();
+
+
+    _isLoading = false;
+    StateHasChanged();
+  }
+
+
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    _usersWithOpenTickets = await dbContext.Tickets
+                                           .FilterActive()
+                                           .Select(t => t.OpenerUserId)
+                                           .Distinct()
+                                           .ToArrayAsync();
+
+    _usersThatOpenedTickets = await dbContext.Tickets
+                                             .Select(t => t.OpenerUserId)
+                                             .Distinct()
+                                             .ToArrayAsync();
+
+    _teamUsers = await dbContext.TeamUsers
+                                .Select(x => x.UserId)
+                                .Distinct()
+                                .ToArrayAsync();
+
+
+    await ReloadDataAsync();
+  }
+
+
+  private async Task LoadDataAsync(LoadDataArgs args) {
+    await ReloadDataAsync(args);
+  }
+
+  private int _count;
+  private ulong[] _usersWithOpenTickets = [];
+  private ulong[] _usersThatOpenedTickets = [];
+  private ulong[] _teamUsers = [];
+  private ulong[] _blocked = [];
+
+  private bool IsBlocked(ulong userId) {
+    return _blocked.Contains(userId);
+  }
+
+  private bool IsTeamUser(ulong userId) {
+    return _teamUsers.Contains(userId);
+  }
+
+  private bool HasOpenTicket(ulong userId) {
+    return _usersWithOpenTickets.Contains(userId);
+  }
+
+  private bool OpenedAnyTicket(ulong userId) {
+    return _usersThatOpenedTickets.Contains(userId);
+  }
+
+
+  private async Task ShowPermissionsDialog(ulong userId) {
+    _ = await DialogService.OpenAsync(Lang.Permissions.Translate(),
+                                      _ =>
+                                        @<UserPermissionsDialogComponent
+                                          UserId="@userId"></UserPermissionsDialogComponent>,
+                                      new DialogOptions {
+                                        Width = "700px",
+                                        CloseDialogOnEsc = true,
+                                        CloseDialogOnOverlayClick = true
+                                      });
+  }
+
+  private async Task ShowUnblockUserDialog(ulong userId) {
+    var dialogResult = await DialogService.Confirm(Lang.UnblockUserConfirmation.Translate(),
+                                                   options: new ConfirmOptions {
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true
+                                                   });
+
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(Users)}]{nameof(ShowUnblockUserDialog)}({{UserId}})";
+      try {
+        var state = await AuthContext;
+        var discordUserId = state.User.GetUserId();
+        await Sender.Send(new ProcessRemoveUserFromBlacklistCommand(discordUserId, userId));
+        Log.Information(logMessage, userId);
+        NotificationService.Notify(NotificationSeverity.Success, Lang.UserUnblockedSuccessfully.Translate());
+        await ReloadDataAsync();
+      }
+      catch (ModmailBotException ex) {
+        Log.Warning(ex,
+                    logMessage, userId);
+        ex.NotifyException(NotificationService);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex,
+                  logMessage, userId);
+        ex.NotifyException(NotificationService);
+      }
+    }
+  }
+
+  private async Task ShowBlockUserDialog(ulong userId) {
+    var dialogResult = await DialogService.Confirm(Lang.BlockUserConfirmation.Translate(),
+                                                   options: new ConfirmOptions {
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
+                                                     CloseDialogOnOverlayClick = true,
+                                                     CloseDialogOnEsc = true
+                                                   });
+
+    if (dialogResult == true) {
+      const string logMessage = $"[{nameof(Users)}]{nameof(ShowBlockUserDialog)}({{UserId}})";
+      try {
+        var state = await AuthContext;
+        var discordUserId = state.User.GetUserId();
+        await Sender.Send(new ProcessAddUserToBlacklistCommand(discordUserId, userId));
+        Log.Information(logMessage, userId);
+        NotificationService.Notify(NotificationSeverity.Success, Lang.UserBlockedSuccessfully.Translate());
+        await ReloadDataAsync();
+      }
+      catch (ModmailBotException ex) {
+        Log.Warning(ex,
+                    logMessage, userId);
+        ex.NotifyException(NotificationService);
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex,
+                  logMessage, userId);
+        ex.NotifyException(NotificationService);
+      }
+    }
+  }
+
+}
+
+
+<div class="container rz-mx-auto">
+  <RadzenRow>
+    <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            @Lang.Users.Translate()
+          </RadzenText>
+          <p>
+            @Lang.UsersPageDescription.Translate()
+          </p>
+          @* <hr class="my-4"/> *@
+        </RadzenColumn>
+      </RadzenRow>
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        @if (_data is null) {
+          <Loading></Loading>
+        }
+        else {
+          <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
+            <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="true"
+                            AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
+                            FilterMode="FilterMode.SimpleWithMenu"
+                            Density="Density.Default"
+                            AllowGrouping="false" AllowSorting="true" PageSize="20" AllowPaging="true"
+                            PagerHorizontalAlign="HorizontalAlign.Left" PagerPosition="PagerPosition.TopAndBottom"
+                            PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                            Data="@_data"
+                            ColumnWidth="180px"
+                            LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                            IsLoading=@_isLoading>
+              <Columns>
+                <RadzenDataGridColumn Visible="false" Property="@nameof(UserInformation.Id)"
+                                      Filterable="false"
+                                      Title="ID" Width="120px" TextAlign="TextAlign.Center"/>
+                <RadzenDataGridColumn Title="@Lang.UserAvatar.Translate()" Sortable="false" Filterable="false"
+                                      Width="120px"
+                                      TextAlign="TextAlign.Center">
+                  <Template Context="data">
+                    <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                      <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px"
+                                   Path="@data.User.AvatarUrl" AlternateText=""/>
+                    </RadzenStack>
+                  </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="OpenerUser.Username" Title="User" Sortable="true" Filterable="true"
+                                      Width="100px" TextAlign="TextAlign.Center">
+                  <Template Context="data">
+                    <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                      <RadzenText Text="@data.User.Username" TextAlign="TextAlign.Center"
+                                  class="fw-bold"></RadzenText>
+                    </RadzenStack>
+                  </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
+                                      Title="Actions">
+                  <Template Context="data">
+
+                    @* <RadzenButton ButtonStyle="ButtonStyle.Info" Icon="monitoring" Variant="Variant.Flat" *@
+                    @*               Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" *@
+                    @*               MouseEnter="@(args => TooltipService.Open(args, Lang.Activity.Translate(), new TooltipOptions { Style = "background: var(--rz-info);" }))" *@
+                    @*               @onclick:stopPropagation="true"> *@
+                    @* </RadzenButton> *@
+
+                    @if (!IsBlocked(data.User.Id)) {
+                      if (!IsTeamUser(data.User.Id)) {
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="block" Variant="Variant.Flat"
+                                      Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1"
+                                      Click="@(async () => await ShowBlockUserDialog(data.User.Id))"
+                                      MouseEnter="@(args => TooltipService.Open(args, Lang.BlockUser.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                      @onclick:stopPropagation="true">
+                        </RadzenButton>
+                      }
+                    }
+                    else {
+                      <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="warning" Variant="Variant.Flat"
+                                    Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1"
+                                    Click="@(async () => await ShowUnblockUserDialog(data.User.Id))"
+                                    MouseEnter="@(args => TooltipService.Open(args, Lang.UnblockUser.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                    @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
+
+
+
+
+
+                    @if (IsTeamUser(data.User.Id)) {
+                      <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="security" Variant="Variant.Flat"
+                                    Shade="Shade.Lighter" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1"
+                                    Click="@(async () => await ShowPermissionsDialog(data.User.Id))"
+                                    MouseEnter="@(args => TooltipService.Open(args, Lang.Permissions.Translate(), new TooltipOptions { Style = "background: var(--rz-warning);" }))"
+                                    @onclick:stopPropagation="true">
+                      </RadzenButton>
+                    }
+
+
+                  </Template>
+                </RadzenDataGridColumn>
+
+              </Columns>
+            </RadzenDataGrid>
+          </RadzenCard>
+        }
+
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+</div>
