@@ -15,7 +15,7 @@ public class TagProvider : IAutoCompleteProvider
     var cache = context.ServiceProvider.GetRequiredService<IMemoryCache>();
     return await cache.GetOrCreateAsync(cacheKey, Get, new MemoryCacheEntryOptions {
       AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5)
-    });
+    }) ?? throw new ArgumentNullException(nameof(cacheKey));
 
     async Task<IEnumerable<DiscordAutoCompleteChoice>> Get(ICacheEntry entry) {
       var scope = context.ServiceProvider.CreateScope();
