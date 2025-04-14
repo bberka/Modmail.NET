@@ -12,10 +12,10 @@
 @code {
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   [Parameter]
-  public Tag Tag { get; set; }
+  public required Tag? Tag { get; set; }
 
   bool IsUpdate => Tag != null;
   string _name = "";
@@ -25,17 +25,15 @@
     set => _name = value.Trim().Replace(" ", "-");
   }
 
-  string _title = "";
+  string? _title = "";
   string _content = "";
 
-  protected override Task OnInitializedAsync() {
+  protected override void OnInitialized() {
     if (Tag is not null) {
       _name = Tag.Name;
       _title = Tag.Title;
       _content = Tag.Content;
     }
-
-    return base.OnInitializedAsync();
   }
 
   private async Task SubmitAsync() {
@@ -58,13 +56,13 @@
                                                      ? "Are you sure you want to update this tag ?"
                                                      : "Are you sure you want to create new tag ?",
                                                    options: new ConfirmOptions {
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No",
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate(),
                                                      CloseDialogOnOverlayClick = true,
                                                      CloseDialogOnEsc = true
                                                    });
     if (dialogResult == true) {
-      const string logMessage = $"[{nameof(CreateOrUpdateTagDialog)}]{nameof(SubmitAsync)}({{Name}})";
+      const string logMessage = $"[{nameof(CreateOrUpdateTagDialogComponent)}]{nameof(SubmitAsync)}({{Name}})";
       try {
         var state = await AuthContext;
         var userId = state.User.GetUserId();

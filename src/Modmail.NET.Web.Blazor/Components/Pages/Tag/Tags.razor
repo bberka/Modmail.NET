@@ -4,29 +4,29 @@
 @using Modmail.NET.Common.Static
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Tag.Commands
-@using Modmail.NET.Web.Blazor.Components.Shared.Tag
+@using Modmail.NET.Features.Teams.Queries
+@using Modmail.NET.Web.Blazor.Components.Pages.Tag.Shared
 @using Modmail.NET.Web.Blazor.Extensions
-@using Modmail.NET.Web.Blazor.Providers
 @using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
 @inject ISender Sender
-@attribute [AuthorizeTeam(nameof(AuthPolicy.ManageTicketTypes))]
-
 
 @code {
 
-  [CascadingParameter]
-    public Task<AuthenticationState> AuthContext { get; set; }
+    [CascadingParameter]
+    public required Task<AuthenticationState> AuthContext { get; set; }
 
-  private IQueryable<Tag> _data;
+    private IQueryable<Tag>? _data;
 
-  bool _isLoading;
-  private int _count;
+    bool _isLoading;
+    private int _count;
 
-  async Task ShowLoading() {
+    private bool _hasPermissionToManage;
+
+    async Task ShowLoading() {
         _isLoading = true;
 
         await Task.Yield();
@@ -34,7 +34,7 @@
         _isLoading = false;
     }
 
-  private async Task ReloadDataAsync(LoadDataArgs args = null) {
+    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
         await ShowLoading();
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -51,33 +51,35 @@
 
 
         _data = args is not null
-                        ? query.ApplyPagination(args)
-                        : query.Skip(0).Take(10).AsQueryable();
+                    ? query.ApplyPagination(args)
+                    : query.Skip(0).Take(10).AsQueryable();
 
         StateHasChanged();
     }
 
 
-  protected override async Task OnInitializedAsync() {
-        await base.OnInitializedAsync();
+    protected override async Task OnInitializedAsync() {
+        var state = await AuthContext;
+        var userId = state.User.GetUserId();
+        _hasPermissionToManage = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageTags));
 
         await ReloadDataAsync();
     }
 
 
-  private async Task LoadDataAsync(LoadDataArgs args) {
+    private async Task LoadDataAsync(LoadDataArgs args) {
         await ReloadDataAsync(args);
     }
 
 
-  private async Task RemoveAsync(Tag data) {
+    private async Task RemoveAsync(Tag data) {
         var dialogResult = await DialogService.Confirm("You are deleting a tag, this action can not be undone.",
                                                        "Are you sure ?",
                                                        new ConfirmOptions {
-                                                               OkButtonText = "Yes",
-                                                               CancelButtonText = "No",
-                                                               CloseDialogOnOverlayClick = true,
-                                                               CloseDialogOnEsc = true
+                                                           OkButtonText = Lang.Yes.Translate(),
+                                                           CancelButtonText = Lang.No.Translate(),
+                                                           CloseDialogOnOverlayClick = true,
+                                                           CloseDialogOnEsc = true
                                                        });
 
 
@@ -110,25 +112,25 @@
         }
     }
 
-  private async Task ShowAddDialog() {
+    private async Task ShowAddDialog() {
         var dialog = await DialogService.OpenAsync("Create Tag",
                                                    _ =>
-                                                           @<CreateOrUpdateTagDialog></CreateOrUpdateTagDialog>,
+                                                       @<CreateOrUpdateTagDialogComponent></CreateOrUpdateTagDialogComponent>,
                                                    new DialogOptions {
-                                                           Width = "450px"
+                                                       Width = "450px"
                                                    });
         if (dialog is true) {
             await ReloadDataAsync();
         }
     }
 
-  private async Task ShowEditDialog(Tag data) {
+    private async Task ShowEditDialog(Tag data) {
         var dialog = await DialogService.OpenAsync("Edit Tag",
                                                    _ =>
-                                                           @<CreateOrUpdateTagDialog
-                                                                   Tag="data"></CreateOrUpdateTagDialog>,
+                                                       @<CreateOrUpdateTagDialogComponent
+                                                           Tag="data"></CreateOrUpdateTagDialogComponent>,
                                                    new DialogOptions {
-                                                           Width = "450px"
+                                                       Width = "450px"
                                                    });
         if (dialog is true) {
             await ReloadDataAsync();
@@ -176,15 +178,18 @@
                             <HeaderTemplate>
                                 <RadzenRow>
                                     <RadzenColumn Size="12">
-                                        <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                                      Icon="add"
-                                                      Variant="Variant.Filled"
-                                                      Shade="Shade.Lighter"
-                                                      Size="ButtonSize.Medium"
-                                                      class="rz-my-1 rz-ms-1"
-                                                      Click="@ShowAddDialog">
-                                            Create Tag
-                                        </RadzenButton>
+                                        @if (_hasPermissionToManage) {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                                          Icon="add"
+                                                          Variant="Variant.Filled"
+                                                          Shade="Shade.Lighter"
+                                                          Size="ButtonSize.Medium"
+                                                          class="rz-my-1 rz-ms-1"
+                                                          Click="@ShowAddDialog">
+                                                Create Tag
+                                            </RadzenButton>
+                                        }
+
                                     </RadzenColumn>
                                 </RadzenRow>
                             </HeaderTemplate>
@@ -216,26 +221,28 @@
                                         @*               @onclick:stopPropagation="true"> *@
                                         @* </RadzenButton> *@
                                         @* *@
-                                        <RadzenButton ButtonStyle="ButtonStyle.Info"
-                                                      Icon="edit"
-                                                      Variant="Variant.Flat"
-                                                      Shade="Shade.Lighter"
-                                                      Size="ButtonSize.Medium"
-                                                      class="rz-my-1 rz-ms-1"
-                                                      Click="@(async () => await ShowEditDialog(data))"
-                                                      MouseEnter="@(args => TooltipService.Open(args, "Edit Tag", new TooltipOptions { Style = "background: var(--rz-info);" }))"
-                                                      @onclick:stopPropagation="true">
-                                        </RadzenButton>
-                                        <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                                                      Icon="delete"
-                                                      Variant="Variant.Flat"
-                                                      Shade="Shade.Lighter"
-                                                      Size="ButtonSize.Medium"
-                                                      class="rz-my-1 rz-ms-1"
-                                                      MouseEnter="@(args => TooltipService.Open(args, "Delete Tag", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
-                                                      Click="@(async () => await RemoveAsync(data))"
-                                                      @onclick:stopPropagation="true">
-                                        </RadzenButton>
+                                        @if (_hasPermissionToManage) {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Info"
+                                                          Icon="edit"
+                                                          Variant="Variant.Flat"
+                                                          Shade="Shade.Lighter"
+                                                          Size="ButtonSize.Medium"
+                                                          class="rz-my-1 rz-ms-1"
+                                                          Click="@(async () => await ShowEditDialog(data))"
+                                                          MouseEnter="@(args => TooltipService.Open(args, "Edit Tag", new TooltipOptions { Style = "background: var(--rz-info);" }))"
+                                                          @onclick:stopPropagation="true">
+                                            </RadzenButton>
+                                            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                                          Icon="delete"
+                                                          Variant="Variant.Flat"
+                                                          Shade="Shade.Lighter"
+                                                          Size="ButtonSize.Medium"
+                                                          class="rz-my-1 rz-ms-1"
+                                                          MouseEnter="@(args => TooltipService.Open(args, "Delete Tag", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                                          Click="@(async () => await RemoveAsync(data))"
+                                                          @onclick:stopPropagation="true">
+                                            </RadzenButton>
+                                        }
                                     </Template>
                                 </RadzenDataGridColumn>
 
