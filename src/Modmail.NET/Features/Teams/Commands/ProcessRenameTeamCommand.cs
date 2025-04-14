@@ -1,11 +1,11 @@
 using MediatR;
 using Modmail.NET.Abstract;
-using Modmail.NET.Attributes;
 using Modmail.NET.Common.Static;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Teams.Commands;
 
-[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+[RequireModmailPermission(nameof(AuthPolicy.ManageAccessPermissions))]
 public sealed record ProcessRenameTeamCommand(
   ulong AuthorizedUserId,
   Guid Id,

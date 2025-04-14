@@ -1,19 +1,16 @@
 using MediatR;
 using Modmail.NET.Abstract;
-using Modmail.NET.Attributes;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Entities;
-using Modmail.NET.Features.Permission.Static;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Teams.Commands;
 
-[PermissionCheck(nameof(AuthPolicy.ManageTeams))]
+[RequireModmailPermission(nameof(AuthPolicy.ManageAccessPermissions))]
 public sealed record ProcessCreateTeamCommand(
   ulong AuthorizedUserId,
   string TeamName,
-  TeamPermissionLevel PermissionLevel,
   bool PingOnNewTicket = false,
-  bool PingOnTicketMessage = false,
-  bool AllowAccessToWebPanel = false
-) : IRequest<GuildTeam>,
+  bool PingOnTicketMessage = false
+) : IRequest<Team>,
     IPermissionCheck;

@@ -1,8 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
-using Modmail.NET.Features.Permission.Queries;
-using Modmail.NET.Features.Teams.Static;
+using Modmail.NET.Features.Teams.Queries;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -15,6 +14,6 @@ public class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery
   }
 
   public async Task<bool> Handle(CheckUserInAnyTeamQuery request, CancellationToken cancellationToken) {
-    return await _dbContext.GuildTeamMembers.AnyAsync(x => x.Key == request.MemberId && x.Type == TeamMemberDataType.UserId, cancellationToken);
+    return await _dbContext.TeamUsers.AnyAsync(x => x.UserId == request.UserId, cancellationToken);
   }
 }

@@ -2,7 +2,7 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Teams.Commands;
-using Modmail.NET.Features.Teams.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -18,7 +18,9 @@ public class ProcessRenameTeamHandler : IRequestHandler<ProcessRenameTeamCommand
   }
 
   public async Task Handle(ProcessRenameTeamCommand request, CancellationToken cancellationToken) {
-    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId, request.Id), cancellationToken);
+    var team = await _dbContext.Teams.FindAsync([request.Id], cancellationToken);
+    if (team is null) throw new ModmailBotException(Lang.TeamNotFound);
+
     team.Name = request.NewName;
     _dbContext.Update(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);

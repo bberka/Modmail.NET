@@ -3,11 +3,11 @@ using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.Teams.Commands;
-using Modmail.NET.Features.Teams.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, GuildTeam>
+public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, Team>
 {
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
@@ -18,8 +18,10 @@ public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand
     _sender = sender;
   }
 
-  public async Task<GuildTeam> Handle(ProcessRemoveTeamCommand request, CancellationToken cancellationToken) {
-    var team = await _sender.Send(new GetTeamQuery(request.AuthorizedUserId, request.Id), cancellationToken);
+  public async Task<Team> Handle(ProcessRemoveTeamCommand request, CancellationToken cancellationToken) {
+    var team = await _dbContext.Teams.FindAsync([request.Id], cancellationToken);
+    if (team is null) throw new ModmailBotException(Lang.TeamNotFound);
+    if (team.SuperUserTeam) throw new InvalidOperationException();
 
     _dbContext.Remove(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);

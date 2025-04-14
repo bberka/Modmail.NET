@@ -7,7 +7,5 @@ using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 namespace Modmail.NET.Features.Teams.Commands;
 
 [RequireModmailPermission(nameof(AuthPolicy.ManageAccessPermissions))]
-public sealed record ProcessRemoveTeamCommand(
-  ulong AuthorizedUserId,
-  Guid Id) : IRequest<Team>,
-             IPermissionCheck;
+public sealed record ProcessAddPermissionToTeamCommand(ulong AuthorizedUserId, Guid TeamId, AuthPolicy[] Policies) : IRequest<TeamPermission[]>,
+                                                                                                                     IPermissionCheck;

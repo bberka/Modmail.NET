@@ -1,8 +1,9 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Teams.Commands;
-using Modmail.NET.Features.Teams.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
@@ -19,21 +20,23 @@ public class ProcessUpdateTeamHandler : IRequestHandler<ProcessUpdateTeamCommand
   }
 
   public async Task Handle(ProcessUpdateTeamCommand request, CancellationToken cancellationToken) {
-    var anyChanges = request.PermissionLevel.HasValue || request.PingOnNewTicket.HasValue || request.PingOnTicketMessage.HasValue;
+    var anyChanges = request.PingOnNewTicket.HasValue || request.PingOnTicketMessage.HasValue;
     if (!anyChanges) return;
 
-    var team = await _sender.Send(new GetTeamByNameQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
+    var team = await _dbContext.Teams.FindAsync([request.TeamId], cancellationToken);
+    if (team is null) throw new ModmailBotException(Lang.TeamNotFound);
 
-    if (request.PermissionLevel.HasValue) team.PermissionLevel = request.PermissionLevel.Value;
+    if (!string.IsNullOrEmpty(request.TeamName)) {
+      var sameName = await _dbContext.Teams
+                                     .AsNoTracking()
+                                     .AnyAsync(x => x.Name == request.TeamName, cancellationToken);
+      if (sameName) throw new ModmailBotException(Lang.TeamWithSameNameAlreadyExists);
+      team.Name = request.TeamName;
+    }
 
     if (request.PingOnNewTicket.HasValue) team.PingOnNewTicket = request.PingOnNewTicket.Value;
 
     if (request.PingOnTicketMessage.HasValue) team.PingOnNewMessage = request.PingOnTicketMessage.Value;
-
-    if (request.IsEnabled.HasValue) team.IsEnabled = request.IsEnabled.Value;
-
-    if (request.AllowAccessToWebPanel.HasValue) team.AllowAccessToWebPanel = request.AllowAccessToWebPanel.Value;
-
 
     _dbContext.Update(team);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);

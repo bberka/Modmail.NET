@@ -14,6 +14,6 @@ public class CheckTeamExistsHandler : IRequestHandler<CheckTeamExistsQuery, bool
   }
 
   public async Task<bool> Handle(CheckTeamExistsQuery request, CancellationToken cancellationToken) {
-    return await _dbContext.GuildTeams.AnyAsync(x => x.Name == request.Name, cancellationToken);
+    return await _dbContext.Teams.AnyAsync(x => x.Name == request.Name, cancellationToken);
   }
 }

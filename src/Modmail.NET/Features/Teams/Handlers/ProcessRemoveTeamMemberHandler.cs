@@ -16,10 +16,13 @@ public class ProcessRemoveTeamMemberHandler : IRequestHandler<ProcessRemoveTeamM
   }
 
   public async Task Handle(ProcessRemoveTeamMemberCommand request, CancellationToken cancellationToken) {
-    var memberEntity = await _dbContext.GuildTeamMembers
-                                       .FirstOrDefaultAsync(x => x.Key == request.TeamMemberKey && x.Type == request.Type, cancellationToken);
-    if (memberEntity is null) throw new NotFoundInException(LangKeys.Member, LangKeys.Team);
-    _dbContext.GuildTeamMembers.Remove(memberEntity);
+    var memberEntity = await _dbContext.TeamUsers
+                                       .Include(x => x.Team)
+                                       .FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
+    if (memberEntity is null) throw new ModmailBotException(Lang.MemberNotFoundInTeam);
+    if (memberEntity.Team!.SuperUserTeam) throw new ModmailBotException(Lang.CanNotRemoveTeamMemberDueToConfigTeam);
+
+    _dbContext.Remove(memberEntity);
     var affected = await _dbContext.SaveChangesAsync(cancellationToken);
     if (affected == 0) throw new DbInternalException();
   }

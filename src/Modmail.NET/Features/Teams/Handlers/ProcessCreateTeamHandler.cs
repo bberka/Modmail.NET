@@ -2,14 +2,13 @@ using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
-using Modmail.NET.Features.Permission.Queries;
-using Modmail.NET.Features.Permission.Static;
 using Modmail.NET.Features.Teams.Commands;
 using Modmail.NET.Features.Teams.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Teams.Handlers;
 
-public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, GuildTeam>
+public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand, Team>
 {
   private readonly ModmailDbContext _dbContext;
   private readonly ISender _sender;
@@ -20,21 +19,14 @@ public class ProcessCreateTeamHandler : IRequestHandler<ProcessCreateTeamCommand
     _sender = sender;
   }
 
-  public async Task<GuildTeam> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
+  public async Task<Team> Handle(ProcessCreateTeamCommand request, CancellationToken cancellationToken) {
     var exists = await _sender.Send(new CheckTeamExistsQuery(request.AuthorizedUserId, request.TeamName), cancellationToken);
-    if (exists) throw new TeamAlreadyExistsException();
+    if (exists) throw new ModmailBotException(Lang.TeamWithSameNameAlreadyExists);
 
-    var userPermissionLevel = await _sender.Send(new GetPermissionLevelQuery(request.AuthorizedUserId, true), cancellationToken) ?? throw new NullReferenceException(nameof(TeamPermissionLevel));
-    if (request.PermissionLevel > userPermissionLevel) throw new InvalidOperationException("Can not set higher team permission than self user");
-
-    var team = new GuildTeam {
+    var team = new Team {
       Name = request.TeamName,
-      IsEnabled = true,
-      GuildTeamMembers = [],
-      PermissionLevel = request.PermissionLevel,
       PingOnNewMessage = request.PingOnTicketMessage,
       PingOnNewTicket = request.PingOnNewTicket,
-      AllowAccessToWebPanel = request.AllowAccessToWebPanel
     };
 
     _dbContext.Add(team);
