@@ -4,15 +4,13 @@ namespace Modmail.NET.Features.Metric.Models;
 
 public sealed record MetricDto
 {
-  public required Statistic Statistic { get; init; }
-  public required List<bool> TotalTickets { get; init; }
+  public required Statistic? Statistic { get; init; }
   public required int ActiveTickets { get; init; }
   public required int ClosedTickets { get; init; }
   public required int TotalMessages { get; init; }
   public required int Teams { get; init; }
   public required int Blacklist { get; init; }
   public required int TicketTypes { get; init; }
-  public required int TeamRoleCount { get; init; }
   public required int TeamUserCount { get; init; }
   public required ChartItemDto<DateTime, int>[] OpenedTicketsChartDataArray { get; init; }
   public required ChartItemDto<DateTime, int>[] ClosedTicketsChartDataArray { get; init; }
