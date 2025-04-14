@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Static;
-using Modmail.NET.Features.Permission.Queries;
+using Modmail.NET.Common.Utils;
+using Modmail.NET.Features.Teams.Queries;
 using Modmail.NET.Language;
 using Modmail.NET.Web.Blazor.Providers;
 using Serilog;
@@ -24,7 +26,7 @@ public static class AuthDependency
            .AddCookie(x => {
              x.LoginPath = "/auth/login";
              x.LogoutPath = "/auth/logout";
-             x.AccessDeniedPath = "/result/" + LangKeys.ErrorAccessDenied;
+             x.AccessDeniedPath = "/result/" + Lang.ErrorAccessDenied;
              x.ExpireTimeSpan = TimeSpan.FromDays(1);
              x.SlidingExpiration = true;
              x.Cookie.HttpOnly = true;
@@ -42,7 +44,7 @@ public static class AuthDependency
              x.SaveTokens = true; // Save tokens for later use
              x.Scope.Add("identify"); // Fetch user details
              x.Scope.Add("guilds"); // Fetch guilds (optional, for roles)
-             x.AccessDeniedPath = "/result/" + LangKeys.ErrorAccessDenied;
+             x.AccessDeniedPath = "/result/" + Lang.ErrorAccessDenied;
              x.CorrelationCookie.SameSite = SameSiteMode.Lax;
              x.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
              x.Events.OnCreatingTicket += async context => {
@@ -65,35 +67,46 @@ public static class AuthDependency
                }
 
                var userId = ulong.Parse(identifier);
+               var name = context.Principal.FindFirst(ClaimTypes.Name)?.Value;
                var scope = context.HttpContext.RequestServices.CreateScope();
                var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+               var options = scope.ServiceProvider.GetRequiredService<IOptions<BotConfig>>();
                try {
-                 var permission = await sender.Send(new GetPermissionLevelQuery(userId));
-                 if (permission is null) {
-                   Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId}", userId);
+                 var isUserOwnerInSettings = options.Value.SuperUsers.Contains(userId);
+                 var inAnyTeam = await sender.Send(new CheckUserInAnyTeamQuery(userId));
+                 if (!isUserOwnerInSettings && !inAnyTeam) {
+                   Log.Warning("Discord.OAuth failed, User is not in any team {UserId} {UserName}", userId, name);
+                   context.Fail("Invalid Token");
+                   return;
+                 }
+
+                 var permissions = await sender.Send(new GetUserPermissionsQuery(userId));
+                 if (permissions.Length == 0) {
+                   Log.Warning("Discord.OAuth Role permission check failed, user does not have permission {UserId} {UserName}", userId, name);
                    context.Fail("Not member of any team");
                    return;
                  }
 
-                 identity.AddClaim(new Claim(ClaimTypes.Role, permission.ToString() ?? throw new NullReferenceException()));
-                 Log.Information("Discord.OAuth access granted {UserId} {UserName} {Permission}", userId, context.Principal.FindFirst(ClaimTypes.Name), permission.ToString());
+                 identity.AddClaim(new Claim(AuthConstants.PermissionsClaimType, UtilPermission.ParseToPermissionsString(permissions)));
+                 identity.AddClaim(new Claim(ClaimTypes.Role, AuthConstants.AuthorizeTeamRole));
+                 Log.Information("Discord.OAuth access granted {UserId} {UserName}", userId, name);
                  context.Success();
                }
                catch (ModmailBotException ex) {
-                 Log.Warning(ex, "Discord.OAuth Access failed {UserId}", userId);
+                 Log.Warning(ex, "Discord.OAuth Access failed {UserId} {UserName}", userId, name);
                  context.Fail(ex.TitleMessage + " : " + ex.ContentMessage);
                }
                catch (Exception ex) {
-                 Log.Warning(ex, "Discord.OAuth Access exception occurred {UserId}", userId);
+                 Log.Warning(ex, "Discord.OAuth Access exception occurred {UserId} {UserName}", userId, name);
                  context.Fail(ex);
                }
              };
              x.Events.OnRemoteFailure += context => {
-               context.Response.Redirect("/result/" + LangKeys.ErrorAuthRemoteFail);
+               context.Response.Redirect("/result/" + Lang.ErrorAuthRemoteFail);
                return Task.CompletedTask;
              };
              x.Events.OnAccessDenied += context => {
-               context.Response.Redirect("/result/" + LangKeys.ErrorAccessDenied);
+               context.Response.Redirect("/result/" + Lang.ErrorAccessDenied);
                return Task.CompletedTask;
              };
            });
