@@ -6,24 +6,28 @@ namespace Modmail.NET.Common.Exceptions;
 
 public class ModmailBotException : Exception
 {
-  [Obsolete("String message constructor is obsolete and will be removed, use constructors that takes Language keys")]
-  protected ModmailBotException(string titleMessage, string contentMessage = null) {
+  public ModmailBotException(string titleMessage, string? contentMessage = null) {
     TitleMessage = titleMessage;
     ContentMessage = contentMessage;
   }
 
-  public ModmailBotException(LangKeys titleMessage) {
-    TitleMessage = titleMessage.GetTranslation();
+  public ModmailBotException(Lang titleMessage) {
+    TitleMessage = titleMessage.Translate();
   }
 
-  public ModmailBotException(LangKeys titleMessage, LangKeys contentMessage) {
-    TitleMessage = titleMessage.GetTranslation();
-    ContentMessage = contentMessage.GetTranslation();
+  public ModmailBotException(Lang titleMessage, string[] param) {
+    TitleMessage = titleMessage.Translate(param);
+  }
+
+
+  public ModmailBotException(Lang titleMessage, Lang contentMessage) {
+    TitleMessage = titleMessage.Translate();
+    ContentMessage = contentMessage.Translate();
   }
 
 
   public string TitleMessage { get; }
-  public string ContentMessage { get; }
+  public string? ContentMessage { get; }
 
   public DiscordWebhookBuilder GetWebhookResponse() {
     return ModmailWebhooks.Warning(TitleMessage, ContentMessage ?? "");
