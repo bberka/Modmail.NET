@@ -22,12 +22,11 @@ public static class DiscordBotDependency
                                       | DiscordIntents.DirectMessageReactions);
 
     builder.Services.AddCommandsExtension((_, extension) => {
-      extension.AddCommands<ModmailCommands>();
       extension.AddCommands<BlacklistSlashCommands>();
       extension.AddCommands<TicketSlashCommands>();
       extension.AddCommands<TagSlashCommands>();
 
-      extension.AddChecks(typeof(ModmailBotProjectMarker).Assembly);
+      extension.AddChecks(typeof(ModmailBot).Assembly);
       TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration {
         PrefixResolver = new DefaultPrefixResolver(true, builder.Configuration.GetValue<string>("Bot:BotPrefix") ?? throw new Exception("BotPrefix is null")).ResolvePrefixAsync,
         IgnoreBots = true,

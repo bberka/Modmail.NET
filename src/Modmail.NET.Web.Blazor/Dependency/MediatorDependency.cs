@@ -6,7 +6,7 @@ public static class MediatorDependency
 {
   public static void Configure(WebApplicationBuilder builder) {
     builder.Services.AddMediatR(x => {
-      x.RegisterServicesFromAssemblies(typeof(ModmailBotProjectMarker).Assembly);
+      x.RegisterServicesFromAssemblies(typeof(ModmailBot).Assembly);
       x.AddOpenBehavior(typeof(LoggerPipelineBehavior<,>));
       x.AddOpenBehavior(typeof(ValidationBehavior<,>));
       x.AddOpenBehavior(typeof(CachingPipelineBehavior<,>));
