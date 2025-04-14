@@ -12,10 +12,10 @@ public class DiscordAuthenticationStateProvider : AuthenticationStateProvider
     _httpContextAccessor = httpContextAccessor;
   }
 
-  public override async Task<AuthenticationState> GetAuthenticationStateAsync() {
+  public override Task<AuthenticationState> GetAuthenticationStateAsync() {
     var user = _httpContextAccessor.HttpContext?.User;
-    if (user == null || user.Identity?.IsAuthenticated != true) return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-    var userId = user.GetUserId(); //validates team user authenticate
-    return new AuthenticationState(user);
+    if (user == null || user.Identity?.IsAuthenticated != true) return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+    _ = user.GetUserId(); //validates team user authenticate
+    return Task.FromResult(new AuthenticationState(user));
   }
 }
