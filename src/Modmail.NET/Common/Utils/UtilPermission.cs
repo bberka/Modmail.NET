@@ -1,38 +1,27 @@
 ﻿using DSharpPlus.Entities;
-using Modmail.NET.Features.Permission.Models;
-using Modmail.NET.Features.Teams.Static;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Teams.Models;
 
 namespace Modmail.NET.Common.Utils;
 
 public static class UtilPermission
 {
-  public static ( List<DiscordMember> members, List<DiscordRole> roles) ParsePermissionInfo(PermissionInfo[] permissions,
-                                                                                            IReadOnlyCollection<DiscordMember> members,
-                                                                                            IReadOnlyDictionary<ulong, DiscordRole> roles) {
-    var modRoleListForOverwrites = new List<DiscordRole>();
+  public static DiscordMember[] ParsePermissionInfo(UserTeamInformation[] userTeamInformations,
+                                                    IReadOnlyCollection<DiscordMember> members) {
     var modMemberListForOverwrites = new List<DiscordMember>();
-    foreach (var perm in permissions) {
-      var role = roles.FirstOrDefault(x => x.Key == perm.Key && perm.Type == TeamMemberDataType.RoleId);
-      if (role.Key != 0) {
-        var exists = modRoleListForOverwrites.Any(x => x.Id == role.Key);
-        if (!exists)
-          modRoleListForOverwrites.Add(role.Value);
-      }
-
-      var member2 = members.FirstOrDefault(x => x.Id == perm.Key && perm.Type == TeamMemberDataType.UserId);
-      if (member2 is not null && member2.Id != 0) {
-        var exists = modMemberListForOverwrites.Any(x => x.Id == member2.Id);
-        if (!exists)
-          modMemberListForOverwrites.Add(member2);
-      }
+    foreach (var perm in userTeamInformations) {
+      var member = members.FirstOrDefault(x => x.Id == perm.UserId);
+      if (member is null || member.Id == 0) continue;
+      var exists = modMemberListForOverwrites.Any(x => x.Id == member.Id);
+      if (!exists)
+        modMemberListForOverwrites.Add(member);
     }
 
-    return (modMemberListForOverwrites, modRoleListForOverwrites);
+    return modMemberListForOverwrites.ToArray();
   }
 
-  public static List<DiscordOverwriteBuilder> GetTicketPermissionOverwrites(DiscordGuild guild,
-                                                                            List<DiscordMember> members,
-                                                                            List<DiscordRole> roles) {
+  public static DiscordOverwriteBuilder[] GetTicketPermissionOverwrites(DiscordGuild guild,
+                                                                        DiscordMember[] members) {
     var overwrites = new List<DiscordOverwriteBuilder>();
 
     var allPerm = new DiscordOverwriteBuilder(guild.EveryoneRole);
@@ -52,16 +41,26 @@ public static class UtilPermission
       overwrites.Add(memberPerm);
     }
 
-    foreach (var role in roles) {
-      var rolePerm = new DiscordOverwriteBuilder(role);
-      rolePerm.Allow(new DiscordPermissions(DiscordPermission.ViewChannel));
-      rolePerm.Allow(new DiscordPermissions(DiscordPermission.ReadMessageHistory));
-      rolePerm.Allow(new DiscordPermissions(DiscordPermission.SendMessages));
-      rolePerm.Deny(new DiscordPermissions(DiscordPermission.ManageChannels));
+    return overwrites.ToArray();
+  }
 
-      overwrites.Add(rolePerm);
+  public static AuthPolicy[] ParseFromPermissionsString(string permissionsString) {
+    if (!permissionsString.Contains(',')) {
+      if (AuthPolicy.TryFromName(permissionsString, true, out var result)) return [result];
+
+      return [];
     }
 
-    return overwrites;
+    var splitedClaimValue = permissionsString.Split(',');
+    var list = new List<AuthPolicy>();
+    foreach (var claimValue in splitedClaimValue)
+      if (AuthPolicy.TryFromName(claimValue, true, out var result))
+        list.Add(result);
+
+    return list.ToArray();
+  }
+
+  public static string ParseToPermissionsString(AuthPolicy[] permissions) {
+    return string.Join(",", permissions.Select(x => x.Name.ToString()));
   }
 }
