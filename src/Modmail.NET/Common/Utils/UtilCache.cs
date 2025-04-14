@@ -7,7 +7,7 @@ public static class UtilCache
 {
   private static readonly string NullHashCode = "$__null_value".GetHashCode().ToString();
 
-  public static string BuildCacheKeyFromT<T>(string mainKey, T data = default) {
+  public static string BuildCacheKeyFromT<T>(string mainKey, T? data = default) {
     var mainKeyStr = UtilHash.CreateSha256Hash(mainKey);
     var keyBuilder = new StringBuilder(mainKeyStr);
 
