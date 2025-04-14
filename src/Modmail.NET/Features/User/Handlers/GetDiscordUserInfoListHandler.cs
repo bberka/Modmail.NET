@@ -6,7 +6,7 @@ using Modmail.NET.Features.User.Queries;
 
 namespace Modmail.NET.Features.User.Handlers;
 
-public class GetDiscordUserInfoListHandler : IRequestHandler<GetDiscordUserInfoListQuery, List<DiscordUserInfo>>
+public class GetDiscordUserInfoListHandler : IRequestHandler<GetDiscordUserInfoListQuery, List<UserInformation>>
 {
   private readonly ModmailDbContext _dbContext;
 
@@ -14,7 +14,7 @@ public class GetDiscordUserInfoListHandler : IRequestHandler<GetDiscordUserInfoL
     _dbContext = dbContext;
   }
 
-  public async Task<List<DiscordUserInfo>> Handle(GetDiscordUserInfoListQuery request, CancellationToken cancellationToken) {
-    return await _dbContext.DiscordUserInfos.ToListAsync(cancellationToken);
+  public async Task<List<UserInformation>> Handle(GetDiscordUserInfoListQuery request, CancellationToken cancellationToken) {
+    return await _dbContext.UserInformation.ToListAsync(cancellationToken);
   }
 }

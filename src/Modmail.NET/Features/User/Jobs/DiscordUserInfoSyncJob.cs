@@ -23,13 +23,13 @@ public class DiscordUserInfoSyncJob : HangfireRecurringJobBase
     var scope = _scopeFactory.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    var guild = await sender.Send(new GetDiscordMainGuildQuery());
+    var guild = await sender.Send(new GetDiscordMainServerQuery());
     var members = await guild.GetAllMembersAsync().ToListAsync();
     // var allDbUsers = await DiscordUserInfo.GetAllAsync();
     var allDbUsers = await sender.Send(new GetDiscordUserInfoListQuery());
-    var convertedDiscordUsers = members.Select(DiscordUserInfo.FromDiscordMember).ToList();
+    var convertedDiscordUsers = members.Select(UserInformation.FromDiscordMember).ToList();
 
-    var updateList = new List<DiscordUserInfo>();
+    var updateList = new List<UserInformation>();
     foreach (var dbUser in allDbUsers) {
       var discordUser = convertedDiscordUsers.FirstOrDefault(x => x.Id == dbUser.Id);
       if (discordUser is null) continue;

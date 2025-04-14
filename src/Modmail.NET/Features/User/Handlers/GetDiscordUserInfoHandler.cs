@@ -10,7 +10,7 @@ using NotFoundException = DSharpPlus.Exceptions.NotFoundException;
 
 namespace Modmail.NET.Features.User.Handlers;
 
-public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery, DiscordUserInfo>
+public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery, UserInformation>
 {
   private readonly ModmailBot _bot;
   private readonly ModmailDbContext _dbContext;
@@ -24,22 +24,22 @@ public class GetDiscordUserInfoHandler : IRequestHandler<GetDiscordUserInfoQuery
     _sender = sender;
   }
 
-  public async Task<DiscordUserInfo> Handle(GetDiscordUserInfoQuery request, CancellationToken cancellationToken) {
-    if (request.UserId == 0) throw new InvalidUserIdException();
-    var result = await _dbContext.DiscordUserInfos.FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
+  public async Task<UserInformation> Handle(GetDiscordUserInfoQuery request, CancellationToken cancellationToken) {
+    if (request.UserId == 0) throw new ModmailBotException(Lang.InvalidUser);
+    var result = await _dbContext.UserInformation.FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
     if (result is not null)
       return result;
 
     try {
       var discordUser = await _bot.Client.GetUserAsync(request.UserId);
       await _sender.Send(new UpdateDiscordUserCommand(discordUser), cancellationToken);
-      result = await _dbContext.DiscordUserInfos.SingleAsync(x => x.Id == request.UserId, cancellationToken);
+      result = await _dbContext.UserInformation.SingleAsync(x => x.Id == request.UserId, cancellationToken);
       return result;
     }
     catch (NotFoundException) {
       //ignored
     }
 
-    throw new NotFoundWithException(LangKeys.User, request.UserId);
+    throw new ModmailBotException(Lang.UserNotFound);
   }
 }
