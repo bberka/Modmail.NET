@@ -1,10 +1,10 @@
 ﻿@page "/dashboard"
 @using Modmail.NET.Common.Static
 @using Modmail.NET.Common.Utils
-@using Modmail.NET.Features.Guild.Queries
 @using Modmail.NET.Features.Metric.Models
 @using Modmail.NET.Features.Metric.Queries
-@using Modmail.NET.Features.Permission.Queries
+@using Modmail.NET.Features.Server.Queries
+@using Modmail.NET.Features.Teams.Queries
 @using Modmail.NET.Features.Ticket.Services
 @using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
@@ -14,30 +14,39 @@
 @inject ModmailBot Bot
 @inject TicketMessage TicketMessage
 @inject IServiceScopeFactory ScopeFactory
+@inject ISender Sender
 @attribute [AuthorizeTeam]
 
 @code {
 
 
   [CascadingParameter]
-  public Task<AuthenticationState> AuthContext { get; set; }
+  public required Task<AuthenticationState> AuthContext { get; set; }
 
   private bool _canManageStartStop;
-  private MetricDto _metricDto;
+  private MetricDto? _metricDto;
 
   protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+
     var scope = ScopeFactory.CreateScope();
     var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    if (await sender.Send(new CheckAnyGuildSetupQuery()) != true) {
-      NavigationManager.NavigateTo("/setup");
+    var isSetup = await sender.Send(new CheckSetupQuery());
+    if (!isSetup) {
+      var isSuperUser = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.SuperUser));
+      if (isSuperUser) {
+        NavigationManager.NavigateTo("/setup");
+        return;
+      }
+
+      NavigationManager.NavigateTo("/result/" + Lang.ServerNotSetup);
       return;
     }
 
-    var state = await AuthContext;
-    var userId = state.User.GetUserId();
-    _canManageStartStop = await sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
+    _canManageStartStop = await sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageDiscordClient));
 
-    _metricDto = await sender.Send(new GetLatestMetricQuery(true));
+    _metricDto = await sender.Send(new GetLatestMetricQuery());
   }
 
 
@@ -50,8 +59,8 @@
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No"
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate()
                                                    });
     if (dialogResult == true) {
       await Bot.StartAsync();
@@ -69,8 +78,8 @@
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No"
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate()
                                                    });
     if (dialogResult == true) {
       await Bot.StopAsync();
@@ -84,8 +93,8 @@
                                                    options: new ConfirmOptions {
                                                      CloseDialogOnEsc = true,
                                                      CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = "Yes",
-                                                     CancelButtonText = "No"
+                                                     OkButtonText = Lang.Yes.Translate(),
+                                                     CancelButtonText = Lang.No.Translate()
                                                    });
     if (dialogResult == true) {
       await Bot.StopAsync();
@@ -192,10 +201,10 @@
           <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
             <RadzenCard class="rz-shadow-7">
               <RadzenText TextStyle="TextStyle.H3">
-                @(UtilReadable.ConvertNumberToReadableString(_metricDto.TeamRoleCount))
+                0
               </RadzenText>
               <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
-                Active Team Roles
+                XXXX
               </RadzenText>
             </RadzenCard>
           </RadzenColumn>
