@@ -1,0 +1,238 @@
+﻿@page "/options"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Metric.Static
+@using Modmail.NET.Features.Teams.Queries
+@using Modmail.NET.Features.Ticket.Static
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@using Serilog
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@rendermode InteractiveServer
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject IOptions<BotConfig> Config
+@inject ISender Sender
+@attribute [AuthorizeTeam]
+
+
+@code {
+
+  private Option? _option;
+  private bool _enableTicketTimeout;
+
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    var hasPermission = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageOptions));
+    if (!hasPermission) {
+      throw new ModmailBotException(Lang.UnauthorizedAccess);
+    }
+
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
+    //TODO: Call cache query however create copy of the reference instead of the reference itself
+    //This causes UI to update the cached options currently fixed but now it calls DB on each page load
+    _option = await dbContext.Options.FirstOrDefaultAsync(x => x.ServerId == Config.Value.MainServerId);
+    if (_option is null) {
+      NavigationManager.NavigateTo("/setup");
+      return;
+    }
+
+
+    InitGuildOptionValues();
+  }
+
+  private void InitGuildOptionValues() {
+    if (_option is null) {
+      return;
+    }
+
+    if (_option.TicketTimeoutHours > 0) {
+      _enableTicketTimeout = true;
+    }
+    else {
+      _option.TicketTimeoutHours = TicketConstants.TicketTimeoutMaxAllowedHours;
+    }
+  }
+
+
+  private async Task SubmitAsync() {
+    const string logMessage = $"[{nameof(Options)}]{nameof(SubmitAsync)}";
+    try {
+      if (_option is null) {
+        throw new InvalidOperationException("Server option is null");
+      }
+
+      if (_option.TicketTimeoutHours is > TicketConstants.TicketTimeoutMaxAllowedHours or < TicketConstants.TicketTimeoutMinAllowedHours && _enableTicketTimeout) {
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Ticket Timeout Hours is not in valid range.");
+        return;
+      }
+
+      if (_option.PublicTranscripts == false) {
+        _option.SendTranscriptLinkToUser = false;
+      }
+
+      if (!_enableTicketTimeout) {
+        _option.TicketTimeoutHours = -1;
+      }
+
+
+      var dbContext = await DbContextFactory.CreateDbContextAsync();
+      dbContext.Update(_option);
+      var affected = await dbContext.SaveChangesAsync();
+      InitGuildOptionValues();
+      if (affected == 0) {
+        NotificationService.Notify(NotificationSeverity.Error, "Failed", "Server options could not be updated");
+        return;
+      }
+
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "Server options updated successfully.");
+    }
+    catch (ModmailBotException ex) {
+      ex.NotifyException(NotificationService);
+      Log.Warning(ex, logMessage);
+    }
+    catch (Exception ex) {
+      ex.NotifyException(NotificationService);
+      Log.Warning(ex, logMessage);
+    }
+  }
+
+
+}
+
+<div class="container rz-mx-auto">
+
+  <RadzenRow>
+    <RadzenColumn Size="12">
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Options
+          </RadzenText>
+          @* <hr class="my-4"/> *@
+          <p>
+            This page shows the list of options that can be configured for the bot. Updates may time some time to take
+            effect.
+          </p>
+        </RadzenColumn>
+      </RadzenRow>
+      <RadzenRow RowGap="4" class="rz-mt-5">
+        @if (_option is null) {
+          <Loading></Loading>
+        }
+        else {
+          <RadzenCard class="rz-shadow-7" Style="min-width: 450px">
+            <RadzenTemplateForm TItem="Option" Data=@_option Submit=@SubmitAsync>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="IsEnabled" @bind-Value=@_option.IsEnabled/>
+                <RadzenLabel Component="IsEnabled">
+                  Enable ticket system
+                </RadzenLabel>
+              </RadzenRow>
+
+              <hr class="rz-my-7"/>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="TakeFeedbackAfterClosing" @bind-Value=@_option.TakeFeedbackAfterClosing/>
+                <RadzenLabel Component="TakeFeedbackAfterClosing">
+                  Take feedback from user
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  After ticket is closed a message is sent to user to take text and star feedback
+                </small>
+              </RadzenRow>
+
+              <hr class="rz-my-7"/>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="AlwaysAnonymous" @bind-Value=@_option.AlwaysAnonymous/>
+                <RadzenLabel Component="AlwaysAnonymous">
+                  Force anonymous messages
+                </RadzenLabel>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Forces anonymous messages for all tickets, ignoring the tickets anonymous option
+                </small>
+              </RadzenRow>
+
+              <hr class="rz-my-7"/>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="PublicTranscripts" @bind-Value=@_option.PublicTranscripts/>
+                <RadzenLabel Component="PublicTranscripts">
+                  Allow public access to transcripts
+                </RadzenLabel>
+              </RadzenRow>
+
+              @if (_option.PublicTranscripts) {
+                <RadzenRow class="rz-my-4">
+                  <RadzenSwitch Name="SendTranscriptLinkToUser" @bind-Value=@_option.SendTranscriptLinkToUser/>
+                  <RadzenLabel Component="SendTranscriptLinkToUser">
+                    Send transcript link to user when ticket closed
+                  </RadzenLabel>
+                </RadzenRow>
+              }
+
+
+              <hr class="rz-my-7"/>
+              <RadzenRow class="rz-my-4">
+                <RadzenSwitch Name="_enableTicketTimeout" @bind-Value=@_enableTicketTimeout/>
+                <RadzenLabel Component="_enableTicketTimeout">
+                  Close inactive tickets
+                </RadzenLabel>
+              </RadzenRow>
+
+
+              @if (_enableTicketTimeout) {
+                <RadzenRow class="rz-my-4">
+                  <RadzenFormField class="w-100" Text="Ticket Timeout Hours" Variant="Variant.Outlined">
+                    <RadzenNumeric @bind-Value="@_option.TicketTimeoutHours"
+                                   Min="TicketConstants.TicketTimeoutMinAllowedHours"
+                                   Max="TicketConstants.TicketTimeoutMaxAllowedHours"/>
+                  </RadzenFormField>
+                </RadzenRow>
+                <RadzenRow>
+                  <small class="text-secondary">
+                    Set the number of hours
+                    (@TicketConstants.TicketTimeoutMinAllowedHours~@TicketConstants.TicketTimeoutMaxAllowedHours) a
+                    ticket can be inactive before it's automatically closed.
+                  </small>
+                </RadzenRow>
+              }
+
+
+              <hr class="rz-my-7"/>
+
+              <RadzenRow class="rz-my-4">
+                <RadzenFormField class="w-100" Text="Statistics Calculate Days" Variant="Variant.Outlined">
+                  <RadzenNumeric @bind-Value="@_option.StatisticsCalculateDays"
+                                 Min="MetricConstants.StatisticsCalculateDaysMin"
+                                 Max="MetricConstants.StatisticsCalculateDaysMax"/>
+                </RadzenFormField>
+              </RadzenRow>
+              <RadzenRow>
+                <small class="text-secondary">
+                  Days to include in statistics calculation
+                  (@MetricConstants.StatisticsCalculateDaysMin~@MetricConstants.StatisticsCalculateDaysMax).
+                </small>
+              </RadzenRow>
+
+              <RadzenRow class="rz-my-4">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" Icon="check_circle"
+                              ButtonStyle="ButtonStyle.Success"/>
+              </RadzenRow>
+            </RadzenTemplateForm>
+          </RadzenCard>
+        }
+
+      </RadzenRow>
+    </RadzenColumn>
+  </RadzenRow>
+</div>
