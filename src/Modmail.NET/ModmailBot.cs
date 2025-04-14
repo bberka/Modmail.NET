@@ -4,9 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Static;
-using Modmail.NET.Features.Guild.Commands;
-using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.Server.Commands;
+using Modmail.NET.Features.Server.Queries;
+using Modmail.NET.Features.Teams.Commands;
 using Modmail.NET.Features.User.Commands;
+using Modmail.NET.Language;
 using Serilog;
 
 namespace Modmail.NET;
@@ -34,18 +36,19 @@ public class ModmailBot
     var options = scope.ServiceProvider.GetRequiredService<IOptions<BotConfig>>();
     await sender.Send(new UpdateDiscordUserCommand(Client.CurrentUser));
 
+    await sender.Send(new SyncSuperUserTeamUsersCommand(Client.CurrentUser.Id));
 
     var guildJoined = Client.Guilds.TryGetValue(options.Value.MainServerId, out var guild);
-    if (!guildJoined) throw new NotJoinedMainServerException();
+    if (!guildJoined || guild is null) throw new ModmailBotException(Lang.NotJoinedMainServer);
 
-    var isSetup = await sender.Send(new CheckAnyGuildSetupQuery());
+    var isSetup = await sender.Send(new CheckSetupQuery());
     if (!isSetup) {
       Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
       try {
-        await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
+        await sender.Send(new ProcessSetupCommand(Client.CurrentUser.Id, guild));
         Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
       }
-      catch (MainServerAlreadySetupException) {
+      catch (ModmailBotException) {
         Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
       }
       catch (Exception ex) {
@@ -53,6 +56,9 @@ public class ModmailBot
         throw;
       }
     }
+
+
+    _ = await sender.Send(new ProcessCreateOrUpdateLogChannelCommand(Client.CurrentUser.Id, guild));
   }
 
   public async Task StopAsync() {
