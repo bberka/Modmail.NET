@@ -6,16 +6,16 @@ namespace Modmail.NET;
 public class BotConfig
 {
   public EnvironmentType Environment { get; set; }
-  public string BotToken { get; set; }
-  public string BotClientId { get; set; }
-  public string BotClientSecret { get; set; }
-  public string BotPrefix { get; set; }
+  public required string BotToken { get; set; }
+  public required string BotClientId { get; set; }
+  public required string BotClientSecret { get; set; }
+  public required string BotPrefix { get; set; }
   public ulong MainServerId { get; set; }
-  public ulong[] OwnerUsers { get; set; }
-  public string DbConnectionString { get; set; }
-  public string DefaultLanguage { get; set; }
+  public required ulong[] SuperUsers { get; set; }
+  public required string DbConnectionString { get; set; }
+  public required string DefaultLanguage { get; set; }
   public bool SensitiveEfCoreDataLog { get; set; }
 
   [Url]
-  public string Domain { get; set; }
+  public required string Domain { get; set; }
 }
