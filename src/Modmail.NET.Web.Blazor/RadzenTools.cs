@@ -6,17 +6,19 @@ namespace Modmail.NET.Web.Blazor;
 
 public static class RadzenTools
 {
-  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs args = null) {
+  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs? args = null) {
     if (args is null) return queryable;
 
     if (args.Filter is not null) queryable = queryable.Where(args.Filter);
 
-    var firstSort = args.Sorts?.FirstOrDefault();
-    if (firstSort != null)
+    var sorts = args.Sorts?.ToArray();
+    if (sorts is not null && sorts.Length > 0) {
+      var firstSort = sorts.First();
       queryable =
         firstSort.SortOrder == SortOrder.Ascending
           ? queryable.OrderBy(x => firstSort.Property)
           : queryable.OrderByDescending(x => firstSort.Property);
+    }
 
 
     return queryable;
