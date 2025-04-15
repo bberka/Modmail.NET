@@ -5,6 +5,7 @@
 @using Modmail.NET.Common.Static
 @using Modmail.NET.Database.Entities
 @using Modmail.NET.Features.Metric.Static
+@using Modmail.NET.Features.Server.Queries
 @using Modmail.NET.Features.Teams.Queries
 @using Modmail.NET.Features.Ticket.Static
 @using Modmail.NET.Web.Blazor.Extensions
@@ -36,8 +37,6 @@
     }
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    //TODO: Call cache query however create copy of the reference instead of the reference itself
-    //This causes UI to update the cached options currently fixed but now it calls DB on each page load
     _option = await dbContext.Options.FirstOrDefaultAsync(x => x.ServerId == Config.Value.MainServerId);
     if (_option is null) {
       NavigationManager.NavigateTo("/setup");
@@ -92,6 +91,15 @@
         return;
       }
 
+      //Update cached option for instant apply
+      var cachedOption = await Sender.Send(new GetOptionQuery());
+      cachedOption.AlwaysAnonymous = _option.AlwaysAnonymous;
+      cachedOption.IsEnabled = _option.IsEnabled;
+      cachedOption.PublicTranscripts = _option.PublicTranscripts;
+      cachedOption.SendTranscriptLinkToUser = _option.SendTranscriptLinkToUser;
+      cachedOption.StatisticsCalculateDays = _option.StatisticsCalculateDays;
+      cachedOption.TakeFeedbackAfterClosing = _option.TakeFeedbackAfterClosing;
+      cachedOption.TicketTimeoutHours = _option.TicketTimeoutHours;
       NotificationService.Notify(NotificationSeverity.Success, "Success", "Server options updated successfully.");
     }
     catch (ModmailBotException ex) {
