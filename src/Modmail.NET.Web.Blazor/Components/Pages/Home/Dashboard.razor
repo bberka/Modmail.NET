@@ -120,26 +120,26 @@
       </RadzenRow>
     </RadzenColumn>
     <RadzenColumn Size="12">
-      @if (_canManageStartStop) {
-        <RadzenCard class="shadow-7">
-          <RadzenRow>
-            <RadzenColumn Size="12">
-              <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
-            </RadzenColumn>
-          </RadzenRow>
-          <RadzenRow>
-            <RadzenColumn Size="12">
-              <RadzenText class="rz-my-4">
-                Bot is
-                @if (Bot.Connected) {
-                  <span class="rz-color-success">Connected</span>
-                }
-                else {
-                  <span class="rz-color-danger">Disconnected</span>
-                }
-              </RadzenText>
-            </RadzenColumn>
-          </RadzenRow>
+      <RadzenCard class="shadow-7">
+        <RadzenRow>
+          <RadzenColumn Size="12">
+            <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
+          </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+          <RadzenColumn Size="12">
+            <RadzenText class="rz-my-4">
+              Bot is
+              @if (Bot.Connected) {
+                <span class="rz-color-success">Connected</span>
+              }
+              else {
+                <span class="rz-color-danger">Disconnected</span>
+              }
+            </RadzenText>
+          </RadzenColumn>
+        </RadzenRow>
+        @if (_canManageStartStop) {
           <RadzenRow>
             <RadzenColumn Size="12">
               @if (Bot.Connected) {
@@ -151,8 +151,9 @@
               }
             </RadzenColumn>
           </RadzenRow>
-        </RadzenCard>
-      }
+        }
+
+      </RadzenCard>
 
       @if (_metricDto is not null) {
         <RadzenRow RowGap="4" class="rz-mt-5">
