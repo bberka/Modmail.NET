@@ -1,21 +1,15 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Common.Exceptions
-@using Modmail.NET.Features.Ticket.Commands
 @using Modmail.NET.Features.Ticket.Mappers
 @using Modmail.NET.Features.Ticket.Models
 @using Modmail.NET.Web.Blazor.Components.Pages.Ticket.Shared
 @using Modmail.NET.Web.Blazor.Extensions
 @using Modmail.NET.Web.Blazor.Providers
 @using Modmail.NET.Web.Blazor.Static
-@using Serilog
 @inject IDbContextFactory<ModmailDbContext> DbContextFactory
 @inject TooltipService TooltipService
 @inject DialogService DialogService
-@inject NotificationService NotificationService
 @inject NavigationManager Navi
-@inject ISender Sender
-@inject ModmailBot Bot
 @attribute [AuthorizeTeam]
 
 @code {
@@ -80,31 +74,15 @@
 
   private int _count;
 
-  private readonly string? _forceCloseReason = null;
-
-  private async Task ForceCloseAsync(TicketDto ticketDto) {
-    //TODO: Add reason textbox with custom component dialog
-    var dialogResult = await DialogService.Confirm(Lang.TicketForceCloseWarning.Translate(),
-                                                   options: new ConfirmOptions {
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate()
-                                                   });
-    if (dialogResult == true) {
-      const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{reason}})";
-      try {
-        await Sender.Send(new ProcessCloseTicketCommand(Bot.Client.CurrentUser.Id, ticketDto.Id));
-        Log.Information(logMessage, _forceCloseReason);
-        NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TicketClosedSuccessfully.Translate());
-        await ReloadDataAsync();
-      }
-      catch (ModmailBotException ex) {
-        ex.NotifyException(NotificationService);
-        Log.Warning(ex, logMessage, _forceCloseReason);
-      }
-      catch (Exception ex) {
-        ex.NotifyException(NotificationService);
-        Log.Fatal(ex, logMessage, _forceCloseReason);
-      }
+  private async Task CloseTicketAsync(TicketDto ticketDto) {
+    var result = await DialogService.OpenAsync(Lang.CloseTicket.Translate(), _ =>
+                                                 @<CloseTicketDialogComponent
+                                                   TicketId="ticketDto.Id"></CloseTicketDialogComponent>,
+                                               new DialogOptions {
+                                                 Width = "400px"
+                                               });
+    if (result is true) {
+      await ReloadDataAsync();
     }
   }
 
@@ -251,9 +229,10 @@
                 <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)"
                                       Title=@Lang.RegisterDateUtc.Translate()/>
                 <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)"
-                                      Title="Last Message Date UTC"/>
-                <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)" Title="Close Date UTC"/>
-                <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason"/>
+                                      Title="@Lang.LastMessageDateUtc.Translate()"/>
+                <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)"
+                                      Title="@Lang.ClosedDateUtc.Translate()"/>
+                <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="@Lang.CloseReason.Translate()"/>
                 <RadzenDataGridColumn Title=@Lang.TicketType.Translate() Sortable="true" Filterable="true"
                                       Property="TicketType.Name"
                                       TextAlign="TextAlign.Center">
@@ -266,7 +245,7 @@
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
-                                      Title="Actions">
+                                      Title="@Lang.Actions.Translate()">
                   <Template Context="data">
                     @if (!data.ClosedDateUtc.HasValue) {
                       <RadzenButton
@@ -276,8 +255,8 @@
                         Shade="Shade.Lighter"
                         Size="ButtonSize.Medium"
                         class="rz-my-1 rz-ms-1"
-                        Click="@(async () => await ForceCloseAsync(data))"
-                        MouseEnter="@(args => TooltipService.Open(args, "Force Close Ticket", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                        Click="@(async () => await CloseTicketAsync(data))"
+                        MouseEnter="@(args => TooltipService.Open(args, Lang.CloseTicket.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }
@@ -290,7 +269,7 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
                       Click="@(() => ShowTranscript(data))"
-                      MouseEnter="@(args => TooltipService.Open(args, "Transcript"))"
+                      MouseEnter="@(args => TooltipService.Open(args, Lang.Transcript.Translate()))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
                     <RadzenButton
@@ -301,7 +280,7 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
                       Click="@(async () => await ShowNotes(data))"
-                      MouseEnter="@(args => TooltipService.Open(args, "Show Notes"))"
+                      MouseEnter="@(args => TooltipService.Open(args, Lang.ShowNotes.Translate()))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
                     @if (data.FeedbackStar.HasValue) {
@@ -313,7 +292,7 @@
                         Size="ButtonSize.Medium"
                         class="rz-my-1 rz-ms-1"
                         Click="@(async () => await ShowFeedback(data))"
-                        MouseEnter="@(args => TooltipService.Open(args, "Show Feedback"))"
+                        MouseEnter="@(args => TooltipService.Open(args, Lang.ShowFeedback.Translate()))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }

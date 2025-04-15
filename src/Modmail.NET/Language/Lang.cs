@@ -332,5 +332,10 @@ public enum Lang
 	Account,
 	DiscordUserId,
 	DiscordUsername,
-	Logout
+	Logout,
+	ThisActionCanNotBeUndone,
+	ShowNotes,
+	ShowFeedback,
+	LastMessageDateUtc,
+	ClosedDateUtc
 }

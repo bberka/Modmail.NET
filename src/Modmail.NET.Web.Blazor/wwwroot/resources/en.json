@@ -323,5 +323,10 @@
   "Hangfire": "Hangfire",
   "Account": "Account",
   "DiscordUserId": "Discord User Id",
-  "DiscordUsername": "Discord Username"
+  "DiscordUsername": "Discord Username",
+  "ThisActionCanNotBeUndone": "This action can not be undone",
+  "ShowNotes": "Show Notes",
+  "ShowFeedback": "Show Feedback",
+  "LastMessageDateUtc": "Last Message Date UTC",
+  "ClosedDateUtc": "Closed Date UTC"
 }
