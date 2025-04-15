@@ -1,9 +1,12 @@
-using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;
 
+[RequireModmailPermission]
 public sealed record ProcessToggleAnonymousCommand(
-  Guid TicketId,
-  DiscordChannel? TicketChannel = null
-) : IRequest;
+	ulong AuthorizedUserId,
+	Guid TicketId
+) : IRequest,
+    IPermissionCheck;

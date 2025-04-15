@@ -111,24 +111,6 @@ public static class TicketBotMessages
 			return messageBuilder;
 		}
 
-
-		public static DiscordEmbedBuilder AnonymousToggled(Database.Entities.Ticket ticket) {
-			var embed2 = new DiscordEmbedBuilder()
-			             .WithTitle(ticket.Anonymous
-				                        ? Lang.AnonymousModOn.Translate()
-				                        : Lang.AnonymousModOff.Translate())
-			             .WithColor(ModmailColors.AnonymousToggledColor)
-			             .WithCustomTimestamp()
-			             .WithDescription(ticket.Anonymous
-				                              ? Lang.TicketSetAnonymousDescription.Translate()
-				                              : Lang.TicketSetNotAnonymousDescription.Translate());
-
-			if (ticket.OpenerUser is not null) embed2.WithUserAsAuthor(ticket.OpenerUser);
-
-
-			return embed2;
-		}
-
 		public static DiscordEmbedBuilder TicketTypeChanged(UserInformation user, TicketType? ticketType) {
 			var embed = new DiscordEmbedBuilder()
 			            .WithTitle(Lang.TicketTypeChanged.Translate())
