@@ -97,8 +97,8 @@ public static class TicketBotMessages
 			            .WithCustomTimestamp()
 			            .WithDescription(Lang.NewTicketDescriptionMessage.Translate())
 			            .WithAuthor(member.GetUsername(), iconUrl: member.AvatarUrl)
-			            .AddField(Lang.User.Translate(), member.Mention, true)
-			            .AddField(Lang.TicketId.Translate(), ticketId.ToString().ToUpper(), true)
+			            .AddField(Lang.User.Translate(), member.Mention)
+			            .AddField(Lang.TicketId.Translate(), ticketId.ToString().ToUpper())
 			            .WithColor(ModmailColors.TicketCreatedColor);
 
 			var messageBuilder = new DiscordMessageBuilder()
