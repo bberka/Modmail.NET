@@ -1,5 +1,9 @@
+using Modmail.NET.Abstract;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
+
 namespace Modmail.NET.Features.Tag.Commands;
 
-//TODO: Permission check
-// [PermissionCheck(nameof(AuthPolicy.ManageTicketTypes))] 
-public sealed record ProcessRemoveTagCommand(ulong AuthorizedUserId, Guid Id) : IRequest<Database.Entities.Tag>;
+[RequireModmailPermission(nameof(AuthPolicy.ManageTags))]
+public sealed record ProcessRemoveTagCommand(ulong AuthorizedUserId, Guid Id) : IRequest<Database.Entities.Tag>,
+                                                                                IPermissionCheck;
