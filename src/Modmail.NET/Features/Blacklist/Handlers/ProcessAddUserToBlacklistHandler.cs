@@ -24,9 +24,10 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
 	public async Task<Database.Entities.Blacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken) {
 		var activeTicket = await _dbContext.Tickets.FilterActive().FirstOrDefaultAsync(cancellationToken);
 		if (activeTicket is not null)
-			await _mediator.Send(new ProcessCloseTicketCommand(activeTicket.Id,
+			await _mediator.Send(new ProcessCloseTicketCommand(
 			                                                   request.UserId,
-			                                                   LangProvider.This.GetTranslation(Lang.TicketClosedDueToBlacklist),
+			                                                   activeTicket.Id,
+			                                                   Lang.TicketClosedDueToBlacklist.Translate(),
 			                                                   DontSendFeedbackMessage: true),
 			                     cancellationToken);
 

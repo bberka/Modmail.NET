@@ -1,11 +1,13 @@
-using DSharpPlus.Entities;
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;
 
+[RequireModmailPermission]
 public sealed record ProcessCloseTicketCommand(
-  Guid TicketId,
-  ulong CloserUserId = 0,
-  string? CloseReason = null,
-  DiscordChannel? ModChatChannel = null,
-  bool DontSendFeedbackMessage = false) : IRequest;
+	ulong AuthorizedUserId,
+	Guid TicketId,
+	string? CloseReason = null,
+	bool DontSendFeedbackMessage = false) : IRequest,
+	                                        IPermissionCheck;

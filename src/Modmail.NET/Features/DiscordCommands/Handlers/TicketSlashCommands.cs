@@ -57,7 +57,7 @@ public class TicketSlashCommands
 				}
 			}
 
-			await _sender.Send(new ProcessCloseTicketCommand(ticketId, ctx.User.Id, reason, ctx.Channel));
+			await _sender.Send(new ProcessCloseTicketCommand(ctx.User.Id, ticketId, reason));
 			await ctx.Interaction.EditOriginalResponseAsync(ModmailWebhooks.Success(Lang.TicketClosed.Translate()));
 			Log.Information(logMessage, ctx.User.Id, reason);
 		}
