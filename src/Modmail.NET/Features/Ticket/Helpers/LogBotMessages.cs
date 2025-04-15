@@ -12,68 +12,45 @@ namespace Modmail.NET.Features.Ticket.Helpers;
 /// </summary>
 public static class LogBotMessages
 {
-  public static DiscordEmbedBuilder NewTicketCreated(DiscordMessage initialMessage,
-                                                     Guid ticketId) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(Lang.NewTicketCreated.Translate())
-                .WithCustomTimestamp()
-                .WithColor(ModmailColors.TicketCreatedColor)
-                .AddField(Lang.TicketId.Translate(), ticketId.ToString().ToUpper())
-                .AddField(Lang.User.Translate(), initialMessage.Author!.Mention);
-    if (initialMessage.Author is not null) embed.WithUserAsAuthor(initialMessage.Author);
+	public static DiscordEmbedBuilder NewTicketCreated(DiscordMessage initialMessage,
+	                                                   Guid ticketId) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithTitle(Lang.NewTicketCreated.Translate())
+		            .WithCustomTimestamp()
+		            .WithColor(ModmailColors.TicketCreatedColor)
+		            .AddField(Lang.TicketId.Translate(), ticketId.ToString().ToUpper())
+		            .AddField(Lang.User.Translate(), initialMessage.Author!.Mention);
+		if (initialMessage.Author is not null) embed.WithUserAsAuthor(initialMessage.Author);
 
-    return embed;
-  }
+		return embed;
+	}
 
-  public static DiscordEmbedBuilder TicketClosed(Database.Entities.Ticket ticket) {
-    var embed = new DiscordEmbedBuilder()
-                .WithCustomTimestamp()
-                .WithTitle(Lang.TicketClosed.Translate())
-                .WithColor(ModmailColors.TicketClosedColor)
-                .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
-                .AddField(Lang.OpenedBy.Translate(), ticket.OpenerUser!.GetMention(), true)
-                .AddField(Lang.ClosedBy.Translate(), ticket.CloserUser!.GetMention(), true)
-                .AddField(Lang.TicketPriority.Translate(), ticket.Priority.ToString(), true);
-    if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
-    if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(Lang.CloseReason.Translate(), ticket.CloseReason, true);
+	public static DiscordEmbedBuilder TicketClosed(Database.Entities.Ticket ticket) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithCustomTimestamp()
+		            .WithTitle(Lang.TicketClosed.Translate())
+		            .WithColor(ModmailColors.TicketClosedColor)
+		            .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
+		            .AddField(Lang.OpenedBy.Translate(), ticket.OpenerUser!.GetMention(), true)
+		            .AddField(Lang.ClosedBy.Translate(), ticket.CloserUser!.GetMention(), true)
+		            .AddField(Lang.TicketPriority.Translate(), ticket.Priority.ToString(), true);
+		if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
+		if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(Lang.CloseReason.Translate(), ticket.CloseReason, true);
 
-    return embed;
-  }
-
-
-  public static DiscordEmbedBuilder BlacklistAdded(UserInformation author, UserInformation user, string reason) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(Lang.UserBlacklisted.Translate())
-                .WithUserAsAuthor(author)
-                .WithColor(ModmailColors.InfoColor)
-                .AddField(Lang.User.Translate(), user.GetMention(), true)
-                .AddField(Lang.UserId.Translate(), user.Id.ToString(), true);
+		return embed;
+	}
 
 
-    return embed;
-  }
-
-  public static DiscordEmbedBuilder BlacklistRemoved(UserInformation author, UserInformation user) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(Lang.UserUnblockedSuccessfully.Translate())
-                .WithUserAsAuthor(author)
-                .WithColor(ModmailColors.InfoColor)
-                .AddField(Lang.User.Translate(), user.GetMention(), true)
-                .AddField(Lang.UserId.Translate(), user.Id.ToString(), true);
-    return embed;
-  }
-
-
-  public static DiscordEmbedBuilder TicketPriorityChanged(UserInformation modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
-    var embed = new DiscordEmbedBuilder()
-                .WithTitle(Lang.TicketPriorityChanged.Translate())
-                .WithCustomTimestamp()
-                .WithColor(ModmailColors.TicketPriorityChangedColor)
-                .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
-                .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
-                .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true);
-    if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
-    // else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
-    return embed;
-  }
+	public static DiscordEmbedBuilder TicketPriorityChanged(UserInformation modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithTitle(Lang.TicketPriorityChanged.Translate())
+		            .WithCustomTimestamp()
+		            .WithColor(ModmailColors.TicketPriorityChangedColor)
+		            .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
+		            .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
+		            .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true);
+		if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
+		// else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
+		return embed;
+	}
 }
