@@ -329,5 +329,8 @@ public enum Lang
 	Advanced,
 	Options,
 	Hangfire,
-	Account
+	Account,
+	DiscordUserId,
+	DiscordUsername,
+	Logout
 }
