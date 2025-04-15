@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
@@ -12,30 +11,17 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyTicketClosed>
 {
 	private readonly ModmailBot _bot;
-	private readonly IOptions<BotConfig> _options;
 	private readonly ISender _sender;
 
 	public NotifyTicketClosedUserMessageHandler(ModmailBot bot,
-	                                            IOptions<BotConfig> options,
 	                                            ISender sender) {
 		_bot = bot;
-		_options = options;
 		_sender = sender;
 	}
 
 	public async ValueTask Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
 		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
-		Uri? transcriptUri = null;
-		if (option.SendTranscriptLinkToUser && option.PublicTranscripts) {
-			var sendLinkToUser = Uri.TryCreate(_options.Value.Domain, UriKind.Absolute, out var uri);
-			if (sendLinkToUser && uri is not null)
-				try {
-					transcriptUri = new Uri(uri, "transcript/" + notification.Ticket.Id);
-				}
-				catch (UriFormatException) {
-					transcriptUri = null;
-				}
-		}
+
 
 		var pmChannel = await _bot.Client.GetChannelAsync(notification.Ticket.PrivateMessageChannelId);
 		var messageBuilder = new DiscordMessageBuilder();
@@ -48,6 +34,10 @@ public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyT
 		var closingMessage = Lang.ClosingMessageDescription.Translate();
 		if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
 		if (!string.IsNullOrEmpty(notification.Ticket.CloseReason)) embedBuilder.AddField(Lang.CloseReason.Translate(), notification.Ticket.CloseReason);
+
+		Uri? transcriptUri = null;
+		if (option.SendTranscriptLinkToUser && option.PublicTranscripts) transcriptUri = UtilTranscript.GetTranscriptUri(notification.Ticket.Id);
+
 		if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, Lang.Transcript.Translate()));
 		messageBuilder.AddEmbed(embedBuilder);
 		await pmChannel.SendMessageAsync(messageBuilder);
