@@ -126,7 +126,7 @@ public class TicketSlashCommands
 		await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 		try {
 			var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
-			await _sender.Send(new ProcessToggleAnonymousCommand(ticketId, ctx.Channel));
+			await _sender.Send(new ProcessToggleAnonymousCommand(ctx.User.Id, ticketId));
 			await ctx.Interaction.EditOriginalResponseAsync(ModmailWebhooks.Success(Lang.TicketAnonymousToggled.Translate()));
 			Log.Information(logMessage, ctx.User.Id);
 		}
