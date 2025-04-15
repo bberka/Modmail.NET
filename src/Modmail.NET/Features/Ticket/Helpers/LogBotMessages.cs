@@ -1,8 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
-using Modmail.NET.Database.Entities;
-using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Helpers;
@@ -37,20 +35,6 @@ public static class LogBotMessages
 		if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
 		if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(Lang.CloseReason.Translate(), ticket.CloseReason, true);
 
-		return embed;
-	}
-
-
-	public static DiscordEmbedBuilder TicketPriorityChanged(UserInformation modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
-		var embed = new DiscordEmbedBuilder()
-		            .WithTitle(Lang.TicketPriorityChanged.Translate())
-		            .WithCustomTimestamp()
-		            .WithColor(ModmailColors.TicketPriorityChangedColor)
-		            .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
-		            .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
-		            .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true);
-		if (!ticket.Anonymous) embed.WithUserAsAuthor(modUser);
-		// else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
 		return embed;
 	}
 }

@@ -3,7 +3,6 @@ using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database.Entities;
-using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Helpers;
@@ -68,20 +67,6 @@ public static class TicketBotMessages
 			               .AddComponents(starList);
 			return response;
 		}
-
-		public static DiscordEmbedBuilder TicketPriorityChanged(Option option, UserInformation information, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithGuildInfoFooter(option)
-			            .WithTitle(Lang.TicketPriorityChanged.Translate())
-			            .WithCustomTimestamp()
-			            .WithColor(ModmailColors.TicketPriorityChangedColor)
-			            .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
-			            .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true);
-			if (!ticket.Anonymous) embed.WithUserAsAuthor(information);
-			// else embed.WithUserAsAuthor(ModmailBot.This.Client.CurrentUser);
-			return embed;
-		}
-
 
 		public static DiscordMessageBuilder YouHaveCreatedNewTicket(DiscordGuild guild,
 		                                                            Option option,
@@ -203,16 +188,6 @@ public static class TicketBotMessages
 			return embed;
 		}
 
-		public static DiscordEmbedBuilder TicketPriorityChanged(UserInformation modUser, Database.Entities.Ticket ticket, TicketPriority oldPriority, TicketPriority newPriority) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithTitle(Lang.TicketPriorityChanged.Translate())
-			            .WithColor(ModmailColors.TicketPriorityChangedColor)
-			            .WithCustomTimestamp()
-			            .AddField(Lang.OldPriority.Translate(), oldPriority.ToString(), true)
-			            .AddField(Lang.NewPriority.Translate(), newPriority.ToString(), true)
-			            .WithUserAsAuthor(modUser);
-			return embed;
-		}
 
 		public static DiscordMessageBuilder MessageReceived(DiscordMessage message,
 		                                                    TicketMessageAttachment[] attachments) {
