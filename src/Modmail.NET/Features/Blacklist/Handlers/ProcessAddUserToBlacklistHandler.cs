@@ -34,7 +34,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
 		if (activeBlock) throw new ModmailBotException(Lang.UserAlreadyBlacklisted);
 
 		var reason = string.IsNullOrEmpty(request.Reason)
-			             ? LangProvider.This.GetTranslation(Lang.NoReasonProvided)
+			             ? Lang.NoReasonProvided.Translate()
 			             : request.Reason;
 
 		var blackList = new Database.Entities.Blacklist {

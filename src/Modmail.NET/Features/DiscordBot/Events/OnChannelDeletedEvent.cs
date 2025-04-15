@@ -28,7 +28,6 @@ public static class OnChannelDeletedEvent
 
 		using var scope = client.ServiceProvider.CreateScope();
 		var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-		var langData = scope.ServiceProvider.GetRequiredService<LangProvider>();
 
 		var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(args.Channel.Topic);
 		if (ticketId == Guid.Empty) {
@@ -79,7 +78,7 @@ public static class OnChannelDeletedEvent
 			await sender.Send(new ProcessCloseTicketCommand(
 			                                                user.Id,
 			                                                ticketId,
-			                                                langData.GetTranslation(Lang.ChannelWasDeleted)
+			                                                Lang.ChannelWasDeleted.Translate()
 			                                               ));
 
 			Log.Information(

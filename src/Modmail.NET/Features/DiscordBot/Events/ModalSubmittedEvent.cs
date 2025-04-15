@@ -42,7 +42,7 @@ public static class ModalSubmittedEvent
 					await args.Interaction.CreateResponseAsync(
 					                                           DiscordInteractionResponseType.ChannelMessageWithSource,
 					                                           new DiscordInteractionResponseBuilder().AsEphemeral()
-					                                                                                  .WithContent(LangProvider.This.GetTranslation(Lang.ThankYouForFeedback))
+					                                                                                  .WithContent(Lang.ThankYouForFeedback.Translate())
 					                                          );
 					break;
 				case "close_ticket_with_reason":
