@@ -15,6 +15,7 @@
 @inject NotificationService NotificationService
 @inject NavigationManager Navi
 @inject ISender Sender
+@inject ModmailBot Bot
 @attribute [AuthorizeTeam]
 
 @code {
@@ -91,7 +92,7 @@
     if (dialogResult == true) {
       const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{reason}})";
       try {
-        await Sender.Send(new ProcessCloseTicketCommand(ticketDto.Id));
+        await Sender.Send(new ProcessCloseTicketCommand(Bot.Client.CurrentUser.Id, ticketDto.Id));
         Log.Information(logMessage, _forceCloseReason);
         NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TicketClosedSuccessfully.Translate());
         await ReloadDataAsync();
