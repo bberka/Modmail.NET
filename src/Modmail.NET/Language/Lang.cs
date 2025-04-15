@@ -323,5 +323,11 @@ public enum Lang
 	AverageTicketsClosed,
 	AverageTicketsOpened,
 	AverageResponseTime,
-	NoType
+	NoType,
+	Types,
+	PanelAccess,
+	Advanced,
+	Options,
+	Hangfire,
+	Account
 }

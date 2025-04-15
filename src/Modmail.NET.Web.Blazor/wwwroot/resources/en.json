@@ -315,5 +315,11 @@
   "AverageTicketClosedTime": "Average Ticket Closed Time",
   "AverageTicketsClosed": "Average Tickets Closed",
   "AverageTicketsOpened": "Average Tickets Opened",
-  "AverageResponseTime": "Average Response Time"
+  "AverageResponseTime": "Average Response Time",
+  "Types": "Types",
+  "PanelAccess": "Panel Access",
+  "Advanced": "Advanced",
+  "Options": "Options",
+  "Hangfire": "Hangfire",
+  "Account": "Account"
 }

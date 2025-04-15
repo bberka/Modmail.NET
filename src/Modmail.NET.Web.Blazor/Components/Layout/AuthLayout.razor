@@ -24,7 +24,7 @@
       <RadzenColumn Size="7">
         <RadzenStack Wrap="FlexWrap.NoWrap" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
                      AlignItems="AlignItems.Center" Gap="0">
-          <RadzenButton Text="Account" class="rz-mx-2 rz-mx-lg-4 rz-mt-2"
+          <RadzenButton Text="@Lang.Account.Translate()" class="rz-mx-2 rz-mx-lg-4 rz-mt-2"
                         Icon="person"
                         Click="ShowAccountDialog">
           </RadzenButton>
@@ -36,38 +36,38 @@
   </RadzenHeader>
   <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
-      <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard"/>
+      <RadzenPanelMenuItem Text="@Lang.Dashboard.Translate()" Icon="home" Path="/dashboard"/>
       @if (_canAccessAnalytics) {
-        <RadzenPanelMenuItem Text="Analytics" Icon="analytics" Path="/analytics"/>
+        <RadzenPanelMenuItem Text="@Lang.Analytics.Translate()" Icon="analytics" Path="/analytics"/>
       }
-      <RadzenPanelMenuItem Text="Tags" Icon="label" Path="/tags"/>
-      <RadzenPanelMenuItem Text="Blacklist" Icon="block" Path="/blacklist"/>
-      <RadzenPanelMenuItem Text="Users" Icon="group" Path="/users"/>
-      <RadzenPanelMenuItem Text="Ticket" Icon="confirmation_number">
-        <RadzenPanelMenuItem Text="Tickets" Icon="local_activity" Path="/tickets"/>
+      <RadzenPanelMenuItem Text="@Lang.Tags.Translate()" Icon="label" Path="/tags"/>
+      <RadzenPanelMenuItem Text="@Lang.Blacklist.Translate()" Icon="block" Path="/blacklist"/>
+      <RadzenPanelMenuItem Text="@Lang.Users.Translate()" Icon="group" Path="/users"/>
+      <RadzenPanelMenuItem Text="@Lang.Ticket.Translate()" Icon="confirmation_number">
+        <RadzenPanelMenuItem Text="@Lang.Tickets.Translate()" Icon="local_activity" Path="/tickets"/>
         @if (_canViewTicketFeedbacks) {
-          <RadzenPanelMenuItem Text="Feedbacks" Icon="reviews" Path="/feedback"/>
+          <RadzenPanelMenuItem Text="@Lang.Feedbacks.Translate()" Icon="reviews" Path="/feedback"/>
         }
-        <RadzenPanelMenuItem Text="Types" Icon="stacks" Path="/ticket-types"/>
+        <RadzenPanelMenuItem Text="@Lang.Types.Translate()" Icon="stacks" Path="/ticket-types"/>
       </RadzenPanelMenuItem>
 
       @if (_canAccessTeams) {
-        <RadzenPanelMenuItem Text="Panel Access" Icon="security">
-          <RadzenPanelMenuItem Text="Permissions" Icon="lock_open" Path="/permissions"/>
-          <RadzenPanelMenuItem Text="Teams" Icon="manage_accounts" Path="/teams"/>
+        <RadzenPanelMenuItem Text="@Lang.PanelAccess.Translate()" Icon="security">
+          <RadzenPanelMenuItem Text="@Lang.Permissions.Translate()" Icon="lock_open" Path="/permissions"/>
+          <RadzenPanelMenuItem Text="@Lang.Teams.Translate()" Icon="manage_accounts" Path="/teams"/>
         </RadzenPanelMenuItem>
       }
 
 
 
       @if (_canAccessOptions || _canAccessHangfire) {
-        <RadzenPanelMenuItem Text="Advanced" Icon="tune">
+        <RadzenPanelMenuItem Text="@Lang.Advanced.Translate()" Icon="tune">
 
           @if (_canAccessOptions) {
-            <RadzenPanelMenuItem Text="Options" Icon="settings" Path="/options"/>
+            <RadzenPanelMenuItem Text="@Lang.Options.Translate()" Icon="settings" Path="/options"/>
           }
           @if (_canAccessHangfire) {
-            <RadzenPanelMenuItem Text="Hangfire" Icon="grid_view" Path="/hangfire"/>
+            <RadzenPanelMenuItem Text="@Lang.Hangfire.Translate()" Icon="grid_view" Path="/hangfire"/>
           }
         </RadzenPanelMenuItem>
       }
@@ -115,7 +115,7 @@
   }
 
   private async Task ShowAccountDialog() {
-    await DialogService.OpenAsync("Account",
+    await DialogService.OpenAsync(Lang.Account.Translate(),
                                   _ =>
                                     @<AccountDialogComponent></AccountDialogComponent>,
                                   new DialogOptions {
