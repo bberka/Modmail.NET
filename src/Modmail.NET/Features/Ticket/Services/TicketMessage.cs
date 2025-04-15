@@ -59,7 +59,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 		         );
 
 		using var scope = _scopeFactory.CreateScope();
-		var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+		var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 		var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
 		try {
@@ -69,7 +69,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 				                nameof(TicketMessage),
 				                user.Id
 				               );
-				await channel.SendMessageAsync(BlacklistBotMessages.YouHaveBeenBlacklisted());
+				//TODO: Send rejection message to user, however it may not be needed since the last message from bot already gonna be you are blacklisted message
 				return;
 			}
 
@@ -86,7 +86,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 				          activeTicket.Id,
 				          user.Id
 				         );
-				await sender.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
+				await mediator.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
 			}
 			else {
 				Log.Debug(
@@ -94,7 +94,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 				          nameof(TicketMessage),
 				          user.Id
 				         );
-				await sender.Send(new ProcessCreateNewTicketCommand(user, channel, message));
+				await mediator.Send(new ProcessCreateNewTicketCommand(user, channel, message));
 			}
 
 			Log.Information(
