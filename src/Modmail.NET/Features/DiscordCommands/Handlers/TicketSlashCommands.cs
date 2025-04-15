@@ -80,7 +80,7 @@ public class TicketSlashCommands
 		await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
 		try {
 			var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(ctx.Channel.Topic);
-			await _sender.Send(new ProcessChangePriorityCommand(ticketId, ctx.User.Id, priority, ctx.Channel));
+			await _sender.Send(new ProcessChangePriorityCommand(ctx.User.Id, ticketId, priority, ctx.Channel));
 			await ctx.Interaction.EditOriginalResponseAsync(ModmailWebhooks.Success(Lang.TicketPriorityChanged.Translate()));
 			Log.Information(logMessage, ctx.User.Id, priority);
 		}
