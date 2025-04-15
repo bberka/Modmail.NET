@@ -29,10 +29,7 @@
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;
     var userId = state.User.GetUserId();
-
-    var scope = ScopeFactory.CreateScope();
-    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-    var isSetup = await sender.Send(new CheckSetupQuery());
+    var isSetup = await Sender.Send(new CheckSetupQuery());
     if (!isSetup) {
       var isSuperUser = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.SuperUser));
       if (isSuperUser) {
@@ -44,9 +41,9 @@
       return;
     }
 
-    _canManageStartStop = await sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageDiscordClient));
+    _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageDiscordClient));
 
-    _metricDto = await sender.Send(new GetLatestMetricQuery());
+    _metricDto = await Sender.Send(new GetLatestMetricQuery());
   }
 
 
