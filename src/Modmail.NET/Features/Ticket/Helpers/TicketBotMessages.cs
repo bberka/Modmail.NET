@@ -111,20 +111,6 @@ public static class TicketBotMessages
 			return messageBuilder;
 		}
 
-		public static DiscordEmbedBuilder TicketTypeChanged(UserInformation user, TicketType? ticketType) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithTitle(Lang.TicketTypeChanged.Translate())
-			            .WithUserAsAuthor(user)
-			            .WithCustomTimestamp()
-			            .WithColor(ModmailColors.TicketTypeChangedColor);
-			if (ticketType is not null)
-				embed.WithDescription(string.Format(Lang.TicketTypeSet.Translate(), ticketType.Emoji, ticketType.Name));
-			else
-				embed.WithDescription(Lang.TicketTypeRemoved.Translate());
-
-			return embed;
-		}
-
 
 		public static DiscordMessageBuilder MessageReceived(DiscordMessage message,
 		                                                    TicketMessageAttachment[] attachments) {
