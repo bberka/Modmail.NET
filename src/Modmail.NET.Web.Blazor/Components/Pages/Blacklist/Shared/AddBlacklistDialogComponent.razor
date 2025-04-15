@@ -29,8 +29,8 @@
   protected override async Task OnInitializedAsync() {
     await base.OnInitializedAsync();
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-
     _users = await dbContext.UserInformation
+                            .OrderBy(x => x.Username)
                             .GroupJoin(dbContext.Blacklists,
                                        user => user.Id,
                                        blacklist => blacklist.UserId,
@@ -38,10 +38,17 @@
                             .SelectMany(x => x.blacklists.DefaultIfEmpty(),
                                         (x, blacklist) => new { x.user, blacklist })
                             .Where(x => x.blacklist == null) // Only take users that are not in blacklist
-                            .OrderBy(x => x.user.Username)
-                            .Where(x => x.user.Id != Bot.Client.CurrentUser.Id) // Exclude bot
-                            .Where(x => Options.Value.SuperUsers.All(y => y != x.user.Id)) // Exclude bot owner
                             .Select(x => x.user)
+                            .GroupJoin(dbContext.TeamUsers,
+                                       user => user.Id,
+                                       teamUser => teamUser.UserId,
+                                       (user, teamUser) => new { user, teamUser })
+                            .SelectMany(x => x.teamUser.DefaultIfEmpty(),
+                                        (x, teamUser) => new { x.user, teamUser })
+                            .Where(x => x.teamUser == null)
+                            .Select(x => x.user)
+                            .Where(x => x.Id != Bot.Client.CurrentUser.Id) // Exclude bot
+                            .Where(x => !Options.Value.SuperUsers.Contains(x.Id)) // Exclude bot owner
                             .ToArrayAsync();
   }
 
