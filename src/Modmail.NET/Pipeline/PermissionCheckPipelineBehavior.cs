@@ -18,10 +18,10 @@ public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBeh
 
 	public async ValueTask<TResponse> Handle(TRequest message, CancellationToken cancellationToken, MessageHandlerDelegate<TRequest, TResponse> next) {
 		if (message.AuthorizedUserId <= 0) throw new ModmailBotException(Lang.UnauthorizedAccess);
-		var attribute = typeof(TRequest).GetCustomAttribute<RequireModmailPermissionAttribute>();
-		if (attribute == null) throw new InvalidOperationException();
-
+		var attribute = message.GetType().GetCustomAttribute<RequireModmailPermissionAttribute>();
+		if (attribute is null) throw new InvalidOperationException();
 		if (attribute.AuthPolicy is null) {
+			// This means that the command is not a permission check but team user check
 			var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(message.AuthorizedUserId), cancellationToken);
 			if (!isAnyTeamMember) throw new ModmailBotException(Lang.UnauthorizedAccess);
 			return await next(message, cancellationToken);
