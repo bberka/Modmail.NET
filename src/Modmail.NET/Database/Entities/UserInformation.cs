@@ -11,58 +11,57 @@ public class UserInformation : IRegisterDateUtc,
                                IUlongId,
                                IEntity
 {
-  [MaxLength(DbLength.Name)]
-  public string Username { get; set; } = null!;
+	/// <summary>
+	///   Users Discord Id
+	/// </summary>
+	[Range(1, long.MaxValue)]
+	public ulong Id { get; set; }
 
-  [MaxLength(DbLength.Url)]
-  public string? AvatarUrl { get; set; }
+	public DateTime RegisterDateUtc { get; set; }
+	public DateTime? UpdateDateUtc { get; set; }
 
-  [MaxLength(DbLength.Url)]
-  public string? BannerUrl { get; set; }
+	[MaxLength(DbLength.Name)]
+	public string Username { get; set; } = null!;
 
-  [MaxLength(DbLength.Email)]
-  public string? Email { get; set; }
+	[MaxLength(DbLength.Url)]
+	public string? AvatarUrl { get; set; }
 
-  [MaxLength(DbLength.Locale)]
-  public string? Locale { get; set; }
+	[MaxLength(DbLength.Url)]
+	public string? BannerUrl { get; set; }
 
-  public virtual ICollection<Ticket> OpenedTickets { get; set; } = [];
-  public virtual ICollection<Ticket> ClosedTickets { get; set; } = [];
-  public virtual ICollection<Ticket> AssignedTickets { get; set; } = [];
+	[MaxLength(DbLength.Email)]
+	public string? Email { get; set; }
 
-  public DateTime RegisterDateUtc { get; set; }
+	[MaxLength(DbLength.Locale)]
+	public string? Locale { get; set; }
 
-  /// <summary>
-  ///   Users Discord Id
-  /// </summary>
-  [Range(1, long.MaxValue)]
-  public ulong Id { get; set; }
+	public virtual ICollection<Ticket> OpenedTickets { get; set; } = [];
+	public virtual ICollection<Ticket> ClosedTickets { get; set; } = [];
+	public virtual ICollection<Ticket> AssignedTickets { get; set; } = [];
 
-  public DateTime? UpdateDateUtc { get; set; }
+	public static UserInformation FromDiscordUser(DiscordUser user) {
+		return new UserInformation {
+			Id = user.Id,
+			Username = user.GetUsername(),
+			AvatarUrl = user.AvatarUrl,
+			BannerUrl = user.BannerUrl,
+			Email = user.Email,
+			Locale = user.Locale
+		};
+	}
 
-  public static UserInformation FromDiscordUser(DiscordUser user) {
-    return new UserInformation {
-      Id = user.Id,
-      Username = user.GetUsername(),
-      AvatarUrl = user.AvatarUrl,
-      BannerUrl = user.BannerUrl,
-      Email = user.Email,
-      Locale = user.Locale
-    };
-  }
+	public static UserInformation FromDiscordMember(DiscordMember member) {
+		return new UserInformation {
+			Id = member.Id,
+			Username = member.GetUsername(),
+			AvatarUrl = member.AvatarUrl,
+			BannerUrl = member.BannerUrl,
+			Email = member.Email,
+			Locale = member.Locale
+		};
+	}
 
-  public static UserInformation FromDiscordMember(DiscordMember member) {
-    return new UserInformation {
-      Id = member.Id,
-      Username = member.GetUsername(),
-      AvatarUrl = member.AvatarUrl,
-      BannerUrl = member.BannerUrl,
-      Email = member.Email,
-      Locale = member.Locale
-    };
-  }
-
-  public string GetMention() {
-    return $"<@{Id}>";
-  }
+	public string GetMention() {
+		return $"<@{Id}>";
+	}
 }

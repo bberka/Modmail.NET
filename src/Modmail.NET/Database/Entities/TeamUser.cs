@@ -8,12 +8,9 @@ public class TeamUser : IRegisterDateUtc,
                         IEntity,
                         IGuidId
 {
-  public required ulong UserId { get; set; }
-
-  public required Guid TeamId { get; set; }
-
-  //FK
-  public virtual Team? Team { get; set; }
-  public Guid Id { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
+	public Guid Id { get; set; }
+	public DateTime RegisterDateUtc { get; set; }
+	public required ulong UserId { get; set; }
+	public required Guid TeamId { get; set; }
+	public virtual Team? Team { get; set; }
 }

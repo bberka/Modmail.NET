@@ -12,18 +12,18 @@ public class Tag : IRegisterDateUtc,
                    IEntity,
                    IGuidId
 {
-  [MaxLength(DbLength.TagName)]
-  [Required]
-  public required string Name { get; set; }
+	[MaxLength(DbLength.TagName)]
+	[Required]
+	public required string Name { get; set; }
 
-  [StringLength(DbLength.TagTitle)]
-  public string? Title { get; set; } = null;
+	[StringLength(DbLength.TagTitle)]
+	public string? Title { get; set; } = null;
 
-  [Required]
-  [MaxLength(TagConstants.TagContentLength)]
-  public required string Content { get; set; }
+	[Required]
+	[MaxLength(TagConstants.TagContentLength)]
+	public required string Content { get; set; }
 
-  public Guid Id { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
-  public DateTime? UpdateDateUtc { get; set; }
+	public Guid Id { get; set; }
+	public DateTime RegisterDateUtc { get; set; }
+	public DateTime? UpdateDateUtc { get; set; }
 }

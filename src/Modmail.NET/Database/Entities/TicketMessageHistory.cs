@@ -8,16 +8,15 @@ public class TicketMessageHistory : IRegisterDateUtc,
                                     IGuidId,
                                     IEntity
 {
-  [MaxLength(DbLength.Message)]
-  public required string? MessageContentBefore { get; set; }
+	public Guid Id { get; set; }
+	public DateTime RegisterDateUtc { get; set; }
 
-  [MaxLength(DbLength.Message)]
-  public required string? MessageContentAfter { get; set; }
+	[MaxLength(DbLength.Message)]
+	public required string? MessageContentBefore { get; set; }
 
-  public required Guid TicketMessageId { get; set; }
+	[MaxLength(DbLength.Message)]
+	public required string? MessageContentAfter { get; set; }
 
-  //FK
-  public virtual TicketMessage? TicketMessage { get; set; }
-  public Guid Id { get; set; }
-  public DateTime RegisterDateUtc { get; set; }
+	public required Guid TicketMessageId { get; set; }
+	public virtual TicketMessage? TicketMessage { get; set; }
 }
