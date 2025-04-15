@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Blacklist.Notifications;
@@ -17,7 +16,7 @@ public class NotifyUnblockedUserDiscordLogHandler : INotificationHandler<NotifyU
 		_mediator = mediator;
 	}
 
-	public async Task Handle(NotifyUnblockedUser notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyUnblockedUser notification, CancellationToken cancellationToken) {
 		var authorUser = await _mediator.Send(new GetDiscordUserInfoQuery(notification.AuthorizedUserId), cancellationToken);
 		var embed = new DiscordEmbedBuilder()
 		            .WithTitle(Lang.UserUnblocked.Translate())

@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Entities;
@@ -8,6 +7,6 @@ namespace Modmail.NET.Features.Teams.Commands;
 
 [RequireModmailPermission(nameof(AuthPolicy.ManageAccessPermissions))]
 public sealed record ProcessRemoveTeamCommand(
-  ulong AuthorizedUserId,
-  Guid Id) : IRequest<Team>,
-             IPermissionCheck;
+	ulong AuthorizedUserId,
+	Guid Id) : IRequest<Team>,
+	           IPermissionCheck;

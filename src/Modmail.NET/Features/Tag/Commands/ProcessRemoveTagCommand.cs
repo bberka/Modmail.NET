@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace Modmail.NET.Features.Tag.Commands;
 
 //TODO: Permission check

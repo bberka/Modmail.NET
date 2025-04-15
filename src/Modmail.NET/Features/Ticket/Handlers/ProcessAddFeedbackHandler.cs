@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Server.Queries;
@@ -20,7 +19,7 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
 		_dbContext = dbContext;
 	}
 
-	public async Task Handle(ProcessAddFeedbackCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessAddFeedbackCommand request, CancellationToken cancellationToken) {
 		if (request.StarCount is < 1 or > 5) throw new InvalidOperationException("Star count must be between 1 and 5");
 		if (string.IsNullOrEmpty(request.TextInput)) throw new InvalidOperationException("Feedback messageContent is empty");
 		if (request.FeedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
@@ -42,5 +41,6 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
 			x.Clear();
 			x.AddEmbed(TicketBotMessages.User.FeedbackReceivedUpdateMessage(ticket));
 		});
+		return Unit.Value;
 	}
 }

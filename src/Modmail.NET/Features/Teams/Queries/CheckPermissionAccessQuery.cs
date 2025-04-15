@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Common.Static;
 
 namespace Modmail.NET.Features.Teams.Queries;

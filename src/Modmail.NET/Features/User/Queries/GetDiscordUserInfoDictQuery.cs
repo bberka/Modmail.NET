@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Attributes;
 using Modmail.NET.Database.Entities;
 

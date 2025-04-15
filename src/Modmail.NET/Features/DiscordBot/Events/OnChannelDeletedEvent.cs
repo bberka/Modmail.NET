@@ -1,7 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities.AuditLogs;
 using DSharpPlus.EventArgs;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;

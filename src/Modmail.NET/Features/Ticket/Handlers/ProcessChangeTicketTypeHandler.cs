@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
@@ -20,7 +19,7 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
 		_mediator = mediator;
 	}
 
-	public async Task Handle(ProcessChangeTicketTypeCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessChangeTicketTypeCommand request, CancellationToken cancellationToken) {
 		//TODO: maybe add removal of embeds for the message to keep getting called if ticket is closed
 		var ticket = await _dbContext.Tickets
 		                             .FilterById(request.TicketId)
@@ -33,5 +32,6 @@ public class ProcessChangeTicketTypeHandler : IRequestHandler<ProcessChangeTicke
 		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
 		if (affected == 0) throw new DbInternalException();
 		await _mediator.Publish(new NotifyTicketTypeChanged(request.AuthorizedUserId, ticket, ticketType), cancellationToken);
+		return Unit.Value;
 	}
 }

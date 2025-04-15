@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Ticket.Notifications;
@@ -15,7 +14,7 @@ public class NotifyTicketAnonymousToggledHandler : INotificationHandler<NotifyTi
 		_bot = bot;
 	}
 
-	public async Task Handle(NotifyTicketAnonymousToggled notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketAnonymousToggled notification, CancellationToken cancellationToken) {
 		var ticketChannel = await _bot.Client.GetChannelAsync(notification.Ticket.ModMessageChannelId);
 		var title = notification.Ticket.Anonymous
 			            ? Lang.AnonymousModOn.Translate()

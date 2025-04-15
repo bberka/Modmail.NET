@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Server.Queries;
@@ -20,7 +19,7 @@ public class NotifyTicketPriorityChangedPrivateMessageHandler : INotificationHan
 		_bot = bot;
 	}
 
-	public async Task Handle(NotifyTicketPriorityChanged notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketPriorityChanged notification, CancellationToken cancellationToken) {
 		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
 		var privateChannel = await _bot.Client.GetChannelAsync(notification.Ticket.PrivateMessageChannelId);
 		var embed = new DiscordEmbedBuilder()

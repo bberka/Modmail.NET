@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.DiscordBot.Queries;
@@ -17,7 +16,7 @@ public class NotifyTicketPriorityChangedLogMessageHandler : INotificationHandler
 		_sender = sender;
 	}
 
-	public async Task Handle(NotifyTicketPriorityChanged notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketPriorityChanged notification, CancellationToken cancellationToken) {
 		var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
 		var embed = new DiscordEmbedBuilder()
 		            .WithTitle(Lang.TicketPriorityChanged.Translate())

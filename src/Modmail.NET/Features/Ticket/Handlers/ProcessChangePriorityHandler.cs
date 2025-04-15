@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
@@ -20,7 +19,7 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
 		_dbContext = dbContext;
 	}
 
-	public async Task Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken) {
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
@@ -35,5 +34,6 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
 		                                                        ticket,
 		                                                        oldPriority,
 		                                                        request.NewPriority), cancellationToken);
+		return Unit.Value;
 	}
 }

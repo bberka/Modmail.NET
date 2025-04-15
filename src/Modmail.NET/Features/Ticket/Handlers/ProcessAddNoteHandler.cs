@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
@@ -24,7 +23,7 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 		_mediator = mediator;
 	}
 
-	public async Task Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
@@ -38,5 +37,6 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 		_dbContext.Add(noteEntity);
 		await _dbContext.SaveChangesAsync(cancellationToken);
 		await _mediator.Publish(new NotifyTicketNoteAdded(request.AuthorizedUserId, ticket, noteEntity), cancellationToken);
+		return Unit.Value;
 	}
 }

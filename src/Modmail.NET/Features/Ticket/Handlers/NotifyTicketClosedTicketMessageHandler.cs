@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Language;
 
@@ -12,7 +11,7 @@ public class NotifyTicketClosedTicketMessageHandler : INotificationHandler<Notif
 		_bot = bot;
 	}
 
-	public async Task Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
 		var modChatChannel = await _bot.Client.GetChannelAsync(notification.Ticket.ModMessageChannelId);
 		await modChatChannel.DeleteAsync(Lang.TicketClosed.Translate());
 	}

@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace Modmail.NET.Features.Ticket.Commands;
 
 public sealed record ProcessChangeTicketTypeCommand(

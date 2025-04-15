@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Abstract;

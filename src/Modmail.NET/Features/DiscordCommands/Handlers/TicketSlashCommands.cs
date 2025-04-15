@@ -3,7 +3,6 @@ using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;

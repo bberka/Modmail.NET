@@ -1,4 +1,3 @@
-using MediatR;
 using Modmail.NET.Features.Ticket.Static;
 
 namespace Modmail.NET.Features.Ticket.Notifications;

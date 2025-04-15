@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Ticket.Notifications;
@@ -19,7 +18,7 @@ public class NotifyTicketTypeChangedTicketMessageHandler : INotificationHandler<
 		_sender = sender;
 	}
 
-	public async Task Handle(NotifyTicketTypeChanged notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketTypeChanged notification, CancellationToken cancellationToken) {
 		var ticketChannel = await _bot.Client.GetChannelAsync(notification.Ticket.ModMessageChannelId);
 		var author = await _sender.Send(new GetDiscordUserInfoQuery(notification.AuthorizedUserId), cancellationToken);
 		var embed = new DiscordEmbedBuilder()

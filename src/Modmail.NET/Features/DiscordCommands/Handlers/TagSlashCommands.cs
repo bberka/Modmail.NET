@@ -4,7 +4,6 @@ using DSharpPlus.Commands.ContextChecks;
 using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
@@ -25,46 +24,46 @@ namespace Modmail.NET.Features.DiscordCommands.Handlers;
 
 public class TagSlashCommands
 {
-  private readonly ISender _sender;
+	private readonly ISender _sender;
 
-  public TagSlashCommands(ISender sender) {
-    _sender = sender;
-  }
+	public TagSlashCommands(ISender sender) {
+		_sender = sender;
+	}
 
-  [Command("tag")]
-  [Description("Get tag content")]
-  [PerformanceLoggerAspect]
-  [UpdateUserInformation]
-  [RequireGuild]
-  public async Task Get(SlashCommandContext ctx,
-                        [Parameter("name")] [Description("Tag name")] [SlashAutoCompleteProvider(typeof(TagProvider))]
-                        string name
-  ) {
-    const string logMessage = $"[{nameof(TagSlashCommands)}]{nameof(Get)}({{ContextUserId}},{{TagName}})";
-    await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
-    try {
-      var dbContext = ctx.ServiceProvider.GetRequiredService<ModmailDbContext>();
-      var tag = await dbContext.Tags.FilterByTagName(name).FirstOrDefaultAsync();
-      if (tag is null) throw new ModmailBotException(Lang.TagNotFound);
+	[Command("tag")]
+	[Description("Get tag content")]
+	[PerformanceLoggerAspect]
+	[UpdateUserInformation]
+	[RequireGuild]
+	public async Task Get(SlashCommandContext ctx,
+	                      [Parameter("name")] [Description("Tag name")] [SlashAutoCompleteProvider(typeof(TagProvider))]
+	                      string name
+	) {
+		const string logMessage = $"[{nameof(TagSlashCommands)}]{nameof(Get)}({{ContextUserId}},{{TagName}})";
+		await ctx.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder());
+		try {
+			var dbContext = ctx.ServiceProvider.GetRequiredService<ModmailDbContext>();
+			var tag = await dbContext.Tags.FilterByTagName(name).FirstOrDefaultAsync();
+			if (tag is null) throw new ModmailBotException(Lang.TagNotFound);
 
-      await ctx.EditResponseAsync(TagBotMessages.TagSent(tag));
+			await ctx.EditResponseAsync(TagBotMessages.TagSent(tag));
 
-      var channelTopic = ctx.Channel.Topic;
-      var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
-      if (ticketId != Guid.Empty) {
-        var isActiveTicket = await _sender.Send(new CheckActiveTicketQuery(ticketId));
-        if (isActiveTicket) await _sender.Send(new ProcessTagSendMessageCommand(ticketId, tag.Id, ctx.User, ctx.Channel, ctx.Guild!));
-      }
+			var channelTopic = ctx.Channel.Topic;
+			var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
+			if (ticketId != Guid.Empty) {
+				var isActiveTicket = await _sender.Send(new CheckActiveTicketQuery(ticketId));
+				if (isActiveTicket) await _sender.Send(new ProcessTagSendMessageCommand(ticketId, tag.Id, ctx.User, ctx.Channel, ctx.Guild!));
+			}
 
-      Log.Information(logMessage, ctx.User.Id, name);
-    }
-    catch (ModmailBotException ex) {
-      await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Warning(ex, logMessage, ctx.User.Id, name);
-    }
-    catch (Exception ex) {
-      await ctx.EditResponseAsync(ex.ToWebhookResponse());
-      Log.Fatal(ex, logMessage, ctx.User.Id, name);
-    }
-  }
+			Log.Information(logMessage, ctx.User.Id, name);
+		}
+		catch (ModmailBotException ex) {
+			await ctx.EditResponseAsync(ex.ToWebhookResponse());
+			Log.Warning(ex, logMessage, ctx.User.Id, name);
+		}
+		catch (Exception ex) {
+			await ctx.EditResponseAsync(ex.ToWebhookResponse());
+			Log.Fatal(ex, logMessage, ctx.User.Id, name);
+		}
+	}
 }

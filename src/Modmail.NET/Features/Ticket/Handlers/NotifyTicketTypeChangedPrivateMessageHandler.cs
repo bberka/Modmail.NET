@@ -1,6 +1,5 @@
 using System.Text;
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Features.Ticket.Jobs;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Language;
@@ -18,7 +17,7 @@ public class NotifyTicketTypeChangedPrivateMessageHandler : INotificationHandler
 		_ticketTypeSelectionTimeoutJob = ticketTypeSelectionTimeoutJob;
 	}
 
-	public async Task Handle(NotifyTicketTypeChanged notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketTypeChanged notification, CancellationToken cancellationToken) {
 		if (notification.Ticket.BotTicketCreatedMessageInDmId == 0) return;
 
 		var privateChannelId = notification.Ticket.PrivateMessageChannelId;

@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
@@ -24,7 +23,7 @@ public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyT
 		_sender = sender;
 	}
 
-	public async Task Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
+	public async ValueTask Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
 		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
 		Uri? transcriptUri = null;
 		if (option.SendTranscriptLinkToUser && option.PublicTranscripts) {

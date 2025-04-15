@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
@@ -21,7 +20,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 		_mediator = mediator;
 	}
 
-	public async Task Handle(ProcessCloseTicketCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessCloseTicketCommand request, CancellationToken cancellationToken) {
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
@@ -36,5 +35,6 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 		_dbContext.Update(ticket);
 		await _dbContext.SaveChangesAsync(cancellationToken);
 		await _mediator.Publish(new NotifyTicketClosed(ticket, request.DontSendFeedbackMessage), cancellationToken);
+		return Unit.Value;
 	}
 }

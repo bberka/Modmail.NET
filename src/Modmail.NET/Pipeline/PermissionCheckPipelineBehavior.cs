@@ -1,5 +1,4 @@
 using System.Reflection;
-using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
@@ -17,20 +16,20 @@ public class PermissionCheckPipelineBehavior<TRequest, TResponse> : IPipelineBeh
 		_sender = sender;
 	}
 
-	public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken) {
-		if (request.AuthorizedUserId <= 0) throw new ModmailBotException(Lang.UnauthorizedAccess);
+	public async ValueTask<TResponse> Handle(TRequest message, CancellationToken cancellationToken, MessageHandlerDelegate<TRequest, TResponse> next) {
+		if (message.AuthorizedUserId <= 0) throw new ModmailBotException(Lang.UnauthorizedAccess);
 		var attribute = typeof(TRequest).GetCustomAttribute<RequireModmailPermissionAttribute>();
 		if (attribute == null) throw new InvalidOperationException();
 
 		if (attribute.AuthPolicy is null) {
-			var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(request.AuthorizedUserId), cancellationToken);
+			var isAnyTeamMember = await _sender.Send(new CheckUserInAnyTeamQuery(message.AuthorizedUserId), cancellationToken);
 			if (!isAnyTeamMember) throw new ModmailBotException(Lang.UnauthorizedAccess);
-			return await next(cancellationToken);
+			return await next(message, cancellationToken);
 		}
 
-		var allowed = await _sender.Send(new CheckPermissionAccessQuery(request.AuthorizedUserId, attribute.AuthPolicy), cancellationToken);
+		var allowed = await _sender.Send(new CheckPermissionAccessQuery(message.AuthorizedUserId, attribute.AuthPolicy), cancellationToken);
 		if (!allowed) throw new ModmailBotException(Lang.UnauthorizedAccess);
 
-		return await next(cancellationToken);
+		return await next(message, cancellationToken);
 	}
 }

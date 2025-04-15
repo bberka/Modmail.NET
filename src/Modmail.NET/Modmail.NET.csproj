@@ -26,7 +26,7 @@
         <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.2.2"/>
         <PackageReference Include="FluentValidation" Version="11.11.0"/>
         <PackageReference Include="Hangfire.Core" Version="1.8.18"/>
-        <PackageReference Include="MediatR" Version="12.5.0"/>
+        <PackageReference Include="Mediator.Abstractions" Version="2.1.7"/>
         <PackageReference Include="Metran" Version="2.0.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.4"/>

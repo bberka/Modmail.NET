@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
@@ -21,7 +20,7 @@ public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserTo
 		_mediator = mediator;
 	}
 
-	public async Task<Database.Entities.Blacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Database.Entities.Blacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken) {
 		var activeTicket = await _dbContext.Tickets.FilterActive().FirstOrDefaultAsync(cancellationToken);
 		if (activeTicket is not null)
 			await _mediator.Send(new ProcessCloseTicketCommand(

@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
@@ -21,7 +20,7 @@ public class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonym
 	}
 
 
-	public async Task Handle(ProcessToggleAnonymousCommand request, CancellationToken cancellationToken) {
+	public async ValueTask<Unit> Handle(ProcessToggleAnonymousCommand request, CancellationToken cancellationToken) {
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
@@ -32,5 +31,6 @@ public class ProcessToggleAnonymousHandler : IRequestHandler<ProcessToggleAnonym
 		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
 		if (affected == 0) throw new DbInternalException();
 		await _mediator.Publish(new NotifyTicketAnonymousToggled(request.AuthorizedUserId, ticket), cancellationToken);
+		return Unit.Value;
 	}
 }

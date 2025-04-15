@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
@@ -14,53 +13,54 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessageCommand>
 {
-  private readonly TicketAttachmentDownloadService _attachmentDownloadService;
-  private readonly ModmailBot _bot;
-  private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
+	private readonly TicketAttachmentDownloadService _attachmentDownloadService;
+	private readonly ModmailBot _bot;
+	private readonly ModmailDbContext _dbContext;
+	private readonly ISender _sender;
 
-  public ProcessModSendMessageHandler(ISender sender,
-                                      ModmailBot bot,
-                                      ModmailDbContext dbContext,
-                                      TicketAttachmentDownloadService attachmentDownloadService) {
-    _sender = sender;
-    _bot = bot;
-    _dbContext = dbContext;
-    _attachmentDownloadService = attachmentDownloadService;
-  }
+	public ProcessModSendMessageHandler(ISender sender,
+	                                    ModmailBot bot,
+	                                    ModmailDbContext dbContext,
+	                                    TicketAttachmentDownloadService attachmentDownloadService) {
+		_sender = sender;
+		_bot = bot;
+		_dbContext = dbContext;
+		_attachmentDownloadService = attachmentDownloadService;
+	}
 
-  public async Task Handle(ProcessModSendMessageCommand request, CancellationToken cancellationToken) {
-    ArgumentNullException.ThrowIfNull(request.ModUser);
-    ArgumentNullException.ThrowIfNull(request.Message);
-    ArgumentNullException.ThrowIfNull(request.Channel);
-    ArgumentNullException.ThrowIfNull(request.Guild);
-
-
-    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
-    ticket.ThrowIfNotOpen();
-    ticket.LastMessageDateUtc = UtilDate.GetNow();
-
-    _dbContext.Update(ticket);
+	public async ValueTask<Unit> Handle(ProcessModSendMessageCommand request, CancellationToken cancellationToken) {
+		ArgumentNullException.ThrowIfNull(request.ModUser);
+		ArgumentNullException.ThrowIfNull(request.Message);
+		ArgumentNullException.ThrowIfNull(request.Channel);
+		ArgumentNullException.ThrowIfNull(request.Guild);
 
 
-    var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
+		var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+		ticket.ThrowIfNotOpen();
+		ticket.LastMessageDateUtc = UtilDate.GetNow();
 
-    var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
+		_dbContext.Update(ticket);
 
-    foreach (var attachment in ticketMessage.Attachments)
-      await _attachmentDownloadService.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
-    var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
-    var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
-    var embed = TicketBotMessages.User.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), anonymous);
-    var botMessage = await privateChannel.SendMessageAsync(embed);
+		var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
-    ticketMessage.BotMessageId = botMessage.Id;
-    await _dbContext.AddAsync(ticketMessage, cancellationToken);
+		var ticketMessage = TicketMessage.MapFrom(request.TicketId, request.Message, true);
 
-    var affected = await _dbContext.SaveChangesAsync(cancellationToken);
-    if (affected == 0) throw new DbInternalException();
+		foreach (var attachment in ticketMessage.Attachments)
+			await _attachmentDownloadService.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
 
-    await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(TicketConstants.ProcessedReactionDiscordEmojiUnicode));
-  }
+		var anonymous = guildOption.AlwaysAnonymous || ticket.Anonymous;
+		var privateChannel = await _bot.Client.GetChannelAsync(ticket.PrivateMessageChannelId);
+		var embed = TicketBotMessages.User.MessageReceived(request.Message, ticketMessage.Attachments.ToArray(), anonymous);
+		var botMessage = await privateChannel.SendMessageAsync(embed);
+
+		ticketMessage.BotMessageId = botMessage.Id;
+		await _dbContext.AddAsync(ticketMessage, cancellationToken);
+
+		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
+		if (affected == 0) throw new DbInternalException();
+
+		await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(TicketConstants.ProcessedReactionDiscordEmojiUnicode));
+		return Unit.Value;
+	}
 }

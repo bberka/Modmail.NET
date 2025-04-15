@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using MediatR;
 using Modmail.NET.Abstract;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Entities;
