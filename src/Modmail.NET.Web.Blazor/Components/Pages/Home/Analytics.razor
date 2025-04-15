@@ -1,0 +1,201 @@
+@page "/analytics"
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Common.Utils
+@using Modmail.NET.Features.Metric.Models
+@using Modmail.NET.Features.Metric.Queries
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@inject ISender Sender
+@attribute [AuthorizeTeam(nameof(AuthPolicy.ViewAnalytics))]
+
+@code {
+
+  [CascadingParameter]
+  public required Task<AuthenticationState> AuthContext { get; set; }
+
+  private MetricDto? _metricDto;
+
+  protected override async Task OnInitializedAsync() {
+    var state = await AuthContext;
+    _ = state.User.GetUserId();
+    _metricDto = await Sender.Send(new GetLatestMetricQuery());
+  }
+
+}
+
+<div class="container">
+  <RadzenRow>
+    <RadzenColumn>
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            @Lang.Analytics.Translate()
+          </RadzenText>
+          @* <hr class="my-4"/> *@
+
+        </RadzenColumn>
+      </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="12">
+      @if (_metricDto is not null) {
+        <RadzenRow RowGap="4">
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.AvgResponseTimeSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.AverageResponseTime.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto?.Statistic?.AvgTicketsOpenedPerDay)) / day
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.AverageTicketsOpened.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto?.Statistic?.AvgTicketsClosedPerDay)) / day
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.AverageTicketsClosed.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.AvgTicketClosedSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.AverageTicketClosedTime.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.FastestClosedTicketSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.FastestClosedTicketTime.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.SlowestClosedTicketSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                @Lang.SlowestClosedTicketTime.Translate()
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenChartTooltipOptions Shared="true"/>
+              <RadzenLineSeries Smooth="true" Data="@_metricDto.OpenedTicketsChartDataArray" CategoryProperty="Category"
+                                Title="@Lang.OpenedTickets.Translate()" LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenLineSeries Smooth="true" Data="@_metricDto.ClosedTicketsChartDataArray" CategoryProperty="Category"
+                                Title="@Lang.ClosedTickets.Translate()" LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenCategoryAxis Padding="20"/>
+              <RadzenValueAxis>
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="@Lang.Count.Translate()"/>
+              </RadzenValueAxis>
+            </RadzenChart>
+
+          </RadzenCard>
+
+        </RadzenRow>
+
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenChartTooltipOptions Shared="true"/>
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.UserMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="@Lang.UserMessages.Translate()"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.ModMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="@Lang.ModMessages.Translate()"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenCategoryAxis Padding="20"/>
+              <RadzenValueAxis>
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="@Lang.Count.Translate()"/>
+              </RadzenValueAxis>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenColumnSeries Data="@_metricDto.TicketTypeChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="@Lang.TicketTypes.Translate()"/>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenColumnSeries Data="@_metricDto.TicketPriorityChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="@Lang.TicketPriority.Translate()"/>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+      }
+
+    </RadzenColumn>
+  </RadzenRow>
+</div>

@@ -3,6 +3,7 @@ using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Metric.Models;
 using Modmail.NET.Features.Metric.Queries;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Metric.Handlers;
 
@@ -76,7 +77,7 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
 		var ticketTypeChartDataArray = await _dbContext.Tickets
 		                                               .GroupBy(x => x.TicketTypeId)
 		                                               .Select(group => new ChartItemDto<string, int>(group.Key == null
-			                                                                                              ? "No Type"
+			                                                                                              ? Lang.NoType.Translate()
 			                                                                                              : group.FirstOrDefault()!.TicketType!.Name,
 		                                                                                              group.Count()
 		                                                                                             ))
@@ -89,6 +90,9 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
 		                                                                                                  group.Count()
 		                                                                                                 ))
 		                                                   .ToArrayAsync(cancellationToken);
+
+
+		var tagCount = await _dbContext.Tags.CountAsync(cancellationToken);
 
 		return new MetricDto {
 			Statistic = data,
@@ -104,7 +108,8 @@ public class GetLatestMetricHandler : IRequestHandler<GetLatestMetricQuery, Metr
 			UserMessageCountChartDataArray = userMessageCountChartDataArray,
 			ModMessageCountChartDataArray = modMessageCountChartDataArray,
 			TicketTypeChartDataArray = ticketTypeChartDataArray,
-			TicketPriorityChartDataArray = ticketPriorityChartDataArray
+			TicketPriorityChartDataArray = ticketPriorityChartDataArray,
+			TagCount = tagCount
 		};
 	}
 }
