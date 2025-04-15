@@ -34,7 +34,7 @@ public class ProcessCloseTicketHandler : IRequestHandler<ProcessCloseTicketComma
 		ticket.CloserUserId = request.AuthorizedUserId;
 		_dbContext.Update(ticket);
 		await _dbContext.SaveChangesAsync(cancellationToken);
-		await _mediator.Publish(new NotifyTicketClosed(ticket, request.DontSendFeedbackMessage), cancellationToken);
+		await _mediator.Publish(new NotifyTicketClosed(request.AuthorizedUserId, ticket, request.DontSendFeedbackMessage), cancellationToken);
 		return Unit.Value;
 	}
 }
