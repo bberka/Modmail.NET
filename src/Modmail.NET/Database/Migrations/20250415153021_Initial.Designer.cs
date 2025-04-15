@@ -12,62 +12,52 @@ using Modmail.NET.Database;
 namespace Modmail.NET.Database.Migrations
 {
     [DbContext(typeof(ModmailDbContext))]
-    [Migration("20250408171950_TagRequiredAttribute")]
-    partial class TagRequiredAttribute
+    [Migration("20250415153021_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.DiscordUserInfo", b =>
+            modelBuilder.Entity("Modmail.NET.Database.Entities.Blacklist", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AuthorUserId")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<string>("AvatarUrl")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("BannerUrl")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("UpdateDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                    b.Property<decimal>("UserId")
+                        .HasColumnType("decimal(20,0)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiscordUserInfos", t =>
-                        {
-                            t.HasCheckConstraint("CK_DiscordUserInfos_Username_MinLength", "LEN([Username]) >= 1");
-                        });
+                    b.HasIndex("AuthorUserId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Blacklists");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.GuildOption", b =>
+            modelBuilder.Entity("Modmail.NET.Database.Entities.Option", b =>
                 {
-                    b.Property<decimal>("GuildId")
+                    b.Property<decimal>("ServerId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<bool>("AlwaysAnonymous")
@@ -81,6 +71,7 @@ namespace Modmail.NET.Database.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<string>("IconUrl")
+                        .IsRequired()
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
@@ -89,21 +80,6 @@ namespace Modmail.NET.Database.Migrations
 
                     b.Property<decimal>("LogChannelId")
                         .HasColumnType("decimal(20,0)");
-
-                    b.Property<int>("ManageBlacklistMinAccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManageHangfireMinAccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManageTeamsMinAccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManageTicketMinAccessLevel")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ManageTicketTypeMinAccessLevel")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -125,90 +101,20 @@ namespace Modmail.NET.Database.Migrations
                     b.Property<bool>("TakeFeedbackAfterClosing")
                         .HasColumnType("bit");
 
-                    b.Property<int>("TicketDataDeleteWaitDays")
-                        .HasColumnType("int");
-
                     b.Property<long>("TicketTimeoutHours")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdateDateUtc")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("GuildId");
+                    b.HasKey("ServerId");
 
-                    b.ToTable("GuildOptions", t =>
+                    b.ToTable("Options", t =>
                         {
-                            t.HasCheckConstraint("CK_GuildOptions_Name_MinLength", "LEN([Name]) >= 1");
+                            t.HasCheckConstraint("CK_Options_Name_MinLength", "LEN([Name]) >= 1");
 
-                            t.HasCheckConstraint("CK_GuildOptions_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN 30 AND 365");
-
-                            t.HasCheckConstraint("CK_GuildOptions_TicketDataDeleteWaitDays_Range", "[TicketDataDeleteWaitDays] BETWEEN -1 AND 365");
+                            t.HasCheckConstraint("CK_Options_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN 30 AND 365");
                         });
-                });
-
-            modelBuilder.Entity("Modmail.NET.Database.Entities.GuildTeam", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("AllowAccessToWebPanel")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<int>("PermissionLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("PingOnNewMessage")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("PingOnNewTicket")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("RegisterDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdateDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("GuildTeams", t =>
-                        {
-                            t.HasCheckConstraint("CK_GuildTeams_Name_MinLength", "LEN([Name]) >= 1");
-                        });
-                });
-
-            modelBuilder.Entity("Modmail.NET.Database.Entities.GuildTeamMember", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("GuildTeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Key")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<DateTime>("RegisterDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildTeamId");
-
-                    b.ToTable("GuildTeamMembers");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.Statistic", b =>
@@ -257,6 +163,7 @@ namespace Modmail.NET.Database.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasMaxLength(4096)
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -287,6 +194,91 @@ namespace Modmail.NET.Database.Migrations
 
                             t.HasCheckConstraint("CK_Tags_Title_MinLength", "LEN([Title]) >= 0");
                         });
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<bool>("PingOnNewMessage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PingOnNewTicket")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("SuperUserTeam")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdateDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Teams", t =>
+                        {
+                            t.HasCheckConstraint("CK_Teams_Name_MinLength", "LEN([Name]) >= 1");
+                        });
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.TeamPermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AuthPolicy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId", "AuthPolicy")
+                        .IsUnique();
+
+                    b.ToTable("TeamPermissions");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.TeamUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("UserId")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("TeamUsers");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.Ticket", b =>
@@ -361,30 +353,6 @@ namespace Modmail.NET.Database.Migrations
                     b.ToTable("Tickets");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.TicketBlacklist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("DiscordUserId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<DateTime>("RegisterDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DiscordUserId")
-                        .IsUnique();
-
-                    b.ToTable("TicketBlacklists");
-                });
-
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -413,6 +381,9 @@ namespace Modmail.NET.Database.Migrations
                     b.Property<bool>("SentByMod")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("TagId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
@@ -420,9 +391,11 @@ namespace Modmail.NET.Database.Migrations
 
                     b.HasIndex("SenderUserId");
 
+                    b.HasIndex("TagId");
+
                     b.HasIndex("TicketId");
 
-                    b.ToTable("TicketMessages");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessageAttachment", b =>
@@ -452,6 +425,9 @@ namespace Modmail.NET.Database.Migrations
                         .HasMaxLength(4000)
                         .HasColumnType("nvarchar(4000)");
 
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("TicketMessageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -467,15 +443,15 @@ namespace Modmail.NET.Database.Migrations
 
                     b.HasIndex("TicketMessageId");
 
-                    b.ToTable("TicketMessageAttachments", t =>
+                    b.ToTable("MessageAttachments", t =>
                         {
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_FileName_MinLength", "LEN([FileName]) >= 1");
+                            t.HasCheckConstraint("CK_MessageAttachments_FileName_MinLength", "LEN([FileName]) >= 1");
 
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_MediaType_MinLength", "LEN([MediaType]) >= 1");
+                            t.HasCheckConstraint("CK_MessageAttachments_MediaType_MinLength", "LEN([MediaType]) >= 1");
 
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_ProxyUrl_MinLength", "LEN([ProxyUrl]) >= 1");
+                            t.HasCheckConstraint("CK_MessageAttachments_ProxyUrl_MinLength", "LEN([ProxyUrl]) >= 1");
 
-                            t.HasCheckConstraint("CK_TicketMessageAttachments_Url_MinLength", "LEN([Url]) >= 1");
+                            t.HasCheckConstraint("CK_MessageAttachments_Url_MinLength", "LEN([Url]) >= 1");
                         });
                 });
 
@@ -503,7 +479,7 @@ namespace Modmail.NET.Database.Migrations
 
                     b.HasIndex("TicketMessageId");
 
-                    b.ToTable("TicketMessageHistory");
+                    b.ToTable("MessageHistory");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketNote", b =>
@@ -517,18 +493,20 @@ namespace Modmail.NET.Database.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<decimal>("DiscordUserId")
-                        .HasColumnType("decimal(20,0)");
-
                     b.Property<DateTime>("RegisterDateUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("UserId")
+                        .HasColumnType("decimal(20,0)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TicketId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("TicketNotes", t =>
                         {
@@ -558,9 +536,6 @@ namespace Modmail.NET.Database.Migrations
                     b.Property<string>("Emoji")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsEnabled")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Key")
                         .IsRequired()
@@ -593,30 +568,97 @@ namespace Modmail.NET.Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.GuildTeamMember", b =>
+            modelBuilder.Entity("Modmail.NET.Database.Entities.UserInformation", b =>
                 {
-                    b.HasOne("Modmail.NET.Database.Entities.GuildTeam", "GuildTeam")
-                        .WithMany("GuildTeamMembers")
-                        .HasForeignKey("GuildTeamId")
+                    b.Property<decimal>("Id")
+                        .HasColumnType("decimal(20,0)");
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("BannerUrl")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Locale")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("RegisterDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdateDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserInformation");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.Blacklist", b =>
+                {
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "AuthorUser")
+                        .WithMany()
+                        .HasForeignKey("AuthorUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GuildTeam");
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AuthorUser");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.TeamPermission", b =>
+                {
+                    b.HasOne("Modmail.NET.Database.Entities.Team", "Team")
+                        .WithMany("Permissions")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.TeamUser", b =>
+                {
+                    b.HasOne("Modmail.NET.Database.Entities.Team", "Team")
+                        .WithMany("Users")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.Ticket", b =>
                 {
-                    b.HasOne("Modmail.NET.Database.Entities.DiscordUserInfo", "AssignedUser")
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "AssignedUser")
                         .WithMany("AssignedTickets")
                         .HasForeignKey("AssignedUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Modmail.NET.Database.Entities.DiscordUserInfo", "CloserUser")
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "CloserUser")
                         .WithMany("ClosedTickets")
                         .HasForeignKey("CloserUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Modmail.NET.Database.Entities.DiscordUserInfo", "OpenerUser")
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "OpenerUser")
                         .WithMany("OpenedTickets")
                         .HasForeignKey("OpenerUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -636,30 +678,25 @@ namespace Modmail.NET.Database.Migrations
                     b.Navigation("TicketType");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.TicketBlacklist", b =>
-                {
-                    b.HasOne("Modmail.NET.Database.Entities.DiscordUserInfo", "DiscordUser")
-                        .WithMany()
-                        .HasForeignKey("DiscordUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DiscordUser");
-                });
-
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessage", b =>
                 {
-                    b.HasOne("Modmail.NET.Database.Entities.DiscordUserInfo", null)
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", null)
                         .WithMany()
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Modmail.NET.Database.Entities.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId");
 
                     b.HasOne("Modmail.NET.Database.Entities.Ticket", null)
                         .WithMany("Messages")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessageAttachment", b =>
@@ -685,31 +722,32 @@ namespace Modmail.NET.Database.Migrations
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketNote", b =>
                 {
                     b.HasOne("Modmail.NET.Database.Entities.Ticket", null)
-                        .WithMany("TicketNotes")
+                        .WithMany("Notes")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Modmail.NET.Database.Entities.UserInformation", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Modmail.NET.Database.Entities.DiscordUserInfo", b =>
+            modelBuilder.Entity("Modmail.NET.Database.Entities.Team", b =>
                 {
-                    b.Navigation("AssignedTickets");
+                    b.Navigation("Permissions");
 
-                    b.Navigation("ClosedTickets");
-
-                    b.Navigation("OpenedTickets");
-                });
-
-            modelBuilder.Entity("Modmail.NET.Database.Entities.GuildTeam", b =>
-                {
-                    b.Navigation("GuildTeamMembers");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.Ticket", b =>
                 {
                     b.Navigation("Messages");
 
-                    b.Navigation("TicketNotes");
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("Modmail.NET.Database.Entities.TicketMessage", b =>
@@ -717,6 +755,15 @@ namespace Modmail.NET.Database.Migrations
                     b.Navigation("Attachments");
 
                     b.Navigation("History");
+                });
+
+            modelBuilder.Entity("Modmail.NET.Database.Entities.UserInformation", b =>
+                {
+                    b.Navigation("AssignedTickets");
+
+                    b.Navigation("ClosedTickets");
+
+                    b.Navigation("OpenedTickets");
                 });
 #pragma warning restore 612, 618
         }
