@@ -22,19 +22,4 @@ public static class LogBotMessages
 
 		return embed;
 	}
-
-	public static DiscordEmbedBuilder TicketClosed(Database.Entities.Ticket ticket) {
-		var embed = new DiscordEmbedBuilder()
-		            .WithCustomTimestamp()
-		            .WithTitle(Lang.TicketClosed.Translate())
-		            .WithColor(ModmailColors.TicketClosedColor)
-		            .AddField(Lang.TicketId.Translate(), ticket.Id.ToString().ToUpper())
-		            .AddField(Lang.OpenedBy.Translate(), ticket.OpenerUser!.GetMention(), true)
-		            .AddField(Lang.ClosedBy.Translate(), ticket.CloserUser!.GetMention(), true)
-		            .AddField(Lang.TicketPriority.Translate(), ticket.Priority.ToString(), true);
-		if (ticket.OpenerUser is not null) embed.WithUserAsAuthor(ticket.CloserUser);
-		if (!string.IsNullOrEmpty(ticket.CloseReason)) embed.AddField(Lang.CloseReason.Translate(), ticket.CloseReason, true);
-
-		return embed;
-	}
 }

@@ -23,51 +23,6 @@ public static class TicketBotMessages
 			return feedbackDone;
 		}
 
-
-		public static DiscordMessageBuilder YourTicketHasBeenClosed(Database.Entities.Ticket ticket, Option option, Uri? transcriptUri) {
-			var messageBuilder = new DiscordMessageBuilder();
-			var embedBuilder = new DiscordEmbedBuilder()
-			                   .WithTitle(Lang.YourTicketHasBeenClosed.Translate())
-			                   .WithDescription(Lang.YourTicketHasBeenClosedDescription.Translate())
-			                   .WithGuildInfoFooter(option)
-			                   .WithCustomTimestamp()
-			                   .WithColor(ModmailColors.TicketClosedColor);
-
-			var closingMessage = Lang.ClosingMessageDescription.Translate();
-
-			if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
-
-			if (!string.IsNullOrEmpty(ticket.CloseReason)) embedBuilder.AddField(Lang.CloseReason.Translate(), ticket.CloseReason);
-
-			if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, Lang.Transcript.Translate()));
-
-			messageBuilder.AddEmbed(embedBuilder);
-			return messageBuilder;
-		}
-
-		public static DiscordMessageBuilder GiveFeedbackMessage(Database.Entities.Ticket ticket, Option option) {
-			var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
-			var starList = new List<DiscordComponent> {
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, ticket.Id), "1", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 2, ticket.Id), "2", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 3, ticket.Id), "3", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 4, ticket.Id), "4", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 5, ticket.Id), "5", false, new DiscordComponentEmoji("⭐"))
-			};
-
-			var ticketFeedbackEmbed = new DiscordEmbedBuilder()
-			                          .WithTitle(Lang.Feedback.Translate())
-			                          .WithDescription(Lang.FeedbackDescription.Translate())
-			                          .WithCustomTimestamp()
-			                          .WithGuildInfoFooter(option)
-			                          .WithColor(ModmailColors.FeedbackColor);
-
-			var response = ticketFeedbackMsgToUser
-			               .AddEmbed(ticketFeedbackEmbed)
-			               .AddComponents(starList);
-			return response;
-		}
-
 		public static DiscordMessageBuilder YouHaveCreatedNewTicket(DiscordGuild guild,
 		                                                            Option option,
 		                                                            List<TicketType> ticketTypes,
