@@ -284,5 +284,6 @@
   "UserBlockedSuccessfully": "User blocked successfully",
   "ClosedTickets": "Closed Tickets",
   "Activity": "Activity",
-  "UserUnblocked": "User Unblocked"
+  "UserUnblocked": "User Unblocked",
+  "TicketTimeout": "Ticket timeout"
 }

@@ -289,5 +289,6 @@ public enum Lang
 	ClosedTickets,
 	Activity,
 	UnauthorizedAccess,
-	UserUnblocked
+	UserUnblocked,
+	TicketTimeout
 }
