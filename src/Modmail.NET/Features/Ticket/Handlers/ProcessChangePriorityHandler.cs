@@ -21,7 +21,6 @@ public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorit
 	}
 
 	public async Task Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken) {
-		if (request.AuthorizedUserId == 0) throw new ModmailBotException(Lang.InvalidUser);
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
