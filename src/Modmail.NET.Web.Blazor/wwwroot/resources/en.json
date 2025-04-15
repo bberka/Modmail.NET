@@ -283,5 +283,6 @@
   "UnblockUserConfirmation": "Are you sure you want to unblock this user ?",
   "UserBlockedSuccessfully": "User blocked successfully",
   "ClosedTickets": "Closed Tickets",
-  "Activity": "Activity"
+  "Activity": "Activity",
+  "UserUnblocked": "User Unblocked"
 }
