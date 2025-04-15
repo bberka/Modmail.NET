@@ -1,10 +1,12 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Notifications;
+using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
@@ -26,7 +28,8 @@ public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
 		                             .FilterById(request.TicketId)
-		                             .FirstOrDefaultAsync(cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+		                             .FirstOrDefaultAsync(cancellationToken);
+		if (ticket is null) throw new ModmailBotException(Lang.TicketNotFound);
 		var noteEntity = new TicketNote {
 			TicketId = ticket.Id,
 			Content = request.Note,
