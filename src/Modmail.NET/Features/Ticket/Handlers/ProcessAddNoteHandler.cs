@@ -1,46 +1,39 @@
-using DSharpPlus.Exceptions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
+using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Helpers;
-using Modmail.NET.Features.User.Queries;
+using Modmail.NET.Features.Ticket.Notifications;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessAddNoteHandler : IRequestHandler<ProcessAddNoteCommand>
 {
-  private readonly ModmailBot _bot;
-  private readonly ModmailDbContext _dbContext;
-  private readonly ISender _sender;
+	private readonly ModmailBot _bot;
+	private readonly ModmailDbContext _dbContext;
+	private readonly IMediator _mediator;
 
-  public ProcessAddNoteHandler(ModmailBot bot,
-                               ModmailDbContext dbContext,
-                               ISender sender) {
-    _bot = bot;
-    _dbContext = dbContext;
-    _sender = sender;
-  }
+	public ProcessAddNoteHandler(ModmailBot bot,
+	                             ModmailDbContext dbContext,
+	                             IMediator mediator) {
+		_bot = bot;
+		_dbContext = dbContext;
+		_mediator = mediator;
+	}
 
-  public async Task Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
-    var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
-    ticket.ThrowIfNotOpen();
-    var noteEntity = new TicketNote {
-      TicketId = ticket.Id,
-      Content = request.Note,
-      UserId = request.UserId
-    };
-    _dbContext.Add(noteEntity);
-    await _dbContext.SaveChangesAsync(cancellationToken);
-    _ = Task.Run(async () => {
-      try {
-        var user = await _sender.Send(new GetDiscordUserInfoQuery(request.UserId), cancellationToken);
-        var mailChannel = await _bot.Client.GetChannelAsync(ticket.ModMessageChannelId);
-        await mailChannel.SendMessageAsync(TicketBotMessages.Ticket.NoteAdded(noteEntity, user));
-      }
-      catch (NotFoundException) {
-        //ignored
-      }
-    }, cancellationToken);
-  }
+	public async Task Handle(ProcessAddNoteCommand request, CancellationToken cancellationToken) {
+		var ticket = await _dbContext.Tickets
+		                             .FilterActive()
+		                             .FilterById(request.TicketId)
+		                             .FirstOrDefaultAsync(cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+		var noteEntity = new TicketNote {
+			TicketId = ticket.Id,
+			Content = request.Note,
+			UserId = request.AuthorizedUserId
+		};
+		_dbContext.Add(noteEntity);
+		await _dbContext.SaveChangesAsync(cancellationToken);
+		await _mediator.Publish(new NotifyTicketNoteAdded(request.AuthorizedUserId, ticket, noteEntity), cancellationToken);
+	}
 }

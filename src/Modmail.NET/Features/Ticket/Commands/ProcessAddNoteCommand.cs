@@ -1,9 +1,13 @@
 using MediatR;
+using Modmail.NET.Abstract;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;
 
+[RequireModmailPermission]
 public sealed record ProcessAddNoteCommand(
-  Guid TicketId,
-  ulong UserId,
-  string Note
-) : IRequest;
+	ulong AuthorizedUserId,
+	Guid TicketId,
+	string Note
+) : IRequest,
+    IPermissionCheck;
