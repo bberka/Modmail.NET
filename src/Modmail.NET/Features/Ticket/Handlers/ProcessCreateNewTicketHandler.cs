@@ -9,6 +9,7 @@ using Modmail.NET.Features.Teams.Queries;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.Ticket.Jobs;
+using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Features.Ticket.Services;
 using Modmail.NET.Features.Ticket.Static;
 using TicketMessage = Modmail.NET.Database.Entities.TicketMessage;
@@ -20,15 +21,15 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 	private readonly TicketAttachmentDownloadService _attachmentDownloadService;
 	private readonly ModmailBot _bot;
 	private readonly ModmailDbContext _dbContext;
-	private readonly ISender _sender;
+	private readonly IMediator _mediator;
 	private readonly TicketTypeSelectionTimeoutJob _ticketTypeSelectionTimeoutJob;
 
-	public ProcessCreateNewTicketHandler(ISender sender,
+	public ProcessCreateNewTicketHandler(IMediator mediator,
 	                                     ModmailBot bot,
 	                                     ModmailDbContext dbContext,
 	                                     TicketTypeSelectionTimeoutJob ticketTypeSelectionTimeoutJob,
 	                                     TicketAttachmentDownloadService attachmentDownloadService) {
-		_sender = sender;
+		_mediator = mediator;
 		_bot = bot;
 		_dbContext = dbContext;
 		_ticketTypeSelectionTimeoutJob = ticketTypeSelectionTimeoutJob;
@@ -36,23 +37,23 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 	}
 
 	public async ValueTask<Unit> Handle(ProcessCreateNewTicketCommand request, CancellationToken cancellationToken) {
-		var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
+		var guildOption = await _mediator.Send(new GetOptionQuery(), cancellationToken);
 
-		var guild = await _sender.Send(new GetDiscordMainServerQuery(), cancellationToken);
+		var guild = await _mediator.Send(new GetDiscordMainServerQuery(), cancellationToken);
 		//make new privateChannel
 		var channelName = string.Format(TicketConstants.TicketNameTemplate, request.User.Username.Trim());
 		var category = await _bot.Client.GetChannelAsync(guildOption.CategoryId);
 
 		var ticketId = Guid.CreateVersion7();
 
-		var permissions = await _sender.Send(new GetUserTeamInformationQuery(), cancellationToken);
+		var permissions = await _mediator.Send(new GetUserTeamInformationQuery(), cancellationToken);
 		var members = await guild.GetAllMembersAsync(cancellationToken).ToListAsync(cancellationToken);
 
 		var modMemberListForOverwrites = UtilPermission.ParsePermissionInfo(permissions, members);
 		var permissionOverwrites = UtilPermission.GetTicketPermissionOverwrites(guild, modMemberListForOverwrites);
 		var mailChannel = await guild.CreateTextChannelAsync(channelName, category, UtilChannelTopic.BuildChannelTopic(ticketId), permissionOverwrites);
 
-		var member = await _sender.Send(new GetDiscordMemberQuery(request.User.Id), cancellationToken);
+		var member = await _mediator.Send(new GetDiscordMemberQuery(request.User.Id), cancellationToken);
 		if (member is null) return Unit.Value;
 
 		var msg = TicketBotMessages.Ticket.NewTicket(member, ticketId);
@@ -97,6 +98,7 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 		_dbContext.Add(ticket);
 		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
 		if (affected == 0) throw new DbInternalException();
+		await _mediator.Publish(new NotifyTicketCreated(ticketId, request.User, request.Message, request.PrivateChannel), cancellationToken);
 
 		foreach (var attachment in ticketMessage.Attachments)
 			await _attachmentDownloadService.Handle(attachment.Id, attachment.Url, Path.GetExtension(attachment.FileName));
@@ -104,10 +106,6 @@ public class ProcessCreateNewTicketHandler : IRequestHandler<ProcessCreateNewTic
 		await mailChannel.SendMessageAsync(msg);
 		var botMessage = await mailChannel.SendMessageAsync(TicketBotMessages.Ticket.MessageReceived(request.Message, ticketMessage.Attachments.ToArray()));
 		ticketMessage.BotMessageId = botMessage.Id;
-
-		var newTicketCreatedLog = LogBotMessages.NewTicketCreated(request.Message, ticket.Id);
-		var logChannel = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
-		await logChannel.SendMessageAsync(newTicketCreatedLog);
 
 		await request.Message.CreateReactionAsync(DiscordEmoji.FromUnicode(TicketConstants.ProcessedReactionDiscordEmojiUnicode));
 		return Unit.Value;
