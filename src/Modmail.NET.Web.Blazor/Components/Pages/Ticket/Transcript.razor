@@ -20,7 +20,7 @@
 <HeadContent>
     <link rel="stylesheet" href="css/markdown.css"/>
 </HeadContent>
-<RadzenCard class="rz-border-bottom sticky-top rz-m-0 rz-p-4 rz-p-lg-7" Style="height: 80px !important;">
+<RadzenCard class="rz-border-bottom-primary sticky-top rz-m-0 rz-p-4 rz-p-lg-7" Style="height: 80px !important;">
     <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-py-0 rz-my-0 rz-ml-4">
         @Lang.TicketTranscript.Translate()
     </RadzenText>
@@ -65,9 +65,30 @@
                 </RadzenStack>
 
 
-                <RadzenMarkdown>
-                    @message.MessageContent
-                </RadzenMarkdown>
+                @if (message.Tag is null) {
+                    <RadzenMarkdown>
+                        @message.MessageContent
+                    </RadzenMarkdown>
+                }
+                else {
+                    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-m-0 rz-color-primary">
+                        /tag @message.Tag.Name
+                    </RadzenText>
+                    <RadzenCard Style="max-width: 600px" class="rz-shadow-7 rz-border-primary">
+                        <RadzenStack Orientation="Orientation.Vertical">
+
+                            @if (!string.IsNullOrEmpty(message.Tag.Title)) {
+                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">
+                                    @message.Tag.Title
+                                </RadzenText>
+                            }
+                            <RadzenMarkdown>
+                                @message.Tag.Content
+                            </RadzenMarkdown>
+                        </RadzenStack>
+                    </RadzenCard>
+                }
+
 
             </RadzenStack>
 
@@ -144,12 +165,12 @@
         }
 
 
-        //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
         _data = await dbContext.Messages
                                .Where(x => x.TicketId == TicketId)
                                .Include(x => x.Attachments)
+                               .Include(x => x.Tag)
                                .OrderBy(x => x.RegisterDateUtc)
                                .GroupBy(x => new
                                {
@@ -160,7 +181,8 @@
                                    x.RegisterDateUtc.Minute,
                                    x.SenderUserId,
                                    x.SentByMod,
-                                   x.ChangeStatus
+                                   x.ChangeStatus,
+                                   x.TagId
                                })
                                .Select(g => new TicketMessage {
                                    RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
@@ -170,9 +192,13 @@
                                    TicketId = TicketId,
                                    MessageDiscordId = 0,
                                    SentByMod = g.Key.SentByMod,
-                                   ChangeStatus = g.Key.ChangeStatus
+                                   ChangeStatus = g.Key.ChangeStatus,
+                                   TagId = g.Key.TagId,
+                                   Tag = g.Where(x => x.TagId == g.Key.TagId).Select(y => y.Tag).FirstOrDefault()
                                })
                                .ToArrayAsync();
+
+        //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
 
         //TODO: .Replace("\n", "\n\n") should be used for non code elements, not sure how to implement this 
         //Reason: \n values are normally managed by the bot and insert is fine, however the markdown renderer do not render single \n it must be \n\n to be rendered in next line
@@ -181,6 +207,8 @@
         //TODO: Add syntax highlight support for pre -> code elements rendered as markdown
 
         //TODO: Allow virtualization, it can be enabled now but it does query the database too much and a bit clunky, also consider it must scroll to bottom or change order type
+
+        //TODO: if a mod uses same tag multiple times in same minute it will be grouped, and second tag will not be shown, this may be considered as a bug.
     }
 
 
