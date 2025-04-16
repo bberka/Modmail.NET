@@ -41,7 +41,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 		if (args.Channel.IsPrivate)
 			await HandlePrivateTicketMessageAsync(args.Message, args.Channel, args.Author);
 		else
-			await HandleGuildTicketMessageAsync(args.Message, args.Channel, args.Author, args.Guild);
+			await HandleGuildTicketMessageAsync(args.Message, args.Channel, args.Author);
 	}
 
 	[PerformanceLoggerAspect]
@@ -127,8 +127,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 	private async Task HandleGuildTicketMessageAsync(
 		DiscordMessage message,
 		DiscordChannel channel,
-		DiscordUser modUser,
-		DiscordGuild guild
+		DiscordUser modUser
 	) {
 		Log.Debug(
 		          "[{Source}] Handling guild ticket message. ChannelId: {ChannelId}, UserId: {UserId}, Message: {Message}",
@@ -152,7 +151,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 
 		try {
 			var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-			await sender.Send(new ProcessModSendMessageCommand(ticketId, modUser, message, channel, guild));
+			await sender.Send(new ProcessModSendMessageCommand(modUser.Id, ticketId, message));
 			Log.Information(
 			                "[{Source}] Processed guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
 			                nameof(TicketMessage),

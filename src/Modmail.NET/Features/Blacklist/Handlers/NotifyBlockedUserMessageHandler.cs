@@ -3,6 +3,7 @@ using Modmail.NET.Common.Extensions;
 using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Blacklist.Notifications;
 using Modmail.NET.Features.DiscordBot.Queries;
+using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Blacklist.Handlers;
@@ -21,10 +22,11 @@ public class NotifyBlockedUserMessageHandler : INotificationHandler<NotifyBlocke
 			//TODO: Log
 			return;
 
+		var option = await _mediator.Send(new GetOptionQuery(), cancellationToken);
 		var embed = new DiscordEmbedBuilder()
 		            .WithTitle(Lang.YouHaveBeenBlacklisted.Translate())
 		            .WithDescription(Lang.YouHaveBeenBlacklistedDescription.Translate())
-		            .WithGuildInfoFooter()
+		            .WithGuildInfoFooter(option)
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.ErrorColor);
 

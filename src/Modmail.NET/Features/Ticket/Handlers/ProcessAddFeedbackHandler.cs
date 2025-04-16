@@ -1,8 +1,10 @@
+using DSharpPlus.Entities;
 using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Extensions;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Ticket.Handlers;
@@ -24,8 +26,8 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
 		if (string.IsNullOrEmpty(request.TextInput)) throw new InvalidOperationException("Feedback messageContent is empty");
 		if (request.FeedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
 
-		var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
-		if (!guildOption.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + guildOption.ServerId);
+		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
+		if (!option.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + option.ServerId);
 
 		var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
 		ticket.ThrowIfNotClosed();
@@ -37,9 +39,17 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
 		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
 		if (affected == 0) throw new DbInternalException();
 
+		var feedbackDoneEmbed = new DiscordEmbedBuilder()
+		                        .WithTitle(Lang.FeedbackReceived.Translate())
+		                        .WithCustomTimestamp()
+		                        .WithGuildInfoFooter(option)
+		                        .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
+		                        .WithColor(ModmailColors.FeedbackColor);
+		if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDoneEmbed.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);
+
 		await request.FeedbackMessage.ModifyAsync(x => {
 			x.Clear();
-			x.AddEmbed(TicketBotMessages.User.FeedbackReceivedUpdateMessage(ticket));
+			x.AddEmbed(feedbackDoneEmbed);
 		});
 		return Unit.Value;
 	}

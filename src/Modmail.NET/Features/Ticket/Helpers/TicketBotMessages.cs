@@ -11,18 +11,6 @@ public static class TicketBotMessages
 {
 	public static class User
 	{
-		public static DiscordEmbedBuilder FeedbackReceivedUpdateMessage(Database.Entities.Ticket ticket) {
-			var feedbackDone = new DiscordEmbedBuilder()
-			                   .WithTitle(Lang.FeedbackReceived.Translate())
-			                   .WithCustomTimestamp()
-			                   .WithGuildInfoFooter()
-			                   .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
-			                   .WithColor(ModmailColors.FeedbackColor);
-			if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDone.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);
-
-			return feedbackDone;
-		}
-
 		public static DiscordMessageBuilder YouHaveCreatedNewTicket(DiscordGuild guild,
 		                                                            Option option,
 		                                                            List<TicketType> ticketTypes,
@@ -56,36 +44,6 @@ public static class TicketBotMessages
 			}
 
 			return builder;
-		}
-
-
-		public static DiscordMessageBuilder MessageReceived(DiscordMessage message, TicketMessageAttachment[] attachments, bool anonymous) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithDescription(message.Content)
-			            .WithGuildInfoFooter()
-			            .WithCustomTimestamp()
-			            .WithColor(ModmailColors.MessageReceivedColor);
-
-			if (!anonymous && message.Author is not null) embed.WithUserAsAuthor(message.Author);
-
-			var msg = new DiscordMessageBuilder();
-
-			msg.AddEmbed(embed);
-			msg.AddAttachments(attachments);
-
-			return msg;
-		}
-
-		public static DiscordEmbedBuilder MessageEdited(DiscordMessage message, bool anonymous) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithDescription(message.Content)
-			            .WithGuildInfoFooter()
-			            .WithCustomTimestamp()
-			            .WithColor(ModmailColors.MessageReceivedColor);
-
-			if (!anonymous && message.Author is not null) embed.WithUserAsAuthor(message.Author);
-
-			return embed;
 		}
 	}
 
@@ -125,17 +83,6 @@ public static class TicketBotMessages
 			                 .AddEmbed(embed)
 			                 .AddAttachments(attachments);
 			return msgBuilder;
-		}
-
-		public static DiscordEmbedBuilder MessageEdited(DiscordMessage message) {
-			var embed = new DiscordEmbedBuilder()
-			            .WithDescription(message.Content)
-			            .WithCustomTimestamp()
-			            .WithColor(ModmailColors.MessageReceivedColor);
-
-			if (message.Author is not null) embed.WithUserAsAuthor(message.Author);
-
-			return embed;
 		}
 	}
 }

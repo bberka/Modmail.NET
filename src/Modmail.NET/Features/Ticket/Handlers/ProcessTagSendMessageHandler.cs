@@ -29,7 +29,7 @@ public class ProcessTagSendMessageHandler : IRequestHandler<ProcessTagSendMessag
 	}
 
 	public async ValueTask<Unit> Handle(ProcessTagSendMessageCommand request, CancellationToken cancellationToken) {
-		var guildOption = await _sender.Send(new GetOptionQuery(), cancellationToken);
+		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
 		var ticket = await _dbContext.Tickets
 		                             .FilterActive()
@@ -57,11 +57,11 @@ public class ProcessTagSendMessageHandler : IRequestHandler<ProcessTagSendMessag
 
 		var embed = new DiscordEmbedBuilder()
 		            .WithDescription(tag.Content)
-		            .WithGuildInfoFooter()
+		            .WithGuildInfoFooter(option)
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.TagReceivedColor);
 		if (!string.IsNullOrEmpty(tag.Title)) embed.WithTitle(tag.Title);
-		if (!(ticket.Anonymous || guildOption.AlwaysAnonymous))
+		if (!(ticket.Anonymous || option.AlwaysAnonymous))
 			embed.WithUserAsAuthor(author);
 		var msg = new DiscordMessageBuilder();
 		msg.AddEmbed(embed);

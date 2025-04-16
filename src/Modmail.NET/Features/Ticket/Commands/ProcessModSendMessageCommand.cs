@@ -1,11 +1,13 @@
 using DSharpPlus.Entities;
+using Modmail.NET.Abstract;
+using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;
 
+[RequireModmailPermission]
 public sealed record ProcessModSendMessageCommand(
+	ulong AuthorizedUserId,
 	Guid TicketId,
-	DiscordUser ModUser,
-	DiscordMessage Message,
-	DiscordChannel Channel,
-	DiscordGuild Guild
-) : IRequest;
+	DiscordMessage Message
+) : IRequest,
+    IPermissionCheck;

@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Extensions;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Server.Queries;
-using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Features.User.Commands;
 using Serilog;
@@ -221,8 +222,8 @@ public static class OnMessageUpdatedEvent
 			var message = await channel.GetMessageAsync(messageId);
 			var embed =
 				updatedMessage.Channel!.IsPrivate
-					? TicketBotMessages.Ticket.MessageEdited(updatedMessage)
-					: TicketBotMessages.User.MessageEdited(updatedMessage, option.AlwaysAnonymous || anonymous);
+					? MessageEditedUpdateTicketMessage(updatedMessage)
+					: MessageEditedUpdatePrivateMessage(updatedMessage, option, option.AlwaysAnonymous || anonymous);
 
 			//TODO: Add support for removing attachment files from message on message update event
 			//Currently discord API or library does not support attachment removal from sent message
@@ -257,5 +258,30 @@ public static class OnMessageUpdatedEvent
 			          messageId
 			         );
 		}
+	}
+
+
+	private static DiscordEmbedBuilder MessageEditedUpdatePrivateMessage(DiscordMessage message, Option option, bool anonymous) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithDescription(message.Content)
+		            .WithGuildInfoFooter(option)
+		            .WithCustomTimestamp()
+		            .WithColor(ModmailColors.MessageReceivedColor);
+
+		if (!anonymous && message.Author is not null) embed.WithUserAsAuthor(message.Author);
+
+		return embed;
+	}
+
+
+	private static DiscordEmbedBuilder MessageEditedUpdateTicketMessage(DiscordMessage message) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithDescription(message.Content)
+		            .WithCustomTimestamp()
+		            .WithColor(ModmailColors.MessageReceivedColor);
+
+		if (message.Author is not null) embed.WithUserAsAuthor(message.Author);
+
+		return embed;
 	}
 }
