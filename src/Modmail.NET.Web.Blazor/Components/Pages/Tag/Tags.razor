@@ -93,7 +93,7 @@
                 Log.Information(logMessage,
                                 data);
                 NotificationService.Notify(NotificationSeverity.Success,
-                                           "Ticket Type deleted successfully");
+                                           "Tag deleted successfully");
 
                 await ReloadDataAsync();
             }
@@ -117,7 +117,7 @@
                                                    _ =>
                                                        @<CreateOrUpdateTagDialogComponent></CreateOrUpdateTagDialogComponent>,
                                                    new DialogOptions {
-                                                       Width = "450px"
+                                                       Width = "600px"
                                                    });
         if (dialog is true) {
             await ReloadDataAsync();
@@ -130,7 +130,7 @@
                                                        @<CreateOrUpdateTagDialogComponent
                                                            Tag="data"></CreateOrUpdateTagDialogComponent>,
                                                    new DialogOptions {
-                                                       Width = "450px"
+                                                       Width = "600px"
                                                    });
         if (dialog is true) {
             await ReloadDataAsync();
