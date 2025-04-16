@@ -46,13 +46,15 @@ public class TagSlashCommands
 			var tag = await dbContext.Tags.FilterByTagName(name).FirstOrDefaultAsync();
 			if (tag is null) throw new ModmailBotException(Lang.TagNotFound);
 
-			await ctx.EditResponseAsync(TagBotMessages.TagSent(tag));
-
 			var channelTopic = ctx.Channel.Topic;
 			var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
 			if (ticketId != Guid.Empty) {
+				await ctx.EditResponseAsync(TagBotMessages.TagSent(tag, ctx.User, true));
 				var isActiveTicket = await _sender.Send(new CheckActiveTicketQuery(ticketId));
-				if (isActiveTicket) await _sender.Send(new ProcessTagSendMessageCommand(ticketId, tag.Id, ctx.User, ctx.Channel, ctx.Guild!));
+				if (isActiveTicket) await _sender.Send(new ProcessTagSendMessageCommand(ctx.User.Id, ticketId, tag.Id, ctx.Channel.Id));
+			}
+			else {
+				await ctx.EditResponseAsync(TagBotMessages.TagSent(tag, ctx.User, false));
 			}
 
 			Log.Information(logMessage, ctx.User.Id, name);

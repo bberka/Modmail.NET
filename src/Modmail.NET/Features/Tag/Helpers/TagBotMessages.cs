@@ -6,36 +6,18 @@ namespace Modmail.NET.Features.Tag.Helpers;
 
 public static class TagBotMessages
 {
-  public static DiscordMessageBuilder TagSent(Database.Entities.Tag message) {
-    var embed = new DiscordEmbedBuilder()
-                .WithDescription(message.Content)
-                .WithGuildInfoFooter()
-                .WithCustomTimestamp()
-                .WithColor(ModmailColors.TagReceivedColor);
+	public static DiscordMessageBuilder TagSent(Database.Entities.Tag message, DiscordUser discordUser, bool ticketChannel) {
+		var embed = new DiscordEmbedBuilder()
+		            .WithDescription(message.Content)
+		            .WithCustomTimestamp()
+		            .WithColor(ModmailColors.TagReceivedColor);
 
-    if (!string.IsNullOrEmpty(message.Title)) embed.WithTitle(message.Title);
+		if (!string.IsNullOrEmpty(message.Title)) embed.WithTitle(message.Title);
 
-    var msg = new DiscordMessageBuilder();
-    msg.AddEmbed(embed);
-    return msg;
-  }
+		if (ticketChannel) embed.WithUserAsAuthor(discordUser);
 
-  public static DiscordMessageBuilder TagReceivedToTicket(Database.Entities.Tag message, DiscordUser? author = null, bool anonymous = false) {
-    var embed = new DiscordEmbedBuilder()
-                .WithDescription(message.Content)
-                .WithGuildInfoFooter()
-                .WithCustomTimestamp()
-                .WithColor(ModmailColors.TagReceivedColor);
-
-
-    if (!string.IsNullOrEmpty(message.Title)) embed.WithTitle(message.Title);
-
-    if (author is not null)
-      if (!anonymous)
-        embed.WithUserAsAuthor(author);
-
-    var msg = new DiscordMessageBuilder();
-    msg.AddEmbed(embed);
-    return msg;
-  }
+		var msg = new DiscordMessageBuilder();
+		msg.AddEmbed(embed);
+		return msg;
+	}
 }
