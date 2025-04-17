@@ -19,4 +19,29 @@ public sealed record MetricDto
 	public required ChartItemDto<DateTime, int>[] UserMessageCountChartDataArray { get; init; }
 	public required ChartItemDto<string, int>[] TicketTypeChartDataArray { get; init; }
 	public required ChartItemDto<string, int>[] TicketPriorityChartDataArray { get; init; }
+
+	public static MetricDto Default => new() {
+		Statistic = new Statistic {
+			AvgResponseTimeSeconds = 0,
+			AvgTicketsClosedPerDay = 0,
+			AvgTicketsOpenedPerDay = 0,
+			AvgTicketClosedSeconds = 0,
+			FastestClosedTicketSeconds = 0,
+			SlowestClosedTicketSeconds = 0
+		},
+		ActiveTickets = 0,
+		ClosedTickets = 0,
+		TotalMessages = 0,
+		Teams = 0,
+		Blacklist = 0,
+		TicketTypes = 0,
+		TeamUserCount = 0,
+		TagCount = 0,
+		OpenedTicketsChartDataArray = [],
+		ClosedTicketsChartDataArray = [],
+		ModMessageCountChartDataArray = [],
+		UserMessageCountChartDataArray = [],
+		TicketTypeChartDataArray = [],
+		TicketPriorityChartDataArray = []
+	};
 }

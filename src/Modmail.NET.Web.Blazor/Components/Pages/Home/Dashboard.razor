@@ -24,7 +24,7 @@
   public required Task<AuthenticationState> AuthContext { get; set; }
 
   private bool _canManageStartStop;
-  private MetricDto? _metricDto;
+  private MetricDto _metricDto = MetricDto.Default;
 
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;
@@ -43,7 +43,10 @@
 
     _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageDiscordClient));
 
-    _metricDto = await Sender.Send(new GetLatestMetricQuery());
+    var metric = await Sender.Send(new GetLatestMetricQuery());
+    if (metric is not null) {
+      _metricDto = metric;
+    }
   }
 
 

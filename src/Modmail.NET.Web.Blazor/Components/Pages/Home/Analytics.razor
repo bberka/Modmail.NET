@@ -13,12 +13,15 @@
   [CascadingParameter]
   public required Task<AuthenticationState> AuthContext { get; set; }
 
-  private MetricDto? _metricDto;
+  private MetricDto _metricDto = MetricDto.Default;
 
   protected override async Task OnInitializedAsync() {
     var state = await AuthContext;
     _ = state.User.GetUserId();
-    _metricDto = await Sender.Send(new GetLatestMetricQuery());
+    var metric = await Sender.Send(new GetLatestMetricQuery());
+    if (metric is not null) {
+      _metricDto = metric;
+    }
   }
 
 }
