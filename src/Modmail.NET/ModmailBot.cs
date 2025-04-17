@@ -23,7 +23,7 @@ public class ModmailBot
 
 
 	public async Task StartAsync() {
-		Log.Information("Starting bot");
+		Log.Information($"[{nameof(ModmailBot)}] Starting bot");
 
 		await Client.ConnectAsync(Const.DiscordActivity);
 
@@ -61,7 +61,7 @@ public class ModmailBot
 	}
 
 	public async Task StopAsync() {
-		Log.Information("Stopping bot");
+		Log.Information($"[{nameof(ModmailBot)}] Stopping bot");
 		await Client.DisconnectAsync();
 		Client.Dispose();
 	}
