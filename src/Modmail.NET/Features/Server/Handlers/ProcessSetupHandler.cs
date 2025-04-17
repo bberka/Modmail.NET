@@ -6,6 +6,7 @@ using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.DiscordBot.Queries;
 using Modmail.NET.Features.Server.Commands;
 using Modmail.NET.Features.Server.Queries;
+using Modmail.NET.Features.User.Jobs;
 using Modmail.NET.Language;
 
 namespace Modmail.NET.Features.Server.Handlers;
@@ -14,10 +15,14 @@ public class ProcessSetupHandler : IRequestHandler<ProcessSetupCommand, Option>
 {
 	private readonly ModmailDbContext _dbContext;
 	private readonly ISender _sender;
+	private readonly DiscordUserInfoSyncJob _discordUserInfoSyncJob;
 
-	public ProcessSetupHandler(ModmailDbContext dbContext, ISender sender) {
+	public ProcessSetupHandler(ModmailDbContext dbContext,
+	                           ISender sender,
+	                           DiscordUserInfoSyncJob discordUserInfoSyncJob) {
 		_dbContext = dbContext;
 		_sender = sender;
+		_discordUserInfoSyncJob = discordUserInfoSyncJob;
 	}
 
 	public async ValueTask<Option> Handle(ProcessSetupCommand request, CancellationToken cancellationToken) {
@@ -46,6 +51,7 @@ public class ProcessSetupHandler : IRequestHandler<ProcessSetupCommand, Option>
 		if (affected == 0) throw new DbInternalException();
 
 		_ = await _sender.Send(new GetDiscordLogChannelQuery(), cancellationToken);
+		_discordUserInfoSyncJob.TriggerJob(); //When setup we expect user info data table to be empty so we call this to update
 		return guildOption;
 	}
 }
