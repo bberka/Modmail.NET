@@ -4,10 +4,11 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Features.Ticket.Commands;
-using Modmail.NET.Features.Ticket.Helpers;
 using Modmail.NET.Features.User.Commands;
+using Modmail.NET.Language;
 using Serilog;
 
 namespace Modmail.NET.Features.DiscordBot.Events;
@@ -99,7 +100,7 @@ public static class ComponentInteractionCreatedEvent
 			var starCount = int.Parse(starParam);
 			var ticketId = Guid.Parse(ticketIdParam);
 
-			var feedbackModal = TicketModals.CreateFeedbackModal(starCount, ticketId, messageId);
+			var feedbackModal = CreateFeedbackModal(starCount, ticketId);
 
 			await args.Interaction.CreateResponseAsync(
 			                                           DiscordInteractionResponseType.Modal,
@@ -122,6 +123,21 @@ public static class ComponentInteractionCreatedEvent
 			          args.Interaction.Data.CustomId,
 			          args.Interaction?.Id
 			         );
+		}
+
+		return;
+
+		DiscordInteractionResponseBuilder CreateFeedbackModal(int starCount, Guid ticketId) {
+			var modal = new DiscordInteractionResponseBuilder()
+			            .WithTitle(Lang.Feedback.Translate())
+			            .WithCustomId(UtilInteraction.BuildKey("feedback", starCount, ticketId, messageId))
+			            .AddComponents(new DiscordTextInputComponent(Lang.Feedback.Translate(),
+			                                                         "feedback",
+			                                                         Lang.PleaseTellUsReasonsForYourRating.Translate(),
+			                                                         style: DiscordTextInputStyle.Paragraph,
+			                                                         required: false,
+			                                                         max_length: DbLength.FeedbackMessage));
+			return modal;
 		}
 	}
 
@@ -182,7 +198,7 @@ public static class ComponentInteractionCreatedEvent
 
 			var ticketIdParam = parameters[0];
 			var ticketId = Guid.Parse(ticketIdParam);
-			var modal = TicketModals.CreateCloseTicketWithReasonModal(ticketId);
+			var modal = CreateCloseTicketWithReasonModal(ticketId);
 			await args.Interaction.CreateResponseAsync(
 			                                           DiscordInteractionResponseType.Modal,
 			                                           modal
@@ -203,6 +219,21 @@ public static class ComponentInteractionCreatedEvent
 			          args.Interaction.Data.CustomId,
 			          args.Interaction?.Id
 			         );
+		}
+
+		return;
+
+		DiscordInteractionResponseBuilder CreateCloseTicketWithReasonModal(Guid ticketId) {
+			var modal = new DiscordInteractionResponseBuilder()
+			            .WithTitle(Lang.CloseTicket.Translate())
+			            .WithCustomId(UtilInteraction.BuildKey("close_ticket_with_reason", ticketId))
+			            .AddComponents(new DiscordTextInputComponent(Lang.Reason.Translate(),
+			                                                         "reason",
+			                                                         Lang.EnterReasonForClosingThisTicket.Translate(),
+			                                                         style: DiscordTextInputStyle.Paragraph,
+			                                                         required: false,
+			                                                         max_length: DbLength.Reason));
+			return modal;
 		}
 	}
 }
