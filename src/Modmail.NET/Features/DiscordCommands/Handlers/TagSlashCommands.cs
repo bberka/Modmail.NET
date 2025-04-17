@@ -9,12 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Extensions;
+using Modmail.NET.Common.Static;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 using Modmail.NET.Features.DiscordCommands.Helpers;
-using Modmail.NET.Features.Tag.Helpers;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.Ticket.Queries;
 using Modmail.NET.Language;
@@ -49,12 +49,12 @@ public class TagSlashCommands
 			var channelTopic = ctx.Channel.Topic;
 			var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channelTopic);
 			if (ticketId != Guid.Empty) {
-				await ctx.EditResponseAsync(TagBotMessages.TagSent(tag, ctx.User, true));
+				await ctx.EditResponseAsync(TagSent(tag, ctx.User, true));
 				var isActiveTicket = await _sender.Send(new CheckActiveTicketQuery(ticketId));
 				if (isActiveTicket) await _sender.Send(new ProcessTagSendMessageCommand(ctx.User.Id, ticketId, tag.Id, ctx.Channel.Id));
 			}
 			else {
-				await ctx.EditResponseAsync(TagBotMessages.TagSent(tag, ctx.User, false));
+				await ctx.EditResponseAsync(TagSent(tag, ctx.User, false));
 			}
 
 			Log.Information(logMessage, ctx.User.Id, name);
@@ -66,6 +66,23 @@ public class TagSlashCommands
 		catch (Exception ex) {
 			await ctx.EditResponseAsync(ex.ToWebhookResponse());
 			Log.Fatal(ex, logMessage, ctx.User.Id, name);
+		}
+
+		return;
+
+		DiscordMessageBuilder TagSent(Database.Entities.Tag message, DiscordUser discordUser, bool ticketChannel) {
+			var embed = new DiscordEmbedBuilder()
+			            .WithDescription(message.Content)
+			            .WithCustomTimestamp()
+			            .WithColor(ModmailColors.TagReceivedColor);
+
+			if (!string.IsNullOrEmpty(message.Title)) embed.WithTitle(message.Title);
+
+			if (ticketChannel) embed.WithUserAsAuthor(discordUser);
+
+			var msg = new DiscordMessageBuilder();
+			msg.AddEmbed(embed);
+			return msg;
 		}
 	}
 }
