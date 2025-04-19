@@ -10,7 +10,7 @@ public class TeamUser : IRegisterDateUtc,
 {
 	public Guid Id { get; set; }
 	public DateTime RegisterDateUtc { get; set; }
-	public required ulong UserId { get; set; }
-	public required Guid TeamId { get; set; }
+	public required ulong UserId { get; init; }
+	public required Guid TeamId { get; init; }
 	public virtual Team? Team { get; set; }
 }

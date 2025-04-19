@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
@@ -11,28 +10,28 @@ public class TicketMessageAttachment : IEntity,
 {
 	public Guid Id { get; set; }
 	public DateTime RegisterDateUtc { get; set; }
-	public required Guid TicketMessageId { get; set; }
+	public required Guid TicketMessageId { get; init; }
 
 	[MaxLength(DbLength.Url)]
 	[Required]
-	public required string Url { get; set; }
+	public required string Url { get; init; }
 
 	[MaxLength(DbLength.Url)]
 	[Required]
-	public string? ProxyUrl { get; set; }
+	public string? ProxyUrl { get; init; }
 
-	public required int? Height { get; set; }
-	public required int? Width { get; set; }
+	public required int? Height { get; init; }
+	public required int? Width { get; init; }
 
 	[MaxLength(DbLength.FileName)]
 	[Required]
-	public required string FileName { get; set; }
+	public required string FileName { get; init; }
 
-	public required int FileSize { get; set; }
+	public required int FileSize { get; init; }
 
 	[MaxLength(DbLength.MediaType)]
 	[Required]
-	public required string MediaType { get; set; }
+	public required string MediaType { get; init; }
 
 	public static TicketMessageAttachment MapFrom(DiscordAttachment attachment, Guid ticketMessageId) {
 		var isUrlValid = Uri.TryCreate(attachment.Url, UriKind.Absolute, out _);

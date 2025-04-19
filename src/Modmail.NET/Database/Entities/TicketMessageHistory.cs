@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
@@ -12,11 +11,11 @@ public class TicketMessageHistory : IRegisterDateUtc,
 	public DateTime RegisterDateUtc { get; set; }
 
 	[MaxLength(DbLength.Message)]
-	public required string? MessageContentBefore { get; set; }
+	public required string? MessageContentBefore { get; init; }
 
 	[MaxLength(DbLength.Message)]
-	public required string? MessageContentAfter { get; set; }
+	public required string? MessageContentAfter { get; init; }
 
-	public required Guid TicketMessageId { get; set; }
+	public required Guid TicketMessageId { get; init; }
 	public virtual TicketMessage? TicketMessage { get; set; }
 }

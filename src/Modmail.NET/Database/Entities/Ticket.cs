@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database.Abstract;
 using Modmail.NET.Features.Ticket.Static;
 
@@ -14,7 +12,7 @@ public class Ticket : IRegisterDateUtc,
 	public DateTime RegisterDateUtc { get; set; }
 	public DateTime LastMessageDateUtc { get; set; } = UtilDate.GetNow();
 	public DateTime? ClosedDateUtc { get; set; }
-	public required ulong OpenerUserId { get; set; } //FK
+	public required ulong OpenerUserId { get; init; } //FK
 	public ulong? CloserUserId { get; set; } //FK
 	public ulong? AssignedUserId { get; set; } //FK
 	public required ulong PrivateMessageChannelId { get; set; }
@@ -29,7 +27,7 @@ public class Ticket : IRegisterDateUtc,
 	public bool IsForcedClosed { get; set; }
 	public int? FeedbackStar { get; set; }
 
-	[MaxLength(DbLength.FeedbackMessage)]
+	[MaxLength(DbLength.Message)]
 	public string? FeedbackMessage { get; set; }
 
 	public bool Anonymous { get; set; }

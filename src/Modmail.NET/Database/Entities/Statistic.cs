@@ -11,22 +11,22 @@ public class Statistic : IRegisterDateUtc,
 	public DateTime RegisterDateUtc { get; set; }
 
 	[Precision(2)]
-	public required double AvgResponseTimeSeconds { get; set; }
+	public required double AvgResponseTimeSeconds { get; init; }
 
 	[Precision(2)]
-	public required double AvgTicketsClosedPerDay { get; set; }
+	public required double AvgTicketsClosedPerDay { get; init; }
 
 	[Precision(2)]
-	public required double AvgTicketsOpenedPerDay { get; set; }
+	public required double AvgTicketsOpenedPerDay { get; init; }
 
 	[Precision(2)]
-	public required double AvgTicketClosedSeconds { get; set; }
+	public required double AvgTicketClosedSeconds { get; init; }
 
 	[Precision(2)]
-	public required double FastestClosedTicketSeconds { get; set; }
+	public required double FastestClosedTicketSeconds { get; init; }
 
 	[Precision(2)]
-	public required double SlowestClosedTicketSeconds { get; set; }
+	public required double SlowestClosedTicketSeconds { get; init; }
 
 	public static Statistic Default() {
 		return new Statistic {

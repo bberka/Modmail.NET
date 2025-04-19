@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database.Abstract;
 using Modmail.NET.Features.Ticket.Static;
 using Modmail.NET.Language;
@@ -16,15 +14,15 @@ public class TicketMessage : IRegisterDateUtc,
 	public Guid Id { get; set; }
 	public DateTime RegisterDateUtc { get; set; }
 	public ulong BotMessageId { get; set; }
-	public required ulong SenderUserId { get; set; }
+	public required ulong SenderUserId { get; init; }
 
 	[MaxLength(DbLength.Message)]
 	public string? MessageContent { get; set; }
 
-	public required ulong MessageDiscordId { get; set; }
-	public required Guid TicketId { get; set; }
-	public required bool SentByMod { get; set; }
-	public Guid? TagId { get; set; }
+	public required ulong MessageDiscordId { get; init; }
+	public required Guid TicketId { get; init; }
+	public required bool SentByMod { get; init; }
+	public Guid? TagId { get; init; }
 	public TicketMessageChangeStatus ChangeStatus { get; set; } = TicketMessageChangeStatus.None;
 	public virtual ICollection<TicketMessageAttachment> Attachments { get; set; } = [];
 	public virtual ICollection<TicketMessageHistory> History { get; set; } = [];

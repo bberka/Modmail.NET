@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
@@ -21,7 +20,7 @@ public class Team : IRegisterDateUtc,
 
 	public bool PingOnNewTicket { get; set; }
 	public bool PingOnNewMessage { get; set; }
-	public bool SuperUserTeam { get; set; }
+	public bool SuperUserTeam { get; init; }
 	public virtual ICollection<TeamUser> Users { get; set; } = [];
 	public virtual ICollection<TeamPermission> Permissions { get; set; } = [];
 }

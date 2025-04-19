@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Abstract;
 
 namespace Modmail.NET.Database.Entities;
@@ -13,9 +12,9 @@ public class TicketNote : IRegisterDateUtc,
 
 	[MaxLength(DbLength.Note)]
 	[Required]
-	public required string Content { get; set; }
+	public required string Content { get; init; }
 
-	public required Guid TicketId { get; set; }
-	public required ulong UserId { get; set; }
+	public required Guid TicketId { get; init; }
+	public required ulong UserId { get; init; }
 	public virtual UserInformation? User { get; set; }
 }
