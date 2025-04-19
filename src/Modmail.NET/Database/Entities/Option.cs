@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database.Abstract;
 using Modmail.NET.Features.Metric.Static;
 using Modmail.NET.Features.Ticket.Static;
@@ -10,12 +9,11 @@ public class Option : IRegisterDateUtc,
                       IUpdateDateUtc,
                       IEntity
 {
+	public required ulong ServerId { get; init; }
 	public DateTime RegisterDateUtc { get; set; }
 	public DateTime? UpdateDateUtc { get; set; }
-	public required ulong ServerId { get; set; }
 
 	[MaxLength(DbLength.Name)]
-	[Required]
 	public required string Name { get; set; } = "Modmail";
 
 	[MaxLength(DbLength.Url)]
