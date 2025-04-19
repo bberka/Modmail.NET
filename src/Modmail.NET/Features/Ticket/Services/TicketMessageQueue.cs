@@ -3,10 +3,8 @@ using DSharpPlus.EventArgs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Modmail.NET.Abstract;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Commands;
@@ -14,12 +12,12 @@ using Serilog;
 
 namespace Modmail.NET.Features.Ticket.Services;
 
-public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
+public class TicketMessageQueue : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 {
 	private readonly IOptions<BotConfig> _options;
 	private readonly IServiceScopeFactory _scopeFactory;
 
-	public TicketMessage(
+	public TicketMessageQueue(
 		IServiceScopeFactory scopeFactory,
 		IOptions<BotConfig> options
 	) : base(TimeSpan.FromMinutes(15)) {
@@ -31,7 +29,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 		if (args.Message.Content.StartsWith(_options.Value.BotPrefix)) {
 			Log.Debug(
 			          "[{Source}] Ignoring message due to bot prefix. UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessage),
+			          nameof(TicketMessageQueue),
 			          userId,
 			          args.Message.Content
 			         );
@@ -52,7 +50,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 	) {
 		Log.Debug(
 		          "[{Source}] Handling private ticket message. UserId: {UserId}, Message: {Message}",
-		          nameof(TicketMessage),
+		          nameof(TicketMessageQueue),
 		          user.Id,
 		          message.Content
 		         );
@@ -65,7 +63,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			if (await dbContext.Blacklists.FilterByUserId(user.Id).AnyAsync()) {
 				Log.Information(
 				                "[{Source}] User is blacklisted, sending rejection message. UserId: {UserId}",
-				                nameof(TicketMessage),
+				                nameof(TicketMessageQueue),
 				                user.Id
 				               );
 				//TODO: Send rejection message to user, however it may not be needed since the last message from bot already gonna be you are blacklisted message
@@ -81,7 +79,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			if (activeTicket is not null) {
 				Log.Debug(
 				          "[{Source}] Active ticket found, processing user message. TicketId: {TicketId}, UserId: {UserId}",
-				          nameof(TicketMessage),
+				          nameof(TicketMessageQueue),
 				          activeTicket.Id,
 				          user.Id
 				         );
@@ -90,7 +88,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			else {
 				Log.Debug(
 				          "[{Source}] No active ticket found, creating a new ticket. UserId: {UserId}",
-				          nameof(TicketMessage),
+				          nameof(TicketMessageQueue),
 				          user.Id
 				         );
 				await mediator.Send(new ProcessCreateNewTicketCommand(user, channel, message));
@@ -98,7 +96,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 
 			Log.Information(
 			                "[{Source}] Processed private message. UserId: {UserId}, Message: {Message}",
-			                nameof(TicketMessage),
+			                nameof(TicketMessageQueue),
 			                user.Id,
 			                message.Content
 			               );
@@ -107,7 +105,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			Log.Warning(
 			            ex,
 			            "[{Source}] ModmailBotException: Error processing private message. UserId: {UserId}, Message: {Message}",
-			            nameof(TicketMessage),
+			            nameof(TicketMessageQueue),
 			            user.Id,
 			            message.Content
 			           );
@@ -116,7 +114,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			Log.Error(
 			          ex,
 			          "[{Source}] Unexpected error processing private message. UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessage),
+			          nameof(TicketMessageQueue),
 			          user.Id,
 			          message.Content
 			         );
@@ -131,7 +129,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 	) {
 		Log.Debug(
 		          "[{Source}] Handling guild ticket message. ChannelId: {ChannelId}, UserId: {UserId}, Message: {Message}",
-		          nameof(TicketMessage),
+		          nameof(TicketMessageQueue),
 		          channel.Id,
 		          modUser.Id,
 		          message.Content
@@ -142,7 +140,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 		if (ticketId == Guid.Empty) {
 			Log.Warning(
 			            "[{Source}] Invalid ticket id, ignoring message. ChannelId: {ChannelId}, Topic: {Topic}",
-			            nameof(TicketMessage),
+			            nameof(TicketMessageQueue),
 			            channel.Id,
 			            channel.Topic
 			           );
@@ -154,7 +152,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			await sender.Send(new ProcessModSendMessageCommand(modUser.Id, ticketId, message));
 			Log.Information(
 			                "[{Source}] Processed guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			                nameof(TicketMessage),
+			                nameof(TicketMessageQueue),
 			                ticketId,
 			                modUser.Id,
 			                message.Content
@@ -164,7 +162,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			Log.Warning(
 			            ex,
 			            "[{Source}] ModmailBotException: Error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			            nameof(TicketMessage),
+			            nameof(TicketMessageQueue),
 			            ticketId,
 			            modUser.Id,
 			            message.Content
@@ -174,7 +172,7 @@ public class TicketMessage : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 			Log.Error(
 			          ex,
 			          "[{Source}] Unexpected error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessage),
+			          nameof(TicketMessageQueue),
 			          ticketId,
 			          modUser.Id,
 			          message.Content
