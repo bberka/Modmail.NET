@@ -1,8 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Modmail.NET.Abstract;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Server.Queries;

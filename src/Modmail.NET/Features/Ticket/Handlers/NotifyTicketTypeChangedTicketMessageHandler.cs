@@ -1,6 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Features.User.Queries;
 using Modmail.NET.Language;

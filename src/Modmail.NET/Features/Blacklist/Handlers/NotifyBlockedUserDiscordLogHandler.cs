@@ -1,6 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Blacklist.Notifications;
 using Modmail.NET.Features.DiscordBot.Queries;
 using Modmail.NET.Features.User.Queries;

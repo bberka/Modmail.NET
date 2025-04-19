@@ -1,5 +1,4 @@
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.Teams.Commands;

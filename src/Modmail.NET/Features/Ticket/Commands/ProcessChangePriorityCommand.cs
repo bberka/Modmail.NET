@@ -1,5 +1,4 @@
 using DSharpPlus.Entities;
-using Modmail.NET.Abstract;
 using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 using Modmail.NET.Features.Ticket.Static;
 

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Teams.Queries;
 using Modmail.NET.Language;
 

@@ -12,7 +12,7 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject ModmailBot Bot
-@inject TicketMessage TicketMessage
+@inject TicketMessageQueue TicketMessageQueue
 @inject IServiceScopeFactory ScopeFactory
 @inject ISender Sender
 @attribute [AuthorizeTeam]
@@ -245,7 +245,7 @@
           <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
             <RadzenCard class="rz-shadow-7">
               <RadzenText TextStyle="TextStyle.H3">
-                @(UtilReadable.ConvertNumberToReadableString(TicketMessage.GetChannelCount()))
+                @(UtilReadable.ConvertNumberToReadableString(TicketMessageQueue.GetChannelCount()))
               </RadzenText>
               <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
                 @Lang.ProcessingMessageQueues.Translate()

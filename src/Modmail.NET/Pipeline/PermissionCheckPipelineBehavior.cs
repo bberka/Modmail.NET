@@ -1,5 +1,4 @@
 using System.Reflection;
-using Modmail.NET.Abstract;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 using Modmail.NET.Features.Teams.Queries;

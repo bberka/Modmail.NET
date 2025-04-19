@@ -1,6 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Features.DiscordBot.Queries;
 using Modmail.NET.Features.Server.Queries;

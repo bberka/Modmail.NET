@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Commands;

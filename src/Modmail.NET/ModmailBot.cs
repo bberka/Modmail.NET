@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Server.Commands;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Teams.Commands;

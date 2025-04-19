@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Blacklist.Commands;

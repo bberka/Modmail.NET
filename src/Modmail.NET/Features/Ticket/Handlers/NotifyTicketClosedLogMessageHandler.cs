@@ -1,7 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Features.DiscordBot.Queries;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Language;

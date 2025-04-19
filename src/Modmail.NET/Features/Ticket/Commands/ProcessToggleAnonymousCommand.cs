@@ -1,4 +1,3 @@
-using Modmail.NET.Abstract;
 using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 
 namespace Modmail.NET.Features.Ticket.Commands;

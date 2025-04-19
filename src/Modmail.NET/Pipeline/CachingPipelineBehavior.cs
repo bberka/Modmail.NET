@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Caching.Memory;
 using Modmail.NET.Attributes;
-using Modmail.NET.Common.Utils;
 using Serilog;
 
 namespace Modmail.NET.Pipeline;

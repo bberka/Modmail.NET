@@ -5,7 +5,6 @@ using DSharpPlus.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Extensions;
 using Modmail.NET.Features.Ticket.Static;

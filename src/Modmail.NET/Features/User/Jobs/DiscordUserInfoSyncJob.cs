@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
-using Modmail.NET.Abstract;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.DiscordBot.Queries;

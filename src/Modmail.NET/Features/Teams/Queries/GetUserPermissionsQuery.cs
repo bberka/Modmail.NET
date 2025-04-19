@@ -1,5 +1,4 @@
 using Modmail.NET.Attributes;
-using Modmail.NET.Common.Static;
 
 namespace Modmail.NET.Features.Teams.Queries;
 
