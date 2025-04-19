@@ -6,8 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Database.Extensions;
@@ -264,7 +262,7 @@ public static class OnMessageUpdatedEvent
 	private static DiscordEmbedBuilder MessageEditedUpdatePrivateMessage(DiscordMessage message, Option option, bool anonymous) {
 		var embed = new DiscordEmbedBuilder()
 		            .WithDescription(message.Content)
-		            .WithGuildInfoFooter(option)
+		            .WithServerInfoFooter(option)
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.MessageReceivedColor);
 

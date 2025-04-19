@@ -1,7 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Language;
@@ -28,7 +26,7 @@ public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyT
 		var embedBuilder = new DiscordEmbedBuilder()
 		                   .WithTitle(Lang.YourTicketHasBeenClosed.Translate())
 		                   .WithDescription(Lang.YourTicketHasBeenClosedDescription.Translate())
-		                   .WithGuildInfoFooter(option)
+		                   .WithServerInfoFooter(option)
 		                   .WithCustomTimestamp()
 		                   .WithColor(ModmailColors.TicketClosedColor);
 		var closingMessage = Lang.ClosingMessageDescription.Translate();
@@ -56,7 +54,7 @@ public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyT
 			                          .WithTitle(Lang.Feedback.Translate())
 			                          .WithDescription(Lang.FeedbackDescription.Translate())
 			                          .WithCustomTimestamp()
-			                          .WithGuildInfoFooter(option)
+			                          .WithServerInfoFooter(option)
 			                          .WithColor(ModmailColors.FeedbackColor);
 
 			var response = ticketFeedbackMsgToUser

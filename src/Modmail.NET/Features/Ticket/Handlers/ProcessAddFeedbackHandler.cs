@@ -1,7 +1,6 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
@@ -42,7 +41,7 @@ public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackComma
 		var feedbackDoneEmbed = new DiscordEmbedBuilder()
 		                        .WithTitle(Lang.FeedbackReceived.Translate())
 		                        .WithCustomTimestamp()
-		                        .WithGuildInfoFooter(option)
+		                        .WithServerInfoFooter(option)
 		                        .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
 		                        .WithColor(ModmailColors.FeedbackColor);
 		if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDoneEmbed.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);

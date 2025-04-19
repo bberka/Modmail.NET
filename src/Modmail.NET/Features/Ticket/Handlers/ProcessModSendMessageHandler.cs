@@ -1,8 +1,6 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Exceptions;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Commands;
@@ -55,7 +53,7 @@ public class ProcessModSendMessageHandler : IRequestHandler<ProcessModSendMessag
 		msg.AddAttachments(ticketMessage.Attachments.ToArray());
 		var embed = new DiscordEmbedBuilder()
 		            .WithDescription(request.Message.Content)
-		            .WithGuildInfoFooter(option)
+		            .WithServerInfoFooter(option)
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.MessageReceivedColor);
 

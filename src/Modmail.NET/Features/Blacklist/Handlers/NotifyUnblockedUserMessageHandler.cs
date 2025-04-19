@@ -1,6 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Blacklist.Notifications;
 using Modmail.NET.Features.DiscordBot.Queries;
 using Modmail.NET.Features.Server.Queries;
@@ -26,7 +25,7 @@ public class NotifyUnblockedUserMessageHandler : INotificationHandler<NotifyUnbl
 		var embed = new DiscordEmbedBuilder()
 		            .WithTitle(Lang.YouHaveBeenRemovedFromBlacklist.Translate())
 		            .WithDescription(Lang.YouHaveBeenRemovedFromBlacklistDescription.Translate())
-		            .WithGuildInfoFooter(option)
+		            .WithServerInfoFooter(option)
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.SuccessColor);
 

@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Common.Extensions;
@@ -21,11 +20,11 @@ public static class EmbedExtensions
 		return builder.WithTimestamp(UtilDate.GetNow());
 	}
 
-	public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, Option info) {
+	public static DiscordEmbedBuilder WithServerInfoFooter(this DiscordEmbedBuilder builder, Option info) {
 		return builder.WithFooter(info.Name, info.IconUrl);
 	}
 
-	public static DiscordEmbedBuilder WithGuildInfoFooter(this DiscordEmbedBuilder builder, DiscordGuild guildInfo) {
+	public static DiscordEmbedBuilder WithServerInfoFooter(this DiscordEmbedBuilder builder, DiscordGuild guildInfo) {
 		return builder.WithFooter(guildInfo.Name, guildInfo.IconUrl);
 	}
 

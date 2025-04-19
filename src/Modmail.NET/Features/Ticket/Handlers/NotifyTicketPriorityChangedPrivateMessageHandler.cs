@@ -1,6 +1,5 @@
 using DSharpPlus.Entities;
 using Modmail.NET.Common.Extensions;
-using Modmail.NET.Common.Static;
 using Modmail.NET.Features.Server.Queries;
 using Modmail.NET.Features.Ticket.Notifications;
 using Modmail.NET.Features.User.Queries;
@@ -23,7 +22,7 @@ public class NotifyTicketPriorityChangedPrivateMessageHandler : INotificationHan
 		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
 		var privateChannel = await _bot.Client.GetChannelAsync(notification.Ticket.PrivateMessageChannelId);
 		var embed = new DiscordEmbedBuilder()
-		            .WithGuildInfoFooter(option)
+		            .WithServerInfoFooter(option)
 		            .WithTitle(Lang.TicketPriorityChanged.Translate())
 		            .WithCustomTimestamp()
 		            .WithColor(ModmailColors.TicketPriorityChangedColor)
