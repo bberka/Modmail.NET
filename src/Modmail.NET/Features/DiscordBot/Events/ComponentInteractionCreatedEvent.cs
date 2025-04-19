@@ -4,8 +4,6 @@ using DSharpPlus.EventArgs;
 using Microsoft.Extensions.DependencyInjection;
 using Modmail.NET.Common.Aspects;
 using Modmail.NET.Common.Exceptions;
-using Modmail.NET.Common.Static;
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Features.Ticket.Commands;
 using Modmail.NET.Features.User.Commands;
 using Modmail.NET.Language;
@@ -136,7 +134,7 @@ public static class ComponentInteractionCreatedEvent
 			                                                         Lang.PleaseTellUsReasonsForYourRating.Translate(),
 			                                                         style: DiscordTextInputStyle.Paragraph,
 			                                                         required: false,
-			                                                         max_length: DbLength.FeedbackMessage));
+			                                                         max_length: DbLength.Message));
 			return modal;
 		}
 	}
