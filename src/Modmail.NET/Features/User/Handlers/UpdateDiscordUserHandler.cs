@@ -1,4 +1,3 @@
-using Modmail.NET.Common.Utils;
 using Modmail.NET.Database;
 using Modmail.NET.Database.Entities;
 using Modmail.NET.Features.User.Commands;
@@ -31,7 +30,6 @@ public class UpdateDiscordUserHandler : IRequestHandler<UpdateDiscordUserCommand
 			return dbData;
 		}
 
-		entity.RegisterDateUtc = UtilDate.GetNow();
 		_dbContext.Add(entity);
 
 		return entity;
