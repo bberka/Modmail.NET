@@ -17,13 +17,14 @@
         <PackageReference Include="Ardalis.SmartEnum.SystemTextJson" Version="8.1.0"/>
         <PackageReference Include="AspectInjector" Version="2.8.2"/>
         <PackageReference Include="CSharpVitamins.ShortGuid" Version="2.0.0"/>
-        <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02483"/>
-        <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02483"/>
-        <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02483"/>
+        <PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02484"/>
+        <PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02484"/>
+        <PackageReference Include="DSharpPlus.Interactivity" Version="5.0.0-nightly-02484"/>
         <PackageReference Include="EFCore.CheckConstraints" Version="9.0.0"/>
         <PackageReference Include="EntityFrameworkCore.Exceptions.Common" Version="8.1.3"/>
         <PackageReference Include="EntityFrameworkCore.Exceptions.SqlServer" Version="8.1.3"/>
         <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.2.2"/>
+        <PackageReference Include="EntityFrameworkCore.Triggered.Extensions" Version="3.2.2"/>
         <PackageReference Include="FluentValidation" Version="11.11.0"/>
         <PackageReference Include="Hangfire.Core" Version="1.8.18"/>
         <PackageReference Include="Mediator.Abstractions" Version="2.1.7"/>
@@ -51,7 +52,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4"/>
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4"/>
         <PackageReference Include="Polly" Version="8.5.2"/>
-        <PackageReference Include="Radzen.Blazor" Version="6.5.2"/>
+        <PackageReference Include="Radzen.Blazor" Version="6.6.1"/>
         <PackageReference Include="Riok.Mapperly" Version="4.2.0"/>
         <PackageReference Include="Serilog" Version="4.2.0"/>
         <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
@@ -64,6 +65,7 @@
         <PackageReference Include="SnowflakeIDGenerator" Version="1.5.2024.337"/>
         <PackageReference Include="System.Linq.Async" Version="6.0.1"/>
         <PackageReference Include="System.Runtime.Caching" Version="9.0.4"/>
+        <PackageReference Include="ZDK.EntityFrameworkCore.ConstraintsBuilder.SqlServer" Version="0.1.1"/>
     </ItemGroup>
 
     <ItemGroup>
