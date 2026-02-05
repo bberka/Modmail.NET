@@ -20,3 +20,4 @@ Log_*.json
 .idea/
 .ai/
 .mcp/
+*.sln.DotSettings
