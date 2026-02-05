@@ -1,0 +1,205 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+
+@inject NavigationManager navigationManager
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@code {
+
+    private HomeStats? Stats { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var dbContext = new ModmailDbContext();
+        if (await GuildOption.Any() != true)
+        {
+            navigationManager.NavigateTo("/setup");
+        }
+
+        var totalTickets = await dbContext.Tickets.Select(x => new
+            {
+                IsClosed = x.ClosedDateUtc.HasValue
+            })
+            .ToListAsync();
+        var activeTickets = totalTickets.Count(x => !x.IsClosed);
+        var closedTickets = totalTickets.Count(x => x.IsClosed);
+        var totalMessages = await dbContext.TicketMessages.CountAsync();
+        var teams = await dbContext.GuildTeams.CountAsync();
+        var blacklist = await dbContext.TicketBlacklists.CountAsync();
+        var ticketTypes = await dbContext.TicketTypes.CountAsync();
+        Stats = new HomeStats(activeTickets, closedTickets, totalMessages, teams, blacklist, ticketTypes);
+    }
+
+    private async Task StartBotAsync()
+    {
+        var dialogResult = await dialogService.Confirm("Are you sure you want to start the bot?", options: new ConfirmOptions
+        {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (dialogResult == true)
+        {
+            await ModmailBot.This.StartAsync();
+            StateHasChanged();
+            notificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
+        }
+    }
+
+    private async Task StopBotAsync()
+    {
+        var dialogResult = await dialogService.Confirm("Are you sure you want to stop the bot?", options: new ConfirmOptions
+        {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (dialogResult == true)
+        {
+            await ModmailBot.This.StopAsync();
+            StateHasChanged();
+            notificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
+        }
+    }
+
+    private async Task RestartBotAsync()
+    {
+        var dialogResult = await dialogService.Confirm("Are you sure you want to restart the bot?", options: new ConfirmOptions
+        {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (dialogResult == true)
+        {
+            await ModmailBot.This.RestartAsync();
+            StateHasChanged();
+            notificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
+        }
+    }
+
+}
+
+<div class="container">
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+                        Dashboard
+                    </RadzenText>
+                    @* <hr class="my-4"/> *@
+
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenColumn>
+        <RadzenColumn Size="12">
+            <RadzenCard class="shadow-7">
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        <RadzenText class="rz-my-4">
+                            Bot is
+                            @if (ModmailBot.This.Connected)
+                            {
+                                <span class="rz-color-success">Connected</span>
+                            }
+                            else
+                            {
+                                <span class="rz-color-danger">Disconnected</span>
+                            }
+                        </RadzenText>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenColumn Size="12">
+                        @if (ModmailBot.This.Connected)
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
+                            <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot
+                            </RadzenButton>
+                        }
+                        else
+                        {
+                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@StartBotAsync">Start Bot
+                            </RadzenButton>
+                        }
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+
+            <RadzenRow RowGap="4" class="rz-mt-5">
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.ActiveTickets.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Active Tickets
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.ClosedTickets.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Closed Tickets
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.TotalMessages.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Total Messages
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.Teams.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Teams
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.Blacklist.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Blacklist
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                    <RadzenCard class="rz-shadow-7">
+                        <RadzenText TextStyle="TextStyle.H3">
+                            @(Stats?.TicketTypes.ToString() ?? "0")
+                        </RadzenText>
+                        <p>
+                            Ticket Types
+                        </p>
+                    </RadzenCard>
+                </RadzenColumn>
+
+            </RadzenRow>
+
+        </RadzenColumn>
+    </RadzenRow>
+</div>

@@ -11,7 +11,8 @@
                     @Message
                 </RadzenAlert>
 
-                @if (_showLogoutButton) {
+                @if (_showLogoutButton)
+                {
                     <RadzenRow>
                         <RadzenColumn>
                             <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="Logout">
@@ -35,8 +36,10 @@
     [Parameter]
     public required string Message { get; set; }
 
-    protected override async Task OnInitializedAsync() {
-        if (Enum.TryParse<Lang>(Message, out var langKeys)) {
+    protected override async Task OnInitializedAsync()
+    {
+        if (Enum.TryParse<Lang>(Message, out var langKeys))
+        {
             Message = langKeys.Translate();
         }
 
@@ -44,7 +47,8 @@
         _showLogoutButton = state.User.Identity?.IsAuthenticated == true;
     }
 
-    private void Logout() {
+    private void Logout()
+    {
         Navigation.NavigateTo("auth/logout", true);
     }
 

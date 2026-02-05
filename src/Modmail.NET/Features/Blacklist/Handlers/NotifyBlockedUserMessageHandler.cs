@@ -9,28 +9,29 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class NotifyBlockedUserMessageHandler : INotificationHandler<NotifyBlockedUser>
 {
-	private readonly IMediator _mediator;
+    private readonly IMediator _mediator;
 
-	public NotifyBlockedUserMessageHandler(IMediator mediator) {
-		_mediator = mediator;
-	}
+    public NotifyBlockedUserMessageHandler(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
 
-	public async ValueTask Handle(NotifyBlockedUser notification, CancellationToken cancellationToken) {
-		var member = await _mediator.Send(new GetDiscordMemberQuery(notification.UserId), cancellationToken);
-		if (member is null)
-			//TODO: Log
-			return;
+    public async ValueTask Handle(NotifyBlockedUser notification, CancellationToken cancellationToken)
+    {
+        var member = await _mediator.Send(new GetDiscordMemberQuery(notification.UserId), cancellationToken);
+        if (member is null)
+            //TODO: Log
+            return;
 
-		var option = await _mediator.Send(new GetOptionQuery(), cancellationToken);
-		var embed = new DiscordEmbedBuilder()
-		            .WithTitle(Lang.YouHaveBeenBlacklisted.Translate())
-		            .WithDescription(Lang.YouHaveBeenBlacklistedDescription.Translate())
-		            .WithServerInfoFooter(option)
-		            .WithCustomTimestamp()
-		            .WithColor(ModmailColors.ErrorColor);
+        var option = await _mediator.Send(new GetOptionQuery(), cancellationToken);
+        var embed = new DiscordEmbedBuilder().WithTitle(Lang.YouHaveBeenBlacklisted.Translate())
+            .WithDescription(Lang.YouHaveBeenBlacklistedDescription.Translate())
+            .WithServerInfoFooter(option)
+            .WithCustomTimestamp()
+            .WithColor(ModmailColors.ErrorColor);
 
-		if (!string.IsNullOrEmpty(notification.Reason)) embed.AddField(Lang.Reason.Translate(), notification.Reason);
+        if (!string.IsNullOrEmpty(notification.Reason)) embed.AddField(Lang.Reason.Translate(), notification.Reason);
 
-		await member.SendMessageAsync(embed);
-	}
+        await member.SendMessageAsync(embed);
+    }
 }

@@ -34,8 +34,6 @@ namespace Modmail.NET.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Options", x => x.ServerId);
-                    table.CheckConstraint("CK_Options_Name_MinLength", "LEN([Name]) >= 1");
-                    table.CheckConstraint("CK_Options_StatisticsCalculateDays_Range", "[StatisticsCalculateDays] BETWEEN 30 AND 365");
                 });
 
             migrationBuilder.CreateTable(
@@ -57,25 +55,6 @@ namespace Modmail.NET.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tags",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false),
-                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tags", x => x.Id);
-                    table.CheckConstraint("CK_Tags_Content_MinLength", "LEN([Content]) >= 1");
-                    table.CheckConstraint("CK_Tags_Name_MinLength", "LEN([Name]) >= 1");
-                    table.CheckConstraint("CK_Tags_Title_MinLength", "LEN([Title]) >= 0");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Teams",
                 columns: table => new
                 {
@@ -90,30 +69,6 @@ namespace Modmail.NET.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teams", x => x.Id);
-                    table.CheckConstraint("CK_Teams_Name_MinLength", "LEN([Name]) >= 1");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TicketTypes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Key = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Emoji = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    Order = table.Column<int>(type: "int", nullable: false),
-                    EmbedMessageTitle = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    EmbedMessageContent = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TicketTypes", x => x.Id);
-                    table.CheckConstraint("CK_TicketTypes_Description_MinLength", "LEN([Description]) >= 1");
-                    table.CheckConstraint("CK_TicketTypes_Key_MinLength", "LEN([Key]) >= 1");
-                    table.CheckConstraint("CK_TicketTypes_Name_MinLength", "LEN([Name]) >= 1");
                 });
 
             migrationBuilder.CreateTable(
@@ -175,6 +130,30 @@ namespace Modmail.NET.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActionLog",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Event = table.Column<int>(type: "int", nullable: false),
+                    IsWebAction = table.Column<bool>(type: "bit", nullable: false),
+                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IpAddress = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    UserAgent = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    UserId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionLog", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActionLog_UserInformation_UserId",
+                        column: x => x.UserId,
+                        principalTable: "UserInformation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Blacklists",
                 columns: table => new
                 {
@@ -202,6 +181,101 @@ namespace Modmail.NET.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Embeds",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(6)", maxLength: 6, nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    ThumbnailUrl = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
+                    WithTimestamp = table.Column<bool>(type: "bit", nullable: false),
+                    WithServerInfoFooter = table.Column<bool>(type: "bit", nullable: false),
+                    IncludeAuthor = table.Column<bool>(type: "bit", nullable: false),
+                    AuthorId = table.Column<decimal>(type: "decimal(20,0)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Embeds", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Embeds_UserInformation_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "UserInformation",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Fields",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false),
+                    Inline = table.Column<bool>(type: "bit", nullable: false),
+                    EmbedId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fields", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Fields_Embeds_EmbedId",
+                        column: x => x.EmbedId,
+                        principalTable: "Embeds",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    IncludeAuthorWhenTicketChannel = table.Column<bool>(type: "bit", nullable: false),
+                    EmbedId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tags_Embeds_EmbedId",
+                        column: x => x.EmbedId,
+                        principalTable: "Embeds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TicketTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDateUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Key = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Emoji = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false),
+                    EmbedId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TicketTypes_Embeds_EmbedId",
+                        column: x => x.EmbedId,
+                        principalTable: "Embeds",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tickets",
                 columns: table => new
                 {
@@ -220,7 +294,7 @@ namespace Modmail.NET.Database.Migrations
                     CloseReason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     IsForcedClosed = table.Column<bool>(type: "bit", nullable: false),
                     FeedbackStar = table.Column<int>(type: "int", nullable: true),
-                    FeedbackMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    FeedbackMessage = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true),
                     Anonymous = table.Column<bool>(type: "bit", nullable: false),
                     TicketTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -261,7 +335,7 @@ namespace Modmail.NET.Database.Migrations
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     BotMessageId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     SenderUserId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    MessageContent = table.Column<string>(type: "nvarchar(max)", maxLength: 2147483647, nullable: true),
+                    MessageContent = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true),
                     MessageDiscordId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     TicketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SentByMod = table.Column<bool>(type: "bit", nullable: false),
@@ -303,7 +377,6 @@ namespace Modmail.NET.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TicketNotes", x => x.Id);
-                    table.CheckConstraint("CK_TicketNotes_Content_MinLength", "LEN([Content]) >= 1");
                     table.ForeignKey(
                         name: "FK_TicketNotes_Tickets_TicketId",
                         column: x => x.TicketId,
@@ -336,10 +409,6 @@ namespace Modmail.NET.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MessageAttachments", x => x.Id);
-                    table.CheckConstraint("CK_MessageAttachments_FileName_MinLength", "LEN([FileName]) >= 1");
-                    table.CheckConstraint("CK_MessageAttachments_MediaType_MinLength", "LEN([MediaType]) >= 1");
-                    table.CheckConstraint("CK_MessageAttachments_ProxyUrl_MinLength", "LEN([ProxyUrl]) >= 1");
-                    table.CheckConstraint("CK_MessageAttachments_Url_MinLength", "LEN([Url]) >= 1");
                     table.ForeignKey(
                         name: "FK_MessageAttachments_Messages_TicketMessageId",
                         column: x => x.TicketMessageId,
@@ -354,8 +423,8 @@ namespace Modmail.NET.Database.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RegisterDateUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MessageContentBefore = table.Column<string>(type: "nvarchar(max)", maxLength: 2147483647, nullable: true),
-                    MessageContentAfter = table.Column<string>(type: "nvarchar(max)", maxLength: 2147483647, nullable: true),
+                    MessageContentBefore = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true),
+                    MessageContentAfter = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true),
                     TicketMessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -370,6 +439,16 @@ namespace Modmail.NET.Database.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ActionLog_Event",
+                table: "ActionLog",
+                column: "Event");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActionLog_UserId",
+                table: "ActionLog",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Blacklists_AuthorUserId",
                 table: "Blacklists",
                 column: "AuthorUserId");
@@ -379,6 +458,16 @@ namespace Modmail.NET.Database.Migrations
                 table: "Blacklists",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Embeds_AuthorId",
+                table: "Embeds",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Fields_EmbedId",
+                table: "Fields",
+                column: "EmbedId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MessageAttachments_TicketMessageId",
@@ -406,16 +495,26 @@ namespace Modmail.NET.Database.Migrations
                 column: "TicketId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tags_EmbedId",
+                table: "Tags",
+                column: "EmbedId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tags_Name",
                 table: "Tags",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamPermissions_TeamId_AuthPolicy",
+                name: "IX_TeamPermissions_AuthPolicy_TeamId",
                 table: "TeamPermissions",
-                columns: new[] { "TeamId", "AuthPolicy" },
+                columns: new[] { "AuthPolicy", "TeamId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeamPermissions_TeamId",
+                table: "TeamPermissions",
+                column: "TeamId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teams_Name",
@@ -463,13 +562,36 @@ namespace Modmail.NET.Database.Migrations
                 name: "IX_Tickets_TicketTypeId",
                 table: "Tickets",
                 column: "TicketTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketTypes_EmbedId",
+                table: "TicketTypes",
+                column: "EmbedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketTypes_Key",
+                table: "TicketTypes",
+                column: "Key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketTypes_Name",
+                table: "TicketTypes",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ActionLog");
+
+            migrationBuilder.DropTable(
                 name: "Blacklists");
+
+            migrationBuilder.DropTable(
+                name: "Fields");
 
             migrationBuilder.DropTable(
                 name: "MessageAttachments");
@@ -506,6 +628,9 @@ namespace Modmail.NET.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "TicketTypes");
+
+            migrationBuilder.DropTable(
+                name: "Embeds");
 
             migrationBuilder.DropTable(
                 name: "UserInformation");

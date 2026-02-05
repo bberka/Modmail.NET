@@ -4,25 +4,25 @@ namespace Modmail.NET.Common.Static;
 
 public static class ModmailColors
 {
-  //Simple
-  public static readonly DiscordColor ErrorColor = DiscordColor.DarkRed;
-  public static readonly DiscordColor SuccessColor = DiscordColor.Green;
-  public static readonly DiscordColor InfoColor = DiscordColor.CornflowerBlue;
-  public static readonly DiscordColor WarningColor = DiscordColor.Orange;
+    //Simple
+    public static readonly DiscordColor ErrorColor = DiscordColor.DarkRed;
+    public static readonly DiscordColor SuccessColor = DiscordColor.Green;
+    public static readonly DiscordColor InfoColor = DiscordColor.CornflowerBlue;
+    public static readonly DiscordColor WarningColor = DiscordColor.Orange;
 
 
-  //Message
-  public static readonly DiscordColor MessageReceivedColor = DiscordColor.Blue;
-  public static readonly DiscordColor TagReceivedColor = DiscordColor.Blue;
+    //Message
+    public static readonly DiscordColor MessageReceivedColor = DiscordColor.Blue;
+    public static readonly DiscordColor TagReceivedColor = DiscordColor.Blue;
 
-  //Ticket
-  public static readonly DiscordColor TicketCreatedColor = DiscordColor.Blue;
-  public static readonly DiscordColor TicketClosedColor = DiscordColor.Red;
+    //Ticket
+    public static readonly DiscordColor TicketCreatedColor = DiscordColor.Blue;
+    public static readonly DiscordColor TicketClosedColor = DiscordColor.Red;
 
-  //Others
-  public static readonly DiscordColor TicketPriorityChangedColor = DiscordColor.Magenta;
-  public static readonly DiscordColor TicketTypeChangedColor = DiscordColor.SpringGreen;
-  public static readonly DiscordColor NoteAddedColor = DiscordColor.Teal;
-  public static readonly DiscordColor AnonymousToggledColor = DiscordColor.Grayple;
-  public static readonly DiscordColor FeedbackColor = DiscordColor.Orange;
+    //Others
+    public static readonly DiscordColor TicketPriorityChangedColor = DiscordColor.Magenta;
+    public static readonly DiscordColor TicketTypeChangedColor = DiscordColor.SpringGreen;
+    public static readonly DiscordColor NoteAddedColor = DiscordColor.Teal;
+    public static readonly DiscordColor AnonymousToggledColor = DiscordColor.Grayple;
+    public static readonly DiscordColor FeedbackColor = DiscordColor.Orange;
 }

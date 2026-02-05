@@ -6,13 +6,15 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class CheckTeamExistsHandler : IRequestHandler<CheckTeamExistsQuery, bool>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public CheckTeamExistsHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public CheckTeamExistsHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<bool> Handle(CheckTeamExistsQuery request, CancellationToken cancellationToken) {
-		return await _dbContext.Teams.AnyAsync(x => x.Name == request.Name, cancellationToken);
-	}
+    public async ValueTask<bool> Handle(CheckTeamExistsQuery request, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Teams.AnyAsync(x => x.Name == request.Name, cancellationToken);
+    }
 }

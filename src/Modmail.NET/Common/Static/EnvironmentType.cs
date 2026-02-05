@@ -2,6 +2,6 @@
 
 public enum EnvironmentType
 {
-  Development,
-  Production
+    Development,
+    Production
 }

@@ -8,23 +8,24 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class ProcessRemoveTeamHandler : IRequestHandler<ProcessRemoveTeamCommand, Team>
 {
-	private readonly ModmailDbContext _dbContext;
-	private readonly ISender _sender;
+    private readonly ModmailDbContext _dbContext;
+    private readonly ISender _sender;
 
-	public ProcessRemoveTeamHandler(ModmailDbContext dbContext,
-	                                ISender sender) {
-		_dbContext = dbContext;
-		_sender = sender;
-	}
+    public ProcessRemoveTeamHandler(ModmailDbContext dbContext, ISender sender)
+    {
+        _dbContext = dbContext;
+        _sender = sender;
+    }
 
-	public async ValueTask<Team> Handle(ProcessRemoveTeamCommand request, CancellationToken cancellationToken) {
-		var team = await _dbContext.Teams.FindAsync([request.Id], cancellationToken);
-		if (team is null) throw new ModmailBotException(Lang.TeamNotFound);
-		if (team.SuperUserTeam) throw new InvalidOperationException();
+    public async ValueTask<Team> Handle(ProcessRemoveTeamCommand request, CancellationToken cancellationToken)
+    {
+        var team = await _dbContext.Teams.FindAsync([request.Id], cancellationToken);
+        if (team is null) throw new ModmailBotException(Lang.TeamNotFound);
+        if (team.SuperUserTeam) throw new InvalidOperationException();
 
-		_dbContext.Remove(team);
-		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
-		if (affected == 0) throw new DbInternalException();
-		return team;
-	}
+        _dbContext.Remove(team);
+        var affected = await _dbContext.SaveChangesAsync(cancellationToken);
+        if (affected == 0) throw new DbInternalException();
+        return team;
+    }
 }

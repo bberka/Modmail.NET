@@ -1,6 +1,5 @@
 ﻿@page "/tickets"
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Features.Ticket.Mappers
 @using Modmail.NET.Features.Ticket.Models
 @using Modmail.NET.Web.Blazor.Components.Pages.Ticket.Shared
 @using Modmail.NET.Web.Blazor.Extensions
@@ -22,20 +21,21 @@
   bool _isLoading;
 
 
-  private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+  private async Task ReloadDataAsync(LoadDataArgs? args = null)
+  {
     _isLoading = true;
 
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    var query = dbContext.Tickets
-                         .AsNoTracking()
-                         .Include(x => x.OpenerUser)
-                         .Include(x => x.CloserUser)
-                         .Include(x => x.TicketType)
-                         .OrderByDescending(x => x.RegisterDateUtc)
-                         .ProjectToDto()
-                         .AsQueryable();
+    var query = dbContext.Tickets.AsNoTracking()
+            .Include(x => x.OpenerUser)
+            .Include(x => x.CloserUser)
+            .Include(x => x.TicketType)
+            .OrderByDescending(x => x.RegisterDateUtc)
+            .ProjectToDto()
+            .AsQueryable();
 
-    switch (_filterTicketType) {
+    switch (_filterTicketType)
+    {
       case TicketFilterType.All:
         break;
       case TicketFilterType.Active:
@@ -53,90 +53,104 @@
     _count = await query.CountAsync();
 
     _data = args is not null
-              ? query.ApplyPagination(args)
-              : query.Skip(0).Take(10).AsQueryable();
+            ? query.ApplyPagination(args)
+            : query.Skip(0)
+                    .Take(10)
+                    .AsQueryable();
 
     _isLoading = false;
     StateHasChanged();
   }
 
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     _ = state.User.GetUserId();
     await ReloadDataAsync();
   }
 
 
-  private async Task LoadDataAsync(LoadDataArgs args) {
+  private async Task LoadDataAsync(LoadDataArgs args)
+  {
     await ReloadDataAsync(args);
   }
 
   private int _count;
 
-  private async Task CloseTicketAsync(TicketDto ticketDto) {
-    var result = await DialogService.OpenAsync(Lang.CloseTicket.Translate(), _ =>
-                                                 @<CloseTicketDialogComponent
-                                                   TicketId="ticketDto.Id"></CloseTicketDialogComponent>,
-                                               new DialogOptions {
-                                                 Width = "400px"
-                                               });
-    if (result is true) {
+  private async Task CloseTicketAsync(TicketDto ticketDto)
+  {
+      var result = await Radzen.DialogService.OpenAsync(Lang.CloseTicket.Translate(), _ => @<CloseTicketDialogComponent
+                                                                                                   TicketId="ticketDto.Id"></CloseTicketDialogComponent>, new DialogOptions
+      {
+              Width = "400px"
+      });
+      if (result is true)
+      {
       await ReloadDataAsync();
     }
   }
 
   private TicketFilterType _filterTicketType = TicketFilterType.All;
 
-  private void ShowTranscript(TicketDto ticketDto) {
+  private void ShowTranscript(TicketDto ticketDto)
+  {
     Navi.NavigateTo("transcript/" + ticketDto.Id);
   }
 
 
-  private async Task ShowNotes(TicketDto ticketDto) {
-    _ = await DialogService.OpenAsync(Lang.TicketNotes.Translate(),
-                                      _ =>
-                                        @<TicketNotesDialogComponent
-                                          TicketId="ticketDto.Id"></TicketNotesDialogComponent>,
-                                      new DialogOptions {
-                                        Width = "900px",
-                                        CloseDialogOnEsc = true,
-                                        CloseDialogOnOverlayClick = true
-                                      });
+  private async Task ShowNotes(TicketDto ticketDto)
+  {
+      _ = await Radzen.DialogService.OpenAsync(Lang.TicketNotes.Translate(), _ => @<TicketNotesDialogComponent
+                                                                                          TicketId="ticketDto.Id"></TicketNotesDialogComponent>, new DialogOptions
+      {
+              Width = "900px",
+              CloseDialogOnEsc = true,
+              CloseDialogOnOverlayClick = true
+      });
   }
 
-  private async Task ShowFeedback(TicketDto ticketDto) {
-    _ = await DialogService.OpenAsync(Lang.TicketFeedback.Translate(),
-                                      _ =>
-                                        @<div class="rz-mx-auto">
-                                          <RadzenRow>
-                                            <RadzenColumn Size="12">
-                                              <RadzenRow class="rz-mb-4">
-                                                @for (var i = 0; i < ticketDto.FeedbackStar; i++) {
-                                                  <RadzenIcon Icon="stars" IconStyle="IconStyle.Warning"></RadzenIcon>
-                                                }
-                                                @for (var i = 0; i < 5 - ticketDto.FeedbackStar; i++) {
-                                                  <RadzenIcon Icon="stars" IconStyle="IconStyle.Base"></RadzenIcon>
-                                                }
-                                              </RadzenRow>
-                                              <RadzenRow class="rz-mt-4">
-                                                <RadzenMarkdown>
-                                                  @if (string.IsNullOrEmpty(ticketDto.FeedbackMessage)) {
-                                                    @Lang.NoFeedbackProvided.Translate()
-                                                  }
-                                                  else {
-                                                    @ticketDto.FeedbackMessage
-                                                  }
-                                                </RadzenMarkdown>
-                                              </RadzenRow>
-                                            </RadzenColumn>
-                                          </RadzenRow>
-                                        </div>,
-                                      new DialogOptions {
-                                        Width = "500px",
-                                        CloseDialogOnEsc = true,
-                                        CloseDialogOnOverlayClick = true
-                                      });
+  private async Task ShowFeedback(TicketDto ticketDto)
+  {
+      _ = await Radzen.DialogService.OpenAsync(Lang.TicketFeedback.Translate(), _ => @<div class="rz-mx-auto">
+                                                                                         <RadzenRow>
+                                                                                             <RadzenColumn Size="12">
+                                                                                                 <RadzenRow
+                                                                                                         class="rz-mb-4">
+                                                                                                     @for (var i = 0; i < ticketDto.FeedbackStar; i++)
+                                                                                                     {
+                                                                                                         <RadzenIcon
+                                                                                                                 Icon="stars"
+                                                                                                                 IconStyle="IconStyle.Warning"></RadzenIcon>
+                                                                                                     }
+                                                                                                     @for (var i = 0; i < 5 - ticketDto.FeedbackStar; i++)
+                                                                                                     {
+                                                                                                         <RadzenIcon
+                                                                                                                 Icon="stars"
+                                                                                                                 IconStyle="IconStyle.Base"></RadzenIcon>
+                                                                                                     }
+                                                                                                 </RadzenRow>
+                                                                                                 <RadzenRow
+                                                                                                         class="rz-mt-4">
+                                                                                                     <RadzenMarkdown>
+                                                                                                         @if (string.IsNullOrEmpty(ticketDto.FeedbackMessage))
+                                                                                                         {
+                                                                                                             @Lang.NoFeedbackProvided.Translate()
+                                                                                                         }
+                                                                                                         else
+                                                                                                         {
+                                                                                                             @ticketDto.FeedbackMessage
+                                                                                                         }
+                                                                                                     </RadzenMarkdown>
+                                                                                                 </RadzenRow>
+                                                                                             </RadzenColumn>
+                                                                                         </RadzenRow>
+                                                                                     </div>, new DialogOptions
+      {
+              Width = "500px",
+              CloseDialogOnEsc = true,
+              CloseDialogOnOverlayClick = true
+      });
   }
 
 
@@ -153,10 +167,12 @@
         </RadzenColumn>
       </RadzenRow>
       <RadzenRow RowGap="4" class="rz-mt-5">
-        @if (_data is null) {
+          @if (_data is null)
+          {
           <Loading></Loading>
         }
-        else {
+          else
+          {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="true"
                             Density="Density.Default"
@@ -208,9 +224,8 @@
                                       TextAlign="TextAlign.Center">
                   <Template Context="data">
                     <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
-                      <RadzenImage Style="width: 100px; height: 100px;" Path="@(data.CloserUser != null
-                                                                                  ? data.CloserUser.AvatarUrl
-                                                                                  : "#")"
+                        <RadzenImage Style="width: 100px; height: 100px;"
+                                     Path="@(data.CloserUser != null ? data.CloserUser.AvatarUrl : "#")"
                                    AlternateText=""/>
                     </RadzenStack>
                   </Template>
@@ -247,7 +262,8 @@
                 <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false" Sortable="false"
                                       Title="@Lang.Actions.Translate()">
                   <Template Context="data">
-                    @if (!data.ClosedDateUtc.HasValue) {
+                      @if (!data.ClosedDateUtc.HasValue)
+                      {
                       <RadzenButton
                         ButtonStyle="ButtonStyle.Danger"
                         Icon="close"
@@ -256,7 +272,7 @@
                         Size="ButtonSize.Medium"
                         class="rz-my-1 rz-ms-1"
                         Click="@(async () => await CloseTicketAsync(data))"
-                        MouseEnter="@(args => TooltipService.Open(args, Lang.CloseTicket.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                        MouseEnter="@(args => Radzen.TooltipService.Open(args, Lang.CloseTicket.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }
@@ -269,7 +285,7 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
                       Click="@(() => ShowTranscript(data))"
-                      MouseEnter="@(args => TooltipService.Open(args, Lang.Transcript.Translate()))"
+                      MouseEnter="@(args => Radzen.TooltipService.Open(args, Lang.Transcript.Translate()))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
                     <RadzenButton
@@ -280,10 +296,11 @@
                       Size="ButtonSize.Medium"
                       class="rz-my-1 rz-ms-1"
                       Click="@(async () => await ShowNotes(data))"
-                      MouseEnter="@(args => TooltipService.Open(args, Lang.ShowNotes.Translate()))"
+                      MouseEnter="@(args => Radzen.TooltipService.Open(args, Lang.ShowNotes.Translate()))"
                       @onclick:stopPropagation="true">
                     </RadzenButton>
-                    @if (data.FeedbackStar.HasValue) {
+                      @if (data.FeedbackStar.HasValue)
+                      {
                       <RadzenButton
                         ButtonStyle="ButtonStyle.Info"
                         Icon="reviews"
@@ -292,7 +309,7 @@
                         Size="ButtonSize.Medium"
                         class="rz-my-1 rz-ms-1"
                         Click="@(async () => await ShowFeedback(data))"
-                        MouseEnter="@(args => TooltipService.Open(args, Lang.ShowFeedback.Translate()))"
+                        MouseEnter="@(args => Radzen.TooltipService.Open(args, Lang.ShowFeedback.Translate()))"
                         @onclick:stopPropagation="true">
                       </RadzenButton>
                     }

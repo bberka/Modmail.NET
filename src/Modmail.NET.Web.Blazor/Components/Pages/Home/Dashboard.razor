@@ -26,13 +26,16 @@
   private bool _canManageStartStop;
   private MetricDto _metricDto = MetricDto.Default;
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     var userId = state.User.GetUserId();
     var isSetup = await Sender.Send(new CheckSetupQuery());
-    if (!isSetup) {
+    if (!isSetup)
+    {
       var isSuperUser = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.SuperUser));
-      if (isSuperUser) {
+      if (isSuperUser)
+      {
         NavigationManager.NavigateTo("/setup");
         return;
       }
@@ -44,59 +47,68 @@
     _canManageStartStop = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageDiscordClient));
 
     var metric = await Sender.Send(new GetLatestMetricQuery());
-    if (metric is not null) {
+    if (metric is not null)
+    {
       _metricDto = metric;
     }
   }
 
 
-  private async Task StartBotAsync() {
-    if (!_canManageStartStop) {
+  private async Task StartBotAsync()
+  {
+    if (!_canManageStartStop)
+    {
       return;
     }
 
-    var dialogResult = await DialogService.Confirm(Lang.StartBotConfirmation.Translate(),
-                                                   options: new ConfirmOptions {
-                                                     CloseDialogOnEsc = true,
-                                                     CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate()
-                                                   });
-    if (dialogResult == true) {
+    var dialogResult = await DialogService.Confirm(Lang.StartBotConfirmation.Translate(), options: new ConfirmOptions
+    {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = Lang.Yes.Translate(),
+            CancelButtonText = Lang.No.Translate()
+    });
+    if (dialogResult == true)
+    {
       await Bot.StartAsync();
       StateHasChanged();
       NotificationService.Notify(NotificationSeverity.Success, Lang.BotStartedSuccessfully.Translate());
     }
   }
 
-  private async Task StopBotAsync() {
-    if (!_canManageStartStop) {
+  private async Task StopBotAsync()
+  {
+    if (!_canManageStartStop)
+    {
       return;
     }
 
-    var dialogResult = await DialogService.Confirm(Lang.StopBotConfirmation.Translate(),
-                                                   options: new ConfirmOptions {
-                                                     CloseDialogOnEsc = true,
-                                                     CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate()
-                                                   });
-    if (dialogResult == true) {
+    var dialogResult = await DialogService.Confirm(Lang.StopBotConfirmation.Translate(), options: new ConfirmOptions
+    {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = Lang.Yes.Translate(),
+            CancelButtonText = Lang.No.Translate()
+    });
+    if (dialogResult == true)
+    {
       await Bot.StopAsync();
       StateHasChanged();
       NotificationService.Notify(NotificationSeverity.Success, Lang.BotStoppedSuccessfully.Translate());
     }
   }
 
-  private async Task RestartBotAsync() {
-    var dialogResult = await DialogService.Confirm(Lang.RestartBotConfirmation.Translate(),
-                                                   options: new ConfirmOptions {
-                                                     CloseDialogOnEsc = true,
-                                                     CloseDialogOnOverlayClick = true,
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate()
-                                                   });
-    if (dialogResult == true) {
+  private async Task RestartBotAsync()
+  {
+    var dialogResult = await DialogService.Confirm(Lang.RestartBotConfirmation.Translate(), options: new ConfirmOptions
+    {
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true,
+            OkButtonText = Lang.Yes.Translate(),
+            CancelButtonText = Lang.No.Translate()
+    });
+    if (dialogResult == true)
+    {
       await Bot.StopAsync();
       await Bot.StartAsync();
       StateHasChanged();
@@ -125,25 +137,30 @@
           <RadzenColumn Size="12">
             <RadzenText TextStyle="TextStyle.DisplayH4">
               @Lang.BotStatus.Translate()
-              @if (Bot.Connected) {
+              @if (Bot.Connected)
+              {
                 <span class="rz-color-success"> @($" {Lang.Connected.Translate()}")</span>
               }
-              else {
+              else
+              {
                 <span class="rz-color-danger"> @($" {Lang.Disconnected.Translate()}")</span>
               }
             </RadzenText>
           </RadzenColumn>
         </RadzenRow>
-        @if (_canManageStartStop) {
+        @if (_canManageStartStop)
+        {
           <RadzenRow class="rz-mb-2 rz-mt-5">
             <RadzenColumn Size="12">
-              @if (Bot.Connected) {
+              @if (Bot.Connected)
+              {
                 <RadzenButton ButtonStyle="ButtonStyle.Danger"
                               Click="@StopBotAsync">@Lang.StopBot.Translate()</RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Warning"
                               Click="@RestartBotAsync">@Lang.RestartBot.Translate()</RadzenButton>
               }
-              else {
+              else
+              {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Click="@StartBotAsync">@Lang.StartBot.Translate()</RadzenButton>
               }
@@ -153,7 +170,8 @@
 
       </RadzenCard>
 
-      @if (_metricDto is not null) {
+      @if (_metricDto is not null)
+      {
         <RadzenRow RowGap="4" class="rz-mt-5">
           <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
             <RadzenCard class="rz-shadow-7">

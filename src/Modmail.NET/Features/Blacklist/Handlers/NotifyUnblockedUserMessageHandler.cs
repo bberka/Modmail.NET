@@ -9,26 +9,27 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class NotifyUnblockedUserMessageHandler : INotificationHandler<NotifyUnblockedUser>
 {
-	private readonly IMediator _mediator;
+    private readonly IMediator _mediator;
 
-	public NotifyUnblockedUserMessageHandler(IMediator mediator) {
-		_mediator = mediator;
-	}
+    public NotifyUnblockedUserMessageHandler(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
 
-	public async ValueTask Handle(NotifyUnblockedUser notification, CancellationToken cancellationToken) {
-		var member = await _mediator.Send(new GetDiscordMemberQuery(notification.UserId), cancellationToken);
-		if (member is null)
-			//TODO: Log
-			return;
-		var option = await _mediator.Send(new GetOptionQuery(), cancellationToken);
+    public async ValueTask Handle(NotifyUnblockedUser notification, CancellationToken cancellationToken)
+    {
+        var member = await _mediator.Send(new GetDiscordMemberQuery(notification.UserId), cancellationToken);
+        if (member is null)
+            //TODO: Log
+            return;
+        var option = await _mediator.Send(new GetOptionQuery(), cancellationToken);
 
-		var embed = new DiscordEmbedBuilder()
-		            .WithTitle(Lang.YouHaveBeenRemovedFromBlacklist.Translate())
-		            .WithDescription(Lang.YouHaveBeenRemovedFromBlacklistDescription.Translate())
-		            .WithServerInfoFooter(option)
-		            .WithCustomTimestamp()
-		            .WithColor(ModmailColors.SuccessColor);
+        var embed = new DiscordEmbedBuilder().WithTitle(Lang.YouHaveBeenRemovedFromBlacklist.Translate())
+            .WithDescription(Lang.YouHaveBeenRemovedFromBlacklistDescription.Translate())
+            .WithServerInfoFooter(option)
+            .WithCustomTimestamp()
+            .WithColor(ModmailColors.SuccessColor);
 
-		await member.SendMessageAsync(embed);
-	}
+        await member.SendMessageAsync(embed);
+    }
 }

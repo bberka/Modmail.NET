@@ -24,16 +24,18 @@
 
     private UserInformation[]? _members;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         var dbContext = await DbContextFactory.CreateDbContextAsync();
         _members = await dbContext.UserInformation.ToArrayAsync();
         await ReloadDataAsync();
     }
 
-    bool _isLoading = false;
+    bool _isLoading;
     private TeamUser[]? _data;
 
-    async Task ShowLoading() {
+    async Task ShowLoading()
+    {
         _isLoading = true;
 
         await Task.Yield();
@@ -41,32 +43,38 @@
         _isLoading = false;
     }
 
-    private async Task LoadDataAsync(LoadDataArgs obj) {
+    private async Task LoadDataAsync(LoadDataArgs obj)
+    {
         await ReloadDataAsync(obj);
     }
 
-    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+    private async Task ReloadDataAsync(LoadDataArgs? args = null)
+    {
         await ShowLoading();
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var query = dbContext.TeamUsers
-                             .Where(x => x.TeamId == Team.Id)
-                             .OrderByDescending(x => x.RegisterDateUtc)
-                             .AsQueryable();
+        var query = dbContext.TeamUsers.Where(x => x.TeamId == Team.Id)
+                .OrderByDescending(x => x.RegisterDateUtc)
+                .AsQueryable();
 
         query = query.ApplyDataGridFilter(args);
 
         _data = args is not null
-                        ? query.ApplyPagination(args).ToArray()
-                        : query.Skip(0).Take(5).ToArray();
+                ? query.ApplyPagination(args)
+                        .ToArray()
+                : query.Skip(0)
+                        .Take(5)
+                        .ToArray();
 
         StateHasChanged();
     }
 
 
-    private async Task RemoveAsync(TeamUser teamPermission) {
+    private async Task RemoveAsync(TeamUser teamPermission)
+    {
         const string logMessage = $"[{nameof(TeamDetailsDialogComponent)}]{nameof(RemoveAsync)}({{@Member}})";
-        try {
+        try
+        {
             var state = await AuthContext;
             var userId = state.User.GetUserId();
             await Sender.Send(new ProcessRemoveTeamMemberCommand(userId, teamPermission.UserId));
@@ -74,11 +82,13 @@
             NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TeamMemberRemoved.Translate());
             await ReloadDataAsync();
         }
-        catch (ModmailBotException ex) {
+        catch (ModmailBotException ex)
+        {
             Log.Warning(ex, logMessage, teamPermission);
             ex.NotifyException(NotificationService);
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Log.Fatal(ex, logMessage, teamPermission);
             ex.NotifyException(NotificationService);
         }
@@ -86,23 +96,27 @@
 
 }
 
-@if (_data is null || _members is null) {
+@if (_data is null || _members is null)
+{
     <Loading></Loading>
 }
-else {
+else
+{
     <RadzenRow>
         <RadzenColumn>
             <RadzenText TextStyle="TextStyle.Subtitle1">
                 You can not remove users that are assigned to this team through role sync, or from bot config file.
             </RadzenText>
 
-            @if (Team.SuperUserTeam) {
+            @if (Team.SuperUserTeam)
+            {
                 <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-warning">
                     This team is automatically created from bot config file and can not be changed.
                 </RadzenText>
             }
 
-            @if (_data.Length == 0) {
+            @if (_data.Length == 0)
+            {
                 <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-on-secondary-lighter">
                     @Lang.TeamHasNoMembers.Translate()
                 </RadzenText>
@@ -127,12 +141,14 @@ else {
                             <RadzenColumn Size="10" SizeLG="10" class="rz-p-4 product-title">
                                 <RadzenColumn Size="12" SizeMD="6">
                                     <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5"
-                                                class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.UserId)?.Username ?? $"Id:{member.UserId}")</RadzenText>
+                                                class="rz-color-on-secondary-lighter">@(_members.FirstOrDefault(x => x.Id == member.UserId)
+                                                ?.Username ?? $"Id:{member.UserId}")</RadzenText>
                                     <RadzenText TextStyle="TextStyle.Body2">User</RadzenText>
                                 </RadzenColumn>
                             </RadzenColumn>
                             <RadzenColumn Size="2" SizeLG="2" class="rz-p-4">
-                                @if (!Team.SuperUserTeam) {
+                                @if (!Team.SuperUserTeam)
+                                {
                                     <RadzenButton ButtonStyle="ButtonStyle.Danger"
                                                   Icon="delete"
                                                   Variant="Variant.Flat"

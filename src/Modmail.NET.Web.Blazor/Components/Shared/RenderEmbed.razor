@@ -1,0 +1,19 @@
+@using Modmail.NET.Database.Entities
+@*//TODO: Fully render embed *@
+
+@if (!string.IsNullOrEmpty(Embed.Title))
+{
+    <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">
+        @Embed.Title
+    </RadzenText>
+}
+<RadzenMarkdown>
+    @Embed.Description
+</RadzenMarkdown>
+
+@code {
+
+    [Parameter]
+    public required Embed Embed { get; set; }
+
+}

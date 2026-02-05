@@ -8,17 +8,20 @@ namespace Modmail.NET.Web.Blazor.Controllers;
 [Route("auth")]
 public class AuthController : Controller
 {
-  [HttpGet("login")]
-  public IActionResult Login() {
-    return Challenge(new AuthenticationProperties {
-      RedirectUri = "/auth/callback",
-      IsPersistent = true
-    }, DiscordAuthenticationDefaults.AuthenticationScheme);
-  }
+    [HttpGet("login")]
+    public IActionResult Login()
+    {
+        return Challenge(new AuthenticationProperties
+        {
+            RedirectUri = "/auth/callback",
+            IsPersistent = true
+        }, DiscordAuthenticationDefaults.AuthenticationScheme);
+    }
 
-  [HttpGet("logout")]
-  public async Task<IActionResult> Logout() {
-    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Redirect("/");
-  }
+    [HttpGet("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Redirect("/");
+    }
 }

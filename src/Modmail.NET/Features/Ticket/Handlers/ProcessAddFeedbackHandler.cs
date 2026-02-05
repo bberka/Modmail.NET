@@ -10,46 +10,50 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessAddFeedbackHandler : IRequestHandler<ProcessAddFeedbackCommand>
 {
-	private readonly ModmailDbContext _dbContext;
-	private readonly ISender _sender;
+    private readonly ModmailDbContext _dbContext;
+    private readonly ISender _sender;
 
-	public ProcessAddFeedbackHandler(ISender sender,
-	                                 ModmailDbContext dbContext,
-	                                 ModmailBot bot) {
-		_sender = sender;
-		_dbContext = dbContext;
-	}
+    public ProcessAddFeedbackHandler(
+        ISender sender,
+        ModmailDbContext dbContext,
+        ModmailBot bot
+    )
+    {
+        _sender = sender;
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<Unit> Handle(ProcessAddFeedbackCommand request, CancellationToken cancellationToken) {
-		if (request.StarCount is < 1 or > 5) throw new InvalidOperationException("Star count must be between 1 and 5");
-		if (string.IsNullOrEmpty(request.TextInput)) throw new InvalidOperationException("Feedback messageContent is empty");
-		if (request.FeedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
+    public async ValueTask<Unit> Handle(ProcessAddFeedbackCommand request, CancellationToken cancellationToken)
+    {
+        if (request.StarCount is < 1 or > 5) throw new InvalidOperationException("Star count must be between 1 and 5");
+        if (string.IsNullOrEmpty(request.TextInput)) throw new InvalidOperationException("Feedback messageContent is empty");
+        if (request.FeedbackMessage is null) throw new InvalidOperationException("Feedback messageContent is null");
 
-		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
-		if (!option.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + option.ServerId);
+        var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
+        if (!option.TakeFeedbackAfterClosing) throw new InvalidOperationException("Feedback is not enabled for this guild: " + option.ServerId);
 
-		var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
-		ticket.ThrowIfNotClosed();
-		if (ticket.FeedbackStar.HasValue) throw new ModmailBotException(Lang.FeedbackAlreadySubmitted);
+        var ticket = await _dbContext.Tickets.FindAsync([request.TicketId], cancellationToken) ?? throw new NullReferenceException(nameof(Ticket));
+        ticket.ThrowIfNotClosed();
+        if (ticket.FeedbackStar.HasValue) throw new ModmailBotException(Lang.FeedbackAlreadySubmitted);
 
-		ticket.FeedbackStar = request.StarCount;
-		ticket.FeedbackMessage = request.TextInput;
-		_dbContext.Update(ticket);
-		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
-		if (affected == 0) throw new DbInternalException();
+        ticket.FeedbackStar = request.StarCount;
+        ticket.FeedbackMessage = request.TextInput;
+        _dbContext.Update(ticket);
+        var affected = await _dbContext.SaveChangesAsync(cancellationToken);
+        if (affected == 0) throw new DbInternalException();
 
-		var feedbackDoneEmbed = new DiscordEmbedBuilder()
-		                        .WithTitle(Lang.FeedbackReceived.Translate())
-		                        .WithCustomTimestamp()
-		                        .WithServerInfoFooter(option)
-		                        .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
-		                        .WithColor(ModmailColors.FeedbackColor);
-		if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDoneEmbed.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);
+        var feedbackDoneEmbed = new DiscordEmbedBuilder().WithTitle(Lang.FeedbackReceived.Translate())
+            .WithCustomTimestamp()
+            .WithServerInfoFooter(option)
+            .AddField(Lang.Star.Translate(), Lang.StarEmoji.Translate() + ticket.FeedbackStar)
+            .WithColor(ModmailColors.FeedbackColor);
+        if (!string.IsNullOrEmpty(ticket.FeedbackMessage)) feedbackDoneEmbed.AddField(Lang.Feedback.Translate(), ticket.FeedbackMessage);
 
-		await request.FeedbackMessage.ModifyAsync(x => {
-			x.Clear();
-			x.AddEmbed(feedbackDoneEmbed);
-		});
-		return Unit.Value;
-	}
+        await request.FeedbackMessage.ModifyAsync(x =>
+        {
+            x.Clear();
+            x.AddEmbed(feedbackDoneEmbed);
+        });
+        return Unit.Value;
+    }
 }

@@ -6,13 +6,15 @@ namespace Modmail.NET.Features.Teams.Handlers;
 
 public class CheckUserInAnyTeamHandler : IRequestHandler<CheckUserInAnyTeamQuery, bool>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public CheckUserInAnyTeamHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public CheckUserInAnyTeamHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<bool> Handle(CheckUserInAnyTeamQuery request, CancellationToken cancellationToken) {
-		return await _dbContext.TeamUsers.AnyAsync(x => x.UserId == request.UserId, cancellationToken);
-	}
+    public async ValueTask<bool> Handle(CheckUserInAnyTeamQuery request, CancellationToken cancellationToken)
+    {
+        return await _dbContext.TeamUsers.AnyAsync(x => x.UserId == request.UserId, cancellationToken);
+    }
 }

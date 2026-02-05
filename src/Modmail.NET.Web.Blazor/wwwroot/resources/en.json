@@ -328,5 +328,7 @@
   "ShowNotes": "Show Notes",
   "ShowFeedback": "Show Feedback",
   "LastMessageDateUtc": "Last Message Date UTC",
-  "ClosedDateUtc": "Closed Date UTC"
+  "ClosedDateUtc": "Closed Date UTC",
+  "EmbedDoesntExists": "Embed does not exists",
+  "ShowEmbed": "Show Embed"
 }

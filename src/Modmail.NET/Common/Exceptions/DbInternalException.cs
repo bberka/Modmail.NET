@@ -4,5 +4,7 @@ namespace Modmail.NET.Common.Exceptions;
 
 public class DbInternalException : ModmailBotException
 {
-  public DbInternalException() : base(Lang.DbInternalError) { }
+    public DbInternalException() : base(Lang.DbInternalError)
+    {
+    }
 }

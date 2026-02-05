@@ -1,4 +1,3 @@
-using Modmail.NET;
 using Modmail.NET.Common.Utils;
 using Modmail.NET.Language;
 using Modmail.NET.Web.Blazor.Components;
@@ -23,9 +22,10 @@ _ = LangProvider.This;
 
 #region DEV
 
-if (!app.Environment.IsDevelopment()) {
-  app.UseExceptionHandler("/Error", true);
-  app.UseHsts();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", true);
+    app.UseHsts();
 }
 
 #endregion
@@ -43,7 +43,7 @@ app.UseAuthorization();
 app.MapControllers();
 HangfireDependency.Initialize(app); //initializes UI 
 app.MapRazorComponents<App>()
-   .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode();
 
 
 Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetReadableProductVersion());

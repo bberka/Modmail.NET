@@ -23,94 +23,93 @@
   string _name = "";
   string? _emoji = "";
   string _description = "";
-  int _order = 0;
-  string? _embedMessageTitle = null;
-  string? _embedMessageContent = null;
+  int _order;
+  Embed? _embed;
 
-  protected override Task OnInitializedAsync() {
-    if (TicketType is not null) {
+  protected override Task OnInitializedAsync()
+  {
+    if (TicketType is not null)
+    {
       _name = TicketType.Name;
       _emoji = TicketType.Emoji;
       _description = TicketType.Description;
       _order = TicketType.Order;
-      _embedMessageTitle = TicketType.EmbedMessageTitle;
-      _embedMessageContent = TicketType.EmbedMessageContent;
+      _embed = TicketType.Embed;
     }
 
     return base.OnInitializedAsync();
   }
 
-  private async Task SubmitAsync() {
-    if (string.IsNullOrEmpty(_name)) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
+  private async Task SubmitAsync()
+  {
+    if (string.IsNullOrEmpty(_name))
+    {
+      Radzen.NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a name.");
       return;
     }
 
-    if (string.IsNullOrEmpty(_description)) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a description.");
+    if (string.IsNullOrEmpty(_description))
+    {
+      Radzen.NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a description.");
       return;
     }
 
     var fromUnicode = DiscordEmoji.TryFromUnicode(_emoji ?? string.Empty, out var unicodeEmoji);
     var fromName = DiscordEmoji.TryFromName(Bot.Client, _emoji ?? string.Empty, out var nameEmoji);
     var anySuccessEmojiParse = fromUnicode || fromName;
-    if (!anySuccessEmojiParse) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
+    if (!anySuccessEmojiParse)
+    {
+      Radzen.NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please enter a valid emoji.");
       return;
     }
 
-    var emojiUnicode = fromUnicode
-                         ? unicodeEmoji.Name
-                         : nameEmoji;
+    var emojiUnicode = fromUnicode ? unicodeEmoji.Name : nameEmoji;
 
 
-    var dialogResult = await DialogService.Confirm(IsUpdate
-                                                     ? "Are you sure you want to update this ticket type ?"
-                                                     : "Are you sure you want to create new ticket type ?",
-                                                   options: new ConfirmOptions {
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate(),
-                                                     CloseDialogOnOverlayClick = true,
-                                                     CloseDialogOnEsc = true
-                                                   });
-    if (dialogResult == true) {
+    var dialogResult = await Radzen.DialogService.Confirm(IsUpdate ? "Are you sure you want to update this ticket type ?" : "Are you sure you want to create new ticket type ?", options: new ConfirmOptions
+    {
+            OkButtonText = Lang.Yes.Translate(),
+            CancelButtonText = Lang.No.Translate(),
+            CloseDialogOnOverlayClick = true,
+            CloseDialogOnEsc = true
+    });
+    if (dialogResult == true)
+    {
       const string logMessage = $"[{nameof(CreateOrUpdateTicketTypeDialogComponent)}]{nameof(SubmitAsync)}({{Name}})";
-      try {
+      try
+      {
         var state = await AuthContext;
         var userId = state.User.GetUserId();
 
-        if (IsUpdate && TicketType is not null) {
+        if (IsUpdate && TicketType is not null)
+        {
           TicketType.Name = _name;
           TicketType.Emoji = emojiUnicode;
           TicketType.Description = _description;
           TicketType.Order = _order;
-          TicketType.EmbedMessageTitle = _embedMessageTitle;
-          TicketType.EmbedMessageContent = _embedMessageContent;
+          TicketType.Embed = _embed;
           await Sender.Send(new ProcessUpdateTicketTypeCommand(userId, TicketType));
           Log.Information(logMessage, _name);
-          NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
+          Radzen.NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type updated successfully.");
         }
-        else {
-          await Sender.Send(new ProcessCreateTicketTypeCommand(userId,
-                                                               _name,
-                                                               emojiUnicode,
-                                                               _description,
-                                                               _order,
-                                                               _embedMessageTitle,
-                                                               _embedMessageContent));
+        else
+        {
+          await Sender.Send(new ProcessCreateTicketTypeCommand(userId, _name, emojiUnicode, _description, _order, _embed));
           Log.Information(logMessage, _name);
-          NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
+          Radzen.NotificationService.Notify(NotificationSeverity.Success, "Success", "Ticket Type created successfully.");
         }
 
-        DialogService.Close(true);
+        Radzen.DialogService.Close(true);
       }
-      catch (ModmailBotException ex) {
+      catch (ModmailBotException ex)
+      {
         Log.Warning(ex, logMessage, _name);
-        ex.NotifyException(NotificationService);
+        ex.NotifyException(Radzen.NotificationService);
       }
-      catch (Exception ex) {
+      catch (Exception ex)
+      {
         Log.Fatal(ex, logMessage, _name);
-        ex.NotifyException(NotificationService);
+        ex.NotifyException(Radzen.NotificationService);
       }
     }
   }
@@ -145,24 +144,12 @@
       </RadzenFormField>
     </RadzenRow>
 
-
-    <RadzenRow class="rz-my-4">
-      <RadzenFormField Text="Embed Message Title" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="embedMessageTitle" @bind-Value="@_embedMessageTitle"></RadzenTextBox>
-      </RadzenFormField>
-    </RadzenRow>
-
-    <RadzenRow class="rz-my-4">
-      <RadzenFormField Text="Embed Message Content" class="w-100" Variant="Variant.Outlined">
-        <RadzenTextBox Name="embedMessageContent" @bind-Value="@_embedMessageContent"></RadzenTextBox>
-      </RadzenFormField>
-    </RadzenRow>
+    <CreateEmbedInputs @bind-Embed="_embed"></CreateEmbedInputs>
 
 
     <RadzenRow class="rz-my-4">
-      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="@(IsUpdate
-                                                                                               ? "Update"
-                                                                                               : "Create")"
+      <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary"
+                    Text="@(IsUpdate ? "Update" : "Create")"
                     Click="SubmitAsync"/>
     </RadzenRow>
   </RadzenColumn>

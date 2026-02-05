@@ -6,10 +6,14 @@ namespace Modmail.NET.Database.Configuration;
 
 public class TeamUserConfiguration : IEntityTypeConfiguration<TeamUser>
 {
-  public void Configure(EntityTypeBuilder<TeamUser> builder) {
-    builder.HasKey(x => x.Id);
+    public void Configure(EntityTypeBuilder<TeamUser> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-    builder.Property(x => x.Id)
-           .ValueGeneratedOnAdd();
-  }
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
+        builder.HasIndex(x => x.UserId)
+            .IsUnique();
+    }
 }

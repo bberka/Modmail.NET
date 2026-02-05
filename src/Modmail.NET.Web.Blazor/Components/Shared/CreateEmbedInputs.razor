@@ -1,0 +1,69 @@
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Database.Entities
+<RadzenRow class="rz-my-4">
+    <RadzenFormField Text="Title" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="Title" @bind-Value="@Embed.Title" MaxLength="DbLength.Title"></RadzenTextBox>
+    </RadzenFormField>
+</RadzenRow>
+
+<RadzenRow class="rz-my-4">
+    <RadzenFormField Text="Description" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextArea Name="Description" @bind-Value="@Embed.Description"
+                        Style="min-height: 300px; max-width: 550px"></RadzenTextArea>
+    </RadzenFormField>
+</RadzenRow>
+
+<RadzenRow class="rz-my-4">
+    <RadzenFormField Text="Color" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="Color" @bind-Value="@Embed.Color" MaxLength="DbLength.DiscordColor"></RadzenTextBox>
+    </RadzenFormField>
+</RadzenRow>
+
+<RadzenRow class="rz-my-4">
+    <RadzenFormField Text="Image URL" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="ImageUrl" @bind-Value="@Embed.ImageUrl" MaxLength="DbLength.Url"></RadzenTextBox>
+    </RadzenFormField>
+</RadzenRow>
+
+<RadzenRow class="rz-my-4">
+    <RadzenFormField Text="Thumbnail URL" class="w-100" Variant="Variant.Outlined">
+        <RadzenTextBox Name="ThumbnailUrl" @bind-Value="@Embed.ThumbnailUrl" MaxLength="DbLength.Url"></RadzenTextBox>
+    </RadzenFormField>
+</RadzenRow>
+
+
+@* <RadzenRow class="rz-my-4"> *@
+@*     <RadzenSwitch Name="IncludeAuthor" @bind-Value="@Embed.IncludeAuthor"/> *@
+@*     <RadzenLabel Component="IncludeAuthor"> *@
+@*         Include Author *@
+@*     </RadzenLabel> *@
+@* </RadzenRow> *@
+
+<RadzenRow class="rz-my-4">
+    <RadzenSwitch Name="WithServerInfoFooter" @bind-Value="@Embed.WithServerInfoFooter"/>
+    <RadzenLabel Component="WithServerInfoFooter">
+        With Server Info Footer
+    </RadzenLabel>
+</RadzenRow>
+
+<RadzenRow class="rz-my-4">
+    <RadzenSwitch Name="WithTimestamp" @bind-Value="@Embed.WithTimestamp"/>
+    <RadzenLabel Component="WithTimestamp">
+        With Timestamp
+    </RadzenLabel>
+</RadzenRow>
+
+@code {
+
+    [Parameter]
+    public required Embed Embed { get; set; }
+
+    [Parameter]
+    public EventCallback<Embed> EmbedChanged { get; set; }
+
+    private async Task OnEmbedChanged()
+    {
+        await EmbedChanged.InvokeAsync(Embed);
+    }
+
+}

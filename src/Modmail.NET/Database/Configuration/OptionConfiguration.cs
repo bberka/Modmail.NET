@@ -6,10 +6,11 @@ namespace Modmail.NET.Database.Configuration;
 
 public class OptionConfiguration : IEntityTypeConfiguration<Option>
 {
-  public void Configure(EntityTypeBuilder<Option> builder) {
-    builder.HasKey(x => x.ServerId);
+    public void Configure(EntityTypeBuilder<Option> builder)
+    {
+        builder.HasKey(x => x.ServerId);
 
-    builder.Property(x => x.ServerId)
-           .ValueGeneratedNever();
-  }
+        builder.Property(x => x.ServerId)
+            .ValueGeneratedNever();
+    }
 }

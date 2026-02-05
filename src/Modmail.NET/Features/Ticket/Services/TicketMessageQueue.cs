@@ -14,169 +14,122 @@ namespace Modmail.NET.Features.Ticket.Services;
 
 public class TicketMessageQueue : MemoryQueueBase<ulong, MessageCreatedEventArgs>
 {
-	private readonly IOptions<BotConfig> _options;
-	private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IOptions<BotConfig> _options;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-	public TicketMessageQueue(
-		IServiceScopeFactory scopeFactory,
-		IOptions<BotConfig> options
-	) : base(TimeSpan.FromMinutes(15)) {
-		_scopeFactory = scopeFactory;
-		_options = options;
-	}
+    public TicketMessageQueue(IServiceScopeFactory scopeFactory, IOptions<BotConfig> options) : base(TimeSpan.FromMinutes(15))
+    {
+        _scopeFactory = scopeFactory;
+        _options = options;
+    }
 
-	protected override async Task Handle(ulong userId, MessageCreatedEventArgs args) {
-		if (args.Message.Content.StartsWith(_options.Value.BotPrefix)) {
-			Log.Debug(
-			          "[{Source}] Ignoring message due to bot prefix. UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessageQueue),
-			          userId,
-			          args.Message.Content
-			         );
-			return;
-		}
+    protected override async Task Handle(ulong userId, MessageCreatedEventArgs args)
+    {
+        if (args.Message.Content.StartsWith(_options.Value.BotPrefix))
+        {
+            Log.Debug("[{Source}] Ignoring message due to bot prefix. UserId: {UserId}, Message: {Message}", nameof(TicketMessageQueue), userId,
+                args.Message.Content);
+            return;
+        }
 
-		if (args.Channel.IsPrivate)
-			await HandlePrivateTicketMessageAsync(args.Message, args.Channel, args.Author);
-		else
-			await HandleGuildTicketMessageAsync(args.Message, args.Channel, args.Author);
-	}
+        if (args.Channel.IsPrivate)
+            await HandlePrivateTicketMessageAsync(args.Message, args.Channel, args.Author);
+        else
+            await HandleGuildTicketMessageAsync(args.Message, args.Channel, args.Author);
+    }
 
-	[PerformanceLoggerAspect]
-	private async Task HandlePrivateTicketMessageAsync(
-		DiscordMessage message,
-		DiscordChannel channel,
-		DiscordUser user
-	) {
-		Log.Debug(
-		          "[{Source}] Handling private ticket message. UserId: {UserId}, Message: {Message}",
-		          nameof(TicketMessageQueue),
-		          user.Id,
-		          message.Content
-		         );
+    [PerformanceLoggerAspect]
+    private async Task HandlePrivateTicketMessageAsync(
+        DiscordMessage message,
+        DiscordChannel channel,
+        DiscordUser user
+    )
+    {
+        Log.Debug("[{Source}] Handling private ticket message. UserId: {UserId}, Message: {Message}", nameof(TicketMessageQueue), user.Id,
+            message.Content);
 
-		using var scope = _scopeFactory.CreateScope();
-		var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-		var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
+        using var scope = _scopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ModmailDbContext>();
 
-		try {
-			if (await dbContext.Blacklists.FilterByUserId(user.Id).AnyAsync()) {
-				Log.Information(
-				                "[{Source}] User is blacklisted, sending rejection message. UserId: {UserId}",
-				                nameof(TicketMessageQueue),
-				                user.Id
-				               );
-				//TODO: Send rejection message to user, however it may not be needed since the last message from bot already gonna be you are blacklisted message
-				return;
-			}
+        try
+        {
+            if (await dbContext.Blacklists.FilterByUserId(user.Id)
+                    .AnyAsync())
+            {
+                Log.Information("[{Source}] User is blacklisted, sending rejection message. UserId: {UserId}", nameof(TicketMessageQueue), user.Id);
+                //TODO: Send rejection message to user, however it may not be needed since the last message from bot already gonna be you are blacklisted message
+                return;
+            }
 
 
-			var activeTicket = await dbContext.Tickets
-			                                  .FilterActive()
-			                                  .FilterByOpenerUserId(user.Id)
-			                                  .FirstOrDefaultAsync();
+            var activeTicket = await dbContext.Tickets.FilterActive()
+                .FilterByOpenerUserId(user.Id)
+                .FirstOrDefaultAsync();
 
-			if (activeTicket is not null) {
-				Log.Debug(
-				          "[{Source}] Active ticket found, processing user message. TicketId: {TicketId}, UserId: {UserId}",
-				          nameof(TicketMessageQueue),
-				          activeTicket.Id,
-				          user.Id
-				         );
-				await mediator.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
-			}
-			else {
-				Log.Debug(
-				          "[{Source}] No active ticket found, creating a new ticket. UserId: {UserId}",
-				          nameof(TicketMessageQueue),
-				          user.Id
-				         );
-				await mediator.Send(new ProcessCreateNewTicketCommand(user, channel, message));
-			}
+            if (activeTicket is not null)
+            {
+                Log.Debug("[{Source}] Active ticket found, processing user message. TicketId: {TicketId}, UserId: {UserId}",
+                    nameof(TicketMessageQueue), activeTicket.Id, user.Id);
+                await mediator.Send(new ProcessUserSentMessageCommand(activeTicket.Id, message, channel));
+            }
+            else
+            {
+                Log.Debug("[{Source}] No active ticket found, creating a new ticket. UserId: {UserId}", nameof(TicketMessageQueue), user.Id);
+                await mediator.Send(new ProcessCreateNewTicketCommand(user, channel, message));
+            }
 
-			Log.Information(
-			                "[{Source}] Processed private message. UserId: {UserId}, Message: {Message}",
-			                nameof(TicketMessageQueue),
-			                user.Id,
-			                message.Content
-			               );
-		}
-		catch (ModmailBotException ex) {
-			Log.Warning(
-			            ex,
-			            "[{Source}] ModmailBotException: Error processing private message. UserId: {UserId}, Message: {Message}",
-			            nameof(TicketMessageQueue),
-			            user.Id,
-			            message.Content
-			           );
-		}
-		catch (Exception ex) {
-			Log.Error(
-			          ex,
-			          "[{Source}] Unexpected error processing private message. UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessageQueue),
-			          user.Id,
-			          message.Content
-			         );
-		}
-	}
+            Log.Information("[{Source}] Processed private message. UserId: {UserId}, Message: {Message}", nameof(TicketMessageQueue), user.Id,
+                message.Content);
+        }
+        catch (ModmailBotException ex)
+        {
+            Log.Warning(ex, "[{Source}] ModmailBotException: Error processing private message. UserId: {UserId}, Message: {Message}",
+                nameof(TicketMessageQueue), user.Id, message.Content);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[{Source}] Unexpected error processing private message. UserId: {UserId}, Message: {Message}", nameof(TicketMessageQueue),
+                user.Id, message.Content);
+        }
+    }
 
-	[PerformanceLoggerAspect]
-	private async Task HandleGuildTicketMessageAsync(
-		DiscordMessage message,
-		DiscordChannel channel,
-		DiscordUser modUser
-	) {
-		Log.Debug(
-		          "[{Source}] Handling guild ticket message. ChannelId: {ChannelId}, UserId: {UserId}, Message: {Message}",
-		          nameof(TicketMessageQueue),
-		          channel.Id,
-		          modUser.Id,
-		          message.Content
-		         );
+    [PerformanceLoggerAspect]
+    private async Task HandleGuildTicketMessageAsync(
+        DiscordMessage message,
+        DiscordChannel channel,
+        DiscordUser modUser
+    )
+    {
+        Log.Debug("[{Source}] Handling guild ticket message. ChannelId: {ChannelId}, UserId: {UserId}, Message: {Message}",
+            nameof(TicketMessageQueue), channel.Id, modUser.Id, message.Content);
 
-		using var scope = _scopeFactory.CreateScope();
-		var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
-		if (ticketId == Guid.Empty) {
-			Log.Warning(
-			            "[{Source}] Invalid ticket id, ignoring message. ChannelId: {ChannelId}, Topic: {Topic}",
-			            nameof(TicketMessageQueue),
-			            channel.Id,
-			            channel.Topic
-			           );
-			return;
-		}
+        using var scope = _scopeFactory.CreateScope();
+        var ticketId = UtilChannelTopic.GetTicketIdFromChannelTopic(channel.Topic);
+        if (ticketId == Guid.Empty)
+        {
+            Log.Warning("[{Source}] Invalid ticket id, ignoring message. ChannelId: {ChannelId}, Topic: {Topic}", nameof(TicketMessageQueue),
+                channel.Id, channel.Topic);
+            return;
+        }
 
-		try {
-			var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-			await sender.Send(new ProcessModSendMessageCommand(modUser.Id, ticketId, message));
-			Log.Information(
-			                "[{Source}] Processed guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			                nameof(TicketMessageQueue),
-			                ticketId,
-			                modUser.Id,
-			                message.Content
-			               );
-		}
-		catch (ModmailBotException ex) {
-			Log.Warning(
-			            ex,
-			            "[{Source}] ModmailBotException: Error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			            nameof(TicketMessageQueue),
-			            ticketId,
-			            modUser.Id,
-			            message.Content
-			           );
-		}
-		catch (Exception ex) {
-			Log.Error(
-			          ex,
-			          "[{Source}] Unexpected error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
-			          nameof(TicketMessageQueue),
-			          ticketId,
-			          modUser.Id,
-			          message.Content
-			         );
-		}
-	}
+        try
+        {
+            var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+            await sender.Send(new ProcessModSendMessageCommand(modUser.Id, ticketId, message));
+            Log.Information("[{Source}] Processed guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
+                nameof(TicketMessageQueue), ticketId, modUser.Id, message.Content);
+        }
+        catch (ModmailBotException ex)
+        {
+            Log.Warning(ex,
+                "[{Source}] ModmailBotException: Error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
+                nameof(TicketMessageQueue), ticketId, modUser.Id, message.Content);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[{Source}] Unexpected error processing guild message. TicketId: {TicketId}, UserId: {UserId}, Message: {Message}",
+                nameof(TicketMessageQueue), ticketId, modUser.Id, message.Content);
+        }
+    }
 }

@@ -6,20 +6,21 @@ namespace Modmail.NET.Database.Configuration;
 
 public class TicketMessageConfiguration : IEntityTypeConfiguration<TicketMessage>
 {
-  public void Configure(EntityTypeBuilder<TicketMessage> builder) {
-    builder.HasKey(x => x.Id);
+    public void Configure(EntityTypeBuilder<TicketMessage> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-    builder.Property(x => x.Id)
-           .ValueGeneratedOnAdd();
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
 
-    builder.HasOne<UserInformation>()
-           .WithMany()
-           .HasForeignKey(x => x.SenderUserId)
-           .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<UserInformation>()
+            .WithMany()
+            .HasForeignKey(x => x.SenderUserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-    builder.HasOne<Ticket>()
-           .WithMany(x => x.Messages)
-           .HasForeignKey(x => x.TicketId)
-           .OnDelete(DeleteBehavior.Cascade);
-  }
+        builder.HasOne<Ticket>()
+            .WithMany(x => x.Messages)
+            .HasForeignKey(x => x.TicketId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }

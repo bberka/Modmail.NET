@@ -6,13 +6,15 @@ namespace Modmail.NET.Features.Server.Handlers;
 
 public class CheckSetupHandler : IRequestHandler<CheckSetupQuery, bool>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public CheckSetupHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public CheckSetupHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<bool> Handle(CheckSetupQuery request, CancellationToken cancellationToken) {
-		return await _dbContext.Options.AnyAsync(cancellationToken);
-	}
+    public async ValueTask<bool> Handle(CheckSetupQuery request, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Options.AnyAsync(cancellationToken);
+    }
 }

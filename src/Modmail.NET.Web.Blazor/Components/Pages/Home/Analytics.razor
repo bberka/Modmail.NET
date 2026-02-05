@@ -15,11 +15,13 @@
 
   private MetricDto _metricDto = MetricDto.Default;
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     _ = state.User.GetUserId();
     var metric = await Sender.Send(new GetLatestMetricQuery());
-    if (metric is not null) {
+    if (metric is not null)
+    {
       _metricDto = metric;
     }
   }
@@ -40,7 +42,8 @@
       </RadzenRow>
     </RadzenColumn>
     <RadzenColumn Size="12">
-      @if (_metricDto is not null) {
+      @if (_metricDto is not null)
+      {
         <RadzenRow RowGap="4">
           <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
             <RadzenCard class="rz-shadow-7">

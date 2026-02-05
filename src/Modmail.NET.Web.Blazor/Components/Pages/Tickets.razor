@@ -1,0 +1,335 @@
+﻿@page "/tickets"
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Web.Blazor.Components.Shared.Tickets
+@using Modmail.NET.Web.Blazor.Static
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject TooltipService tooltipService
+@inject DialogService dialogService
+@inject NotificationService notificationService
+
+@code {
+
+    private IQueryable<TicketDto>? data;
+
+    bool isLoading;
+
+    async Task ShowLoading()
+    {
+        isLoading = true;
+
+        await Task.Yield();
+
+        isLoading = false;
+    }
+
+    private async Task reloadDataAsync(LoadDataArgs? args = null)
+    {
+        await ShowLoading();
+
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var query = dbContext.Tickets.Include(x => x.OpenerUser)
+            .Include(x => x.CloserUser)
+            .Include(x => x.TicketType)
+            .OrderByDescending(x => x.RegisterDateUtc)
+            .ProjectToDto()
+            .AsQueryable();
+
+        switch (filterTicketType)
+        {
+            case TicketFilterType.All:
+                break;
+            case TicketFilterType.Active:
+                query = query.Where(x => !x.ClosedDateUtc.HasValue);
+                break;
+            case TicketFilterType.Closed:
+                query = query.Where(x => x.ClosedDateUtc.HasValue);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        if (args is not null)
+        {
+            query = query.ApplyDataGridFilter(args);
+        }
+
+        count = await query.CountAsync();
+
+        data = args is not null
+            ? query.ApplyPagination(args)
+            : query.Skip(0)
+                .Take(10)
+                .AsQueryable();
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await reloadDataAsync();
+    }
+
+
+    private async Task LoadDataAsync(LoadDataArgs args)
+    {
+        await reloadDataAsync(args);
+    }
+
+    private int count;
+
+    private readonly string? forceCloseReason = null;
+
+    private async Task ForceCloseAsync(TicketDto ticketDto)
+    {
+        @* var customDialogResult = await dialogService.OpenAsync("Are you sure you want to force close this ticket ?", *@
+        @*                                                   value => @<div> *@
+        @*                                                              <RadzenLabel Text="Reason" class="rz-mb-2"></RadzenLabel> *@
+        @*                                                              <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
+        @*                                                            </div>, *@
+        @*                                                   new DialogOptions() { *@
+        @*                                                     Width = "400px", *@
+        @*                                                     Height = "200px", *@
+        @*                                                   } *@
+        @*                                                   ); *@
+
+
+        @* ChildContent = value => *@
+        @*   @<div> *@
+        @*     <RadzenLabel Text="Reason" class="rz-mb-2"></RadzenLabel> *@
+        @*     <RadzenTextBox @bind-Value="forceCloseReason" class="rz-w-100"></RadzenTextBox> *@
+        @*   </div> *@
+        //TODO: Add reason textbox with custom component dialog
+        var dialogResult = await dialogService.Confirm("Are you sure you want to force close this ticket ? This action is not recommended and can not be undone.", options: new ConfirmOptions
+        {
+            OkButtonText = "Yes",
+            CancelButtonText = "No"
+        });
+        if (dialogResult == true)
+        {
+            const string logMessage = $"[{nameof(Tickets)}]{nameof(ForceCloseAsync)}({{reason}})";
+            try
+            {
+                var ticket = await Ticket.GetActiveTicketAsync(ticketDto.Id);
+                await ticket.ProcessCloseTicketAsync(0, forceCloseReason);
+                Log.Information(logMessage, forceCloseReason);
+                notificationService.Notify(NotificationSeverity.Success, "Success", "The ticket has been closed successfully.");
+
+                await reloadDataAsync();
+            }
+            catch (BotExceptionBase ex)
+            {
+                ex.NotifyException(notificationService);
+                Log.Warning(ex, logMessage, forceCloseReason);
+            }
+            catch (Exception ex)
+            {
+                ex.NotifyException(notificationService);
+                Log.Fatal(ex, logMessage, forceCloseReason);
+            }
+        }
+    }
+
+    private TicketFilterType filterTicketType = TicketFilterType.All;
+
+    private async Task ShowMessages(TicketDto ticketDto)
+    {
+        var dialog = await dialogService.OpenAsync("Ticket Messages", ds => @<TicketMessages
+                                                                                TicketId="ticketDto.Id"></TicketMessages>, new DialogOptions
+        {
+            Width = "900px",
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true
+        });
+    }
+
+
+    private async Task ShowNotes(TicketDto ticketDto)
+    {
+        var dialog = await dialogService.OpenAsync("Ticket Notes", ds => @<TicketNotes
+                                                                             TicketId="ticketDto.Id"></TicketNotes>, new DialogOptions
+        {
+            Width = "900px",
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true
+        });
+    }
+
+    private async Task ShowAddNoteDialog(TicketDto ticketDto)
+    {
+        throw new NotImplementedException();
+    }
+
+}
+
+<div class="rz-mx-auto">
+    <RadzenRow>
+        <RadzenColumn Size="12">
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+                        Tickets
+                    </RadzenText>
+                    <p>
+                        This page shows the list of tickets that have been opened by users.
+                    </p>
+                    @* <hr class="my-4"/> *@
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow RowGap="4" class="rz-mt-5">
+                @if (data is null)
+                {
+                    <Loading></Loading>
+                }
+                else
+                {
+                    <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
+                        <RadzenDataGrid Responsive="true" Count="count" LoadData="LoadDataAsync"
+                                        AllowColumnPicking="true"
+                                        AllowFiltering="false" AllowColumnResize="true" AllowAlternatingRows="false"
+                                        FilterMode="FilterMode.SimpleWithMenu"
+                                        AllowGrouping="false" AllowSorting="true" PageSize="10" AllowPaging="true"
+                                        PagerHorizontalAlign="HorizontalAlign.Left"
+                                        PagerPosition="PagerPosition.TopAndBottom"
+                                        PagerAlwaysVisible="false" GotoFirstPageOnSort="true"
+                                        Data="@data" TItem="TicketDto" ColumnWidth="180px"
+                                        LogicalFilterOperator="LogicalFilterOperator.Or" ShowPagingSummary="true"
+                                        IsLoading=@isLoading Sort="@ShowLoading" Page="@ShowLoading"
+                                        Group="@ShowLoading"
+                                        Filter="@ShowLoading">
+                            <HeaderTemplate>
+                                <RadzenDropDown Style="user-select: none"
+                                                Name="filter-ticket-type"
+                                                @bind-Value="@filterTicketType"
+                                                Data="Enum.GetValues<TicketFilterType>()"
+                                                Change="() => reloadDataAsync()"
+                                                class="w-100"
+                                                TValue="TicketFilterType"
+                                                Placeholder="Filter Tickets"
+                                                AllowFiltering="false"/>
+                            </HeaderTemplate>
+                            <Columns>
+                                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.Id)"
+                                                      Filterable="false" Title="ID"
+                                                      TextAlign="TextAlign.Center"/>
+                                <RadzenDataGridColumn Title="Opener User Avatar" Sortable="false" Filterable="false"
+                                                      TextAlign="TextAlign.Center">
+                                    <Template Context="data">
+                                        <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                                            <RadzenImage class="rz-m-0 rz-p-0" Style="width: 100px; height: 100px"
+                                                         Path="@data.OpenerUser!.AvatarUrl" AlternateText=""/>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Property="OpenerUser.Username" Title="Opener User" Sortable="true"
+                                                      Filterable="true" TextAlign="TextAlign.Center">
+                                    <Template Context="data">
+                                        <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                                            <RadzenText Text="@data.OpenerUser!.Username" TextAlign="TextAlign.Center"
+                                                        class="fw-bold"></RadzenText>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <RadzenDataGridColumn Title="Closer User Avatar" Sortable="false" Filterable="false"
+                                                      TextAlign="TextAlign.Center">
+                                    <Template Context="data">
+                                        <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                                            <RadzenImage Style="width: 100px; height: 100px;"
+                                                         Path="@data.CloserUser?.AvatarUrl"
+                                                         AlternateText=""/>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Closer User" Sortable="true" Filterable="true"
+                                                      TextAlign="TextAlign.Center">
+                                    <Template Context="data">
+                                        <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                                            <RadzenText Text="@data.CloserUser?.Username" TextAlign="TextAlign.Center"
+                                                        class="fw-bold"></RadzenText>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <RadzenDataGridColumn Property="@nameof(TicketDto.RegisterDateUtc)"
+                                                      Title="Register Date UTC"/>
+                                <RadzenDataGridColumn Visible="false" Property="@nameof(TicketDto.LastMessageDateUtc)"
+                                                      Title="Last Message Date UTC"/>
+                                <RadzenDataGridColumn Property="@nameof(TicketDto.ClosedDateUtc)"
+                                                      Title="Close Date UTC"/>
+                                <RadzenDataGridColumn Property="@nameof(TicketDto.CloseReason)" Title="Close Reason"/>
+                                <RadzenDataGridColumn Title="Ticket Type" Sortable="true" Filterable="true"
+                                                      TextAlign="TextAlign.Center">
+                                    <Template Context="data">
+                                        <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-12">
+                                            <RadzenText Text="@data.TicketType?.Name" TextAlign="TextAlign.Center"
+                                                        class="fw-bold"></RadzenText>
+                                        </RadzenStack>
+                                    </Template>
+                                </RadzenDataGridColumn>
+
+                                <RadzenDataGridColumn Context="data" TextAlign="TextAlign.Center" Filterable="false"
+                                                      Sortable="false"
+                                                      Title="Actions">
+                                    <Template Context="data">
+                                        @if (!data.ClosedDateUtc.HasValue)
+                                        {
+                                            <RadzenButton
+                                                ButtonStyle="ButtonStyle.Danger"
+                                                Icon="close"
+                                                Variant="Variant.Flat"
+                                                Shade="Shade.Lighter"
+                                                Size="ButtonSize.Medium"
+                                                class="rz-my-1 rz-ms-1"
+                                                Click="@(async () => await ForceCloseAsync(data))"
+                                                MouseEnter="@(args => tooltipService.Open(args, "Force Close Ticket", new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                                @onclick:stopPropagation="true">
+                                            </RadzenButton>
+                                        }
+
+                                        <RadzenButton
+                                            ButtonStyle="ButtonStyle.Info"
+                                            Icon="chat"
+                                            Variant="Variant.Flat"
+                                            Shade="Shade.Lighter"
+                                            Size="ButtonSize.Medium"
+                                            class="rz-my-1 rz-ms-1"
+                                            Click="@(async () => await ShowMessages(data))"
+                                            MouseEnter="@(args => tooltipService.Open(args, "Show Messages"))"
+                                            @onclick:stopPropagation="true">
+                                        </RadzenButton>
+                                        <RadzenButton
+                                            ButtonStyle="ButtonStyle.Info"
+                                            Icon="description"
+                                            Variant="Variant.Flat"
+                                            Shade="Shade.Lighter"
+                                            Size="ButtonSize.Medium"
+                                            class="rz-my-1 rz-ms-1"
+                                            Click="@(async () => await ShowNotes(data))"
+                                            MouseEnter="@(args => tooltipService.Open(args, "Show Notes"))"
+                                            @onclick:stopPropagation="true">
+                                        </RadzenButton>
+                                        @* <RadzenButton *@
+                                        @*   ButtonStyle="ButtonStyle.Success" *@
+                                        @*   Icon="add_notes" *@
+                                        @*   Variant="Variant.Flat" *@
+                                        @*   Shade="Shade.Lighter" *@
+                                        @*   Size="ButtonSize.Medium" *@
+                                        @*   class="rz-my-1 rz-ms-1" *@
+                                        @*   Click="@(async () => await ShowAddNoteDialog(data))" *@
+                                        @*   MouseEnter="@(args => tooltipService.Open(args, "Add Note", new TooltipOptions() { Style = "background: var(--rz-success);" }))" *@
+                                        @*   @onclick:stopPropagation="true"> *@
+                                        @* </RadzenButton> *@
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenCard>
+                }
+
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+</div>

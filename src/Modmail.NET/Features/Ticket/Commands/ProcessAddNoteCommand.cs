@@ -4,8 +4,6 @@ namespace Modmail.NET.Features.Ticket.Commands;
 
 [RequireModmailPermission]
 public sealed record ProcessAddNoteCommand(
-	ulong AuthorizedUserId,
-	Guid TicketId,
-	string Note
-) : IRequest,
-    IPermissionCheck;
+    ulong AuthorizedUserId,
+    Guid TicketId,
+    string Note) : IRequest, IPermissionCheck;

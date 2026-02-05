@@ -26,68 +26,60 @@
 
   private string _reason = string.Empty;
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     await base.OnInitializedAsync();
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    _users = await dbContext.UserInformation
-                            .OrderBy(x => x.Username)
-                            .GroupJoin(dbContext.Blacklists,
-                                       user => user.Id,
-                                       blacklist => blacklist.UserId,
-                                       (user, blacklists) => new { user, blacklists })
-                            .SelectMany(x => x.blacklists.DefaultIfEmpty(),
-                                        (x, blacklist) => new { x.user, blacklist })
-                            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
-                            .Select(x => x.user)
-                            .GroupJoin(dbContext.TeamUsers,
-                                       user => user.Id,
-                                       teamUser => teamUser.UserId,
-                                       (user, teamUser) => new { user, teamUser })
-                            .SelectMany(x => x.teamUser.DefaultIfEmpty(),
-                                        (x, teamUser) => new { x.user, teamUser })
-                            .Where(x => x.teamUser == null)
-                            .Select(x => x.user)
-                            .Where(x => x.Id != Bot.Client.CurrentUser.Id) // Exclude bot
-                            .Where(x => !Options.Value.SuperUsers.Contains(x.Id)) // Exclude bot owner
-                            .ToArrayAsync();
+    _users = await dbContext.UserInformation.OrderBy(x => x.Username)
+            .GroupJoin(dbContext.Blacklists, user => user.Id, blacklist => blacklist.UserId, (user, blacklists) => new { user, blacklists })
+            .SelectMany(x => x.blacklists.DefaultIfEmpty(), (x, blacklist) => new { x.user, blacklist })
+            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
+            .Select(x => x.user)
+            .GroupJoin(dbContext.TeamUsers, user => user.Id, teamUser => teamUser.UserId, (user, teamUser) => new { user, teamUser })
+            .SelectMany(x => x.teamUser.DefaultIfEmpty(), (x, teamUser) => new { x.user, teamUser })
+            .Where(x => x.teamUser == null)
+            .Select(x => x.user)
+            .Where(x => x.Id != Bot.Client.CurrentUser.Id) // Exclude bot
+            .Where(x => !Microsoft.Extensions.Options.Options.Value.SuperUsers.Contains(x.Id)) // Exclude bot owner
+            .ToArrayAsync();
   }
 
-  private async Task SubmitAsync() {
-    if (_selectedUserId <= 0) {
-      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+  private async Task SubmitAsync()
+  {
+      if (_selectedUserId <= 0)
+      {
+          Radzen.NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
-    var dialogResult = await DialogService.Confirm("Are you sure you want to block this user?",
-                                                   options: new ConfirmOptions {
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate(),
-                                                     CloseDialogOnOverlayClick = true,
-                                                     CloseDialogOnEsc = true
-                                                   });
-    if (dialogResult == true) {
+      var dialogResult = await Radzen.DialogService.Confirm("Are you sure you want to block this user?", options: new ConfirmOptions
+      {
+              OkButtonText = Lang.Yes.Translate(),
+              CancelButtonText = Lang.No.Translate(),
+              CloseDialogOnOverlayClick = true,
+              CloseDialogOnEsc = true
+      });
+      if (dialogResult == true)
+      {
       const string logMessage = $"[{nameof(AddBlacklistDialogComponent)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
-      try {
+      try
+      {
         var state = await AuthContext;
         var discordUserId = state.User.GetUserId();
         await Sender.Send(new ProcessAddUserToBlacklistCommand(discordUserId, _selectedUserId, _reason));
-        NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
-        Log.Information(logMessage,
-                        _selectedUserId,
-                        _reason);
-        DialogService.Close(true);
+        Radzen.NotificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
+        Log.Information(logMessage, _selectedUserId, _reason);
+        Radzen.DialogService.Close(true);
       }
-      catch (ModmailBotException ex) {
-        ex.NotifyException(NotificationService);
-        Log.Warning(logMessage,
-                    _selectedUserId,
-                    _reason);
+      catch (ModmailBotException ex)
+      {
+          ex.NotifyException(Radzen.NotificationService);
+          Log.Warning(logMessage, _selectedUserId, _reason);
       }
-      catch (Exception ex) {
-        ex.NotifyException(NotificationService);
-        Log.Fatal(logMessage,
-                  _selectedUserId,
-                  _reason);
+      catch (Exception ex)
+      {
+          ex.NotifyException(Radzen.NotificationService);
+          Log.Fatal(logMessage, _selectedUserId, _reason);
       }
     }
   }

@@ -6,30 +6,38 @@ namespace Modmail.NET.Database;
 
 public class ModmailDbContext : DbContext
 {
-	public ModmailDbContext() { }
-	public ModmailDbContext(DbContextOptions<ModmailDbContext> options) : base(options) { }
-	public required DbSet<Ticket> Tickets { get; set; }
-	public required DbSet<TicketMessageAttachment> MessageAttachments { get; set; }
-	public required DbSet<TicketMessage> Messages { get; set; }
-	public required DbSet<TicketMessageHistory> MessageHistory { get; set; }
-	public required DbSet<Option> Options { get; set; }
-	public required DbSet<Team> Teams { get; set; }
-	public required DbSet<TeamUser> TeamUsers { get; set; }
-	public required DbSet<TeamPermission> TeamPermissions { get; set; }
-	public required DbSet<TicketNote> TicketNotes { get; set; }
-	public required DbSet<UserInformation> UserInformation { get; set; }
-	public required DbSet<Blacklist> Blacklists { get; set; }
-	public required DbSet<TicketType> TicketTypes { get; set; }
-	public required DbSet<Statistic> Statistics { get; set; }
-	public required DbSet<Tag> Tags { get; set; }
-	public required DbSet<Field> Fields { get; set; }
-	public required DbSet<Embed> Embeds { get; set; }
+    public ModmailDbContext()
+    {
+    }
 
-	protected override void OnModelCreating(ModelBuilder modelBuilder) {
-		modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
-	}
+    public ModmailDbContext(DbContextOptions<ModmailDbContext> options) : base(options)
+    {
+    }
 
-	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) {
-		configurationBuilder.ConfigureSmartEnum();
-	}
+    public required DbSet<Ticket> Tickets { get; set; }
+    public required DbSet<TicketMessageAttachment> MessageAttachments { get; set; }
+    public required DbSet<TicketMessage> Messages { get; set; }
+    public required DbSet<TicketMessageHistory> MessageHistory { get; set; }
+    public required DbSet<Option> Options { get; set; }
+    public required DbSet<Team> Teams { get; set; }
+    public required DbSet<TeamUser> TeamUsers { get; set; }
+    public required DbSet<TeamPermission> TeamPermissions { get; set; }
+    public required DbSet<TicketNote> TicketNotes { get; set; }
+    public required DbSet<UserInformation> UserInformation { get; set; }
+    public required DbSet<Blacklist> Blacklists { get; set; }
+    public required DbSet<TicketType> TicketTypes { get; set; }
+    public required DbSet<Statistic> Statistics { get; set; }
+    public required DbSet<Tag> Tags { get; set; }
+    public required DbSet<Field> Fields { get; set; }
+    public required DbSet<Embed> Embeds { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModmailDbContext).Assembly);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.ConfigureSmartEnum();
+    }
 }

@@ -4,9 +4,9 @@ namespace Modmail.NET.Features.Ticket.Models;
 
 public class TicketFeedbackDto
 {
-  public required Guid Id { get; set; }
-  public required DateTime ClosedDateUtc { get; set; }
-  public required UserInformation OpenerUser { get; set; }
-  public int? FeedbackStar { get; set; }
-  public string? FeedbackMessage { get; set; }
+    public required Guid Id { get; set; }
+    public required DateTime ClosedDateUtc { get; set; }
+    public required UserInformation OpenerUser { get; set; }
+    public int? FeedbackStar { get; set; }
+    public string? FeedbackMessage { get; set; }
 }

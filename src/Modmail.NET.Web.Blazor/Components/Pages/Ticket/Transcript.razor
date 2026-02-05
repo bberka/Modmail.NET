@@ -41,19 +41,20 @@
                                  AlternateText="@_users[message.SenderUserId].Username"/>
 
                     <RadzenStack Orientation="Orientation.Vertical" Gap="2">
-                        <RadzenText TextStyle="TextStyle.Subtitle1" class=@(message.SentByMod
-                                                                                ? "rz-color-info rz-mr-2 "
-                                                                                : "rz-mr-2 ")>
+                        <RadzenText TextStyle="TextStyle.Subtitle1"
+                                    class=@(message.SentByMod ? "rz-color-info rz-mr-2 " : "rz-mr-2 ")>
                             <strong>@_users[message.SenderUserId].Username</strong>
                         </RadzenText>
                         <RadzenText TextStyle="TextStyle.Caption" Style="opacity: 0.7;">
                             @message.RegisterDateUtc.ToString("MM/dd/yyyy HH:mm")
-                            <span class=@(message.ChangeStatus switch {
+                            <span class=@(message.ChangeStatus switch
+                            {
                                 TicketMessageChangeStatus.Updated => "rz-color-secondary",
                                 TicketMessageChangeStatus.Deleted => "rz-color-danger",
                                 _ => ""
                             })>
-                                @(message.ChangeStatus switch {
+                                @(message.ChangeStatus switch
+                                {
                                     TicketMessageChangeStatus.Updated => " - " + Lang.Edited.Translate(),
                                     TicketMessageChangeStatus.Deleted => " - " + Lang.Deleted.Translate(),
                                     _ => ""
@@ -65,26 +66,20 @@
                 </RadzenStack>
 
 
-                @if (message.Tag is null) {
+                @if (message.Tag is null)
+                {
                     <RadzenMarkdown>
                         @message.MessageContent
                     </RadzenMarkdown>
                 }
-                else {
+                else
+                {
                     <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-m-0 rz-color-primary">
                         /tag @message.Tag.Name
                     </RadzenText>
                     <RadzenCard Style="max-width: 600px" class="rz-shadow-7 rz-border-primary">
                         <RadzenStack Orientation="Orientation.Vertical">
-
-                            @if (!string.IsNullOrEmpty(message.Tag.Title)) {
-                                <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">
-                                    @message.Tag.Title
-                                </RadzenText>
-                            }
-                            <RadzenMarkdown>
-                                @message.Tag.Content
-                            </RadzenMarkdown>
+                            <RenderEmbed Embed="@message.Tag.Embed"></RenderEmbed>
                         </RadzenStack>
                     </RadzenCard>
                 }
@@ -92,26 +87,36 @@
 
             </RadzenStack>
 
-            @if (message.Attachments.Any()) {
-                var array = message.Attachments.Select(x => new {
-                    Attachment = x,
-                    IsImage = IsImage(x.FileName)
-                }).ToArray();
-                var images = array.Where(x => x.IsImage).Select(x => x.Attachment).ToArray();
-                var files = array.Where(x => !x.IsImage).Select(x => x.Attachment).ToArray();
+            @if (message.Attachments.Any())
+            {
+                var array = message.Attachments.Select(x => new
+                        {
+                                Attachment = x,
+                                IsImage = IsImage(x.FileName)
+                        })
+                        .ToArray();
+                var images = array.Where(x => x.IsImage)
+                        .Select(x => x.Attachment)
+                        .ToArray();
+                var files = array.Where(x => !x.IsImage)
+                        .Select(x => x.Attachment)
+                        .ToArray();
 
                 <div class="rz-mt-4">
-                    @foreach (var attachment in images) {
+                    @foreach (var attachment in images)
+                    {
                         <RadzenImage Path="@attachment.Url" style="max-width: 70vw; max-height: 70vh;"
                                      class="rz-mt-"
                                      AlternateText="@attachment.FileName"/>
                     }
 
-                    @if (images.Length > 0 && files.Length > 0) {
+                    @if (images.Length > 0 && files.Length > 0)
+                    {
                         <div class="rz-mt-3"></div>
                     }
 
-                    @foreach (var attachment in files) {
+                    @foreach (var attachment in files)
+                    {
                         <RadzenButton Shade="Shade.Lighter"
                                       Click=@(async () => await OpenInNewTab(attachment.Url))
                                       Text="@attachment.FileName"
@@ -148,55 +153,64 @@
     private Dictionary<ulong, UserInformation> _users = new();
     private string? _id;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         var option = await Sender.Send(new GetOptionQuery());
-        if (!option.PublicTranscripts) {
+        if (!option.PublicTranscripts)
+        {
             var authState = await AuthContext;
-            if (authState.User.Identity?.IsAuthenticated == false) {
+            if (authState.User.Identity?.IsAuthenticated == false)
+            {
                 Navi.NavigateTo("/", true);
                 return;
             }
         }
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var ticketExists = await dbContext.Tickets.FilterById(TicketId).AnyAsync();
-        if (!ticketExists) {
+        var ticketExists = await dbContext.Tickets.FilterById(TicketId)
+                .AnyAsync();
+        if (!ticketExists)
+        {
             Navi.NavigateTo("/404", true);
         }
 
 
         _id = ShortGuid.Encode(TicketId);
         _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
-        _data = await dbContext.Messages
-                               .Where(x => x.TicketId == TicketId)
-                               .Include(x => x.Attachments)
-                               .Include(x => x.Tag)
-                               .OrderBy(x => x.RegisterDateUtc)
-                               .GroupBy(x => new
-                               {
-                                   x.RegisterDateUtc.Year,
-                                   x.RegisterDateUtc.Month,
-                                   x.RegisterDateUtc.Day,
-                                   x.RegisterDateUtc.Hour,
-                                   x.RegisterDateUtc.Minute,
-                                   x.SenderUserId,
-                                   x.SentByMod,
-                                   x.ChangeStatus,
-                                   x.TagId
-                               })
-                               .Select(g => new TicketMessage {
-                                   RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
-                                   SenderUserId = g.Key.SenderUserId,
-                                   MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc).Select(x => x.MessageContent)),
-                                   Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
-                                   TicketId = TicketId,
-                                   MessageDiscordId = 0,
-                                   SentByMod = g.Key.SentByMod,
-                                   ChangeStatus = g.Key.ChangeStatus,
-                                   TagId = g.Key.TagId,
-                                   Tag = g.Where(x => x.TagId == g.Key.TagId).Select(y => y.Tag).FirstOrDefault()
-                               })
-                               .ToArrayAsync();
+        _data = await dbContext.Messages.Where(x => x.TicketId == TicketId)
+                .Include(x => x.Attachments)
+                .Include(x => x.Tag)
+                .OrderBy(x => x.RegisterDateUtc)
+                .GroupBy(x => new
+                {
+                        x.RegisterDateUtc.Year,
+                        x.RegisterDateUtc.Month,
+                        x.RegisterDateUtc.Day,
+                        x.RegisterDateUtc.Hour,
+                        x.RegisterDateUtc.Minute,
+                        x.SenderUserId,
+                        x.SentByMod,
+                        x.ChangeStatus,
+                        x.TagId
+                })
+                .Select(g => new TicketMessage
+                {
+                        RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
+                        SenderUserId = g.Key.SenderUserId,
+                        MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc)
+                                .Select(x => x.MessageContent)),
+                        Attachments = g.SelectMany(x => x.Attachments)
+                                .ToList(), // Aggregate attachments
+                        TicketId = TicketId,
+                        MessageDiscordId = 0,
+                        SentByMod = g.Key.SentByMod,
+                        ChangeStatus = g.Key.ChangeStatus,
+                        TagId = g.Key.TagId,
+                        Tag = g.Where(x => x.TagId == g.Key.TagId)
+                                .Select(y => y.Tag)
+                                .FirstOrDefault()
+                })
+                .ToArrayAsync();
 
         //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
 
@@ -212,16 +226,20 @@
     }
 
 
-    private static bool IsImage(string fileName) {
-        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+    private static bool IsImage(string fileName)
+    {
+        var ext = Path.GetExtension(fileName)
+                .ToLowerInvariant();
         return ext is ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp";
     }
 
-    private async Task OpenInNewTab(string url) {
+    private async Task OpenInNewTab(string url)
+    {
         await JsRuntime.InvokeVoidAsync("open", url, "_blank");
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
         await JsRuntime.InvokeVoidAsync("scrollToBottom", "transcriptContainer");
     }
 

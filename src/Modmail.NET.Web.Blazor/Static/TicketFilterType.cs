@@ -2,7 +2,7 @@
 
 public enum TicketFilterType
 {
-  All,
-  Active,
-  Closed
+    All,
+    Active,
+    Closed
 }

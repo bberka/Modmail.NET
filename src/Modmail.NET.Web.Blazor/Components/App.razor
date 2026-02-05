@@ -37,10 +37,12 @@
   [CascadingParameter]
   public required HttpContext HttpContext { get; set; }
 
-  protected override void OnInitialized() {
+  protected override void OnInitialized()
+  {
     var theme = HttpContext.Request.Cookies[Const.ThemeCookieName];
 
-    if (!string.IsNullOrEmpty(theme)) {
+    if (!string.IsNullOrEmpty(theme))
+    {
       ThemeService.SetTheme(theme, false);
     }
   }

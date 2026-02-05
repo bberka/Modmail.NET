@@ -6,11 +6,17 @@ namespace Modmail.NET.Database.Configuration;
 
 public class EmbedConfiguration : IEntityTypeConfiguration<Embed>
 {
-	public void Configure(EntityTypeBuilder<Embed> builder) {
-		builder.Navigation(x => x.Fields)
-		       .AutoInclude();
+    public void Configure(EntityTypeBuilder<Embed> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-		builder.Navigation(x => x.Author)
-		       .AutoInclude();
-	}
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
+        builder.Navigation(x => x.Fields)
+            .AutoInclude();
+
+        builder.Navigation(x => x.Author)
+            .AutoInclude();
+    }
 }

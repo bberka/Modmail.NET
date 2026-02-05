@@ -5,10 +5,12 @@
     <Found Context="routeData">
       <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AuthLayout)">
         <NotAuthorized>
-          @if (context.User.Identity?.IsAuthenticated != true) {
+          @if (context.User.Identity?.IsAuthenticated != true)
+          {
             <RedirectToLoginComponent/>
           }
-          else {
+          else
+          {
             <RadzenText TextStyle="TextStyle.Subtitle1">
               @Lang.ErrorAuthForbidden.Translate()
             </RadzenText>

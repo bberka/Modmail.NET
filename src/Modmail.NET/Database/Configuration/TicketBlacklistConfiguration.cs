@@ -1,23 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Modmail.NET.Database.Entities;
+using Modmail.NET.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public class TicketBlacklistConfiguration : IEntityTypeConfiguration<Blacklist>
+public sealed class TicketBlacklistConfiguration : IEntityTypeConfiguration<TicketBlacklist>
 {
-  public void Configure(EntityTypeBuilder<Blacklist> builder) {
-    builder.HasKey(x => x.Id);
+    public void Configure(EntityTypeBuilder<TicketBlacklist> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-    builder.Property(x => x.Id)
-           .ValueGeneratedOnAdd();
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd();
 
-    builder.HasIndex(x => x.UserId)
-           .IsUnique();
+        builder.HasIndex(x => x.DiscordUserId)
+            .IsUnique();
 
-    builder.HasOne(x => x.User)
-           .WithMany()
-           .HasForeignKey(x => x.UserId)
-           .OnDelete(DeleteBehavior.Restrict);
-  }
+        builder.HasOne(x => x.DiscordUser)
+            .WithMany()
+            .HasForeignKey(x => x.DiscordUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
 }

@@ -6,10 +6,11 @@ namespace Modmail.NET.Database.Configuration;
 
 public class UserInformationConfiguration : IEntityTypeConfiguration<UserInformation>
 {
-	public void Configure(EntityTypeBuilder<UserInformation> builder) {
-		builder.HasKey(x => x.Id);
+    public void Configure(EntityTypeBuilder<UserInformation> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-		builder.Property(x => x.Id)
-		       .ValueGeneratedNever();
-	}
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+    }
 }

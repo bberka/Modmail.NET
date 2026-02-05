@@ -2,5 +2,5 @@ namespace Modmail.NET.Database.Abstract;
 
 public interface IGuidId
 {
-  public Guid Id { get; set; }
+    public Guid Id { get; set; }
 }

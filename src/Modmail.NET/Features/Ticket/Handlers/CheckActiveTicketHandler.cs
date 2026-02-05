@@ -7,16 +7,17 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class CheckActiveTicketHandler : IRequestHandler<CheckActiveTicketQuery, bool>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public CheckActiveTicketHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public CheckActiveTicketHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<bool> Handle(CheckActiveTicketQuery request, CancellationToken cancellationToken) {
-		return await _dbContext.Tickets
-		                       .FilterActive()
-		                       .FilterById(request.TicketId)
-		                       .AnyAsync(cancellationToken);
-	}
+    public async ValueTask<bool> Handle(CheckActiveTicketQuery request, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Tickets.FilterActive()
+            .FilterById(request.TicketId)
+            .AnyAsync(cancellationToken);
+    }
 }

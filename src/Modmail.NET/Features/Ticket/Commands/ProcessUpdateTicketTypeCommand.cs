@@ -4,5 +4,4 @@ using Modmail.NET.Features.DiscordCommands.Checks.Attributes;
 namespace Modmail.NET.Features.Ticket.Commands;
 
 [RequireModmailPermission(nameof(AuthPolicy.ManageTicketTypes))]
-public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, TicketType TicketType) : IRequest,
-                                                                                                     IPermissionCheck;
+public sealed record ProcessUpdateTicketTypeCommand(ulong AuthorizedUserId, TicketType TicketType) : IRequest, IPermissionCheck;

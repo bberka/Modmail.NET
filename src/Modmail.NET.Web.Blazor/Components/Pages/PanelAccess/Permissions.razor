@@ -21,10 +21,12 @@
         </RadzenColumn>
       </RadzenRow>
       <RadzenRow RowGap="4" class="rz-mt-5">
-        @if (_data is null) {
+        @if (_data is null)
+        {
           <Loading></Loading>
         }
-        else {
+        else
+        {
           <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
             <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync" AllowColumnPicking="false"
                             Density="Density.Default"
@@ -82,29 +84,35 @@
 
   bool _isLoading;
 
-  private void ReloadData(LoadDataArgs? args = null) {
+  private void ReloadData(LoadDataArgs? args = null)
+  {
     _isLoading = true;
 
-    var query = AuthPolicy.List.OrderBy(x => x.Value).AsQueryable();
+    var query = AuthPolicy.List.OrderBy(x => x.Value)
+            .AsQueryable();
 
     query = query.ApplyDataGridFilter(args);
 
     _count = query.Count();
 
     _data = args is not null
-              ? query.ApplyPagination(args)
-              : query.Skip(0).Take(25).AsQueryable();
+            ? query.ApplyPagination(args)
+            : query.Skip(0)
+                    .Take(25)
+                    .AsQueryable();
 
     _isLoading = false;
     StateHasChanged();
   }
 
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     var userId = state.User.GetUserId();
     var hasPermission = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ManageAccessPermissions));
-    if (!hasPermission) {
+    if (!hasPermission)
+    {
       throw new ModmailBotException(Lang.UnauthorizedAccess);
     }
 
@@ -112,22 +120,23 @@
   }
 
 
-  private void LoadDataAsync(LoadDataArgs args) {
+  private void LoadDataAsync(LoadDataArgs args)
+  {
     ReloadData(args);
   }
 
   private int _count;
 
 
-  private async Task ViewUsersWithThisPermission(AuthPolicy data) {
-    _ = await DialogService.OpenAsync(Lang.UsersWithXPermission.Translate(data.Name),
-                                      _ =>
-                                        @<UsersWithPermissionComponent Policy="data"></UsersWithPermissionComponent>,
-                                      new DialogOptions {
-                                        Width = "900px",
-                                        CloseDialogOnEsc = true,
-                                        CloseDialogOnOverlayClick = true
-                                      });
+  private async Task ViewUsersWithThisPermission(AuthPolicy data)
+  {
+    _ = await DialogService.OpenAsync(Lang.UsersWithXPermission.Translate(data.Name), _ => @<UsersWithPermissionComponent
+                                                                                                   Policy="data"></UsersWithPermissionComponent>, new DialogOptions
+    {
+            Width = "900px",
+            CloseDialogOnEsc = true,
+            CloseDialogOnOverlayClick = true
+    });
   }
 
 }

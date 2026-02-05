@@ -14,10 +14,12 @@
   [CascadingParameter]
   public required Task<AuthenticationState> AuthContext { get; set; }
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     _ = state.User.GetUserId();
-    if (await Sender.Send(new CheckSetupQuery())) {
+    if (await Sender.Send(new CheckSetupQuery()))
+    {
       NavigationManager.NavigateTo("/dashboard");
     }
   }

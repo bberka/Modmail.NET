@@ -22,36 +22,34 @@
 
   private UserInformation[]? _users;
 
-  private ulong _selectedUserId = 0;
+  private ulong _selectedUserId;
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var dbContext = await DbContextFactory.CreateDbContextAsync();
-    var teamMemberIds = dbContext.TeamUsers
-                                 .Select(x => x.UserId)
-                                 .ToArray();
+    var teamMemberIds = dbContext.TeamUsers.Select(x => x.UserId)
+            .ToArray();
 
-    _users = await dbContext.UserInformation
-                            .GroupJoin(dbContext.Blacklists,
-                                       user => user.Id,
-                                       blacklist => blacklist.UserId,
-                                       (user, blacklists) => new { user, blacklists })
-                            .SelectMany(x => x.blacklists.DefaultIfEmpty(),
-                                        (x, blacklist) => new { x.user, blacklist })
-                            .Where(x => x.blacklist == null && x.user.Id != Bot.Client.CurrentUser.Id && !teamMemberIds.Contains(x.user.Id)) // Only take users that are not in blacklist
-                            .OrderBy(x => x.user.Username)
-                            .Select(x => x.user)
-                            .ToArrayAsync();
+    _users = await dbContext.UserInformation.GroupJoin(dbContext.Blacklists, user => user.Id, blacklist => blacklist.UserId, (user, blacklists) => new { user, blacklists })
+            .SelectMany(x => x.blacklists.DefaultIfEmpty(), (x, blacklist) => new { x.user, blacklist })
+            .Where(x => x.blacklist == null && x.user.Id != Bot.Client.CurrentUser.Id && !teamMemberIds.Contains(x.user.Id)) // Only take users that are not in blacklist
+            .OrderBy(x => x.user.Username)
+            .Select(x => x.user)
+            .ToArrayAsync();
   }
 
-  private async Task SubmitAsync(MouseEventArgs obj) {
-    if (_selectedUserId == 0) {
+  private async Task SubmitAsync(MouseEventArgs obj)
+  {
+      if (_selectedUserId == 0)
+      {
       NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
     const string logMessage = $"[{nameof(AddUserToTeamDialogComponent)}]{nameof(SubmitAsync)}({{UserId}})";
 
-    try {
+      try
+      {
       var state = await AuthContext;
       var userId = state.User.GetUserId();
 
@@ -60,11 +58,13 @@
       NotificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");
       DialogService.Close(true);
     }
-    catch (ModmailBotException ex) {
+      catch (ModmailBotException ex)
+      {
       Log.Warning(logMessage, _selectedUserId);
       ex.NotifyException(NotificationService);
     }
-    catch (Exception ex) {
+      catch (Exception ex)
+      {
       Log.Fatal(logMessage, _selectedUserId);
       ex.NotifyException(NotificationService);
     }
@@ -72,10 +72,12 @@
 
 }
 
-@if (_users == null) {
+@if (_users == null)
+{
   <Loading></Loading>
 }
-else {
+else
+{
   <RadzenRow>
     <RadzenColumn>
       <RadzenRow class="rz-my-4">

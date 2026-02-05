@@ -4,12 +4,12 @@ namespace Modmail.NET.Features.Ticket.Static;
 
 public enum TicketPriority
 {
-  [ChoiceDisplayName("Low")]
-  Low,
+    [ChoiceDisplayName("Low")]
+    Low,
 
-  [ChoiceDisplayName("Normal")]
-  Normal,
+    [ChoiceDisplayName("Normal")]
+    Normal,
 
-  [ChoiceDisplayName("High")]
-  High
+    [ChoiceDisplayName("High")]
+    High
 }

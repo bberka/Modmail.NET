@@ -37,7 +37,8 @@
   <RadzenSidebar @bind-Expanded="@_sidebarExpanded">
     <RadzenPanelMenu>
       <RadzenPanelMenuItem Text="@Lang.Dashboard.Translate()" Icon="home" Path="/dashboard"/>
-      @if (_canAccessAnalytics) {
+      @if (_canAccessAnalytics)
+      {
         <RadzenPanelMenuItem Text="@Lang.Analytics.Translate()" Icon="analytics" Path="/analytics"/>
       }
       <RadzenPanelMenuItem Text="@Lang.Tags.Translate()" Icon="label" Path="/tags"/>
@@ -45,13 +46,15 @@
       <RadzenPanelMenuItem Text="@Lang.Users.Translate()" Icon="group" Path="/users"/>
       <RadzenPanelMenuItem Text="@Lang.Ticket.Translate()" Icon="confirmation_number">
         <RadzenPanelMenuItem Text="@Lang.Tickets.Translate()" Icon="local_activity" Path="/tickets"/>
-        @if (_canViewTicketFeedbacks) {
+        @if (_canViewTicketFeedbacks)
+        {
           <RadzenPanelMenuItem Text="@Lang.Feedbacks.Translate()" Icon="reviews" Path="/feedback"/>
         }
         <RadzenPanelMenuItem Text="@Lang.Types.Translate()" Icon="stacks" Path="/ticket-types"/>
       </RadzenPanelMenuItem>
 
-      @if (_canAccessTeams) {
+      @if (_canAccessTeams)
+      {
         <RadzenPanelMenuItem Text="@Lang.PanelAccess.Translate()" Icon="security">
           <RadzenPanelMenuItem Text="@Lang.Permissions.Translate()" Icon="lock_open" Path="/permissions"/>
           <RadzenPanelMenuItem Text="@Lang.Teams.Translate()" Icon="manage_accounts" Path="/teams"/>
@@ -60,13 +63,16 @@
 
 
 
-      @if (_canAccessOptions || _canAccessHangfire) {
+      @if (_canAccessOptions || _canAccessHangfire)
+      {
         <RadzenPanelMenuItem Text="@Lang.Advanced.Translate()" Icon="tune">
 
-          @if (_canAccessOptions) {
+          @if (_canAccessOptions)
+          {
             <RadzenPanelMenuItem Text="@Lang.Options.Translate()" Icon="settings" Path="/options"/>
           }
-          @if (_canAccessHangfire) {
+          @if (_canAccessHangfire)
+          {
             <RadzenPanelMenuItem Text="@Lang.Hangfire.Translate()" Icon="grid_view" Path="/hangfire"/>
           }
         </RadzenPanelMenuItem>
@@ -97,11 +103,13 @@
   private bool _canViewTicketFeedbacks;
   private bool _canAccessTeams;
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var state = await AuthContext;
     _isAuth = state.User.Identity?.IsAuthenticated == true;
-    if (!_isAuth) {
-      NavigationManager.NavigateTo("/", true);
+    if (!_isAuth)
+    {
+      Microsoft.AspNetCore.Components.NavigationManager.NavigateTo("/", true);
       return;
     }
 
@@ -114,14 +122,13 @@
     _canViewTicketFeedbacks = await Sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.ViewTicketFeedbacks));
   }
 
-  private async Task ShowAccountDialog() {
-    await DialogService.OpenAsync(Lang.Account.Translate(),
-                                  _ =>
-                                    @<AccountDialogComponent></AccountDialogComponent>,
-                                  new DialogOptions {
-                                    Width = "450px",
-                                    CloseDialogOnOverlayClick = true
-                                  });
+  private async Task ShowAccountDialog()
+  {
+    await Radzen.DialogService.OpenAsync(Lang.Account.Translate(), _ => @<AccountDialogComponent></AccountDialogComponent>, new DialogOptions
+    {
+            Width = "450px",
+            CloseDialogOnOverlayClick = true
+    });
   }
 
 }

@@ -2,7 +2,8 @@
 
 public static class UtilDate
 {
-  public static DateTime GetNow() {
-    return DateTime.UtcNow;
-  }
+    public static DateTime GetNow()
+    {
+        return DateTime.UtcNow;
+    }
 }

@@ -11,48 +11,45 @@ namespace Modmail.NET.Features.Blacklist.Handlers;
 
 public class ProcessAddUserToBlacklistHandler : IRequestHandler<ProcessAddUserToBlacklistCommand, Database.Entities.Blacklist>
 {
-	private readonly ModmailDbContext _dbContext;
-	private readonly IMediator _mediator;
+    private readonly ModmailDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-	public ProcessAddUserToBlacklistHandler(ModmailDbContext dbContext,
-	                                        IMediator mediator) {
-		_dbContext = dbContext;
-		_mediator = mediator;
-	}
+    public ProcessAddUserToBlacklistHandler(ModmailDbContext dbContext, IMediator mediator)
+    {
+        _dbContext = dbContext;
+        _mediator = mediator;
+    }
 
-	public async ValueTask<Database.Entities.Blacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken) {
-		var activeTicket = await _dbContext.Tickets
-		                                   .FilterActive()
-		                                   .FilterByOpenerUserId(request.UserId)
-		                                   .FirstOrDefaultAsync(cancellationToken);
-		if (activeTicket is not null)
-			await _mediator.Send(new ProcessCloseTicketCommand(
-			                                                   request.AuthorizedUserId,
-			                                                   activeTicket.Id,
-			                                                   Lang.TicketClosedDueToBlacklist.Translate(),
-			                                                   DontSendFeedbackMessage: true),
-			                     cancellationToken);
+    public async ValueTask<Database.Entities.Blacklist> Handle(ProcessAddUserToBlacklistCommand request, CancellationToken cancellationToken)
+    {
+        var activeTicket = await _dbContext.Tickets.FilterActive()
+            .FilterByOpenerUserId(request.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (activeTicket is not null)
+            await _mediator.Send(
+                new ProcessCloseTicketCommand(request.AuthorizedUserId, activeTicket.Id, Lang.TicketClosedDueToBlacklist.Translate(), true),
+                cancellationToken);
 
-		var activeBlock = await _dbContext.Blacklists.FilterByUserId(request.UserId).AnyAsync(cancellationToken);
-		if (activeBlock) throw new ModmailBotException(Lang.UserAlreadyBlacklisted);
+        var activeBlock = await _dbContext.Blacklists.FilterByUserId(request.UserId)
+            .AnyAsync(cancellationToken);
+        if (activeBlock) throw new ModmailBotException(Lang.UserAlreadyBlacklisted);
 
-		var reason = string.IsNullOrEmpty(request.Reason)
-			             ? Lang.NoReasonProvided.Translate()
-			             : request.Reason;
+        var reason = string.IsNullOrEmpty(request.Reason) ? Lang.NoReasonProvided.Translate() : request.Reason;
 
-		var blackList = new Database.Entities.Blacklist {
-			Reason = reason,
-			UserId = request.UserId,
-			AuthorUserId = request.AuthorizedUserId
-		};
+        var blackList = new Database.Entities.Blacklist
+        {
+            Reason = reason,
+            UserId = request.UserId,
+            AuthorUserId = request.AuthorizedUserId
+        };
 
-		_dbContext.Add(blackList);
-		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
-		if (affected == 0) throw new DbInternalException();
+        _dbContext.Add(blackList);
+        var affected = await _dbContext.SaveChangesAsync(cancellationToken);
+        if (affected == 0) throw new DbInternalException();
 
 
-		await _mediator.Publish(new NotifyBlockedUser(request.AuthorizedUserId, request.UserId, reason), cancellationToken);
+        await _mediator.Publish(new NotifyBlockedUser(request.AuthorizedUserId, request.UserId, reason), cancellationToken);
 
-		return blackList;
-	}
+        return blackList;
+    }
 }

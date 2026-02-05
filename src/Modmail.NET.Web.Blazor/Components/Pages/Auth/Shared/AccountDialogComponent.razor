@@ -12,19 +12,23 @@
   private string _username = string.Empty;
 
 
-  protected override async Task OnInitializedAsync() {
+  protected override async Task OnInitializedAsync()
+  {
     var auth = await AuthContext;
     _userId = auth.User.GetUserId();
     _username = auth.User.GetUsername();
     var roleStr = auth.User.GetRole();
-    if (string.IsNullOrEmpty(roleStr)) {
+    if (string.IsNullOrEmpty(roleStr))
+    {
       NavigationManager.NavigateTo("result/" + Lang.UnauthorizedAccess);
     }
   }
 
-  private void ClickLogout() {
+  private void ClickLogout()
+  {
     NavigationManager.NavigateTo("/auth/logout", true);
   }
+
 }
 
 

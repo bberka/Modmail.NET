@@ -6,10 +6,17 @@ namespace Modmail.NET.Database.Configuration;
 
 public class TicketTypeConfiguration : IEntityTypeConfiguration<TicketType>
 {
-  public void Configure(EntityTypeBuilder<TicketType> builder) {
-    builder.HasKey(x => x.Id);
+    public void Configure(EntityTypeBuilder<TicketType> builder)
+    {
+        builder.HasKey(x => x.Id);
 
-    builder.Property(x => x.Id)
-           .ValueGeneratedOnAdd();
-  }
+        builder.Property(x => x.Id)
+            .ValueGeneratedNever();
+
+        builder.HasIndex(x => x.Key)
+            .IsUnique();
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+    }
 }

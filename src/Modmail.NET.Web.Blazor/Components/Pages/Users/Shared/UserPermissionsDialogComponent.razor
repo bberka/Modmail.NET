@@ -10,22 +10,22 @@
     [Parameter]
     public required ulong UserId { get; set; }
 
-    bool _isLoading = false;
+    bool _isLoading;
 
     private IQueryable<AuthPolicy>? _data;
-    private int _count = 0;
+    private int _count;
 
-    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+    private async Task ReloadDataAsync(LoadDataArgs? args = null)
+    {
         _isLoading = true;
         var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var query = dbContext.TeamUsers
-                             .Include(x => x.Team)
-                             .ThenInclude(x => x!.Permissions)
-                             .Where(x => x.UserId == UserId)
-                             .OrderByDescending(x => x.RegisterDateUtc)
-                             .SelectMany(x => x.Team!.Permissions)
-                             .Select(x => x.AuthPolicy)
-                             .AsQueryable();
+        var query = dbContext.TeamUsers.Include(x => x.Team)
+                .ThenInclude(x => x!.Permissions)
+                .Where(x => x.UserId == UserId)
+                .OrderByDescending(x => x.RegisterDateUtc)
+                .SelectMany(x => x.Team!.Permissions)
+                .Select(x => x.AuthPolicy)
+                .AsQueryable();
 
         query = query.ApplyDataGridFilter(args);
 
@@ -42,12 +42,14 @@
     }
 
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         await ReloadDataAsync();
     }
 
 
-    private async Task LoadDataAsync(LoadDataArgs args) {
+    private async Task LoadDataAsync(LoadDataArgs args)
+    {
         await ReloadDataAsync(args);
     }
 
@@ -58,10 +60,12 @@
     <RadzenRow>
         <RadzenColumn Size="12">
             <RadzenRow RowGap="4" class="rz-mt-5">
-                @if (_data is null) {
+                @if (_data is null)
+                {
                     <Loading></Loading>
                 }
-                else {
+                else
+                {
                     <RadzenCard Style="width: 100% !important;" class="rz-shadow-7">
                         <RadzenDataGrid Responsive="true" Count="_count" LoadData="LoadDataAsync"
                                         AllowColumnPicking="false"

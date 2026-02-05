@@ -5,9 +5,10 @@ namespace Modmail.NET.Database.Triggers;
 
 public class RegisterDateTrigger : IBeforeSaveTrigger<IRegisterDateUtc>
 {
-	public Task BeforeSave(ITriggerContext<IRegisterDateUtc> context, CancellationToken cancellationToken) {
-		if (context.ChangeType is ChangeType.Added) context.Entity.RegisterDateUtc = UtilDate.GetNow();
+    public Task BeforeSave(ITriggerContext<IRegisterDateUtc> context, CancellationToken cancellationToken)
+    {
+        if (context.ChangeType is ChangeType.Added) context.Entity.RegisterDateUtc = UtilDate.GetNow();
 
-		return Task.CompletedTask;
-	}
+        return Task.CompletedTask;
+    }
 }

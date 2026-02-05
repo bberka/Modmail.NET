@@ -7,14 +7,17 @@
     [CascadingParameter]
     public required Task<AuthenticationState> AuthContext { get; set; }
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         var state = await AuthContext;
-        if (state.User.Identity?.IsAuthenticated == true) {
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
             NavigationManager.NavigateTo("/dashboard", false);
         }
     }
 
-    private void NavigateToLogin() {
+    private void NavigateToLogin()
+    {
         NavigationManager.NavigateTo("/auth/login", true);
     }
 

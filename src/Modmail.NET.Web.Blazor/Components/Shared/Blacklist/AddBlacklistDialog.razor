@@ -1,0 +1,100 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Serilog
+@inject IDbContextFactory<ModmailDbContext> dbContextFactory
+@inject NotificationService notificationService
+@inject DialogService dialogService
+
+@code {
+
+    private List<DiscordUserInfo> _users = new();
+
+    private ulong? selectedUserId;
+
+    private readonly string? reason = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        _users = await dbContext.DiscordUserInfos.GroupJoin(dbContext.TicketBlacklists, user => user.Id, blacklist => blacklist.DiscordUserId, (user, blacklists) => new { user, blacklists })
+            .SelectMany(x => x.blacklists.DefaultIfEmpty(), (x, blacklist) => new { x.user, blacklist })
+            .Where(x => x.blacklist == null) // Only take users that are not in blacklist
+            .OrderBy(x => x.user.Username)
+            .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
+            .Where(x => BotConfig.This.OwnerUsers.All(y => y != x.user.Id)) // Exclude bot owner
+            .Where(x => x.)
+            .Select(x => x.user)
+            .ToListAsync();
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (selectedUserId is null)
+        {
+            notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+            return;
+        }
+
+        var dialogResult = await dialogService.Confirm("Are you sure you want to block this user?", options: new ConfirmOptions
+        {
+            OkButtonText = "Yes",
+            CancelButtonText = "No",
+            CloseDialogOnOverlayClick = true,
+            CloseDialogOnEsc = true
+        });
+        if (dialogResult == true)
+        {
+            const string logMessage = $"[{nameof(AddBlacklistDialog)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
+            try
+            {
+                await TicketBlacklist.ProcessAddUserToBlacklist(selectedUserId.Value, reason);
+                notificationService.Notify(NotificationSeverity.Success, "Success", "User blacklisted successfully.");
+                Log.Information(logMessage, selectedUserId.Value, reason);
+                dialogService.Close(true);
+            }
+            catch (BotExceptionBase ex)
+            {
+                ex.NotifyException(notificationService);
+                Log.Warning(logMessage, selectedUserId.Value, reason);
+            }
+            catch (Exception ex)
+            {
+                ex.NotifyException(notificationService);
+                Log.Fatal(logMessage, selectedUserId.Value, reason);
+            }
+        }
+    }
+
+    // private sealed record AddBlackListModel(ulong UserId);
+
+}
+
+
+<RadzenRow>
+    <RadzenColumn>
+        <RadzenRow class="rz-my-4">
+            <RadzenAlert AllowClose="false" Size="AlertSize.Small" AlertStyle="AlertStyle.Warning"
+                         Variant="Variant.Flat"
+                         Shade="Shade.Lighter">
+                Blocking user will force close active tickets if user has any.
+            </RadzenAlert>
+            <RadzenAlert AllowClose="false" Size="AlertSize.Small" AlertStyle="AlertStyle.Info" Variant="Variant.Flat"
+                         Shade="Shade.Lighter">
+                You can only see users that are interacted with the bot.
+            </RadzenAlert>
+        </RadzenRow>
+        <RadzenRow class="rz-my-4">
+            <RadzenDropDown Style="width: 100%; max-width: 300px;" TValue="ulong?" @bind-Value="selectedUserId"
+                            Placeholder="Select user" AllowFiltering="true"
+                            Data="@(_users)" TextProperty="@nameof(DiscordUserInfo.Username)"
+                            ValueProperty="@nameof(DiscordUserInfo.Id)"/>
+        </RadzenRow>
+        <RadzenRow class="rz-my-4">
+            <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Primary" Text="Block User"
+                          Click="SubmitAsync"/>
+        </RadzenRow>
+
+
+    </RadzenColumn>
+</RadzenRow>

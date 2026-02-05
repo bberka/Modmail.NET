@@ -20,37 +20,36 @@
   private string? _reason;
 
 
-  private async Task SubmitAsync() {
-    var dialogResult = await DialogService.Confirm(Lang.TicketForceCloseWarning.Translate(),
-                                                   options: new ConfirmOptions {
-                                                     OkButtonText = Lang.Yes.Translate(),
-                                                     CancelButtonText = Lang.No.Translate(),
-                                                     CloseDialogOnOverlayClick = true,
-                                                     CloseDialogOnEsc = true
-                                                   });
-    if (dialogResult == true) {
+  private async Task SubmitAsync()
+  {
+      var dialogResult = await DialogService.Confirm(Lang.TicketForceCloseWarning.Translate(), options: new ConfirmOptions
+      {
+              OkButtonText = Lang.Yes.Translate(),
+              CancelButtonText = Lang.No.Translate(),
+              CloseDialogOnOverlayClick = true,
+              CloseDialogOnEsc = true
+      });
+      if (dialogResult == true)
+      {
       const string logMessage = $"[{nameof(CloseTicketDialogComponent)}]{nameof(SubmitAsync)}({{UserId}},{{Reason}})";
       var state = await AuthContext;
       var discordUserId = state.User.GetUserId();
-      try {
+      try
+      {
         await Sender.Send(new ProcessCloseTicketCommand(discordUserId, TicketId, _reason));
         NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TicketClosedSuccessfully.Translate());
-        Log.Information(logMessage,
-                        discordUserId,
-                        _reason);
+        Log.Information(logMessage, discordUserId, _reason);
         DialogService.Close(true);
       }
-      catch (ModmailBotException ex) {
+      catch (ModmailBotException ex)
+      {
         ex.NotifyException(NotificationService);
-        Log.Warning(logMessage,
-                    discordUserId,
-                    _reason);
+        Log.Warning(logMessage, discordUserId, _reason);
       }
-      catch (Exception ex) {
+      catch (Exception ex)
+      {
         ex.NotifyException(NotificationService);
-        Log.Fatal(logMessage,
-                  discordUserId,
-                  _reason);
+        Log.Fatal(logMessage, discordUserId, _reason);
       }
     }
   }

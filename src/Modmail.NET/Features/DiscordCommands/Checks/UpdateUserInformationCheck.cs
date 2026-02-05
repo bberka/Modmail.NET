@@ -8,10 +8,11 @@ namespace Modmail.NET.Features.DiscordCommands.Checks;
 
 public class UpdateUserInformationCheck : IContextCheck<UpdateUserInformationAttribute>
 {
-	public async ValueTask<string?> ExecuteCheckAsync(UpdateUserInformationAttribute attribute, CommandContext context) {
-		var scope = context.ServiceProvider.CreateScope();
-		var sender = scope.ServiceProvider.GetRequiredService<ISender>();
-		await sender.Send(new UpdateDiscordUserCommand(context.User));
-		return null;
-	}
+    public async ValueTask<string?> ExecuteCheckAsync(UpdateUserInformationAttribute attribute, CommandContext context)
+    {
+        var scope = context.ServiceProvider.CreateScope();
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+        await sender.Send(new UpdateDiscordUserCommand(context.User));
+        return null;
+    }
 }

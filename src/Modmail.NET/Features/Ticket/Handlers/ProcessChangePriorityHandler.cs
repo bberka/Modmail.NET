@@ -10,30 +10,28 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessChangePriorityHandler : IRequestHandler<ProcessChangePriorityCommand>
 {
-	private readonly IMediator _mediator;
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
+    private readonly IMediator _mediator;
 
-	public ProcessChangePriorityHandler(IMediator mediator,
-	                                    ModmailDbContext dbContext) {
-		_mediator = mediator;
-		_dbContext = dbContext;
-	}
+    public ProcessChangePriorityHandler(IMediator mediator, ModmailDbContext dbContext)
+    {
+        _mediator = mediator;
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<Unit> Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken) {
-		var ticket = await _dbContext.Tickets
-		                             .FilterActive()
-		                             .FilterById(request.TicketId)
-		                             .FirstOrDefaultAsync(cancellationToken);
-		if (ticket is null) throw new ModmailBotException(Lang.TicketNotFound);
+    public async ValueTask<Unit> Handle(ProcessChangePriorityCommand request, CancellationToken cancellationToken)
+    {
+        var ticket = await _dbContext.Tickets.FilterActive()
+            .FilterById(request.TicketId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (ticket is null) throw new ModmailBotException(Lang.TicketNotFound);
 
-		var oldPriority = ticket.Priority;
-		ticket.Priority = request.NewPriority;
-		_dbContext.Update(ticket);
-		await _dbContext.SaveChangesAsync(cancellationToken);
-		await _mediator.Publish(new NotifyTicketPriorityChanged(request.AuthorizedUserId,
-		                                                        ticket,
-		                                                        oldPriority,
-		                                                        request.NewPriority), cancellationToken);
-		return Unit.Value;
-	}
+        var oldPriority = ticket.Priority;
+        ticket.Priority = request.NewPriority;
+        _dbContext.Update(ticket);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _mediator.Publish(new NotifyTicketPriorityChanged(request.AuthorizedUserId, ticket, oldPriority, request.NewPriority),
+            cancellationToken);
+        return Unit.Value;
+    }
 }

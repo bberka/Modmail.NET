@@ -8,60 +8,67 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class NotifyTicketClosedUserMessageHandler : INotificationHandler<NotifyTicketClosed>
 {
-	private readonly ModmailBot _bot;
-	private readonly ISender _sender;
+    private readonly ModmailBot _bot;
+    private readonly ISender _sender;
 
-	public NotifyTicketClosedUserMessageHandler(ModmailBot bot,
-	                                            ISender sender) {
-		_bot = bot;
-		_sender = sender;
-	}
+    public NotifyTicketClosedUserMessageHandler(ModmailBot bot, ISender sender)
+    {
+        _bot = bot;
+        _sender = sender;
+    }
 
-	public async ValueTask Handle(NotifyTicketClosed notification, CancellationToken cancellationToken) {
-		var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
+    public async ValueTask Handle(NotifyTicketClosed notification, CancellationToken cancellationToken)
+    {
+        var option = await _sender.Send(new GetOptionQuery(), cancellationToken);
 
 
-		var pmChannel = await _bot.Client.GetChannelAsync(notification.Ticket.PrivateMessageChannelId);
-		var messageBuilder = new DiscordMessageBuilder();
-		var embedBuilder = new DiscordEmbedBuilder()
-		                   .WithTitle(Lang.YourTicketHasBeenClosed.Translate())
-		                   .WithDescription(Lang.YourTicketHasBeenClosedDescription.Translate())
-		                   .WithServerInfoFooter(option)
-		                   .WithCustomTimestamp()
-		                   .WithColor(ModmailColors.TicketClosedColor);
-		var closingMessage = Lang.ClosingMessageDescription.Translate();
-		if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
-		if (!string.IsNullOrEmpty(notification.Ticket.CloseReason)) embedBuilder.AddField(Lang.CloseReason.Translate(), notification.Ticket.CloseReason);
+        var pmChannel = await _bot.Client.GetChannelAsync(notification.Ticket.PrivateMessageChannelId);
+        var messageBuilder = new DiscordMessageBuilder();
+        var embedBuilder = new DiscordEmbedBuilder().WithTitle(Lang.YourTicketHasBeenClosed.Translate())
+            .WithDescription(Lang.YourTicketHasBeenClosedDescription.Translate())
+            .WithServerInfoFooter(option)
+            .WithCustomTimestamp()
+            .WithColor(ModmailColors.TicketClosedColor);
+        var closingMessage = Lang.ClosingMessageDescription.Translate();
+        if (!string.IsNullOrEmpty(closingMessage)) embedBuilder.WithDescription(closingMessage);
+        if (!string.IsNullOrEmpty(notification.Ticket.CloseReason))
+            embedBuilder.AddField(Lang.CloseReason.Translate(), notification.Ticket.CloseReason);
 
-		Uri? transcriptUri = null;
-		if (option.SendTranscriptLinkToUser && option.PublicTranscripts) transcriptUri = UtilTranscript.GetTranscriptUri(notification.Ticket.Id);
+        Uri? transcriptUri = null;
+        if (option.SendTranscriptLinkToUser && option.PublicTranscripts) transcriptUri = UtilTranscript.GetTranscriptUri(notification.Ticket.Id);
 
-		if (transcriptUri is not null) messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, Lang.Transcript.Translate()));
-		messageBuilder.AddEmbed(embedBuilder);
-		await pmChannel.SendMessageAsync(messageBuilder);
+        if (transcriptUri is not null)
+            messageBuilder.AddComponents(new DiscordLinkButtonComponent(transcriptUri.AbsoluteUri, Lang.Transcript.Translate()));
+        messageBuilder.AddEmbed(embedBuilder);
+        await pmChannel.SendMessageAsync(messageBuilder);
 
-		if (option.TakeFeedbackAfterClosing && !notification.DontSendFeedbackMessage) {
-			var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
-			var starList = new List<DiscordComponent> {
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, notification.Ticket.Id), "1", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 2, notification.Ticket.Id), "2", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 3, notification.Ticket.Id), "3", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 4, notification.Ticket.Id), "4", false, new DiscordComponentEmoji("⭐")),
-				new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 5, notification.Ticket.Id), "5", false, new DiscordComponentEmoji("⭐"))
-			};
+        if (option.TakeFeedbackAfterClosing && !notification.DontSendFeedbackMessage)
+        {
+            var ticketFeedbackMsgToUser = new DiscordMessageBuilder();
+            var starList = new List<DiscordComponent>
+            {
+                new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 1, notification.Ticket.Id), "1", false,
+                    new DiscordComponentEmoji("⭐")),
+                new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 2, notification.Ticket.Id), "2", false,
+                    new DiscordComponentEmoji("⭐")),
+                new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 3, notification.Ticket.Id), "3", false,
+                    new DiscordComponentEmoji("⭐")),
+                new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 4, notification.Ticket.Id), "4", false,
+                    new DiscordComponentEmoji("⭐")),
+                new DiscordButtonComponent(DiscordButtonStyle.Primary, UtilInteraction.BuildKey("star", 5, notification.Ticket.Id), "5", false,
+                    new DiscordComponentEmoji("⭐"))
+            };
 
-			var ticketFeedbackEmbed = new DiscordEmbedBuilder()
-			                          .WithTitle(Lang.Feedback.Translate())
-			                          .WithDescription(Lang.FeedbackDescription.Translate())
-			                          .WithCustomTimestamp()
-			                          .WithServerInfoFooter(option)
-			                          .WithColor(ModmailColors.FeedbackColor);
+            var ticketFeedbackEmbed = new DiscordEmbedBuilder().WithTitle(Lang.Feedback.Translate())
+                .WithDescription(Lang.FeedbackDescription.Translate())
+                .WithCustomTimestamp()
+                .WithServerInfoFooter(option)
+                .WithColor(ModmailColors.FeedbackColor);
 
-			var response = ticketFeedbackMsgToUser
-			               .AddEmbed(ticketFeedbackEmbed)
-			               .AddComponents(starList);
+            var response = ticketFeedbackMsgToUser.AddEmbed(ticketFeedbackEmbed)
+                .AddComponents(starList);
 
-			await pmChannel.SendMessageAsync(response);
-		}
-	}
+            await pmChannel.SendMessageAsync(response);
+        }
+    }
 }

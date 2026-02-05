@@ -10,34 +10,37 @@ namespace Modmail.NET.Features.Ticket.Handlers;
 
 public class ProcessRemoveTicketTypeHandler : IRequestHandler<ProcessRemoveTicketTypeCommand, TicketType>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public ProcessRemoveTicketTypeHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public ProcessRemoveTicketTypeHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<TicketType> Handle(ProcessRemoveTicketTypeCommand request, CancellationToken cancellationToken) {
-		var ticketType = await _dbContext.TicketTypes.FindAsync([request.Id], cancellationToken)
-		                 ?? throw new ModmailBotException(Lang.TicketTypeNotFound);
+    public async ValueTask<TicketType> Handle(ProcessRemoveTicketTypeCommand request, CancellationToken cancellationToken)
+    {
+        var ticketType = await _dbContext.TicketTypes.FindAsync([request.Id], cancellationToken) ??
+                         throw new ModmailBotException(Lang.TicketTypeNotFound);
 
-		var allTicketsByType = await _dbContext.Tickets
-		                                       .FilterByTypeId(request.Id)
-		                                       .ToListAsync(cancellationToken);
+        var allTicketsByType = await _dbContext.Tickets.FilterByTypeId(request.Id)
+            .ToListAsync(cancellationToken);
 
-		if (allTicketsByType.Count > 0) {
-			foreach (var ticket in allTicketsByType) {
-				ticket.TicketTypeId = null;
-				ticket.TicketType = null;
-			}
+        if (allTicketsByType.Count > 0)
+        {
+            foreach (var ticket in allTicketsByType)
+            {
+                ticket.TicketTypeId = null;
+                ticket.TicketType = null;
+            }
 
-			_dbContext.UpdateRange(allTicketsByType);
-		}
+            _dbContext.UpdateRange(allTicketsByType);
+        }
 
-		_dbContext.Remove(ticketType);
+        _dbContext.Remove(ticketType);
 
-		var affected = await _dbContext.SaveChangesAsync(cancellationToken);
-		if (affected == 0) throw new DbInternalException();
+        var affected = await _dbContext.SaveChangesAsync(cancellationToken);
+        if (affected == 0) throw new DbInternalException();
 
-		return ticketType;
-	}
+        return ticketType;
+    }
 }

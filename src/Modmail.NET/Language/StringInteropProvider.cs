@@ -6,77 +6,65 @@ namespace Modmail.NET.Language;
 
 public static class StringInterpolationMgr
 {
-  private const string NewLineInterpolation = "{NewLine}";
+    private const string NewLineInterpolation = "{NewLine}";
 
-  public static string Build(string text,
-                             ulong? userId = null,
-                             ulong? modUserId = null,
-                             ulong? channelId = null,
-                             ulong? guildId = null,
-                             string? userName = null,
-                             string? modUserName = null,
-                             string? channelName = null,
-                             string? guildName = null,
-                             string? roleName = null,
-                             string? teamName = null,
-                             string? ticketId = null
-  ) {
-    var sb = new StringBuilder(text);
-    return sb.Replace("{UserId}", userId?.ToString() ?? "Unknown")
-             .Replace("{ModUserId}", modUserId?.ToString() ?? "Unknown")
-             .Replace("{ChannelId}", channelId?.ToString() ?? "Unknown")
-             .Replace("{GuildId}", guildId?.ToString() ?? "Unknown")
-             .Replace("{UserName}", userName ?? "Unknown")
-             .Replace("{ModUserName}", modUserName ?? "Unknown")
-             .Replace("{ChannelName}", channelName ?? "Unknown")
-             .Replace("{GuildName}", guildName ?? "Unknown")
-             .Replace("{RoleName}", roleName ?? "Unknown")
-             .Replace("{TeamName}", teamName ?? "Unknown")
-             .Replace("{TicketId}", ticketId ?? "Unknown")
-             .Replace(NewLineInterpolation, Environment.NewLine)
-             .ToString();
-  }
+    public static string Build(
+        string text,
+        ulong? userId = null,
+        ulong? modUserId = null,
+        ulong? channelId = null,
+        ulong? guildId = null,
+        string? userName = null,
+        string? modUserName = null,
+        string? channelName = null,
+        string? guildName = null,
+        string? roleName = null,
+        string? teamName = null,
+        string? ticketId = null
+    )
+    {
+        var sb = new StringBuilder(text);
+        return sb.Replace("{UserId}", userId?.ToString() ?? "Unknown")
+            .Replace("{ModUserId}", modUserId?.ToString() ?? "Unknown")
+            .Replace("{ChannelId}", channelId?.ToString() ?? "Unknown")
+            .Replace("{GuildId}", guildId?.ToString() ?? "Unknown")
+            .Replace("{UserName}", userName ?? "Unknown")
+            .Replace("{ModUserName}", modUserName ?? "Unknown")
+            .Replace("{ChannelName}", channelName ?? "Unknown")
+            .Replace("{GuildName}", guildName ?? "Unknown")
+            .Replace("{RoleName}", roleName ?? "Unknown")
+            .Replace("{TeamName}", teamName ?? "Unknown")
+            .Replace("{TicketId}", ticketId ?? "Unknown")
+            .Replace(NewLineInterpolation, Environment.NewLine)
+            .ToString();
+    }
 
 
-  public static string Build(string text,
-                             DiscordGuild? guild = null,
-                             DiscordUser? user = null,
-                             DiscordUser? modUser = null,
-                             DiscordChannel? channel = null,
-                             DiscordRole? role = null,
-                             Team? team = null
-  ) {
-    return Build(text,
-                 user?.Id,
-                 modUser?.Id,
-                 channel?.Id,
-                 guild?.Id,
-                 user?.Username,
-                 modUser?.Username,
-                 channel?.Name,
-                 guild?.Name,
-                 role?.Name,
-                 team?.Name);
-  }
+    public static string Build(
+        string text,
+        DiscordGuild? guild = null,
+        DiscordUser? user = null,
+        DiscordUser? modUser = null,
+        DiscordChannel? channel = null,
+        DiscordRole? role = null,
+        Team? team = null
+    )
+    {
+        return Build(text, user?.Id, modUser?.Id, channel?.Id, guild?.Id, user?.Username, modUser?.Username, channel?.Name, guild?.Name, role?.Name,
+            team?.Name);
+    }
 
-  public static string Build(string text,
-                             Option? guild = null,
-                             UserInformation? user = null,
-                             UserInformation? modUser = null,
-                             DiscordChannel? channel = null,
-                             DiscordRole? role = null,
-                             Team? team = null
-  ) {
-    return Build(text,
-                 user?.Id,
-                 modUser?.Id,
-                 channel?.Id,
-                 guild?.ServerId,
-                 user?.Username,
-                 modUser?.Username,
-                 channel?.Name,
-                 guild?.Name,
-                 role?.Name,
-                 team?.Name);
-  }
+    public static string Build(
+        string text,
+        Option? guild = null,
+        UserInformation? user = null,
+        UserInformation? modUser = null,
+        DiscordChannel? channel = null,
+        DiscordRole? role = null,
+        Team? team = null
+    )
+    {
+        return Build(text, user?.Id, modUser?.Id, channel?.Id, guild?.ServerId, user?.Username, modUser?.Username, channel?.Name, guild?.Name,
+            role?.Name, team?.Name);
+    }
 }

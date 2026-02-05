@@ -23,26 +23,28 @@
     [Parameter]
     public required Team Team { get; set; }
 
-    bool _isLoading = false;
+    bool _isLoading;
     private AuthPolicy[]? _data;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         await ReloadDataAsync();
     }
 
-    private async Task LoadDataAsync(LoadDataArgs obj) {
+    private async Task LoadDataAsync(LoadDataArgs obj)
+    {
         await ReloadDataAsync(obj);
     }
 
-    private async Task ReloadDataAsync(LoadDataArgs? args = null) {
+    private async Task ReloadDataAsync(LoadDataArgs? args = null)
+    {
         _isLoading = true;
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var query = dbContext.TeamPermissions
-                             .Where(x => x.TeamId == Team.Id)
-                             .OrderByDescending(x => x.RegisterDateUtc)
-                             .Select(x => x.AuthPolicy)
-                             .AsQueryable();
+        var query = dbContext.TeamPermissions.Where(x => x.TeamId == Team.Id)
+                .OrderByDescending(x => x.RegisterDateUtc)
+                .Select(x => x.AuthPolicy)
+                .AsQueryable();
 
         query = query.ApplyDataGridFilter(args);
 
@@ -57,32 +59,38 @@
     }
 
 
-    private async Task RemoveAsync(AuthPolicy teamPermission) {
+    private async Task RemoveAsync(AuthPolicy teamPermission)
+    {
         const string logMessage = $"[{nameof(TeamPermissionsDialogComponent)}]{nameof(RemoveAsync)}({{@Member}})";
-        try {
+        try
+        {
             var state = await AuthContext;
             var userId = state.User.GetUserId();
             await Sender.Send(new ProcessRemoveTeamPermissionCommand(userId, teamPermission));
             Log.Information(logMessage, teamPermission);
-            NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), detail: Lang.TeamPermissionRemovedSuccessfully.Translate());
+            Radzen.NotificationService.Notify(NotificationSeverity.Success, Lang.Success.Translate(), Lang.TeamPermissionRemovedSuccessfully.Translate());
             await ReloadDataAsync();
         }
-        catch (ModmailBotException ex) {
+        catch (ModmailBotException ex)
+        {
             Log.Warning(ex, logMessage, teamPermission);
-            ex.NotifyException(NotificationService);
+            ex.NotifyException(Radzen.NotificationService);
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Log.Fatal(ex, logMessage, teamPermission);
-            ex.NotifyException(NotificationService);
+            ex.NotifyException(Radzen.NotificationService);
         }
     }
 
 }
 
-@if (_data is null) {
+@if (_data is null)
+{
     <Loading></Loading>
 }
-else {
+else
+{
     <RadzenRow>
         <RadzenColumn>
             <RadzenText TextStyle="TextStyle.Subtitle1">
@@ -91,7 +99,8 @@ else {
                 permissions will be ignored.
             </RadzenText>
 
-            @if (_data.Length == 0) {
+            @if (_data.Length == 0)
+            {
                 <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-on-secondary-lighter">
                     @Lang.TeamHasNoPermissions.Translate()
                 </RadzenText>
@@ -121,7 +130,7 @@ else {
                                           Shade="Shade.Lighter"
                                           Size="ButtonSize.Medium"
                                           class="rz-my-1 rz-ms-1"
-                                          MouseEnter="@(args => TooltipService.Open(args, Lang.RemovePermission.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
+                                          MouseEnter="@(args => Radzen.TooltipService.Open(args, Lang.RemovePermission.Translate(), new TooltipOptions { Style = "background: var(--rz-danger);" }))"
                                           Click="@(async () => await RemoveAsync(perm))"
                                           @onclick:stopPropagation="true">
                             </RadzenButton>

@@ -5,17 +5,20 @@ namespace Modmail.NET.Web.Blazor.Providers;
 
 public class AuthorizeTeamAttribute : AuthorizeAttribute
 {
-  public AuthorizeTeamAttribute() {
-    Roles = AuthConstants.AuthorizeTeamRole;
-  }
+    public AuthorizeTeamAttribute()
+    {
+        Roles = AuthConstants.AuthorizeTeamRole;
+    }
 
-  public AuthorizeTeamAttribute(AuthPolicy policy) {
-    Roles = AuthConstants.AuthorizeTeamRole;
-    Policy = policy.Name;
-  }
+    public AuthorizeTeamAttribute(AuthPolicy policy)
+    {
+        Roles = AuthConstants.AuthorizeTeamRole;
+        Policy = policy.Name;
+    }
 
-  public AuthorizeTeamAttribute(string policy) {
-    Roles = AuthConstants.AuthorizeTeamRole;
-    Policy = policy;
-  }
+    public AuthorizeTeamAttribute(string policy)
+    {
+        Roles = AuthConstants.AuthorizeTeamRole;
+        Policy = policy;
+    }
 }

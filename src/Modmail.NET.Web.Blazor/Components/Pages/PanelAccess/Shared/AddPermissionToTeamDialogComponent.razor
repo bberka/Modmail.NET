@@ -29,18 +29,23 @@
     private IEnumerable<int> _selectedPermissions = [];
     private ulong _userId;
 
-    private async Task LoadAsync() {
+    private async Task LoadAsync()
+    {
         var permissions = await Sender.Send(new GetUserPermissionsQuery(_userId));
 
         var isSuperUser = permissions.Contains(AuthPolicy.SuperUser);
-        var isConfigSuperUser = Options.Value.SuperUsers.Contains(_userId);
-        if (isConfigSuperUser) {
+        var isConfigSuperUser = Microsoft.Extensions.Options.Options.Value.SuperUsers.Contains(_userId);
+        if (isConfigSuperUser)
+        {
             _data = AuthPolicy.List.ToArray();
         }
-        else if (isSuperUser) {
-            _data = AuthPolicy.List.Where(x => x != AuthPolicy.SuperUser).ToArray();
+        else if (isSuperUser)
+        {
+            _data = AuthPolicy.List.Where(x => x != AuthPolicy.SuperUser)
+                    .ToArray();
         }
-        else {
+        else
+        {
             _data = permissions;
         }
 
@@ -48,59 +53,68 @@
 
         var dbContext = await DbContextFactory.CreateDbContextAsync();
 
-        var teamPermissions = await dbContext.TeamPermissions.Where(x => x.TeamId == Team.Id).Select(x => x.AuthPolicy).ToArrayAsync();
+        var teamPermissions = await dbContext.TeamPermissions.Where(x => x.TeamId == Team.Id)
+                .Select(x => x.AuthPolicy)
+                .ToArrayAsync();
         _data = teamPermissions.Any(x => x == AuthPolicy.SuperUser)
-                        ? []
-                        : _data.Where(x => teamPermissions.All(y => y != x)).OrderBy(x => x.Value).ToArray();
+                ? []
+                : _data.Where(x => teamPermissions.All(y => y != x))
+                        .OrderBy(x => x.Value)
+                        .ToArray();
     }
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         var state = await AuthContext;
         _userId = state.User.GetUserId();
         await LoadAsync();
     }
 
-    private async Task SubmitAsync(MouseEventArgs obj) {
-        var validPermissions = _selectedPermissions
-                               .Select(x => AuthPolicy.TryFromValue(x, out var permission)
-                                                    ? permission
-                                                    : null)
-                               .Where(x => x != null)
-                               .Select(x => x!)
-                               .ToArray();
-        if (validPermissions.Length == 0) {
-            NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission.");
+    private async Task SubmitAsync(MouseEventArgs obj)
+    {
+        var validPermissions = _selectedPermissions.Select(x => AuthPolicy.TryFromValue(x, out var permission) ? permission : null)
+                .Where(x => x != null)
+                .Select(x => x!)
+                .ToArray();
+        if (validPermissions.Length == 0)
+        {
+            Radzen.NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a permission.");
             return;
         }
 
 
         const string logMessage = $"[{nameof(AddPermissionToTeamDialogComponent)}]{nameof(SubmitAsync)}({{@Permission}})";
 
-        try {
+        try
+        {
             var state = await AuthContext;
             var userId = state.User.GetUserId();
 
             await Sender.Send(new ProcessAddPermissionToTeamCommand(userId, Team.Id, validPermissions));
             Log.Information(logMessage, _selectedPermissions);
-            NotificationService.Notify(NotificationSeverity.Success, "Success", Lang.PermissionAddedSuccessfully.Translate());
-            DialogService.Close(true);
+            Radzen.NotificationService.Notify(NotificationSeverity.Success, "Success", Lang.PermissionAddedSuccessfully.Translate());
+            Radzen.DialogService.Close(true);
         }
-        catch (ModmailBotException ex) {
+        catch (ModmailBotException ex)
+        {
             Log.Warning(logMessage, validPermissions.First());
-            ex.NotifyException(NotificationService);
+            ex.NotifyException(Radzen.NotificationService);
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Log.Fatal(logMessage, validPermissions.First());
-            ex.NotifyException(NotificationService);
+            ex.NotifyException(Radzen.NotificationService);
         }
     }
 
 }
 
-@if (_data == null) {
+@if (_data == null)
+{
     <Loading></Loading>
 }
-else if (_data.Length == 0) {
+else if (_data.Length == 0)
+{
     <RadzenRow>
         <RadzenColumn>
             <RadzenText TextStyle="TextStyle.Subtitle1">
@@ -109,7 +123,8 @@ else if (_data.Length == 0) {
         </RadzenColumn>
     </RadzenRow>
 }
-else {
+else
+{
     <RadzenRow>
         <RadzenColumn>
             <RadzenRow class="rz-my-4">

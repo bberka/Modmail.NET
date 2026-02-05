@@ -7,13 +7,15 @@ namespace Modmail.NET.Features.User.Handlers;
 
 public class GetDiscordUserInfoListHandler : IRequestHandler<GetDiscordUserInfoListQuery, List<UserInformation>>
 {
-	private readonly ModmailDbContext _dbContext;
+    private readonly ModmailDbContext _dbContext;
 
-	public GetDiscordUserInfoListHandler(ModmailDbContext dbContext) {
-		_dbContext = dbContext;
-	}
+    public GetDiscordUserInfoListHandler(ModmailDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public async ValueTask<List<UserInformation>> Handle(GetDiscordUserInfoListQuery request, CancellationToken cancellationToken) {
-		return await _dbContext.UserInformation.ToListAsync(cancellationToken);
-	}
+    public async ValueTask<List<UserInformation>> Handle(GetDiscordUserInfoListQuery request, CancellationToken cancellationToken)
+    {
+        return await _dbContext.UserInformation.ToListAsync(cancellationToken);
+    }
 }
