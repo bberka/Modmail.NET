@@ -1,36 +1,22 @@
-﻿using Radzen;
-using System.Linq.Dynamic.Core;
-using Modmail.NET.Exceptions;
-
+﻿using System.Linq.Dynamic.Core;
+using Modmail.NET.Common.Exceptions;
+using Radzen;
 
 namespace Modmail.NET.Web.Blazor;
 
 public static class RadzenTools
 {
-  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs? args = null) {
+  public static IQueryable<T> ApplyDataGridFilter<T>(this IQueryable<T> queryable, LoadDataArgs args = null) {
     if (args is null) return queryable;
 
-    // if (args.Filter is not null) {
-    // }
+    if (args.Filter is not null) queryable = queryable.Where(args.Filter);
 
-    // var expression = Expression.Constant(true);
-    // foreach (var filter in args.Filters) {
-    //   var filterValue = filter.FilterValue;
-    //   var filterType = filter.FilterOperator;
-    //   var filterField = filter.;
-    //   
-    // }
-
-    if (args.Sorts is not null) {
-      foreach (var sort in args.Sorts) {
-        var sortField = sort.Property;
-        if (string.IsNullOrEmpty(sort.Property)) continue;
-        var sortDir = sort.SortOrder;
-        queryable = queryable.OrderBy(sortField + (sortDir == SortOrder.Ascending
-                                                     ? ""
-                                                     : " descending"));
-      }
-    }
+    var firstSort = args.Sorts?.FirstOrDefault();
+    if (firstSort != null)
+      queryable =
+        firstSort.SortOrder == SortOrder.Ascending
+          ? queryable.OrderBy(x => firstSort.Property)
+          : queryable.OrderByDescending(x => firstSort.Property);
 
 
     return queryable;
@@ -48,7 +34,7 @@ public static class RadzenTools
   }
 
   public static void NotifyException<T>(this T exception, NotificationService service, bool showExceptionMessage = false) where T : Exception {
-    if (exception is BotExceptionBase botException) {
+    if (exception is ModmailBotException botException) {
       service.Notify(NotificationSeverity.Warning, "Failed", botException.TitleMessage);
       return;
     }

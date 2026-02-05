@@ -1,0 +1,10 @@
+@using Modmail.NET.Common.Utils
+<RadzenFooter>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center"
+                 AlignItems="AlignItems.Center" Gap="0">
+        Modmail.NET &copy; @UtilDate.GetNow().Year - v@(UtilVersion.GetReadableProductVersion())
+
+        <RadzenLink Text="Github" Path="/api/link/github" class="rz-mx-2 rz-mx-lg-4">
+        </RadzenLink>
+    </RadzenStack>
+</RadzenFooter>

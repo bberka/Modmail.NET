@@ -1,6 +1,6 @@
-﻿@using Modmail.NET.Web.Blazor.Components.Layout.Shared
-@using Modmail.NET.Web.Shared
-@inject ThemeService themeService
+﻿@using Modmail.NET.Common.Static
+@using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@inject ThemeService ThemeService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +20,14 @@
 <script src="_framework/blazor.web.js"></script>
 
 <Scripts></Scripts>
+<script type="text/javascript">
+  window.scrollToBottom = (elementId) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollTop = element.scrollHeight;
+    }
+  };
+</script>
 </body>
 </html>
 
@@ -31,10 +39,10 @@
 
   protected override void OnInitialized() {
     base.OnInitialized();
-    var theme = HttpContext.Request.Cookies[WebSharedConstants.THEME_COOKIE_NAME];
+    var theme = HttpContext.Request.Cookies[Const.ThemeCookieName];
 
     if (!string.IsNullOrEmpty(theme)) {
-      themeService.SetTheme(theme, false);
+      ThemeService.SetTheme(theme, false);
     }
   }
 

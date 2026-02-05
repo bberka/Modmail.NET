@@ -50,3 +50,10 @@
 #components-reconnect-modal {
     background-color: #333 !important;
 }
+
+.transcript-container {
+    height: calc(100vh - 80px) !important; /* Adjust 60px based on the actual height of your sticky header */
+    overflow-y: auto !important;
+    margin: 0; /*remove default margin*/
+    padding: 0; /*remove default padding*/
+}

@@ -1,244 +1,63 @@
-﻿using System.Reflection;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
-using Microsoft.EntityFrameworkCore;
-using Modmail.NET.Commands;
-using Modmail.NET.Database;
-using Modmail.NET.Entities;
-using Modmail.NET.Events;
-using Modmail.NET.Exceptions;
-using Modmail.NET.Manager;
-using Modmail.NET.Utils;
-using Ninject;
+﻿using DSharpPlus;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Modmail.NET.Common.Exceptions;
+using Modmail.NET.Common.Static;
+using Modmail.NET.Features.Guild.Commands;
+using Modmail.NET.Features.Guild.Queries;
+using Modmail.NET.Features.User.Commands;
 using Serilog;
-using Serilog.Extensions.Logging;
-using NotFoundException = Modmail.NET.Exceptions.NotFoundException;
 
 namespace Modmail.NET;
 
 public class ModmailBot
 {
-  private static ModmailBot? _instance;
-
-  public bool Connected { get; private set; }
-
-  private ModmailBot() {
-    _ = BotConfig.This; // Initialize the environment container
-    UtilLogConfig.Configure();
-    AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
-      var isDiscordException = args.ExceptionObject is DiscordException;
-      if (isDiscordException) {
-        var casted = (DiscordException)args.ExceptionObject;
-        Log.Error(casted, "Unhandled Discord exception {JsonMessage} {@Data}", casted.JsonMessage, casted.Data);
-      }
-      else {
-        Log.Error((Exception)args.ExceptionObject, "Unhandled exception");
-      }
-    };
-
-    _ = LangData.This;
-
-    if (BotConfig.This.Environment == EnvironmentType.Development)
-      Log.Information("Running in development mode");
-
-    var kernel = new StandardKernel(new MmKernel());
-    ServiceLocator.Initialize(kernel);
-
-
-    Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetVersion());
-    //Define the client
-    Client = new DiscordClient(new DiscordConfiguration {
-      Token = BotConfig.This.BotToken,
-      AutoReconnect = true,
-      TokenType = TokenType.Bot,
-      Intents = DiscordIntents.All,
-      HttpTimeout = TimeSpan.FromSeconds(10),
-      LogUnknownEvents = false,
-      LoggerFactory = new SerilogLoggerFactory(Log.Logger)
-    });
-
-    //Define the events
-    Client.Heartbeated += OnHeartbeat.Handle;
-    Client.Ready += OnReady.Handle;
-    Client.ClientErrored += OnClientError.Handle;
-    Client.SocketErrored += OnSocketError.Handle;
-
-    //Ticket events
-    Client.MessageCreated += OnMessageCreated.Handle;
-    Client.ChannelDeleted += OnChannelDeleted.Handle;
-
-    Client.InteractionCreated += InteractionCreated.Handle;
-    Client.ComponentInteractionCreated += ComponentInteractionCreated.Handle;
-    Client.ModalSubmitted += ModalSubmitted.Handle;
-
-    //FOR USER DATA UPDATE ONLY
-    Client.GuildMemberAdded += OnGuildMemberAdded.Handle;
-    Client.GuildMemberRemoved += OnGuildMemberRemoved.Handle;
-    Client.GuildBanAdded += OnGuildBanAdded.Handle;
-    Client.GuildBanRemoved += OnGuildBanRemoved.Handle;
-    Client.MessageAcknowledged += OnMessageAcknowledged.Handle;
-    Client.UserUpdated += OnUserUpdated.Handle;
-    Client.UserSettingsUpdated += OnUserSettingsUpdated.Handle;
-    Client.ScheduledGuildEventUserAdded += OnScheduledGuildEventUserAdded.Handle;
-    Client.ScheduledGuildEventUserRemoved += OnScheduledGuildEventUserRemoved.Handle;
-    Client.MessageReactionAdded += OnMessageReactionAdded.Handle;
-    Client.MessageReactionRemoved += OnMessageReactionRemoved.Handle;
-    Client.MessageReactionRemovedEmoji += OnMessageReactionRemovedEmoji.Handle;
-    Client.MessageReactionsCleared += OnMessageReactionsCleared.Handle;
-    Client.MessageDeleted += OnMessageDeleted.Handle;
-    Client.MessageUpdated += OnMessageUpdated.Handle;
-    Client.ThreadCreated += OnThreadCreated.Handle;
-
-
-    //Slash commands
-    var assembly = typeof(ModmailBot).Assembly;
-    var slash = Client.UseSlashCommands();
-
-    slash.RegisterCommands(assembly);
-
-
-    //Commands
-    var commands = Client.UseCommandsNext(new CommandsNextConfiguration() {
-      StringPrefixes = [
-        BotConfig.This.BotPrefix
-      ],
-      EnableDms = false,
-      CaseSensitive = false
-    });
-
-
-    commands.RegisterCommands(assembly);
+  public ModmailBot(DiscordClient client) {
+    Client = client;
   }
 
-  public static ModmailBot This {
-    get {
-      _instance ??= new ModmailBot();
-      return _instance;
-    }
-  }
+  public bool Connected => Client.AllShardsConnected;
+  public DiscordClient Client { get; }
 
-  public DiscordClient Client { get; private set; }
-  // public ServiceProvider Services { get; private set; }
 
   public async Task StartAsync() {
-    // Start the bot
-
     Log.Information("Starting bot");
-    await Client.ConnectAsync();
-    Connected = true;
 
-    await SetupDatabase();
+    await Client.ConnectAsync(Const.DiscordActivity);
+
+    while (!Client.AllShardsConnected) await Task.Delay(5);
 
 
-    //Service initialization
-    _ = TicketTimeoutTimer.This;
-    _ = TicketTypeSelectionTimeoutTimer.This;
-    _ = DiscordUserInfoSyncTimer.This;
-    
-    await Task.Delay(5);
+    var scope = Client.ServiceProvider.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    var options = scope.ServiceProvider.GetRequiredService<IOptions<BotConfig>>();
+    await sender.Send(new UpdateDiscordUserCommand(Client.CurrentUser));
 
-    await Client.UpdateStatusAsync(Const.DISCORD_ACTIVITY);
-    await DiscordUserInfo.AddOrUpdateAsync(Client.CurrentUser);
+
+    var guildJoined = Client.Guilds.TryGetValue(options.Value.MainServerId, out var guild);
+    if (!guildJoined) throw new NotJoinedMainServerException();
+
+    var isSetup = await sender.Send(new CheckAnyGuildSetupQuery());
+    if (!isSetup) {
+      Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} Setting up main server");
+      try {
+        await sender.Send(new ProcessGuildSetupCommand(Client.CurrentUser.Id, guild));
+        Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup complete");
+      }
+      catch (MainServerAlreadySetupException) {
+        Log.Information($"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server already setup");
+      }
+      catch (Exception ex) {
+        Log.Fatal(ex, $"[{nameof(ModmailBot)}]{nameof(StartAsync)} main server setup exception");
+        throw;
+      }
+    }
   }
 
   public async Task StopAsync() {
     Log.Information("Stopping bot");
     await Client.DisconnectAsync();
-    Connected = false;
-  }
-
-  public async Task RestartAsync() {
-    Log.Information("Restarting bot");
-    await StopAsync();
-    await StartAsync();
-  }
-
-
-  public async Task SetupDatabase() {
-    await using var dbContext = new ModmailDbContext();
-    try {
-      await dbContext.Database.MigrateAsync();
-      Log.Information("Database migration completed!");
-    }
-    catch (Exception ex) {
-      Log.Error(ex, "Failed to setup server: Database migration failed");
-      throw;
-    }
-  }
-
-
-  public async Task<DiscordMember?> GetMemberFromAnyGuildAsync(ulong userId) {
-    foreach (var guild in Client.Guilds)
-      try {
-        var member = await guild.Value.GetMemberAsync(userId, false);
-        if (member == null) continue;
-        await DiscordUserInfo.AddOrUpdateAsync(member);
-        return member;
-      }
-      catch (Exception ex) {
-        Log.Error(ex, "Failed to get member from guild {GuildId} for user {UserId}", guild.Key, userId);
-      }
-
-    return null;
-  }
-
-  public async Task<DiscordGuild> GetMainGuildAsync() {
-    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetMainGuildAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(300)) ?? await _get();
-
-
-    async Task<DiscordGuild> _get() {
-      var guildId = BotConfig.This.MainServerId;
-      var guild = await Client.GetGuildAsync(guildId);
-      if (guild == null) {
-        Log.Error("Main guild not found: {GuildId}", guildId);
-        throw new NotFoundException(LangKeys.MAIN_GUILD);
-      }
-
-      var guildOption = await GuildOption.GetAsync();
-
-      guildOption.Name = guild.Name;
-      guildOption.IconUrl = guild.IconUrl;
-      guildOption.BannerUrl = guild.BannerUrl;
-      await guildOption.UpdateAsync();
-      await DiscordUserInfo.AddOrUpdateAsync(guild.Owner);
-
-      return guild;
-    }
-  }
-  
-  public async Task<DiscordChannel> GetLogChannelAsync() {
-    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetLogChannelAsync));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(60)) ?? await _get();
-
-    async Task<DiscordChannel> _get() {
-      var guild = await GetMainGuildAsync();
-      var option = await GuildOption.GetAsync();
-      if (option is null) throw new ServerIsNotSetupException();
-
-      var logChannel = guild.GetChannel(option.LogChannelId);
-
-      if (logChannel is null) {
-        logChannel = await option.ProcessCreateLogChannel(guild);
-        Log.Information("Log channel not found, created new log channel {LogChannelId}", logChannel.Id);
-      }
-
-      return logChannel;
-    }
-  }
-  
-  
-  public async Task<List<DiscordRole>> GetRoles() {
-    var key = SimpleCacher.CreateKey(nameof(ModmailBot), nameof(GetRoles));
-    return await SimpleCacher.Instance.GetOrSetAsync(key, _get, TimeSpan.FromSeconds(10)) ?? await _get();
-      async Task<List<DiscordRole>> _get() {
-      var guild = await GetMainGuildAsync();
-      var rolesDict = guild.Roles;
-      var roles = rolesDict.Values.ToList();
-      return roles;
-    }
+    Client.Dispose();
   }
 }

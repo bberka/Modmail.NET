@@ -1,0 +1,407 @@
+﻿@page "/dashboard"
+@using Modmail.NET.Common.Static
+@using Modmail.NET.Common.Utils
+@using Modmail.NET.Features.Guild.Queries
+@using Modmail.NET.Features.Metric.Models
+@using Modmail.NET.Features.Metric.Queries
+@using Modmail.NET.Features.Permission.Queries
+@using Modmail.NET.Features.Ticket.Services
+@using Modmail.NET.Web.Blazor.Extensions
+@using Modmail.NET.Web.Blazor.Providers
+@inject NavigationManager NavigationManager
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ModmailBot Bot
+@inject TicketMessage TicketMessage
+@inject IServiceScopeFactory ScopeFactory
+@attribute [AuthorizeTeam]
+
+@code {
+
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
+
+  private bool _canManageStartStop;
+  private MetricDto _metricDto;
+
+  protected override async Task OnInitializedAsync() {
+    var scope = ScopeFactory.CreateScope();
+    var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+    if (await sender.Send(new CheckAnyGuildSetupQuery()) != true) {
+      NavigationManager.NavigateTo("/setup");
+      return;
+    }
+
+    var state = await AuthContext;
+    var userId = state.User.GetUserId();
+    _canManageStartStop = await sender.Send(new CheckPermissionAccessQuery(userId, AuthPolicy.Owner));
+
+    _metricDto = await sender.Send(new GetLatestMetricQuery(true));
+  }
+
+
+  private async Task StartBotAsync() {
+    if (!_canManageStartStop) {
+      return;
+    }
+
+    var dialogResult = await DialogService.Confirm("Are you sure you want to start the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot started successfully");
+    }
+  }
+
+  private async Task StopBotAsync() {
+    if (!_canManageStartStop) {
+      return;
+    }
+
+    var dialogResult = await DialogService.Confirm("Are you sure you want to stop the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StopAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot stopped successfully");
+    }
+  }
+
+  private async Task RestartBotAsync() {
+    var dialogResult = await DialogService.Confirm("Are you sure you want to restart the bot?",
+                                                   options: new ConfirmOptions {
+                                                     CloseDialogOnEsc = true,
+                                                     CloseDialogOnOverlayClick = true,
+                                                     OkButtonText = "Yes",
+                                                     CancelButtonText = "No"
+                                                   });
+    if (dialogResult == true) {
+      await Bot.StopAsync();
+      await Bot.StartAsync();
+      StateHasChanged();
+      NotificationService.Notify(NotificationSeverity.Success, "Bot restarted successfully");
+    }
+  }
+
+}
+
+<div class="container">
+  <RadzenRow>
+    <RadzenColumn>
+      <RadzenRow>
+        <RadzenColumn Size="12">
+          <RadzenText TextStyle="TextStyle.H3" class="fw-bold">
+            Dashboard
+          </RadzenText>
+          @* <hr class="my-4"/> *@
+
+        </RadzenColumn>
+      </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="12">
+      @if (_canManageStartStop) {
+        <RadzenCard class="shadow-7">
+          <RadzenRow>
+            <RadzenColumn Size="12">
+              <RadzenText TextStyle="TextStyle.DisplayH4">Bot Status</RadzenText>
+            </RadzenColumn>
+          </RadzenRow>
+          <RadzenRow>
+            <RadzenColumn Size="12">
+              <RadzenText class="rz-my-4">
+                Bot is
+                @if (Bot.Connected) {
+                  <span class="rz-color-success">Connected</span>
+                }
+                else {
+                  <span class="rz-color-danger">Disconnected</span>
+                }
+              </RadzenText>
+            </RadzenColumn>
+          </RadzenRow>
+          <RadzenRow>
+            <RadzenColumn Size="12">
+              @if (Bot.Connected) {
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="@StopBotAsync">Stop Bot</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="@RestartBotAsync">Restart Bot</RadzenButton>
+              }
+              else {
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" Click="@StartBotAsync">Start Bot</RadzenButton>
+              }
+            </RadzenColumn>
+          </RadzenRow>
+        </RadzenCard>
+      }
+
+      @if (_metricDto is not null) {
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.ActiveTickets))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Active Tickets
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.ClosedTickets))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Closed Tickets
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.TotalMessages))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Total Messages
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.Teams))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Teams
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.TeamRoleCount))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Active Team Roles
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.TeamUserCount))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Active Team Members
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.Blacklist))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Blacklist
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto.TicketTypes))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Ticket Types
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(TicketMessage.GetChannelCount()))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Processing Message Queues
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+        </RadzenRow>
+
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.AvgResponseTimeSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Average Response Time
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto?.Statistic?.AvgTicketsOpenedPerDay)) / day
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Average Tickets Opened
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertNumberToReadableString(_metricDto?.Statistic?.AvgTicketsClosedPerDay)) / day
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Average Tickets Closed
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.AvgTicketClosedSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Average Ticket Closed Time
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.FastestClosedTicketSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Fastest Closed Ticket Time
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+
+
+          <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+            <RadzenCard class="rz-shadow-7">
+              <RadzenText TextStyle="TextStyle.H3">
+                @(UtilReadable.ConvertSecondsToReadableString(_metricDto?.Statistic?.SlowestClosedTicketSeconds))
+              </RadzenText>
+              <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-color-primary">
+                Slowest Closed Ticket Time
+              </RadzenText>
+            </RadzenCard>
+          </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenChartTooltipOptions Shared="true"/>
+              <RadzenLineSeries Smooth="true" Data="@_metricDto.OpenedTicketsChartDataArray" CategoryProperty="Category"
+                                Title="Opened Tickets" LineType="LineType.Dashed" ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenLineSeries Smooth="true" Data="@_metricDto.ClosedTicketsChartDataArray" CategoryProperty="Category"
+                                Title="Closed Tickets" LineType="LineType.Dashed" ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenCategoryAxis Padding="20"/>
+              <RadzenValueAxis>
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="Count"/>
+              </RadzenValueAxis>
+            </RadzenChart>
+
+          </RadzenCard>
+
+        </RadzenRow>
+
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenChartTooltipOptions Shared="true"/>
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.UserMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="User Messages"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenLineSeries Smooth="true"
+                                Data="@_metricDto.ModMessageCountChartDataArray"
+                                CategoryProperty="Category"
+                                Title="Mod Messages"
+                                LineType="LineType.Dashed"
+                                ValueProperty="Value">
+                <RadzenMarkers Visible="true" MarkerType="MarkerType.Square"/>
+                <RadzenSeriesDataLabels Visible="false"/>
+              </RadzenLineSeries>
+
+              <RadzenCategoryAxis Padding="20"/>
+              <RadzenValueAxis>
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="Count"/>
+              </RadzenValueAxis>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenColumnSeries Data="@_metricDto.TicketTypeChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="Ticket Types"/>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+
+        <RadzenRow RowGap="4" class="rz-mt-5">
+          <RadzenCard class="rz-shadow-7 w-100">
+            <RadzenChart>
+              <RadzenColumnSeries Data="@_metricDto.TicketPriorityChartDataArray"
+                                  CategoryProperty="Category"
+                                  ValueProperty="Value"
+                                  Title="Ticket Priority"/>
+            </RadzenChart>
+          </RadzenCard>
+        </RadzenRow>
+      }
+
+    </RadzenColumn>
+  </RadzenRow>
+</div>

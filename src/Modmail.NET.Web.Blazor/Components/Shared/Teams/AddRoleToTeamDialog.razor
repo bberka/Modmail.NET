@@ -1,58 +1,73 @@
-﻿@using System.ComponentModel.DataAnnotations
-@using DSharpPlus.Entities
+﻿@using DSharpPlus.Entities
 @using Microsoft.EntityFrameworkCore
-@using Modmail.NET.Static
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.DiscordBot.Queries
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Features.Teams.Static
+@using Modmail.NET.Web.Blazor.Extensions
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject NotificationService notificationService
-@inject DialogService dialogService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
 
 @code {
-  private List<DiscordRole>? _roles;
-  private ulong selectedRoleId = 0;
+  private List<DiscordRole> _roles;
+  private ulong _selectedRoleId = 0;
+
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
 
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
 
   protected override async Task OnInitializedAsync() {
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var teamMemberIds = dbContext.GuildTeamMembers
                                  .Where(x => x.GuildTeamId == GuildTeam.Id && x.Type == TeamMemberDataType.RoleId)
                                  .Select(x => x.Key)
                                  .ToList();
-    _roles = (await ModmailBot.This.GetRoles())
-             .Where(x => x.Name != "@everyone")
-             .Where(x => teamMemberIds.All(y => y != x.Id)) // Exclude team members
-             .ToList();
+
+    var guild = await Sender.Send(new GetDiscordMainGuildQuery());
+    _roles = guild.Roles
+                  .Where(x => x.Value.Name != "@everyone")
+                  .Where(x => teamMemberIds.All(y => y != x.Key)) // Exclude team members
+                  .Select(x => x.Value)
+                  .ToList();
   }
 
   private async Task SubmitAsync() {
-    if (selectedRoleId == 0) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+    if (_selectedRoleId == 0) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
     const string logMessage = $"[{nameof(AddRoleToTeamDialog)}]{nameof(SubmitAsync)}({{RoleId}})";
 
     try {
-      var role = _roles?.First(x => x.Id == selectedRoleId);
+      var role = _roles?.First(x => x.Id == _selectedRoleId);
       if (role is null) {
-        notificationService.Notify(NotificationSeverity.Warning, "Warning", "Role not found.");
+        NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Role not found.");
         return;
       }
 
-      await GuildTeam.ProcessAddRoleToTeam(role);
-      Log.Information(logMessage, selectedRoleId);
-      notificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
-      dialogService.Close(true);
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+
+      await Sender.Send(new ProcessAddRoleToTeamCommand(userId, GuildTeam.Id, role));
+      Log.Information(logMessage, _selectedRoleId);
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "Role added to team successfully.");
+      DialogService.Close(true);
     }
-    catch (BotExceptionBase ex) {
-      Log.Warning(logMessage, selectedRoleId);
-      ex.NotifyException(notificationService);
+    catch (ModmailBotException ex) {
+      Log.Warning(logMessage, _selectedRoleId);
+      ex.NotifyException(NotificationService);
     }
     catch (Exception ex) {
-      Log.Fatal(logMessage, selectedRoleId);
-      ex.NotifyException(notificationService);
+      Log.Fatal(logMessage, _selectedRoleId);
+      ex.NotifyException(NotificationService);
     }
   }
 
@@ -71,7 +86,7 @@ else {
                         TextProperty="@nameof(DiscordRole.Name)"
                         ValueProperty="@nameof(DiscordRole.Id)"
                         TValue="ulong"
-                        @bind-Value="selectedRoleId"
+                        @bind-Value="_selectedRoleId"
                         Placeholder="Select Role"
                         AllowFiltering="true"/>
       </RadzenRow>

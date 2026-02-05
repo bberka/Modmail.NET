@@ -1,12 +1,18 @@
 ﻿namespace Modmail.NET.Web.Blazor.Services;
 
-public sealed class ModmailHostedService : IHostedService
+public class ModmailHostedService : IHostedService
 {
+  private readonly ModmailBot _modmailBot;
+
+  public ModmailHostedService(ModmailBot modmailBot) {
+    _modmailBot = modmailBot;
+  }
+
   public async Task StartAsync(CancellationToken cancellationToken) {
-    await ModmailBot.This.StartAsync();
+    await _modmailBot.StartAsync();
   }
 
   public async Task StopAsync(CancellationToken cancellationToken) {
-    await ModmailBot.This.StopAsync();
+    await _modmailBot.StopAsync();
   }
 }

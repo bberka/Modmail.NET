@@ -1,0 +1,21 @@
+﻿@using Modmail.NET.Web.Blazor.Components.Layout.Shared
+@inherits LayoutComponentBase
+<RadzenComponents @rendermode="InteractiveServer"></RadzenComponents>
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenRow>
+            <RadzenColumn Size="5">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Normal"
+                             AlignItems="AlignItems.Center" Gap="0">
+                    <RadzenSidebarToggle/>
+                    <RadzenLabel Text="Modmail.NET"/>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenHeader>
+    <RadzenBody>
+        @Body
+    </RadzenBody>
+    <AppFooter></AppFooter>
+</RadzenLayout>
+<AppError></AppError>

@@ -1,0 +1,197 @@
+@page "/transcript/{TicketId:guid}"
+@using CSharpVitamins
+@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Guild.Queries
+@using Modmail.NET.Features.Ticket.Static
+@using Modmail.NET.Features.User.Queries
+@using Modmail.NET.Web.Blazor.Components.Layout
+@using Path = Path
+@layout EmptyLayout
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject ISender Sender
+@inject IJSRuntime JsRuntime
+@inject NavigationManager Navi
+
+<PageTitle>
+    Ticket Transcript @_id
+</PageTitle>
+<HeadContent>
+    <link rel="stylesheet" href="css/markdown.css"/>
+</HeadContent>
+<RadzenCard class="rz-border-bottom sticky-top rz-m-0 rz-p-4 rz-p-lg-7" Style="height: 80px !important;">
+    <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5" class="rz-py-0 rz-my-0 rz-ml-4">Ticket Transcript
+    </RadzenText>
+</RadzenCard>
+<RadzenCard class="rz-m-0 rz-p-0">
+    <RadzenDataList AllowVirtualization="false"
+                    PageSize="25"
+                    Data="@_data"
+                    WrapItems="false"
+                    TItem="TicketMessage"
+                    id="transcriptContainer"
+                    class="transcript-container">
+        <Template Context="message">
+            <RadzenStack Orientation="Orientation.Vertical">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenImage Path="@_users[message.SenderUserId].AvatarUrl"
+                                 Style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"
+                                 AlternateText="@_users[message.SenderUserId].Username"/>
+
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="2">
+                        <RadzenText TextStyle="TextStyle.Subtitle1" class=@(message.SentByMod
+                                                                                ? "rz-color-info rz-mr-2 "
+                                                                                : "rz-mr-2 ")>
+                            <strong>@_users[message.SenderUserId].Username</strong>
+                        </RadzenText>
+                        <RadzenText TextStyle="TextStyle.Caption" Style="opacity: 0.7;">
+                            @message.RegisterDateUtc.ToString("MM/dd/yyyy HH:mm")
+                            <span class=@(message.ChangeStatus switch {
+                                TicketMessageChangeStatus.Updated => "rz-color-secondary",
+                                TicketMessageChangeStatus.Deleted => "rz-color-danger",
+                                _ => ""
+                            })>
+                                @(message.ChangeStatus switch {
+                                    TicketMessageChangeStatus.Updated => " - Edited",
+                                    TicketMessageChangeStatus.Deleted => " - Deleted",
+                                    _ => ""
+                                })
+                            </span>
+
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+
+
+                <RadzenMarkdown>
+                    @message.MessageContent
+                </RadzenMarkdown>
+
+            </RadzenStack>
+
+            @if (message.Attachments != null && message.Attachments.Any()) {
+                var array = message.Attachments.Select(x => new {
+                    Attachment = x,
+                    IsImage = IsImage(x.FileName)
+                }).ToArray();
+                var images = array.Where(x => x.IsImage).Select(x => x.Attachment).ToArray();
+                var files = array.Where(x => !x.IsImage).Select(x => x.Attachment).ToArray();
+
+                <div class="rz-mt-4">
+                    @foreach (var attachment in images) {
+                        <RadzenImage Path="@attachment.Url" style="max-width: 70vw; max-height: 70vh;"
+                                     class="rz-mt-"
+                                     AlternateText="@attachment.FileName"/>
+                    }
+
+                    @if (images.Length > 0 && files.Length > 0) {
+                        <div class="rz-mt-3"></div>
+                    }
+
+                    @foreach (var attachment in files) {
+                        <RadzenButton Shade="Shade.Lighter"
+                                      Click=@(async () => await OpenInNewTab(attachment.Url))
+                                      Text="@attachment.FileName"
+                                      class="rz-mr-3 rz-mt-3"
+                                      Icon="download"
+                                      ButtonStyle="ButtonStyle.Light"/>
+                    }
+
+                </div>
+            }
+        </Template>
+        <EmptyTemplate>
+            <RadzenText>No messages found.</RadzenText>
+        </EmptyTemplate>
+        <LoadingTemplate>
+            <Loading></Loading>
+        </LoadingTemplate>
+    </RadzenDataList>
+
+
+</RadzenCard>
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthContext { get; set; }
+
+    [Parameter]
+    public Guid TicketId { get; set; }
+
+    private TicketMessage[] _data;
+    private Dictionary<ulong, DiscordUserInfo> _users = new();
+    private string _id;
+    private ModmailDbContext _context;
+
+    protected override async Task OnInitializedAsync() {
+        var option = await Sender.Send(new GetGuildOptionQuery(false));
+        if (!option.PublicTranscripts) {
+            var authState = await AuthContext;
+            if (authState.User.Identity?.IsAuthenticated == false) {
+                Navi.NavigateTo("/", true);
+                return;
+            }
+        }
+
+        _context = await DbContextFactory.CreateDbContextAsync();
+        var ticketExists = await _context.Tickets.AnyAsync(x => x.Id == TicketId);
+        if (!ticketExists) {
+            Navi.NavigateTo("/404", true);
+        }
+
+
+        //TODO: implement message history view for edited messages, can be directly rendered or can be a dialog
+        _id = ShortGuid.Encode(TicketId);
+        _users = await Sender.Send(new GetDiscordUserInfoDictQuery());
+        _data = await _context.TicketMessages
+                              .Where(x => x.TicketId == TicketId)
+                              .Include(x => x.Attachments)
+                              .OrderBy(x => x.RegisterDateUtc)
+                              .GroupBy(x => new
+                              {
+                                  x.RegisterDateUtc.Year,
+                                  x.RegisterDateUtc.Month,
+                                  x.RegisterDateUtc.Day,
+                                  x.RegisterDateUtc.Hour,
+                                  x.RegisterDateUtc.Minute,
+                                  x.SenderUserId,
+                                  x.SentByMod,
+                                  x.ChangeStatus
+                              })
+                              .Select(g => new TicketMessage {
+                                  RegisterDateUtc = g.Min(x => x.RegisterDateUtc),
+                                  SenderUserId = g.Key.SenderUserId,
+                                  MessageContent = string.Join("<br/>", g.OrderBy(x => x.RegisterDateUtc).Select(x => x.MessageContent)),
+                                  Attachments = g.SelectMany(x => x.Attachments).ToList(), // Aggregate attachments
+                                  TicketId = TicketId,
+                                  MessageDiscordId = 0,
+                                  SentByMod = g.Key.SentByMod,
+                                  ChangeStatus = g.Key.ChangeStatus
+                              })
+                              .ToArrayAsync();
+
+        //TODO: .Replace("\n", "\n\n") should be used for non code elements, not sure how to implement this 
+        //Reason: \n values are normally managed by the bot and insert is fine, however the markdown renderer do not render single \n it must be \n\n to be rendered in next line
+        //We cant just use Replace because it breaks code or texts inside ```these```
+
+        //TODO: Add syntax highlight support for pre -> code elements rendered as markdown
+
+        //TODO: Allow virtualization, it can be enabled now but it does query the database too much and a bit clunky, also consider it must scroll to bottom or change order type
+    }
+
+
+    private static bool IsImage(string fileName) {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext is ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp";
+    }
+
+    private async Task OpenInNewTab(string url) {
+        await JsRuntime.InvokeVoidAsync("open", url, "_blank");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        await JsRuntime.InvokeVoidAsync("scrollToBottom", "transcriptContainer");
+    }
+
+}

@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Modmail.NET.Entities;
+using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public sealed class TicketTypeConfiguration : IEntityTypeConfiguration<TicketType>
+public class TicketTypeConfiguration : IEntityTypeConfiguration<TicketType>
 {
   public void Configure(EntityTypeBuilder<TicketType> builder) {
     builder.HasKey(x => x.Id);

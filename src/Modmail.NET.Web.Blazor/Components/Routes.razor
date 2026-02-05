@@ -1,16 +1,35 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-  <Found Context="routeData">
-    <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-    <FocusOnNavigate RouteData="routeData" Selector="h1"/>
-  </Found>
-  <NotFound>
-    <LayoutView Layout="typeof(Layout.MainLayout)">
-      <p>Sorry, there's nothing at this address.</p>
-    </LayoutView>
-  </NotFound>
-</Router>
+﻿@using Modmail.NET.Language
+@using Modmail.NET.Web.Blazor.Components.Layout
+<CascadingAuthenticationState>
+  <Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+      <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(AuthLayout)">
+        <NotAuthorized>
+          @if (context.User.Identity?.IsAuthenticated != true) {
+            <RedirectToLogin/>
+          }
+          else {
+            <RadzenText TextStyle="TextStyle.Subtitle1">
+              @LangKeys.ErrorAuthForbidden.GetTranslation()
+            </RadzenText>
+          }
+        </NotAuthorized>
+      </AuthorizeRouteView>
+    </Found>
+    <NotFound>
+      <LayoutView Layout="@typeof(AuthLayout)">
+        <RadzenText TextStyle="TextStyle.Subtitle1">
+          @LangKeys.ErrorNotFound.GetTranslation()
+        </RadzenText>
+      </LayoutView>
+    </NotFound>
+  </Router>
+</CascadingAuthenticationState>
 
-@code{
+@code {
 
+  [CascadingParameter]
+  private Task<AuthenticationState> Context { get; set; }
 
 }
+

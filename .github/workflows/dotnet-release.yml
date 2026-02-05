@@ -1,0 +1,142 @@
+name: Create Release on Push to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0'
+
+      - name: Check if global.json Exists
+        id: check_global_json
+        run: |
+          if [ -f "./global.json" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "global.json exists."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "global.json does not exist."
+          fi
+
+      - name: Get Version from global.json
+        id: get_version
+        if: steps.check_global_json.outputs.exists == 'true'
+        run: |
+          VERSION=$(jq -r .sdk.version ./global.json 2>/dev/null)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from global.json"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Get Version from csproj
+        id: get_version_csproj
+        if: steps.check_global_json.outputs.exists != 'true'
+        run: |
+          PROJECT_FILE="./src/Modmail.NET.Web.Blazor/Modmail.NET.Web.Blazor.csproj"
+          VERSION=$(grep -oP '<Version>\K[^<]+' "$PROJECT_FILE" 2>/dev/null)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Could not extract version from .csproj"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Check if Tag Exists
+        id: check_tag
+        run: |
+          TAG="v${{ env.VERSION }}"
+          if git show-ref --quiet "refs/tags/$TAG"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag $TAG already exists."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git tag -a "v${{ env.VERSION }}" -m "Release v${{ env.VERSION }}"
+          git push origin --tags
+        
+      - name: Restore dependencies
+        run: |
+          dotnet restore ./src/Modmail.NET/Modmail.NET.csproj
+          dotnet restore ./src/Modmail.NET.Web.Blazor/Modmail.NET.Web.Blazor.csproj
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Publish
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Determine Prerelease
+        id: determine_prerelease
+        run: |
+          if [[ "${{ env.VERSION }}" == *"-"* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get Previous Tag
+        id: get_previous_tag
+        run: |
+          # Get the latest tag before the current one
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          echo "Previous tag found: $PREVIOUS_TAG"
+
+      - name: Generate Release Notes
+        id: generate_release_notes
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previousTag = "${{ steps.get_previous_tag.outputs.PREVIOUS_TAG }}";
+            const options = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "v${{ env.VERSION }}"
+            };
+            if (previousTag) {
+              options.previous_tag_name = previousTag;
+            } else {
+              console.log("No previous tag found, generating notes from the beginning.");
+            }
+            const result = await github.rest.repos.generateReleaseNotes(options);
+            core.setOutput("release_notes", result.data.body);
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ env.VERSION }}"
+          name: "Release v${{ env.VERSION }}"
+          body: ${{ steps.generate_release_notes.outputs.release_notes }}
+          draft: false
+          prerelease: ${{ steps.determine_prerelease.outputs.is_prerelease == 'true' }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          skipIfReleaseExists: true
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: ./publish
+          retention-days: 7

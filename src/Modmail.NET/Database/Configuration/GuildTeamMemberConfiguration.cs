@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Modmail.NET.Entities;
+using Modmail.NET.Database.Entities;
 
 namespace Modmail.NET.Database.Configuration;
 
-public sealed class GuildTeamMemberConfiguration : IEntityTypeConfiguration<GuildTeamMember>
+public class GuildTeamMemberConfiguration : IEntityTypeConfiguration<GuildTeamMember>
 {
   public void Configure(EntityTypeBuilder<GuildTeamMember> builder) {
     builder.HasKey(x => x.Id);

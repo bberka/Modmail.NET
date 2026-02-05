@@ -1,40 +1,50 @@
-using Modmail.NET.Database;
+using Modmail.NET;
+using Modmail.NET.Common.Utils;
+using Modmail.NET.Language;
 using Modmail.NET.Web.Blazor.Components;
-using Modmail.NET.Web.Blazor.Services;
-using Modmail.NET.Web.Shared;
-using Radzen;
+using Modmail.NET.Web.Blazor.Dependency;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-       .AddInteractiveServerComponents();
-
-builder.Services.AddHostedService<ModmailHostedService>();
-builder.Services.AddDbContextFactory<ModmailDbContext>();
-builder.Services.AddDbContext<ModmailDbContext>();
-
-builder.Services.AddRadzenCookieThemeService(options => {
-  options.Name = WebSharedConstants.THEME_COOKIE_NAME; // The name of the cookie
-  options.Duration = TimeSpan.FromDays(365); // The duration of the cookie
-});
-
-builder.Services.AddRadzenComponents();
-
+AspNetDependency.Configure(builder);
+BlazorDependency.Configure(builder);
+BusinessDependency.Configure(builder);
+HangfireDependency.Configure(builder);
+DiscordBotDependency.Configure(builder);
+MediatorDependency.Configure(builder);
+ValidatorDependency.Configure(builder);
+AuthDependency.Configure(builder);
 
 var app = builder.Build();
+await BusinessDependency.InitializeDatabaseAsync(app);
+ServiceLocator.Initialize(app.Services);
+_ = LangProvider.This;
+
+#region DEV
 
 if (!app.Environment.IsDevelopment()) {
   app.UseExceptionHandler("/Error", true);
   app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+#endregion
 
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+
+//DO NOT CHANGE FOLLOWING METHODS ORDER
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+HangfireDependency.Initialize(app); //initializes UI 
 app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();
 
+
+Log.Information("Starting Modmail.NET v{Version}", UtilVersion.GetReadableProductVersion());
 app.Run();

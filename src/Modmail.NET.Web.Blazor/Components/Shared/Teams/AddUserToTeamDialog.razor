@@ -1,31 +1,34 @@
-﻿@using DSharpPlus.Entities
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.EntityFrameworkCore.Storage
-@using Modmail.NET.Static
+﻿@using Microsoft.EntityFrameworkCore
+@using Modmail.NET.Common.Exceptions
+@using Modmail.NET.Database.Entities
+@using Modmail.NET.Features.Teams.Commands
+@using Modmail.NET.Features.Teams.Static
+@using Modmail.NET.Web.Blazor.Extensions
 @using Serilog
-@inject IDbContextFactory<ModmailDbContext> dbContextFactory
-@inject NotificationService notificationService
-@inject DialogService dialogService
+@inject IDbContextFactory<ModmailDbContext> DbContextFactory
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject ModmailBot Bot
+@inject ISender Sender
 
 @code {
 
   [Parameter]
   public required GuildTeam GuildTeam { get; set; }
 
-  private List<DiscordUserInfo>? _users;
+  [CascadingParameter]
+  public Task<AuthenticationState> AuthContext { get; set; }
 
-  private ulong selectedUserId = 0;
+  private List<DiscordUserInfo> _users;
+
+  private ulong _selectedUserId = 0;
 
   protected override async Task OnInitializedAsync() {
-    var dbContext = await dbContextFactory.CreateDbContextAsync();
+    var dbContext = await DbContextFactory.CreateDbContextAsync();
     var teamMemberIds = dbContext.GuildTeamMembers
                                  .Where(x => x.GuildTeamId == GuildTeam.Id && x.Type == TeamMemberDataType.UserId)
                                  .Select(x => x.Key)
                                  .ToList();
-
-    // var blackListedUserIds = dbContext.TicketBlacklists
-    //                                 .Select(x => x.DiscordUserId)
-    //                                 .ToList();
 
     _users = await dbContext.DiscordUserInfos
                             .GroupJoin(dbContext.TicketBlacklists,
@@ -36,33 +39,36 @@
                                         (x, blacklist) => new { x.user, blacklist })
                             .Where(x => x.blacklist == null) // Only take users that are not in blacklist
                             .OrderBy(x => x.user.Username)
-                            .Where(x => x.user.Id != ModmailBot.This.Client.CurrentUser.Id) // Exclude bot
+                            .Where(x => x.user.Id != Bot.Client.CurrentUser.Id) // Exclude bot
                             .Where(x => teamMemberIds.All(y => y != x.user.Id)) // Exclude team members
                             .Select(x => x.user)
                             .ToListAsync();
   }
 
   private async Task SubmitAsync(MouseEventArgs obj) {
-    if (selectedUserId == 0) {
-      notificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
+    if (_selectedUserId == 0) {
+      NotificationService.Notify(NotificationSeverity.Warning, "Warning", "Please select a user.");
       return;
     }
 
     const string logMessage = $"[{nameof(AddUserToTeamDialog)}]{nameof(SubmitAsync)}({{UserId}})";
 
     try {
-      await GuildTeam.ProcessAddTeamMemberAsync(selectedUserId);
-      Log.Information(logMessage, selectedUserId);
-      notificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");
-      dialogService.Close(true);
+      var state = await AuthContext;
+      var userId = state.User.GetUserId();
+
+      await Sender.Send(new ProcessAddTeamMemberCommand(userId, GuildTeam.Id, _selectedUserId));
+      Log.Information(logMessage, _selectedUserId);
+      NotificationService.Notify(NotificationSeverity.Success, "Success", "User added to team successfully.");
+      DialogService.Close(true);
     }
-    catch (BotExceptionBase ex) {
-      Log.Warning(logMessage, selectedUserId);
-      ex.NotifyException(notificationService);
+    catch (ModmailBotException ex) {
+      Log.Warning(logMessage, _selectedUserId);
+      ex.NotifyException(NotificationService);
     }
     catch (Exception ex) {
-      Log.Fatal(logMessage, selectedUserId);
-      ex.NotifyException(notificationService);
+      Log.Fatal(logMessage, _selectedUserId);
+      ex.NotifyException(NotificationService);
     }
   }
 
@@ -81,7 +87,7 @@ else {
                         TextProperty="@nameof(DiscordUserInfo.Username)"
                         ValueProperty="@nameof(DiscordUserInfo.Id)"
                         TValue="ulong"
-                        @bind-Value="selectedUserId"
+                        @bind-Value="_selectedUserId"
                         Placeholder="Select User"
                         AllowFiltering="true"/>
       </RadzenRow>

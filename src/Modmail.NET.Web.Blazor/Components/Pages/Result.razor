@@ -1,0 +1,53 @@
+@page "/result/{Message}"
+@using Modmail.NET.Language
+@using Modmail.NET.Web.Blazor.Components.Layout
+@inject NavigationManager Navigation
+@layout EmptyLayout
+
+<div class="container">
+    <RadzenRow>
+        <RadzenColumn>
+            <RadzenStack JustifyContent="JustifyContent.Center">
+                <RadzenAlert Style="margin-top: 10px;" AlertStyle="AlertStyle.Secondary" AllowClose="false">
+                    @Message
+                </RadzenAlert>
+
+                @if (_showLogoutButton) {
+                    <RadzenRow>
+                        <RadzenColumn>
+                            <RadzenButton ButtonStyle="ButtonStyle.Warning" Click="Logout">
+                                Logout
+                            </RadzenButton>
+                        </RadzenColumn>
+                    </RadzenRow>
+                }
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</div>
+
+@code {
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthContext { get; set; }
+
+    private bool _showLogoutButton;
+
+    [Parameter]
+    public string Message { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        if (Enum.TryParse<LangKeys>(Message, out var langKeys)) {
+            Message = langKeys.GetTranslation();
+        }
+
+        var state = await AuthContext;
+        _showLogoutButton = state.User.Identity?.IsAuthenticated == true;
+    }
+
+    private void Logout() {
+        Navigation.NavigateTo("auth/logout", true);
+    }
+
+
+}
