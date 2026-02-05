@@ -17,3 +17,6 @@ Log_*.json
 
 # Exclude appsettings.example.json from being ignored
 !appsettings.example.json
+.idea/
+.ai/
+.mcp/
